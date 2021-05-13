@@ -2,6 +2,8 @@
 
 #include "CGColor.h"
 
+#include "include-private.h"
+
 #include <string.h>
 #include <stdint.h>
 #include <assert.h>
@@ -260,7 +262,7 @@ static inline int  decode_hsla_array( char *s, float hsla[ 4], unsigned int n)
    hsla[ 3] = 1.0;
 
    assert( *s == '(' );
-   while( c = *++s)
+   while( (c = *++s))   // use even more (((((())))))!!!
    {
       if( (c >= '0' && c <= '9') || c == '.')
       {
@@ -271,8 +273,8 @@ static inline int  decode_hsla_array( char *s, float hsla[ 4], unsigned int n)
             hsla[ i] = hsla[ i] / 100.0 * max[ i];
             end      = end + 1;
             break;
-      
-         case 't' : 
+
+         case 't' :
             if( i || strncmp( end, "turn", 4))
                return( -1);
             // only for h
@@ -314,7 +316,7 @@ static inline int  decode_hsla_array( char *s, float hsla[ 4], unsigned int n)
          {
             if( hsla[ i] < 0.0)
                hsla[ i] = 0.0;
-            if( hsla[ i] > max[ i]) 
+            if( hsla[ i] > max[ i])
                hsla[ i] = max[ i];
          }
 
@@ -322,7 +324,7 @@ static inline int  decode_hsla_array( char *s, float hsla[ 4], unsigned int n)
             return( 0);
 
          s = end - 1;
-         continue;   
+         continue;
       }
 
       if( c == ' ')
@@ -368,7 +370,7 @@ static inline int  decode_rgba_array( char *s, float rgba[ 4], unsigned int n)
    rgba[ 3] = 1.0;
 
    assert( *s == '(' );
-   while( c = *++s)
+   while( (c = *++s))
    {
       if( (c >= '0' && c <= '9') || c == '.')
       {
@@ -382,14 +384,14 @@ static inline int  decode_rgba_array( char *s, float rgba[ 4], unsigned int n)
 
          if( rgba[ i] < 0.0)
             rgba[ i] = 0.0;
-         if( rgba[ i] > max[ i]) 
+         if( rgba[ i] > max[ i])
             rgba[ i] = max[ i];
 
          if( ++i == n)
             return( 0);
 
          s = end - 1;
-         continue;   
+         continue;
       }
 
       if( c == ' ')
@@ -409,7 +411,7 @@ static inline int  decode_rgba_array( char *s, float rgba[ 4], unsigned int n)
 #if USE_OWN_HSLA_CODE
 // stolen from @mjackson: https://gist.github.com/mjackson/5311256
 
-static float  hue2rgb( float p, float q, float t) 
+static float  hue2rgb( float p, float q, float t)
 {
    if (t < 0.0) t += 1;
    if (t > 1.0) t -= 1;
@@ -423,22 +425,22 @@ static float  hue2rgb( float p, float q, float t)
  * Converts an HSL color value to RGB. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
  * Assumes h, s, and l are contained in the set [0, 1] and
- * returns r, g, and b in the set [0, 1]. 
+ * returns r, g, and b in the set [0, 1].
  */
 static void mulle_normalized_hsl_to_normalized_rgb(float hsl[3], float rgb[3])
 {
    double   q;
    double   p;
 
-   if( hsl[ 1] == 0) 
+   if( hsl[ 1] == 0)
    {
-      rgb[ 0] = 
-      rgb[ 1] = 
+      rgb[ 0] =
+      rgb[ 1] =
       rgb[ 2] = hsl[ 2]; // achromatic
       return;
    }
-   q =  hsl[ 2] < 0.5 
-            ?  hsl[ 2] * (1 + hsl[ 1]) 
+   q =  hsl[ 2] < 0.5
+            ?  hsl[ 2] * (1 + hsl[ 1])
             :  hsl[ 2] + hsl[ 1] - hsl[ 2] * hsl[ 1];
    p = 2 * hsl[ 2] - q;
 
@@ -489,7 +491,7 @@ CGColorRef   MulleColorMakeFromCString( char *string)
          rgba[ 0] = (dehex( s[ 0]) << 4) + dehex( s[ 0]);
          rgba[ 1] = (dehex( s[ 2]) << 4) + dehex( s[ 2]);
          rgba[ 2] = (dehex( s[ 4]) << 4) + dehex( s[ 4]);
-         break;   
+         break;
 
       default :
          return( getNVGColor( 0));
@@ -510,9 +512,9 @@ CGColorRef   MulleColorMakeFromCString( char *string)
             if( decode_rgba_array( &string[ i], rgbaf, i))
                return( getNVGColor( 0));
 
-            return( nvgRGBAf( rgbaf[ 0] / 255.0, 
-                              rgbaf[ 1] / 255.0, 
-                              rgbaf[ 2] / 255.0, 
+            return( nvgRGBAf( rgbaf[ 0] / 255.0,
+                              rgbaf[ 1] / 255.0,
+                              rgbaf[ 2] / 255.0,
                               rgbaf[ 3]));
          }
       }

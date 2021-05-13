@@ -14,11 +14,11 @@
 # include "anonymous-pro.inc"
 # define FONT_DATA   Anonymous_Pro_ttf
 #else
-# include "Roboto-Regular.inc"
+# include "_Roboto-Regular.inc"
 # define FONT_DATA   Roboto_Regular_ttf
 #endif
-#include "entypo.inc"
-#include "emoji.inc"
+#include "_entypo.inc"
+#include "_emoji.inc"
 
 #include <assert.h>
 
@@ -28,6 +28,39 @@
 
 @implementation CGContext ( CGFont)
 
+
+//
+// We don't have ValueFoundation here, so copy some stuff over
+//
+static void   *retain( struct mulle_container_valuecallback *callback,
+                       void *obj,
+                       struct mulle_allocator *allocator)
+{
+   return( [(id) obj retain]);
+}
+
+
+
+static void  autorelease( struct mulle_container_valuecallback *callback,
+                          void *obj,
+                          struct mulle_allocator *allocator)
+{
+   [(id) obj autorelease];
+}
+
+
+//
+// description is a bet on the future
+//
+static void   *describe( struct mulle_container_valuecallback *callback,
+                         void *obj,
+                         struct mulle_allocator **p_allocator)
+{
+   *p_allocator = NULL;
+   return( mulle_objc_object_call( obj, @selector( description), obj));
+}
+
+
 static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
 + (void) load
@@ -35,7 +68,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    c_string_to_object_callback = (struct mulle_container_keyvaluecallback)
    {
       .keycallback   = mulle_container_keycallback_copied_cstring,
-      .valuecallback = *MulleObjCContainerValueRetainCallback
+      .valuecallback = { retain, autorelease, describe }
    };
 }
 
@@ -65,7 +98,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    mulle_map_reset( &_fontMap);
 }
 
-- (void) addFontWithCData:(struct mulle_data) data 
+- (void) addFontWithCData:(struct mulle_data) data
           fontNameCString:(char *) name
 {
    CGFont   *font;

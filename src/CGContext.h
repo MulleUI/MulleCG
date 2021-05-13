@@ -15,10 +15,9 @@
 //******************************************************************************
 #import "import.h"
 
-#include "CGGeometry.h"
-#include "CGColor.h"
-#include "CATime.h"
-#include "nanoperf.h"
+#import "CGColor.h"
+#import "CGImage.h"
+
 
 // UNUSED:
 typedef enum
@@ -117,26 +116,11 @@ typedef enum {
 // clang-format on
 
 
+
 struct NVGcontext;
 
 @class CGFont;
-@class UIImage;
-@class MulleTextureImage;
-
-
-struct MulleNVGPerformance
-{
-   // perf measurements
-   double             dt;
-	double             prevt;
-   double             cpuTime;
-   struct PerfGraph   fps;
-   struct PerfGraph   cpuGraph;
-   struct PerfGraph   gpuGraph;
-   struct PerfGraph   memGraph;
-   struct GPUtimer    gpuTimer;
-   BOOL               enabled;
-};
+@class CGLayer;
 
 
 struct MulleFrameInfo
@@ -148,7 +132,6 @@ struct MulleFrameInfo
    CGFloat       pixelRatio;
    NSUInteger    renderFrame;      // current frame nr (can wrap)
    NSUInteger    refreshRate;      // often 60 Hz
-   BOOL          isPerfEnabled;    // move out ??
 };
 
 //
@@ -169,13 +152,10 @@ struct MulleFrameInfo
 @interface CGContext : NSObject
 {
 	struct NVGcontext            *_vg;
-   struct MulleNVGPerformance   _perf;
    struct MulleFrameInfo        _currentFrameInfo;
-   struct mulle_pointerarray    *_framebufferImages;
+   struct mulle_pointerarray    *_layers;
    struct mulle__pointermap     *_images;
    struct mulle_map             _fontMap;
-   CAAbsoluteTime               _renderStartTimestamp;
-   CAAbsoluteTime               _firstRenderStartTimestamp;
    BOOL                         _isRendering;
 }
 
@@ -184,33 +164,33 @@ struct MulleFrameInfo
 // not animatable though, better use windows ?
 @property CGColorRef   backgroundColor;
 
+- (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
+              useStencilStrokes:(BOOL) useStencilStrokes;
+
 - (struct NVGcontext *) nvgContext;
 
 - (void) beginRenderWithFrameInfo:(struct MulleFrameInfo *) info;
 - (void) endRender;
 - (void) resetTransform;
 
-
-- (CAAbsoluteTime) renderStartTimestamp;
-
-
 //
 // Maintain an internal mapping of image to textureID, the textureID is
 // only valid for the duration of the CGContext. An UIImage that has been
-// registered should unregister before dieing, because it's address might
+// registered should unregister before dying, because it's address might
 // be reused. Also the texture leaks...
-// TODO: can't have UIImage HERE. Must be CGImage
 //
-- (int) registerTextureIDForImage:(UIImage *) image;
-- (void) unregisterTextureIDForImage:(UIImage *) image;
+// TODO: can't have UIImage HERE. Must be CGImage
+//       ass
+- (int) registerTextureIDForImage:(id <CGBitmapImage>) image;
+- (void) unregisterTextureIDForImage:(id <CGBitmapImage>) image;
 
 - (void) clearFramebuffer;
 - (void) getCurrentFrameInfo:(struct MulleFrameInfo *) info;
 - (struct MulleFrameInfo *) currentFrameInfo;
 
-- (MulleTextureImage *) framebufferImageWithBitmapSize:(struct mulle_bitmap_size) size
-                                               options:(NSUInteger) options;
-- (void) removeFramebufferImage:(MulleTextureImage *) image;
+// these are not CALayers, but CGLayers which are GPU textures
+- (void) addToLayers:(CGLayer *) image;
+- (void) removeFromLayers:(CGLayer *) image;
 
 @end
 

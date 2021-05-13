@@ -1,16 +1,17 @@
 #ifndef cg_color_h__
 #define cg_color_h__
 
-#include "CGBase.h"
+#include "include.h"
+
 #include <math.h>
-#include "nanovg.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 
 
-typedef NVGcolor   CGColorRef;
+typedef NVGcolor   CGColorRef;   // actually a little struct we have this
+                                 // misnomer for compatibility
 typedef void       *CGColorSpaceRef;
 
 
@@ -135,6 +136,15 @@ static inline void   MulleColorGetComponents(CGColorRef color, CGFloat *componen
    components[ 1] = color.g;
    components[ 2] = color.b;
    components[ 3] = color.a;
+}
+
+
+
+static inline CGColorRef   MulleMakeColorWithColorAndAlpha( CGColorRef color,
+                                                            CGFloat alpha)
+{
+   color.a = alpha;
+   return( color);
 }
 
 

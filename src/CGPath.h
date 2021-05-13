@@ -6,13 +6,6 @@
 
 #include "include.h"
 
-#include <mulle-buffer/mulle-buffer.h>  // TODO: why not get for free ?
-#include <mulle-container/mulle-container.h>  // TODO: why not get for free ?
-
-#include "CGBase.h"
-#include "CGAffineTransform.h"
-
-
 enum CGPathCommand
 {
    CGPathMoveToPointCommand,
