@@ -1,17 +1,17 @@
-#import "CGGeometry+CString.h"
+#include "CGGeometry+CString.h"
 
-#import "import-private.h"
+#include "include-private.h"
 
-#include <stdio.h>
+#include "MulleCG_asprintf.h"
 
 //
-// todo: use MulleObjC_asprintf here
+// todo: use MulleCG_asprintf here
 //
 char   *CGPointCStringDescription( CGPoint point)
 {
    auto char  *s;
 
-   s = MulleObjC_asprintf( "%.2f %.2f", point.x, point.y);
+   s = MulleCG_asprintf( "%.2f %.2f", point.x, point.y);
    return( s);
 }
 
@@ -20,7 +20,7 @@ char   *CGRectCStringDescription( CGRect rect)
 {
    auto char  *s;
 
-   s = MulleObjC_asprintf( "%.2f %.2f %.2f %.2f",
+   s = MulleCG_asprintf( "%.2f %.2f %.2f %.2f",
             rect.origin.x,
             rect.origin.y,
             rect.size.width,

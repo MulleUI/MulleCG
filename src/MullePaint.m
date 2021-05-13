@@ -10,18 +10,14 @@
 #  import "CGContext.h"
 # endif
 #endif
-#ifdef __has_include
-# if __has_include( "MulleBitmapImage.h")
-#  import "MulleBitmapImage.h"
-# endif
-#endif
+
 
 
 @implementation MullePaint
 
 
 - (instancetype) initWithNVGpaint:(struct NVGpaint) paint
-                        CGContext:(CGContext *) context;
+                          context:(CGContext *) context;
 {
    _paint   = paint;
    _context = context;
@@ -32,38 +28,38 @@
 // the paint is valid for the NVGcontext only, but the nvg context is
 // not kept, and the nvgContext doesnt keep the paint
 - (instancetype) initLinearGradientWithStartPoint:(CGPoint) start
-                                         endPoint:(CGPoint) end 
+                                         endPoint:(CGPoint) end
                                        innerColor:(CGColorRef) innerColor
                                        outerColor:(CGColorRef) outerColor
-                                        CGContext:(CGContext *) context
-{               
+                                          context:(CGContext *) context
+{
    // todo move to CGContext
    _paint = nvgLinearGradient( [context nvgContext], start.x, start.y, end.x, end.y,
                                innerColor, outerColor);
    _context = context;
    return( self);
-}                  
+}
 
 
-- (instancetype) initImagePatternWithBitmapImage:(MulleBitmapImage *) image
-                                          origin:(CGPoint) origin         
-                                             end:(CGPoint) end         
-                                           angle:(CGFloat) angle
-                                           alpha:(CGFloat) alpha
-                                       CGContext:(CGContext *) context
+- (instancetype) initImagePatternWithImage:(id <CGBitmapImage>) image
+                                    origin:(CGPoint) origin
+                                       end:(CGPoint) end
+                                     angle:(CGFloat) angle
+                                     alpha:(CGFloat) alpha
+                                   context:(CGContext *) context
 {
 //   CGSize    size;
 //
 //   size = [image size];
-   _paint = nvgImagePattern( [context nvgContext], 
-                             origin.x, origin.y, 
+   _paint = nvgImagePattern( [context nvgContext],
+                             origin.x, origin.y,
                              end.x, end.y,
-       	                    angle, 
-                             [context registerTextureIDForImage:image], 
+       	                    angle,
+                             [context registerTextureIDForImage:image],
                              alpha);
    _context = context;
-   return( self);                             
-}                           
+   return( self);
+}
 
 
 - (CGColorRef) innerColor
@@ -95,8 +91,8 @@
 
 - (void) finalize
 {
-   [_bitmapImage autorelease];
-   _bitmapImage = nil;
+   [_image autorelease];
+   _image = nil;
 
    [super finalize]; // call anywhere you like
 }

@@ -5,9 +5,6 @@
 #import "CGContext.h"
 #import "CGContext+CGFont.h"
 #import "CGGeometry+CString.h"
-#import "UIImage.h"
-#import "MulleBitmapImage.h"
-#import "MulleTextureImage.h"
 #include <stdio.h>
 
 
@@ -35,16 +32,6 @@ static struct
 }
 
 
-- (void) _initPerformanceCounters
-{
-	initGraph( &_perf.fps,      GRAPH_RENDER_FPS, "Frame Time");
-	initGraph( &_perf.cpuGraph, GRAPH_RENDER_MS, "CPU Time");
-	initGraph( &_perf.gpuGraph, GRAPH_RENDER_MS, "GPU Time");
-#ifdef HAVE_MEM_GRAPH
-   initGraph( &_perf.memGraph, GRAPH_RENDER_PERCENT, "GPU Memory");
-#endif
-   _perf.cpuTime = -1.0;
-}
 
 /*
 static void   assert_shader_compiler_errors( GLuint shader)
@@ -110,23 +97,29 @@ static char  geometryShaderSource[] =
 // need to run locked so only one thread can create a NVG context at the
 // same time. The same probably has to be done for every font load  ?
 //
-- (id) init
+- (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
+              useStencilStrokes:(BOOL) useStencilStrokes
+
 {
+   int   flags;
+
+   flags  = edgeAntialiasing ? NVG_ANTIALIAS : 0;
+   flags |= useStencilStrokes ? NVG_STENCIL_STROKES : 0;
+#if DEBUG
+   flags |= NVG_DEBUG;
+#endif
+
    mulle_thread_mutex_lock( &Self._freeTypeLock);
    {
 #ifdef NANOVG_GL3_IMPLEMENTATION
-	   _vg  = nvgCreateGL3( NVG_ANTIALIAS | NVG_STENCIL_STROKES
+      _vg  = nvgCreateGL3( flags);
 #endif
 #ifdef NANOVG_GLES2_IMPLEMENTATION
-   	_vg  = nvgCreateGLES2( NVG_ANTIALIAS | NVG_STENCIL_STROKES
+      _vg  = nvgCreateGLES2( flags);
 #endif
 #ifdef NANOVG_GLES3_IMPLEMENTATION
-	   _vg  = nvgCreateGLES3( NVG_ANTIALIAS | NVG_STENCIL_STROKES
+      _vg  = nvgCreateGLES3( flags);
 #endif
-#if DEBUG
-      | NVG_DEBUG
-#endif
-      );
    }
    mulle_thread_mutex_unlock( &Self._freeTypeLock);
 
@@ -135,9 +128,9 @@ static char  geometryShaderSource[] =
       [self release];
       return( nil);
    }
-
 /*
-#if MULLE_UI_GLVERSION != MULLE_GLES2
+#if MULLE_CG_GL
+VERSION != MULLE_GLES2
    {
       struct GLNVGcontext   *vgl = (struct GLNVGcontext *) _vg;
       unsigned int          program;
@@ -167,10 +160,16 @@ static char  geometryShaderSource[] =
    }
 #endif
 */
-   [self _initPerformanceCounters];
    [self _initFontCache];
 
    return( self);
+}
+
+
+- (instancetype) init
+{
+   return( [self initWithEdgeAntialiasing:YES
+                        useStencilStrokes:YES]);
 }
 
 
@@ -187,7 +186,7 @@ static char  geometryShaderSource[] =
    [self _resetFontCache];
 
    [self _unmapImages];
-   [self _finalizeFramebufferImages];
+   [self _finalizeLayers];
 
    mulle_thread_mutex_lock( &Self._freeTypeLock);
    {
@@ -247,30 +246,6 @@ static char  geometryShaderSource[] =
                CGSizeCStringDescription( info->framebufferSize),
                CGSizeCStringDescription( info->size));
 #endif
-   _renderStartTimestamp = CAAbsoluteTimeNow();
-   if( _renderStartTimestamp == 0.0)
-      _firstRenderStartTimestamp = _renderStartTimestamp;
-
-   // > performance measurement
-   if( _currentFrameInfo.isPerfEnabled)
-   {
-      if( _perf.cpuTime == -1.0)
-      {
-         _perf.cpuTime = 0.0;
-
-         initGPUTimer( &_perf.gpuTimer);
-   	   _perf.prevt = _renderStartTimestamp;
-
-         // render code want sans, so load it (now once)
-         [self fontWithNameCString:"sans"];
-      }
-
-      t           = _renderStartTimestamp;
-      _perf.dt    = t - _perf.prevt;
-      _perf.prevt = t;
-
-      startGPUTimer( &_perf.gpuTimer);
-   }
    // < performance measurement
 
    glViewport( info->viewportFrame.origin.x,
@@ -285,9 +260,13 @@ static char  geometryShaderSource[] =
 }
 
 
-- (CAAbsoluteTime) renderStartTimestamp
+
+- (void) endRender
 {
-   return(_renderStartTimestamp);
+   assert( _isRendering);
+
+   _isRendering = NO;
+   nvgEndFrame( _vg);
 }
 
 
@@ -311,74 +290,10 @@ static char  geometryShaderSource[] =
 }
 
 
-- (void) endRender
-{
-	float            gpuTimes[3];
-   int              i;
-   int              n;
-   GLint            total;
-   GLint            unused;
-   int              y;
-   BOOL             perfEnabled;
-   CAAbsoluteTime   now;
-
-   assert( _isRendering);
-   perfEnabled = _currentFrameInfo.isPerfEnabled;
-   if( perfEnabled)
-   {
-      // > display performance values for previous frame
-      y = 5;
-      renderGraph( _vg, 5,y, &_perf.fps);
-      y += 35 + 2;
-      renderGraph( _vg, 5, y, &_perf.cpuGraph);
-      if( _perf.gpuTimer.supported)
-      {
-         y += 35 + 2;
-         renderGraph( _vg, 5,y, &_perf.gpuGraph);
-      }
-#ifdef HAVE_MEM_GRAPH
-      y += 35 + 2;
-      renderGraph( _vg, 5,y, &_perf.memGraph);
-#endif
-      // < display performance values for previous frame
-   }
-
-   _isRendering = NO;
-   nvgEndFrame( _vg);
-
-   if( perfEnabled)
-   {
-      now = CAAbsoluteTimeNow();
-
-      // > get performance values for current frame
-      _perf.cpuTime = now - _perf.prevt;
-      updateGraph(&_perf.fps, _perf.dt);
-      updateGraph(&_perf.cpuGraph, _perf.cpuTime);
-
-#ifdef HAVE_MEM_GRAPH
-      total = 0;
-      glGetIntegerv(GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX, &total);
-      unused = 0;
-      glGetIntegerv(GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX, &unused);
-      if( total)
-         updateGraph(&_perf.memGraph, unused * 100.0 / total);
-#endif
-
-      // We may get multiple results.
-      n = stopGPUTimer(&_perf.gpuTimer, gpuTimes, 3);
-      for (i = 0; i < n; i++)
-   	   updateGraph(&_perf.gpuGraph, gpuTimes[i]);
-
-      // < get performance values for current frame
-   }
-}
-
-
-// future, rasterize vector images to bitmaps here
-- (int) registerTextureIDForImage:(UIImage *) image
+- (int) registerTextureIDForImage:(id <CGBitmapImage>) image
 {
    int                      textureId;
-   mulle_int_size           size;
+   CGSize                   size;
    void                     *value;
    struct mulle_allocator   *allocator;
 
@@ -393,22 +308,16 @@ static char  geometryShaderSource[] =
       }
    }
 
-   if( ! [image isKindOfClass:[MulleBitmapImage class]])
-   {
-      abort();
-      return( -1);
-   }
-
    allocator = MulleObjCInstanceGetAllocator( self);
    if( ! _images)
       _images = mulle__pointermap_create( 16, 0, allocator);
 
-   size      = [(MulleBitmapImage *) image intSize];
+   size      = [image size];
    textureId = nvgCreateImageRGBA( _vg,
-                                   size.width,
-                                   size.height,
+                                   (int) round( size.width),
+                                   (int) round( size.height),
                                    [image nvgImageFlags],
-                                   [(MulleBitmapImage *) image bytes]);
+                                   [image bytes]);
 //   fprintf( stderr, "textureid: %d\n", textureId);
 
    _mulle__pointermap_set( _images, image, (void *) (intptr_t) textureId, allocator);
@@ -416,7 +325,7 @@ static char  geometryShaderSource[] =
 }
 
 
-- (void) unregisterTextureIDForImage:(UIImage *) image
+- (void) unregisterTextureIDForImage:(id <CGBitmapImage>) image
 {
    void   *value;
    int    textureId;
@@ -434,38 +343,46 @@ static char  geometryShaderSource[] =
 }
 
 
-- (MulleTextureImage *) framebufferImageWithBitmapSize:(struct mulle_bitmap_size) size
-                                               options:(NSUInteger) options
+// - (MulleTextureImage *) framebufferImageWithBitmapSize:(struct MulleBitmapInfo) size
+//                                                options:(NSUInteger) options
+// {
+//    MulleTextureImage   *image;
+//
+//    image = [[[MulleTextureImage alloc] initWithBitmapInfo:size
+//                                                   context:self
+//                                                   options:options] autorelease];
+//    if( ! image)
+//       return( nil);
+//
+//    // images are not retained!
+//    if( ! _layers)
+//       _layers = mulle_pointerarray_create( NULL);
+//    _mulle_pointerarray_add( _layers, image);
+//
+//    return( image);
+// }
+
+- (void) addToLayers:(CGLayer *) image
 {
-   MulleTextureImage   *image;
-
-   image = [[[MulleTextureImage alloc] initWithBitmapSize:size
-                                                  context:self
-                                                  options:options] autorelease];
-   if( ! image)
-      return( nil);
-
    // images are not retained!
-   if( ! _framebufferImages)
-      _framebufferImages = mulle_pointerarray_create( NULL);
-   _mulle_pointerarray_add( _framebufferImages, image);
-
-   return( image);
+   if( ! _layers)
+      _layers = mulle_pointerarray_create( NULL);
+   _mulle_pointerarray_add( _layers, image);
 }
 
 
-- (void) removeFramebufferImage:(UIImage *) image
+- (void) removeFromLayers:(CGLayer *) image
 {
    intptr_t   index;
 
-   if( ! _framebufferImages)
+   if( ! _layers)
       return;
 
-   index = _mulle_pointerarray_find( _framebufferImages, image);
+   index = _mulle_pointerarray_find( _layers, image);
    if( index == mulle_not_found_e)
       return;
 
-   _mulle_pointerarray_set( _framebufferImages, index, NULL);
+   _mulle_pointerarray_set( _layers, index, NULL);
 }
 
 
@@ -473,7 +390,7 @@ static char  geometryShaderSource[] =
 {
    struct mulle__pointermapenumerator  rover;
    struct mulle_pointerpair            *pair;
-   UIImage                             *image;
+   NSObject <CGImage>                  *image;
    int                                 textureId;
 
    if( ! _images)
@@ -493,15 +410,15 @@ static char  geometryShaderSource[] =
 }
 
 
-- (void) _finalizeFramebufferImages
+- (void) _finalizeLayers
 {
    struct mulle_pointerarrayenumerator  rover;
-   UIImage                             *image;
+   NSObject <CGImage>                  *image;
 
-   if( ! _framebufferImages)
+   if( ! _layers)
       return;
 
-   rover = mulle_pointerarray_enumerate( _framebufferImages);
+   rover = mulle_pointerarray_enumerate( _layers);
    while( _mulle_pointerarrayenumerator_next( &rover, (void **) &image))
    {
       // call finalize on these as they are effectively dead now
@@ -509,8 +426,8 @@ static char  geometryShaderSource[] =
    }
    mulle_pointerarrayenumerator_done( &rover);
 
-   mulle_pointerarray_destroy( _framebufferImages);
-   _framebufferImages = NULL;
+   mulle_pointerarray_destroy( _layers);
+   _layers = NULL;
 }
 
 @end

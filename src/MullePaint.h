@@ -1,23 +1,11 @@
 //
 // Copyright (c) 2020 Nat!, Mulle kybernetiK
 //
-#ifdef __has_include
-# if __has_include( "NSObject.h")
-#  import "NSObject.h"
-# endif
-#endif
-
-#ifdef __has_include
-# if __has_include( "CGColor.h")
-#  import "CGColor.h"
-# endif
-#endif
-
 #import "import.h"
 
+#import "CGColor.h"
+#import "CGContext.h"
 
-@class MulleBitmapImage;
-@class CGContext;
 
 
 // Paint is either a gradient or a texture. Actually behind the scenes
@@ -28,26 +16,26 @@
    struct NVGpaint     _paint;
 }
 
-@property( readonly, assign) CGContext         *context;
-@property( readonly, retain) MulleBitmapImage  *bitmapImage;
+@property( readonly, assign) CGContext           *context;
+@property( readonly, retain) NSObject <CGImage>  *image;
 
 - (instancetype) initWithNVGpaint:(struct NVGpaint) paint
-                        CGContext:(CGContext *) context;
+                          context:(CGContext *) context;
 
 // the paint is valid for the NVGcontext only, but the nvg context is
 // not kept, and the nvgContext doesnt keep the paint
 - (instancetype) initLinearGradientWithStartPoint:(CGPoint) start
-                                         endPoint:(CGPoint) end 
+                                         endPoint:(CGPoint) end
                                        innerColor:(CGColorRef) innerColor
                                        outerColor:(CGColorRef) outerColor
-                                        CGContext:(CGContext *) context;
+                                          context:(CGContext *) context;
 
-- (instancetype) initImagePatternWithBitmapImage:(MulleBitmapImage *) image
-                                          origin:(CGPoint) origin         
-                                             end:(CGPoint) end         
-                                           angle:(CGFloat) angle
-                                           alpha:(CGFloat) alpha
-                                       CGContext:(CGContext *) context;
+- (instancetype) initImagePatternWithImage:(id <CGImage>) image
+                                    origin:(CGPoint) origin
+                                       end:(CGPoint) end
+                                     angle:(CGFloat) angle
+                                     alpha:(CGFloat) alpha
+                                   context:(CGContext *) context;
 
 - (CGColorRef) innerColor;
 - (CGColorRef) outerColor;

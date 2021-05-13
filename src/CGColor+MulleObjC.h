@@ -1,6 +1,6 @@
 #import "CGColor.h"
 
-#import "import-private.h"
+#import "import.h"
 
 
 static inline void   MulleObjectSetCGColorRef( id obj, SEL sel, CGColorRef color)

@@ -6,7 +6,6 @@
 
 #include "include.h"
 
-#include <nanovg.h>   // TODO: make cgpath+nanovg.h private header ?
 #include "CGPath.h"
 
 // set append to YES, if you don't want to begin a new path
