@@ -8,7 +8,6 @@
 #include <stdio.h>
 
 
-
 #define HAVE_MEM_GRAPH
 
 // #define RENDER_DEBUG
@@ -162,6 +161,7 @@ VERSION != MULLE_GLES2
 */
    [self _initFontCache];
 
+   _mulle__pointerset_init( &_resources, 0, MulleObjCInstanceGetAllocator( self));
    return( self);
 }
 
@@ -185,8 +185,7 @@ VERSION != MULLE_GLES2
 
    [self _resetFontCache];
 
-   [self _unmapImages];
-   [self _finalizeLayers];
+   [self removeAllResources];
 
    mulle_thread_mutex_lock( &Self._freeTypeLock);
    {
@@ -228,14 +227,34 @@ VERSION != MULLE_GLES2
 #define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
 
 
-- (void) beginRenderWithFrameInfo:(struct MulleFrameInfo *) info
+- (void) continueRender
+{
+   glViewport( _currentFrameInfo.viewportFrame.origin.x,
+               _currentFrameInfo.viewportFrame.origin.y,
+               _currentFrameInfo.viewportFrame.size.width,
+               _currentFrameInfo.viewportFrame.size.height);
+   nvgBeginFrame( _vg, _currentFrameInfo.size.width,
+                       _currentFrameInfo.size.height,
+                       _currentFrameInfo.pixelRatio);
+}
+
+
+- (void) beginRender:(struct CGFrameInfo *) info
 {
    double   t;
    GLint    value;
 
    assert( ! _isRendering);
+   assert( info);
+
+   _isRendering = YES;
+   _lastRenderStart  = _currentFrameInfo.renderStart
+                          ? _currentFrameInfo.renderStart
+                          : info->renderStart;
+   _frameDelta       = _currentFrameInfo.renderStart - _lastRenderStart;
 
    _currentFrameInfo = *info;
+   _alpha            = 1.0;
 
 #if RENDER_DEBUG
    if( ! CGSizeEqualToSize( info->viewportFrame.size, info->framebufferSize) ||
@@ -247,36 +266,39 @@ VERSION != MULLE_GLES2
                CGSizeCStringDescription( info->size));
 #endif
    // < performance measurement
-
-   glViewport( info->viewportFrame.origin.x,
-               info->viewportFrame.origin.y,
-               info->viewportFrame.size.width,
-               info->viewportFrame.size.height);
-   nvgBeginFrame( _vg, info->size.width,
-                       info->size.height,
-                       info->pixelRatio);
-   _isRendering = YES;
-   _alpha       = 1.0;
+   [self continueRender];
 }
 
+
+- (void) suspendRender
+{
+   nvgEndFrame( _vg);
+}
 
 
 - (void) endRender
 {
    assert( _isRendering);
 
+   [self suspendRender];
    _isRendering = NO;
-   nvgEndFrame( _vg);
 }
 
 
-- (struct MulleFrameInfo *) currentFrameInfo
+- (BOOL) isRendering
+{
+   return( _isRendering);
+}
+
+
+
+- (struct CGFrameInfo *) currentFrameInfo
 {
    return( &_currentFrameInfo);
 }
 
 
-- (void) getCurrentFrameInfo:(struct MulleFrameInfo *) info
+- (void) getCurrentFrameInfo:(struct CGFrameInfo *) info
 {
    assert( info);
    assert( _currentFrameInfo.pixelRatio);  // not yet initialized!!
@@ -290,60 +312,7 @@ VERSION != MULLE_GLES2
 }
 
 
-- (int) registerTextureIDForImage:(id <CGBitmapImage>) image
-{
-   int                      textureId;
-   CGSize                   size;
-   void                     *value;
-   struct mulle_allocator   *allocator;
-
-   if( _images)
-   {
-      value = _mulle__pointermap_get( _images, image);
-      if( value)
-      {
-         textureId = (int) (intptr_t) value;
-   //      fprintf( stderr, "textureid: %d\n", textureId);
-         return( textureId);
-      }
-   }
-
-   allocator = MulleObjCInstanceGetAllocator( self);
-   if( ! _images)
-      _images = mulle__pointermap_create( 16, 0, allocator);
-
-   size      = [image size];
-   textureId = nvgCreateImageRGBA( _vg,
-                                   (int) round( size.width),
-                                   (int) round( size.height),
-                                   [image nvgImageFlags],
-                                   [image bytes]);
-//   fprintf( stderr, "textureid: %d\n", textureId);
-
-   _mulle__pointermap_set( _images, image, (void *) (intptr_t) textureId, allocator);
-   return( textureId);
-}
-
-
-- (void) unregisterTextureIDForImage:(id <CGBitmapImage>) image
-{
-   void   *value;
-   int    textureId;
-
-   assert( _images);
-
-   value = _mulle__pointermap_get( _images, image);
-   if( ! value)
-      return;
-
-   textureId = (int) (intptr_t) value;
-   nvgDeleteImage( _vg, textureId);
-
-   _mulle__pointermap_remove( _images, image, MulleObjCInstanceGetAllocator( self));
-}
-
-
-// - (MulleTextureImage *) framebufferImageWithBitmapSize:(struct MulleBitmapInfo) size
+// - (MulleTextureImage *) framebufferImageWithBitmapSize:(struct CGBitmapInfo) size
 //                                                options:(NSUInteger) options
 // {
 //    MulleTextureImage   *image;
@@ -362,72 +331,42 @@ VERSION != MULLE_GLES2
 //    return( image);
 // }
 
-- (void) addToLayers:(CGLayer *) image
+- (void) addToResources:(id) resource
 {
-   // images are not retained!
-   if( ! _layers)
-      _layers = mulle_pointerarray_create( NULL);
-   _mulle_pointerarray_add( _layers, image);
+   // resources are not retained!
+   _mulle__pointerset_insert( &_resources, resource, MulleObjCInstanceGetAllocator( self));
 }
 
 
-- (void) removeFromLayers:(CGLayer *) image
+- (void) _removeFromResources:(id) resource
 {
-   intptr_t   index;
-
-   if( ! _layers)
-      return;
-
-   index = _mulle_pointerarray_find( _layers, image);
-   if( index == mulle_not_found_e)
-      return;
-
-   _mulle_pointerarray_set( _layers, index, NULL);
+   _mulle__pointerset_remove( &_resources, resource, MulleObjCInstanceGetAllocator( self));
 }
 
 
-- (void) _unmapImages
+- (void) removeFromResources:(id) resource
 {
-   struct mulle__pointermapenumerator  rover;
-   struct mulle_pointerpair            *pair;
-   NSObject <CGImage>                  *image;
-   int                                 textureId;
-
-   if( ! _images)
-      return;
-
-   rover = mulle__pointermap_enumerate( _images);
-   while( (pair = _mulle__pointermapenumerator_next( &rover)))
-   {
-      // we just remove the textureIDs and wipeout the mapping
-      textureId = (int) (intptr_t) pair->value;
-      nvgDeleteImage( _vg, textureId);
-   }
-   mulle__pointermapenumerator_done( &rover);
-
-   _mulle__pointermap_destroy( _images, MulleObjCInstanceGetAllocator( self));
-   _images = NULL;
+   if( _mulle__pointerset_remove( &_resources, resource, MulleObjCInstanceGetAllocator( self)))
+      [resource contextDidRemoveObject:self];
 }
 
 
-- (void) _finalizeLayers
+- (void) removeAllResources
 {
-   struct mulle_pointerarrayenumerator  rover;
-   NSObject <CGImage>                  *image;
+   struct mulle__pointersetenumerator   rover;
+   struct mulle__pointerset             tmp;
+   id                                   resource;
 
-   if( ! _layers)
-      return;
+   tmp = _resources;
+   _mulle__pointerset_init( &_resources, 0, MulleObjCInstanceGetAllocator( self));
 
-   rover = mulle_pointerarray_enumerate( _layers);
-   while( _mulle_pointerarrayenumerator_next( &rover, (void **) &image))
-   {
-      // call finalize on these as they are effectively dead now
-      [image finalize];
-   }
-   mulle_pointerarrayenumerator_done( &rover);
+   rover = _mulle__pointerset_enumerate( &tmp);
+   while( _mulle__pointersetenumerator_next( &rover, (void **) &resource))
+      [resource contextDidRemoveObject:self];
+   mulle__pointersetenumerator_done( &rover);
 
-   mulle_pointerarray_destroy( _layers);
-   _layers = NULL;
+   _mulle__pointerset_done( &tmp, MulleObjCInstanceGetAllocator( self));
 }
+
 
 @end

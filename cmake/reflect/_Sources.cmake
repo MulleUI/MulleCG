@@ -8,13 +8,18 @@ if( MULLE_TRACE_INCLUDE)
    MESSAGE( STATUS "# Include \"${CMAKE_CURRENT_LIST_FILE}\"" )
 endif()
 
+#
+# contents selected with patternfile ??-source--sources
+#
 set( SOURCES
 nanovg/src/nanovg.c
 src/CGAffineTransform+CString.m
+src/CGAffineTransform.c
 src/CGColor.c
 src/CGContext+CGFont.m
 src/CGContext+Render.m
 src/CGContext.m
+src/CGDrawable.m
 src/CGFont.m
 src/CGGeometry+CString.m
 src/CGImage.m
@@ -27,6 +32,9 @@ src/MullePaint.m
 src/nanovg+CString.m
 )
 
+#
+# contents selected with patternfile ??-source--stage2-sources
+#
 set( STAGE2_SOURCES
 src/MulleObjCLoader+MulleCG.m
 )

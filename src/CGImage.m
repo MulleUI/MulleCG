@@ -3,79 +3,141 @@
 #import "CGContext.h"
 
 
-PROTOCOLCLASS_IMPLEMENTATION( CGImage)
 
-- (NSUInteger) nvgImageFlags
+@implementation CGImage
+
+- (instancetype) initWithTextureID:(int) textureID
+                        imageFlags:(NSUInteger) imageFlags
+                           context:(CGContext *) context
 {
-   return( 0);
-}
+   if( ! textureID)
+   {
+      [self release];
+      return( nil);
+   }
 
-- (CGRect) canvas
-{
-   return( (CGRect){ .origin = CGPointZero, .size = [self size]});
-}
+   [context addToResources:self];
 
+   _imageFlags = imageFlags;
+   _context    = context;
+   _textureID  = textureID;
 
-- (CGRect) bounds
-{
-   return( [self canvas]);
-}
-
-PROTOCOLCLASS_END()
-
-
-
-PROTOCOLCLASS_IMPLEMENTATION( _CGBitmapImage)
-
-- (struct MulleBitmapSize) bitmapSize
-{
-   return( [self bitmapInfo].size);
+   return( self);
 }
 
 
-- (void) drawRect:(CGRect) rect
-     cornerRadius:(CGFloat) cornerRadius
-            alpha:(CGFloat) alpha
-          context:(CGContext *) context
+- (void) contextDidRemoveObject:(CGContext *) context
 {
-   int          textureID;
-   NVGcontext   *vg;
-   NVGpaint     imgPaint;
-
-   textureID = [self textureIDWithContext:context];
-   assert( textureID != -1);
-   if( textureID == -1)
-      return;
-
-   vg = MulleContextGetNVGContext( context);
-
-   nvgBeginPath( vg);
-   imgPaint  = nvgImagePattern( vg, rect.origin.x,
-                                    rect.origin.y,
-                                    rect.size.width,
-                                    rect.size.height,
-                                    0.0f/180.0f*NVG_PI,
-                                    textureID,
-                                    alpha);
-
-   nvgRoundedRect( vg, rect.origin.x,
-                       rect.origin.y,
-                       rect.size.width,
-                       rect.size.height,
-                       (int) cornerRadius);
-   nvgFillPaint( vg, imgPaint);
-   nvgFill( vg);
+   if( _textureID)
+      nvgDeleteImage( CGContextGetNVGContext( context), _textureID);
+   _context = nil;
 }
 
-PROTOCOLCLASS_END()
 
+- (void) finalize
+{
+   // this will call contextDidRemoveObject: eventually
+   [_context removeFromResources:self];
 
+   [super finalize];
+}
 
-PROTOCOLCLASS_IMPLEMENTATION( CGBitmapImage)
 
 - (int) textureIDWithContext:(CGContext *) context
+                  imageFlags:(NSUInteger) imageFlags
 {
-   return( context ? [context registerTextureIDForImage:self] : -1);
+   if( context == _context && imageFlags == _imageFlags)
+      return( _textureID);
+   return( -1);
 }
 
-PROTOCOLCLASS_END()
+
+- (struct CGBitmapInfo) bitmapInfo
+{
+   return( CGBitmapInfoMake( [self bitmapSize],
+                             4,
+                             CGBitmapEncodingRGBABytes));
+}
+
+
+- (struct CGBitmapSize) bitmapSize;  // just integer value of size
+{
+   int  w;
+   int  h;
+
+   nvgImageSize( CGContextGetNVGContext( _context), _textureID, &w, &h);
+   return( CGBitmapSizeMake( w, h));
+}
+
+
+// this i
+- (instancetype) initWithContentsOfFileCString:(char *) filename
+                                    imageFlags:(NSUInteger) imageFlags
+                                       context:(CGContext *) context
+{
+   int   textureID;
+
+   assert( [context isRendering]);
+
+   textureID = nvgCreateImage( CGContextGetNVGContext( context),
+                               filename,
+                               imageFlags & 0x3F);
+   return( [self initWithTextureID:textureID
+                        imageFlags:imageFlags
+                           context:context]);
+}
+
+
+- (instancetype) initWithFileCData:(struct mulle_data) fileCData
+                        imageFlags:(NSUInteger) imageFlags
+                           context:(CGContext *) context
+{
+   int   textureID;
+
+   assert( [context isRendering]);
+
+
+   textureID = nvgCreateImageMem( CGContextGetNVGContext( context),
+                                  imageFlags & 0x3F,
+                                  fileCData.bytes,
+                                  (int) fileCData.length);
+   return( [self initWithTextureID:textureID
+                        imageFlags:imageFlags
+                           context:context]);
+}
+
+
+- (instancetype) initWithRGBABytes:(void *) bytes
+                        bitmapSize:(struct CGBitmapSize) bitmapSize
+                        imageFlags:(NSUInteger) imageFlags
+                           context:(CGContext *) context
+{
+   int   textureID;
+
+   assert( [context isRendering]);
+   assert( bytes);
+   assert( bitmapSize.width >= 1);
+   assert( bitmapSize.height >= 1);
+
+   textureID = nvgCreateImageRGBA( CGContextGetNVGContext( context),
+                                   bitmapSize.width,
+                                   bitmapSize.height,
+                                   imageFlags & 0x3F,
+                                   bytes);
+   return( [self initWithTextureID:textureID
+                        imageFlags:imageFlags
+                           context:context]);
+}
+
+
+- (void) setBytes:(void *) bytes
+{
+   assert( [_context isRendering]);
+
+
+   nvgUpdateImage( CGContextGetNVGContext( _context),
+                   _textureID,
+                   bytes);
+}
+
+@end

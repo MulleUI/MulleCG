@@ -6,6 +6,8 @@
 
 #include "include.h"
 
+#include "CGAffineTransform.h"
+
 enum CGPathCommand
 {
    CGPathMoveToPointCommand,

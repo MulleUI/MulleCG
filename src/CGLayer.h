@@ -2,7 +2,10 @@
 
 
 @class CGContext;
-struct MulleFrameInfo;
+struct CGFrameInfo;
+
+// Better name: CGFramebufferImage ?
+
 
 // This used to be called MulleTextureImage, which fits better, but the
 // historic name is CGLayer. It has nothing to do with a CALayer though.
@@ -19,28 +22,24 @@ struct MulleFrameInfo;
 // The CGContext keeps track of all texture images, but doesn't retain them.
 // When the time comes, it calls -finalize on all texture images.
 //
-@interface CGLayer : NSObject < CGBitmapImage>
+@interface CGLayer : CGImage
 
-@property( readonly, assign) void                     *framebuffer;
-@property( readonly, retain) CGContext                *context;
-@property( readonly, assign) struct MulleBitmapInfo   bitmapInfo;
-@property( readonly, assign) int                      nvgImageFlags;
+@property( readonly, assign) void                  *framebuffer;
+@property( readonly, assign) struct CGBitmapInfo   bitmapInfo;
 
 //
-// options is nvgImageFlags currently
+// options is imageFlags currently
 //
-- (instancetype) initWithBitmapInfo:(struct MulleBitmapInfo) size
-                            context:(CGContext *) context
-                            options:(NSUInteger) options;
-
-- (int) textureIDWithContext:(CGContext *) context;
+- (instancetype) initWithBitmapInfo:(struct CGBitmapInfo) size
+                      imageFlags:(NSUInteger) imageFlags
+                            context:(CGContext *) context;
 
 - (struct mulle_data) readRGBACData:(struct mulle_allocator *) allocator;
 
 
 // binds the framebuffer and begins render of the context
 // do your drawing after calling it (use -context for CGContext)
-- (void) beginRenderWithFrameInfo:(struct MulleFrameInfo *) renderInfo;
+- (void) beginRender:(struct CGFrameInfo *) renderInfo;
 
 // end render of the context and unbind the framebuffer
 - (void) endRender;

@@ -12,7 +12,7 @@
  */
 
 // You can tweak the following #import with these commands.
-// (Use C02A18E3-65C4-453B-958B-1AF052FEDC79 instead of MulleObjC if there are duplicate entries)
+// (Use 22EBC69D-E0BB-4EC7-BAC7-FD3AECC7D2E4 instead of MulleObjC if there are duplicate entries)
 //    remove:             `mulle-sourcetree mark MulleObjC no-header`
 //    rename:             `mulle-sde dependency|library set MulleObjC include whatever.h`
 //    reorder:            `mulle-sourcetree move MulleObjC <up|down>`

@@ -4,38 +4,81 @@
 #import "import.h"
 
 #import "CGColor.h"
-#import "CGContext.h"
 
 
+@class CGImage;
+@class CGContext;
 
 // Paint is either a gradient or a texture. Actually behind the scenes
 // its a texture anyway :)
-
+//
+// The image handle (textureID) is managed by nanovg though.
+// It will not be available via the context. Therefore a paint can only
+// exist in one context currently. TODO: make this more like UIImage so
+// we can use it in multiple contexts. (otherwise its fairly useless)
+//
+//
+// Todo: assign a "name" to the gradient and store it in context ?
+//       maybe MullePaint is a bad idea and should be dropped. Gradients
+//       are meant to be created on the fly..
+//
 @interface MullePaint : NSObject
 {
-   struct NVGpaint     _paint;
+   struct NVGpaint   _paint;
+   CGImage           *_image;
 }
 
-@property( readonly, assign) CGContext           *context;
-@property( readonly, retain) NSObject <CGImage>  *image;
+@property( readonly, assign) CGContext   *context;
 
-- (instancetype) initWithNVGpaint:(struct NVGpaint) paint
++ (instancetype) linearGradientWithRect:(CGRect) rect
+                             innerColor:(CGColorRef) innerColor
+                             outerColor:(CGColorRef) outerColor
+                                context:(CGContext *) context;
++ (instancetype) radialGradientCenterPoint:(CGPoint) point
+                               innerRadius:(CGFloat) innerRadius
+                               outerRadius:(CGFloat) outerRadius
+                                innerColor:(CGColorRef) innerColor
+                                outerColor:(CGColorRef) outerColor
+                                   context:(CGContext *) context;
++ (instancetype) boxGradientWithRect:(CGRect) point
+                        cornerRadius:(CGFloat) cornerRadius
+                             feather:(CGFloat) feather
+                          innerColor:(CGColorRef) innerColor
+                          outerColor:(CGColorRef) outerColor
+                             context:(CGContext *) context;
++ (instancetype) patternWithImage:(CGImage *) image
+                             rect:(CGRect) rect
+                            angle:(CGFloat) angle
+                            alpha:(CGFloat) alpha
                           context:(CGContext *) context;
 
 // the paint is valid for the NVGcontext only, but the nvg context is
 // not kept, and the nvgContext doesnt keep the paint
-- (instancetype) initLinearGradientWithStartPoint:(CGPoint) start
-                                         endPoint:(CGPoint) end
-                                       innerColor:(CGColorRef) innerColor
-                                       outerColor:(CGColorRef) outerColor
-                                          context:(CGContext *) context;
+- (instancetype) initLinearGradientWithRect:(CGRect) rect
+                                 innerColor:(CGColorRef) innerColor
+                                 outerColor:(CGColorRef) outerColor
+                                    context:(CGContext *) context;
 
-- (instancetype) initImagePatternWithImage:(id <CGImage>) image
-                                    origin:(CGPoint) origin
-                                       end:(CGPoint) end
-                                     angle:(CGFloat) angle
-                                     alpha:(CGFloat) alpha
-                                   context:(CGContext *) context;
+- (instancetype) initRadialGradientWithCenterPoint:(CGPoint) point
+                                       innerRadius:(CGFloat) innerRadius
+                                       outerRadius:(CGFloat) outerRadius
+                                        innerColor:(CGColorRef) innerColor
+                                        outerColor:(CGColorRef) outerColor
+                                           context:(CGContext *) context;
+- (instancetype) initBoxGradientWithRect:(CGRect) point
+                            cornerRadius:(CGFloat) cornerRadius
+                                 feather:(CGFloat) feather
+                              innerColor:(CGColorRef) innerColor
+                              outerColor:(CGColorRef) outerColor
+                                 context:(CGContext *) context;
+
+// it's not necessary to keep the image i believe (so we don't)
+- (instancetype) initPatternWithImage:(CGImage *) image
+                                 rect:(CGRect) rect
+                                angle:(CGFloat) angle
+                                alpha:(CGFloat) alpha
+                              context:(CGContext *) context;
+
 
 - (CGColorRef) innerColor;
 - (CGColorRef) outerColor;

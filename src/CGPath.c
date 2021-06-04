@@ -17,7 +17,7 @@ void   _CGPathInit( struct CGPath *path, struct mulle_allocator *allocator)
                             8,
                             allocator);
 
-                            
+
 }
 
 
@@ -41,8 +41,8 @@ void   _CGPathDone(struct CGPath *path)
 void CGPathDestroy(struct CGPath *path)
 {
    struct mulle_allocator *allocator;
-   
-   if( ! path) 
+
+   if( ! path)
       return;
 
    allocator = mulle_buffer_get_allocator( &path->_commands);

@@ -18,7 +18,7 @@
 # define FONT_DATA   Roboto_Regular_ttf
 #endif
 #include "_entypo.inc"
-#include "_emoji.inc"
+#include "_emoji.inc"   // NotoEmoji_Regular_ttf
 
 #include <assert.h>
 
@@ -192,11 +192,20 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
       nvgAddFallbackFontId( _vg, fontIndex, [fallbackFont fontIndex]);
 
    font = [CGFont fontWithNameCString:s
-                     fontIndex:fontIndex];
+                            fontIndex:fontIndex];
    assert( font);
    mulle_map_insert( &_fontMap, s, font);
 
    return( font);
+}
+
+
+- (void) setFont:(CGFont *) font
+{
+   if( font)
+      nvgFontFace( _vg, [font nameCString]);
+   else
+      nvgFontFace( _vg, "sans");
 }
 
 @end
