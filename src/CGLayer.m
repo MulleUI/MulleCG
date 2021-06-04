@@ -8,57 +8,49 @@
 
 @implementation CGLayer
 
-- (instancetype) initWithBitmapInfo:(struct MulleBitmapInfo) bitmapInfo
+- (instancetype) initWithBitmapInfo:(struct CGBitmapInfo) info
+                         imageFlags:(NSUInteger) imageFlags
                             context:(CGContext *) context
-                            options:(NSUInteger) options
 {
    NVGcontext   *vg;
 
    assert( context && [context isKindOfClass:[CGContext class]]);
+   assert( info.encoding == CGBitmapEncodingRGBABytes);
+   assert( info.nColorComponents == 4);
 
-   vg           = [context nvgContext];
+   vg           = CGContextGetNVGContext( context);
    _framebuffer = nvgluCreateFramebuffer( vg,
-                                    bitmapInfo.size.width,
-                                    bitmapInfo.size.height,
-                                    options);
+                                          info.size.width,
+                                          info.size.height,
+                                          imageFlags);
    if( ! _framebuffer)
    {
       [self release];
       return( nil);
    }
-   [_context addToLayers:self];
 
    //
    // Image is dependent on the graphics context, and can't live without it
    // TextureImage is threfore retained by the context and not the other way
    // (how long does the context live though)
    //
-   _context       = context;
-   _bitmapInfo    = bitmapInfo;
-   _nvgImageFlags = options;
-
-   return( self);
-}
-
-
-- (int) textureIDWithContext:(CGContext *) context
-{
-   if( context != _context)
-      return( -1);
-   return( ((NVGLUframebuffer *) _framebuffer)->image);
+   return( [self initWithTextureID:((NVGLUframebuffer *) _framebuffer)->image
+                        imageFlags:imageFlags
+                           context:context]);
 }
 
 
 - (void) finalize
 {
-   [_context removeFromLayers:self];
-   _context = nil;
 
    if( _framebuffer)
    {
    	nvgluDeleteFramebuffer((NVGLUframebuffer *) _framebuffer);
       _framebuffer = NULL;
    }
+
+   // assume nvgluDeleteFramebuffer did delete the texture already
+   _textureID = 0;
    [super finalize];
 }
 
@@ -87,11 +79,11 @@
 }
 
 
-- (void) beginRenderWithFrameInfo:(struct MulleFrameInfo *) renderInfo
+- (void) beginRender:(struct CGFrameInfo *) renderInfo
 {
    // render view into a framebuffer tied to the texture
    nvgluBindFramebuffer( _framebuffer);
-   [_context beginRenderWithFrameInfo:renderInfo];
+   [_context beginRender:renderInfo];
    [_context clearFramebuffer];
 }
 
@@ -100,6 +92,34 @@
 {
    [_context endRender];
    nvgluBindFramebuffer( NULL);
+}
+
+
+- (instancetype) initWithContentsOfFileCString:(char *) filename
+                                    imageFlags:(NSUInteger) imageFlags
+                                       context:(CGContext *) context
+{
+   abort();
+   return( nil);
+}
+
+
+- (instancetype) initWithFileCData:(struct mulle_data) fileCData
+                        imageFlags:(NSUInteger) imageFlags
+                           context:(CGContext *) context
+{
+   abort();
+   return( nil);
+}
+
+
+- (instancetype) initWithRGBABytes:(void *) bytes
+                        bitmapSize:(struct CGBitmapSize) bitmapSize
+                        imageFlags:(NSUInteger) imageFlags
+                           context:(CGContext *) context
+{
+   abort();
+   return( nil);
 }
 
 @end

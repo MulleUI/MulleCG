@@ -15,7 +15,19 @@
 #define _mulle_cg_include_h__
 
 // You can tweak the following #include with these commands.
-// (Use FE9FAFD3-0F57-40DD-974A-CFD0F8DCA9D3 instead of mulle-buffer if there are duplicate entries)
+// (Use BC187FCD-1722-4313-BFA8-FADA57629452 instead of mulle-container if there are duplicate entries)
+//    remove:             `mulle-sourcetree mark mulle-container no-header`
+//    rename:             `mulle-sde dependency|library set mulle-container include whatever.h`
+//    reorder:            `mulle-sourcetree move mulle-container <up|down>`
+//    toggle #include:    `mulle-sourcetree mark mulle-container [no-]import`
+//    toggle public:      `mulle-sourcetree mark mulle-container [no-]public`
+//    toggle optional:    `mulle-sourcetree mark mulle-container [no-]require`
+//    remove for platform:`mulle-sourcetree mark mulle-container no-platform-<uname>`
+//        (use mulle-sourcetree-to-c --unames for known values)
+#include <mulle-container/mulle-container.h>   // mulle-container
+
+// You can tweak the following #include with these commands.
+// (Use 4BFB6924-F24F-4369-959C-B56F012E768F instead of mulle-buffer if there are duplicate entries)
 //    remove:             `mulle-sourcetree mark mulle-buffer no-header`
 //    rename:             `mulle-sde dependency|library set mulle-buffer include whatever.h`
 //    reorder:            `mulle-sourcetree move mulle-buffer <up|down>`
@@ -27,19 +39,7 @@
 #include <mulle-buffer/mulle-buffer.h>   // mulle-buffer
 
 // You can tweak the following #include with these commands.
-// (Use BCE5B99F-3981-407B-9CFE-5117FF264891 instead of mulle-sprintf if there are duplicate entries)
-//    remove:             `mulle-sourcetree mark mulle-sprintf no-header`
-//    rename:             `mulle-sde dependency|library set mulle-sprintf include whatever.h`
-//    reorder:            `mulle-sourcetree move mulle-sprintf <up|down>`
-//    toggle #include:    `mulle-sourcetree mark mulle-sprintf [no-]import`
-//    toggle public:      `mulle-sourcetree mark mulle-sprintf [no-]public`
-//    toggle optional:    `mulle-sourcetree mark mulle-sprintf [no-]require`
-//    remove for platform:`mulle-sourcetree mark mulle-sprintf no-platform-<uname>`
-//        (use mulle-sourcetree-to-c --unames for known values)
-#include <mulle-sprintf/mulle-sprintf.h>   // mulle-sprintf
-
-// You can tweak the following #include with these commands.
-// (Use 4872A0E9-F5CF-48D0-8F66-91A4C5175149 instead of mulle-layout if there are duplicate entries)
+// (Use 3B31CCA0-4431-4AE0-BB6B-DE668CC29C30 instead of mulle-layout if there are duplicate entries)
 //    remove:             `mulle-sourcetree mark mulle-layout no-header`
 //    rename:             `mulle-sde dependency|library set mulle-layout include whatever.h`
 //    reorder:            `mulle-sourcetree move mulle-layout <up|down>`
@@ -51,15 +51,27 @@
 #include <mulle-layout/mulle-layout.h>   // mulle-layout
 
 // You can tweak the following #include with these commands.
-// (Use 9946D831-DF44-491C-ACCF-13C909737D1B instead of mulle-container if there are duplicate entries)
-//    remove:             `mulle-sourcetree mark mulle-container no-header`
-//    rename:             `mulle-sde dependency|library set mulle-container include whatever.h`
-//    reorder:            `mulle-sourcetree move mulle-container <up|down>`
-//    toggle #include:    `mulle-sourcetree mark mulle-container [no-]import`
-//    toggle public:      `mulle-sourcetree mark mulle-container [no-]public`
-//    toggle optional:    `mulle-sourcetree mark mulle-container [no-]require`
-//    remove for platform:`mulle-sourcetree mark mulle-container no-platform-<uname>`
+// (Use 44DBC7BB-6395-427E-A36E-5659F68D16DA instead of mulle-sprintf if there are duplicate entries)
+//    remove:             `mulle-sourcetree mark mulle-sprintf no-header`
+//    rename:             `mulle-sde dependency|library set mulle-sprintf include whatever.h`
+//    reorder:            `mulle-sourcetree move mulle-sprintf <up|down>`
+//    toggle #include:    `mulle-sourcetree mark mulle-sprintf [no-]import`
+//    toggle public:      `mulle-sourcetree mark mulle-sprintf [no-]public`
+//    toggle optional:    `mulle-sourcetree mark mulle-sprintf [no-]require`
+//    remove for platform:`mulle-sourcetree mark mulle-sprintf no-platform-<uname>`
 //        (use mulle-sourcetree-to-c --unames for known values)
-#include <mulle-container/mulle-container.h>   // mulle-container
+#include <mulle-sprintf/mulle-sprintf.h>   // mulle-sprintf
+
+// You can tweak the following #include with these commands.
+// (Use FA6B0416-A6AF-4D16-A916-3A5606D75179 instead of mulle-time if there are duplicate entries)
+//    remove:             `mulle-sourcetree mark mulle-time no-header`
+//    rename:             `mulle-sde dependency|library set mulle-time include whatever.h`
+//    reorder:            `mulle-sourcetree move mulle-time <up|down>`
+//    toggle #include:    `mulle-sourcetree mark mulle-time [no-]import`
+//    toggle public:      `mulle-sourcetree mark mulle-time [no-]public`
+//    toggle optional:    `mulle-sourcetree mark mulle-time [no-]require`
+//    remove for platform:`mulle-sourcetree mark mulle-time no-platform-<uname>`
+//        (use mulle-sourcetree-to-c --unames for known values)
+#include <mulle-time/mulle-time.h>   // mulle-time
 
 #endif

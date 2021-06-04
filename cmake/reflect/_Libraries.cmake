@@ -37,7 +37,7 @@ if( NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             CACHE INTERNAL "need to cache this"
          )
          #
-         # Inherit ObjC loader and link dependency info.
+         # Inherit information from dependency.
          # Encompasses: no-cmake-searchpath,no-cmake-dependency,no-cmake-loader
          # Disable with: `mulle-sourcetree mark GL no-cmake-inherit`
          #
@@ -127,7 +127,7 @@ if( NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             CACHE INTERNAL "need to cache this"
          )
          #
-         # Inherit ObjC loader and link dependency info.
+         # Inherit information from dependency.
          # Encompasses: no-cmake-searchpath,no-cmake-dependency,no-cmake-loader
          # Disable with: `mulle-sourcetree mark GLU no-cmake-inherit`
          #
@@ -216,7 +216,7 @@ if( NOT M_LIBRARY)
          CACHE INTERNAL "need to cache this"
       )
       #
-      # Inherit ObjC loader and link dependency info.
+      # Inherit information from dependency.
       # Encompasses: no-cmake-searchpath,no-cmake-dependency,no-cmake-loader
       # Disable with: `mulle-sourcetree mark m no-cmake-inherit`
       #

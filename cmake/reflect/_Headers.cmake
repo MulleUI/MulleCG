@@ -8,33 +8,52 @@ if( MULLE_TRACE_INCLUDE)
    MESSAGE( STATUS "# Include \"${CMAKE_CURRENT_LIST_FILE}\"" )
 endif()
 
+#
+# contents are derived from the file locations
+
 set( INCLUDE_DIRS
 nanovg/src
 src
 src/reflect
 )
 
+#
+# contents selected with patternfile ??-header--private-generated-headers
+#
 set( PRIVATE_GENERATED_HEADERS
 src/reflect/_MulleCG-import-private.h
 src/reflect/_MulleCG-include-private.h
 )
 
+#
+# contents selected with patternfile ??-header--private-generic-headers
+#
 set( PRIVATE_GENERIC_HEADERS
 src/import-private.h
 src/include-private.h
 )
 
+#
+# contents selected with patternfile ??-header--public-generated-headers
+#
 set( PUBLIC_GENERATED_HEADERS
 src/reflect/_MulleCG-export.h
 src/reflect/_MulleCG-import.h
 src/reflect/_MulleCG-include.h
+src/reflect/_MulleCG-provide.h
 )
 
+#
+# contents selected with patternfile ??-header--public-generic-headers
+#
 set( PUBLIC_GENERIC_HEADERS
 src/import.h
 src/include.h
 )
 
+#
+# contents selected with patternfile ??-header--public-headers
+#
 set( PUBLIC_HEADERS
 nanovg/src/fontstash.h
 nanovg/src/nanovg_gl.h
@@ -43,18 +62,21 @@ nanovg/src/nanovg.h
 nanovg/src/stb_image.h
 nanovg/src/stb_truetype.h
 src/CGAffineTransform+CString.h
+src/CGAffineTransform.h
 src/CGAffineTransform+nanovg.h
 src/CGColor+MulleObjC.h
 src/CGColor.h
 src/CGContext+CGFont.h
 src/CGContext+Render.h
 src/CGContext.h
+src/CGDrawable.h
 src/CGFont.h
 src/CGGeometry+CString.h
 src/CGImage.h
 src/CGLayer.h
 src/CGPath.h
 src/CGPath+nanovg.h
+src/_MulleCGBackend.h
 src/MulleCG_asprintf.h
 src/MulleCG.h
 src/MulleEdgeInsets+CString.h

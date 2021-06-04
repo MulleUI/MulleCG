@@ -11,54 +11,187 @@
 # endif
 #endif
 
+#include "CGImage.h"
 
 
+//
+// gradients in nanovg are somewhat ephemeral, you create them on the fly and
+// you don't have to dispose of them (apparently)
+//
 @implementation MullePaint
 
 
-- (instancetype) initWithNVGpaint:(struct NVGpaint) paint
-                          context:(CGContext *) context;
+//
+// the paint is valid for the NVGcontext only, but the nvg context is
+// not kept by the paint, and the nvgContext doesnt keep the paint
+//
+- (instancetype) initBoxGradientWithRect:(CGRect) rect
+                            cornerRadius:(CGFloat) cornerRadius
+                                 feather:(CGFloat) feather
+                              innerColor:(CGColorRef) innerColor
+                              outerColor:(CGColorRef) outerColor
+                                 context:(CGContext *) context
 {
-   _paint   = paint;
+   // todo move to CGContext
+   _paint = nvgBoxGradient( CGContextGetNVGContext( context),
+                            rect.origin.x,
+                            rect.origin.y,
+                            rect.size.width,
+                            rect.size.height,
+                            cornerRadius,
+                            feather,
+                            innerColor,
+                            outerColor);
    _context = context;
-
    return( self);
 }
 
+
++ (instancetype) boxGradientWithRect:(CGRect) point
+                        cornerRadius:(CGFloat) cornerRadius
+                             feather:(CGFloat) feather
+                          innerColor:(CGColorRef) innerColor
+                          outerColor:(CGColorRef) outerColor
+                             context:(CGContext *) context
+{
+   return( [[[self alloc] initBoxGradientWithRect:point
+                                     cornerRadius:cornerRadius
+                                          feather:feather
+                                       innerColor:innerColor
+                                       outerColor:outerColor
+                                          context:context] autorelease]);
+}
+
+
+
+//
 // the paint is valid for the NVGcontext only, but the nvg context is
-// not kept, and the nvgContext doesnt keep the paint
-- (instancetype) initLinearGradientWithStartPoint:(CGPoint) start
-                                         endPoint:(CGPoint) end
-                                       innerColor:(CGColorRef) innerColor
-                                       outerColor:(CGColorRef) outerColor
+// not kept by the paint, and the nvgContext doesnt keep the paint
+//
+- (instancetype) initRadialGradientWithCenterPoint:(CGPoint) point
+                                       innerRadius:(CGFloat) innerRadius
+                                       outerRadius:(CGFloat) outerRadius
+                                        innerColor:(CGColorRef) innerColor
+                                        outerColor:(CGColorRef) outerColor
                                           context:(CGContext *) context
 {
    // todo move to CGContext
-   _paint = nvgLinearGradient( [context nvgContext], start.x, start.y, end.x, end.y,
-                               innerColor, outerColor);
+   _paint = nvgRadialGradient( CGContextGetNVGContext( context),
+                               point.x,
+                               point.y,
+                               innerRadius,
+                               outerRadius,
+                               innerColor,
+                               outerColor);
    _context = context;
    return( self);
 }
 
 
-- (instancetype) initImagePatternWithImage:(id <CGBitmapImage>) image
-                                    origin:(CGPoint) origin
-                                       end:(CGPoint) end
-                                     angle:(CGFloat) angle
-                                     alpha:(CGFloat) alpha
++ (instancetype) radialGradientCenterPoint:(CGPoint) point
+                               innerRadius:(CGFloat) innerRadius
+                               outerRadius:(CGFloat) outerRadius
+                                innerColor:(CGColorRef) innerColor
+                                outerColor:(CGColorRef) outerColor
                                    context:(CGContext *) context
 {
+   return( [[[self alloc] initRadialGradientWithCenterPoint:point
+                                                innerRadius:innerRadius
+                                                outerRadius:outerRadius
+                                                 innerColor:innerColor
+                                                 outerColor:outerColor
+                                                    context:context] autorelease]);
+}
+
+
+//
+// the paint is valid for the NVGcontext only, but the nvg context is
+// not kept by the paint, and the nvgContext doesnt keep the paint
+//
+- (instancetype) initLinearGradientWithRect:(CGRect) rect
+                                 innerColor:(CGColorRef) innerColor
+                                 outerColor:(CGColorRef) outerColor
+                                    context:(CGContext *) context
+{
+   // todo move to CGContext
+   _paint = nvgLinearGradient( CGContextGetNVGContext( context),
+                               CGRectGetMinX( rect),
+                               CGRectGetMinY( rect),
+                               CGRectGetMaxX( rect),
+                               CGRectGetMaxY( rect),
+                               innerColor,
+                               outerColor);
+   _context = context;
+   return( self);
+}
+
+
++ (instancetype) linearGradientWithRect:(CGRect) rect
+                             innerColor:(CGColorRef) innerColor
+                             outerColor:(CGColorRef) outerColor
+                                context:(CGContext *) context
+{
+   return( [[[self alloc] initLinearGradientWithRect:rect
+                                          innerColor:innerColor
+                                          outerColor:outerColor
+                                             context:context] autorelease]);
+}
+
+
+
+- (instancetype) initPatternWithImage:(CGImage *) image
+                                 rect:(CGRect) rect
+                                angle:(CGFloat) angle
+                                alpha:(CGFloat) alpha
+                             context:(CGContext *) context
+{
+   int   imageID;
+
+   imageID = [image textureIDWithContext:context
+                              imageFlags:[image imageFlags]];
+   if( imageID == -1)
+   {
+      [self release];
+      return( nil);
+   }
 //   CGSize    size;
 //
 //   size = [image size];
-   _paint = nvgImagePattern( [context nvgContext],
-                             origin.x, origin.y,
-                             end.x, end.y,
+   _paint = nvgImagePattern( CGContextGetNVGContext( context),
+                             CGRectGetMinX( rect),
+                             CGRectGetMinY( rect),
+                             CGRectGetMaxX( rect),
+                             CGRectGetMaxY( rect),
        	                    angle,
-                             [context registerTextureIDForImage:image],
+                             imageID,
                              alpha);
+
+   assert( _paint.image == imageID);
    _context = context;
+   _image   = [image retain]; // retain for _paint.image
    return( self);
+}
+
+
++ (instancetype) patternWithImage:(CGImage *) image
+                             rect:(CGRect) rect
+                            angle:(CGFloat) angle
+                            alpha:(CGFloat) alpha
+                          context:(CGContext *) context;
+{
+   return( [[[self alloc] initPatternWithImage:image
+                                          rect:rect
+                                         angle:angle
+                                         alpha:alpha
+                                       context:context] autorelease]);
+}
+
+
+- (int) textureIDWithContext:(CGContext *) context
+{
+   if( context == _context)
+      return( _paint.image);
+   return( -1);
 }
 
 
@@ -67,15 +200,18 @@
    return( _paint.innerColor);
 }
 
+
 - (CGColorRef) outerColor
 {
    return( _paint.outerColor);
 }
 
+
 - (CGFloat) radius
 {
    return( _paint.radius);
 }
+
 
 - (CGFloat) feather
 {
@@ -91,10 +227,10 @@
 
 - (void) finalize
 {
-   [_image autorelease];
-   _image = nil;
+   [_context release];
+   _context = nil;
 
-   [super finalize]; // call anywhere you like
+   [super finalize];
 }
 
 @end
