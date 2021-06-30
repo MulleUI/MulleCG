@@ -1,7 +1,6 @@
 craftinfo/freetype-craftinfo;local;no-delete,no-header,no-link,no-share,no-subproject,no-update;eaa033b3-5468-4de9-91cf-86b5d069a233;;;;;
 freetype;${FREETYPE_NODETYPE:-tar};no-all-load,no-cmake-inherit,no-cmake-searchpath,no-header,no-import,no-inplace,only-liftheaders;e670491e-d104-45c1-a5e0-798bd854f01f;${FREETYPE_URL:-https://github.com/mulle-kybernetik-tv/freetype2/archive/2.10.1-mulle.tar.gz};${FREETYPE_BRANCH};;;aliases=freetyped,freetype
 GL;none;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-platform-darwin,no-update;4edeaf88-96fa-49de-a075-3e49d3d939b3;GL;${GL_BRANCH};;;include=GL/glext.h
-GLU;none;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-platform-darwin,no-update;9d1fb7ab-5eb3-4bc0-b08d-55a1608a9a07;GLU;${GLU_BRANCH};;;
 m;none;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-update;4f8c9930-b601-4bed-9ef6-59002def0b11;m;${M_BRANCH};;;
 nanovg;${NANOVG_NODETYPE:-git};no-all-load,no-build,no-header,no-import,no-link,no-share;9a9af895-f932-4cdd-879f-0467543ad260;${NANOVG_URL:-git@github.com:mulle-kybernetik-tv/nanovg.git};${NANOVG_BRANCH:-cleartype};;;
 harfbuzz;none;no-all-load,no-build,no-cmake-inherit,no-delete,no-dependency,no-fs,no-header,no-import,no-share,no-update;8be56cd3-eb2f-4805-ae2a-bb7b14522a8b;;${HARFBUZZ_BRANCH};;;

@@ -272,6 +272,16 @@ VERSION != MULLE_GLES2
 
 - (void) suspendRender
 {
+   // MEMO: this also flushes the font cache, not sure if this desirable or 
+   //       necessary or too painful ??
+   //
+   // We could write a simpler:
+   //
+   // void nvgFlushFrame(NVGcontext* ctx)
+   // {
+   //    ctx->params.renderFlush(ctx->params.userPtr);
+   // }
+   // 
    nvgEndFrame( _vg);
 }
 

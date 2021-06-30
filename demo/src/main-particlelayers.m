@@ -87,7 +87,7 @@
    }
    while( (r + g + b) < 0.4);
 
-   self->color       = MulleColorMakeRGBOpaque( r, g, b);
+   self->color       = MulleColorMakeRGB( r, g, b);
    return( self);
 }
 
@@ -202,7 +202,7 @@ int   main()
                                    styleMask:EDGE_ANTIALIAS ? 0 : MulleWindowStyleMaskNoEdgeAntialias] autorelease];
    [app addWindow:window];
 
-   [window setBackgroundColor:CGColorCreateGenericRGB( 0.0, 0.0, 0.0, 1.0)];
+   [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
 
    setupSceneInView( [window contentPlane]);
 

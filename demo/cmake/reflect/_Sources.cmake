@@ -12,6 +12,7 @@ endif()
 # contents selected with patternfile ??-source--sources
 #
 set( SOURCES
+src/main-opengl.m
 src/main-particlelayers.m
 src/main-particles.m
 )
