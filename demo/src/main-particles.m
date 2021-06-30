@@ -79,7 +79,7 @@ static inline void   ParticleInit( struct Particle *p, CGSize canvasSize)
    }
    while( (r + g + b) < 0.4);
 
-   p->color       = MulleColorMakeRGBOpaque( r, g, b);
+   p->color       = MulleColorMakeRGB( r, g, b);
 }
 
 static inline void   ParticleDraw( struct Particle *p, NVGcontext *vg)
@@ -229,7 +229,7 @@ int   main()
                                    styleMask:EDGE_ANTIALIAS ? 0 : MulleWindowStyleMaskNoEdgeAntialias] autorelease];
    [app addWindow:window];
 
-   [window setBackgroundColor:CGColorCreateGenericRGB( 0.0, 0.0, 0.0, 1.0)];
+   [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
 
    setupSceneInView( [window contentPlane]);
 

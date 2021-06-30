@@ -427,7 +427,7 @@ static float  hue2rgb( float p, float q, float t)
  * Assumes h, s, and l are contained in the set [0, 1] and
  * returns r, g, and b in the set [0, 1].
  */
-static void mulle_normalized_hsl_to_normalized_rgb(float hsl[3], float rgb[3])
+static void   mulle_normalized_hsl_to_normalized_rgb(float hsl[3], float rgb[3])
 {
    double   q;
    double   p;
@@ -449,6 +449,7 @@ static void mulle_normalized_hsl_to_normalized_rgb(float hsl[3], float rgb[3])
    rgb[ 2] = hue2rgb( p, q, hsl[ 0] - 1.0/3.0);
 }
 #endif
+
 
 
 CGColorRef   MulleColorMakeFromCString( char *string)
@@ -547,4 +548,151 @@ CGColorRef   MulleColorMakeFromCString( char *string)
 }
 
 
+
+
+// https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately/54024653#54024653
+// input: h in [0,360] and s,v in [0,1] - output: r,g,b in [0,1]
+//
+CGColorRef   MulleColorMakeHSVA( CGFloat h, CGFloat s, CGFloat v, CGFloat a)
+{
+   double   r;
+   double   g;
+   double   b;
+
+   double   i;
+   double   f;
+   double   p;
+   double   q;
+   double   t;
+
+   i = floor( h * 6);
+   f = h * 6 - i;
+   p = v * (1 - s);
+   q = v * (1 - f * s);
+   t = v * (1 - (1 - f) * s);
+
+   switch( (int) i % 6)
+   {
+   case 0: r = v; g = t; b = p; break;
+   case 1: r = q; g = v; b = p; break;
+   case 2: r = p; g = v; b = t; break;
+   case 3: r = p; g = q; b = v; break;
+   case 4: r = t; g = p; b = v; break;
+   case 5: r = v; g = p; b = q; break;
+   }
+
+   return( CGColorMakeRGBA( r, g, b, a));
+}
+
+
+// https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately/54024653#54024653
+void  MulleColorGetHSVAComponents( CGColorRef color, CGFloat *components)
+{
+   double   r;
+   double   g;
+   double   b;
+
+   double   max;
+   double   min;
+   double   d;
+   double   s;
+   double   v;
+   double   h;
+
+   r = color.r;
+   g = color.g;
+   b = color.b;
+
+   max = r > g ? (r > b ? r : (g > b ? g : b))
+               : (g > b ? g : b);
+
+   min = r < g ? (r < b ? r : (g < b ? g : b))
+               : (g < b ? g : b);
+
+   d = max - min;
+   s = (max == 0.0 ? 0 : d / max);
+   v = max;
+
+   if( max == min)
+      h = 0;
+   else
+   {
+      if( max == r)
+         h = (g - b) + d * (g < b ? 6: 0);
+      else
+         if( max == g)
+            h = (b - r) + d * 2;
+         else
+            h = (r - g) + d * 4;
+      h /= 6 * d;
+   }
+   components[ 0] = h;
+   components[ 1] = s;
+   components[ 2] = v;
+   components[ 3] = color.a;
+}
+
+
+
+// stolen from @mjackson: https://gist.github.com/mjackson/5311256
+/**
+ * Converts an RGB color value to HSL. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * returns h, s, and l in the set [0, 1].
+ *
+ * @param   Number  r       The red color value
+ * @param   Number  g       The green color value
+ * @param   Number  b       The blue color value
+ * @return  Array           The HSL representation
+ */
+void  MulleColorGetHSLAComponents( CGColorRef color, CGFloat *components)
+{
+   double max;
+   double min;
+   double h;
+   double s;
+   double l;
+   double d;
+   double r;
+   double g;
+   double b;
+
+   r = color.r;
+   g = color.g;
+   b = color.b;
+
+   max = r > g ? (r > b ? r : (g > b ? g : b))
+               : (g > b ? g : b);
+
+   min = r < g ? (r < b ? r : (g < b ? g : b))
+               : (g < b ? g : b);
+
+
+   l = (max + min) / 2;
+
+   if( max == min)
+   {
+      h = s = 0; // achromatic
+   }
+   else
+   {
+      d = max - min;
+      s = l > 0.5 ? d / (2 - max - min)
+                  : d / (max + min);
+
+      if( max == r)
+         h = (g - b) / d + (g < b ? 6 : 0);
+      else
+         if( max == g)
+            h = (b - r) / d + 2;
+         else
+            h = (r - g) / d + 4;
+      h /= 6;
+   }
+
+  components[ 0] = h;
+  components[ 1] = s;
+  components[ 2] = l;
+  components[ 3] = color.a;
+}
 

@@ -72,10 +72,6 @@ typedef struct CGFrameInfo
 - (void) beginRender:(struct CGFrameInfo *) info;
 - (void) endRender;
 
-- (void) resetTransform;
-- (void) clearFramebuffer;
-
-
 //
 // used to intermix OpenGL or other commands, this flushes commands
 // cleans some font state and sets the viewport.
@@ -84,9 +80,11 @@ typedef struct CGFrameInfo
 - (void) suspendRender;
 - (void) continueRender;
 
-
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info;
 - (struct CGFrameInfo *) currentFrameInfo;
+
+- (void) resetTransform;
+- (void) clearFramebuffer;
 
 //
 // Images and maybe future other resources, that are only valid as long as

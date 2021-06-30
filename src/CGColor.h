@@ -61,7 +61,7 @@ static inline CGColorRef   MulleColorMakeRandomOpaque( void)
 
 
 static inline CGColorRef
-   MulleColorMakeRGBOpaque( CGFloat r, CGFloat g, CGFloat b)
+   MulleColorMakeRGB( CGFloat r, CGFloat g, CGFloat b)
 {
    assert( r >= 0.0 && r <= 1.0);
    assert( g >= 0.0 && g <= 1.0);
@@ -75,7 +75,7 @@ static inline CGColorRef
 
 
 // Returns color value specified by hue, saturation and lightness.
-// HSL values are all in range [0..1], alpha will be set to 255.
+// HSL values are all in range [0..1], alpha will be set to 1.0.
 static inline CGColorRef
    MulleColorMakeHSL( CGFloat h, CGFloat s, CGFloat l)
 {
@@ -99,9 +99,32 @@ static inline CGColorRef
 }
 
 
+CGColorRef   MulleColorMakeHSVA( CGFloat h, CGFloat s, CGFloat v, CGFloat a);
+
+
+// HSL values are all in range [0..1], alpha will be set to 255.
+static inline CGColorRef
+   MulleColorMakeHSV( CGFloat h, CGFloat s, CGFloat l)
+{
+   return( MulleColorMakeHSVA( h, s, l, 1.0));
+}
+
+// just convenience for same color, differenr name
+static inline CGColorRef
+   MulleColorMakeHSBA( CGFloat h, CGFloat s, CGFloat l, CGFloat a)
+{
+   return( MulleColorMakeHSVA( h, s, l, a));
+}
 
 static inline CGColorRef
-   CGColorCreateGenericRGB( CGFloat r, CGFloat g, CGFloat b, CGFloat a)
+   MulleColorMakeHSB( CGFloat h, CGFloat s, CGFloat l)
+{
+   return( MulleColorMakeHSVA( h, s, l, 1.0));
+}
+
+
+static inline CGColorRef
+   CGColorMakeRGBA( CGFloat r, CGFloat g, CGFloat b, CGFloat a)
 {
    assert( r >= 0.0 && r <= 1.0);
    assert( g >= 0.0 && g <= 1.0);
@@ -117,7 +140,7 @@ static inline CGColorRef
 
 static inline CGColorRef CGColorCreate( CGColorSpaceRef space, const CGFloat *components)
 {
-   return( CGColorCreateGenericRGB( components[ 0],
+   return( CGColorMakeRGBA( components[ 0],
                                     components[ 1],
                                     components[ 2],
                                     components[ 3]));
@@ -136,6 +159,23 @@ static inline void   MulleColorGetComponents(CGColorRef color, CGFloat *componen
    components[ 1] = color.g;
    components[ 2] = color.b;
    components[ 3] = color.a;
+}
+
+
+void  MulleColorGetHSLAComponents( CGColorRef color, CGFloat *components);
+
+// this is the same as HSBA, third parameter is weird brightness :)
+// Lossless back and forth conversion between RGBA and HSBA is not possible.
+// Nanovg only works with RGBA. It's best to keep HSBA separate operate on 
+// it and then convert to RGBA for actual drawing.
+//
+void  MulleColorGetHSVAComponents( CGColorRef color, CGFloat *components);
+
+// HSL values are all in range [0..1], alpha will be set to 255.
+static inline void
+   MulleColorGetHSBAComponents( CGColorRef color, CGFloat *components)
+{
+   MulleColorGetHSVAComponents( color, components);
 }
 
 
