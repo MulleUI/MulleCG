@@ -3,9 +3,9 @@
 #import "CGAffineTransform+CString.h"
 
 
-char   *NVGscissorCStringDescription( _NVGtransform value);
+char   *NVGscissorUTF8String( _NVGtransform value);
 
-static inline char   *_NVGtransformCStringDescription( _NVGtransform xform)
+static inline char   *_NVGtransformUTF8String( _NVGtransform xform)
 {
-   return( CGAffineTransformRefCStringDescription( _NVGtransformAsCGAffineTransformRef( xform)));
+   return( CGAffineTransformRefUTF8String( _NVGtransformAsCGAffineTransformRef( xform)));
 }

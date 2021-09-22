@@ -8,7 +8,7 @@
 #include "MulleCG_asprintf.h"
 
 
-char   *CGAffineTransformRefCStringDescription( CGAffineTransform *xform)
+char   *CGAffineTransformRefUTF8String( CGAffineTransform *xform)
 {
    auto char  *s;
 

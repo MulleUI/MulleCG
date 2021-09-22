@@ -1,5 +1,8 @@
 #import "import.h"
 
+#import "CGBitmap.h"
+
+
 // The whole "drawable" concept doesn't exist in CoreGraphics
 
 //
@@ -133,66 +136,6 @@ PROTOCOLCLASS_END()
 // somewhat superflous
 @protocol CGVectorDrawable <CGDrawable>
 @end
-
-
-// make it so the lowest bit encodes FP or integer
-// fffffffffffnnnnt
-// next bits is size-1 * char for
-// t: 0 integer, 1: FP
-//    n: 0 char      n:0 float
-// f: 0 RGBA
-
-
-struct CGBitmapSize
-{
-   NSUInteger   width;
-   NSUInteger   height;
-};
-
-
-static inline struct CGBitmapSize    CGBitmapSizeMake(NSUInteger w, NSUInteger h)
-{
-   return( (struct CGBitmapSize){ .width = w, .height = h });
-}
-
-
-
-// this is a a mulle addition
-enum CGBitmapEncoding
-{
-   CGBitmapEncodingRGBABytes = ((0 << 5) | 0 | 0)  // only one we know ATM
-};
-
-
-
-// this is a a mulle addition
-struct CGBitmapInfo
-{
-   struct CGBitmapSize     size;
-   NSUInteger              nColorComponents;  // this is 0-4 of bytes
-   enum CGBitmapEncoding   encoding;
-};
-
-
-static inline struct CGBitmapInfo
-   CGBitmapInfoMake( struct CGBitmapSize size,
-                        NSUInteger nColorComponents,
-                        enum CGBitmapEncoding encoding)
-{
-   return( (struct CGBitmapInfo){ .size = size,
-                                     .nColorComponents = nColorComponents,
-                                     .encoding = encoding});
-}
-
-
-static inline NSUInteger   CGBitmapInfoGetSizeInBytes( struct CGBitmapInfo info)
-{
-   switch( info.encoding)
-   {
-   case CGBitmapEncodingRGBABytes :
-      return( info.size.width * info.size.height * info.nColorComponents);
-   }
-}
 
 
 

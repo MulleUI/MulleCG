@@ -5,12 +5,12 @@
 #include "CGAffineTransform.h"
 
 
-char   *CGAffineTransformRefCStringDescription( CGAffineTransform *xform);
+char   *CGAffineTransformRefUTF8String( CGAffineTransform *xform);
 
 
-static inline char   *CGAffineTransformCStringDescription( CGAffineTransform xform)
+static inline char   *CGAffineTransformUTF8String( CGAffineTransform xform)
 {
-   return( CGAffineTransformRefCStringDescription( &xform));
+   return( CGAffineTransformRefUTF8String( &xform));
 }
 
 

@@ -218,15 +218,18 @@ void   setupSceneInView( UIWindowPlane *contentPlane)
 
 int   main()
 {
-   UIWindow       *window;
-   UIApplication  *app;
+   UIWindow         *window;
+   UIApplication    *app;
+   UIWindowStyleMask    styleMask;
    /*
     * window and app
     */
-   app    = [UIApplication sharedInstance];
-   window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
-                                titleCString:"Demo"
-                                   styleMask:EDGE_ANTIALIAS ? 0 : MulleWindowStyleMaskNoEdgeAntialias] autorelease];
+   app        = [UIApplication sharedInstance];
+   styleMask  = EDGE_ANTIALIAS ? 0 : UIWindowStyleNoEdgeAntialias;
+   styleMask |= UIWindowStyleRenderNonRetainedOnly;
+   window     = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
+                                    titleCString:"Demo"
+                                       styleMask:styleMask] autorelease];
    [app addWindow:window];
 
    [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];

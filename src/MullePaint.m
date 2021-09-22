@@ -224,13 +224,4 @@
    return( _paint);
 }
 
-
-- (void) finalize
-{
-   [_context release];
-   _context = nil;
-
-   [super finalize];
-}
-
 @end

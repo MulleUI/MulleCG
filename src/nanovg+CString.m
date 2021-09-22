@@ -5,7 +5,7 @@
 #import "MulleCG_asprintf.h"
 
 
-char   *NVGscissorCStringDescription( _NVGtransform value)
+char   *NVGscissorUTF8String( _NVGtransform value)
 {
    char   *s;
 

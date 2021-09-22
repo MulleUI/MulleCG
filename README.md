@@ -4,7 +4,6 @@
 
 
 
-
 ### You are here
 
 ```
@@ -33,6 +32,22 @@
   '--------------------------------'
 
 ```
+
+## Dependencies 
+
+### Debian
+
+```
+apt-get install libharfbuzz-dev
+apt-get install libgl-dev
+apt-get install libxrandr-dev
+apt-get install libxinerama-dev
+apt-get install libxcursor-dev
+apt-get install libxi-dev
+apt-get install libglu-dev # ??? conflict with freeglut possible
+sudo apt-get install libxxf86vm-dev
+```
+
 
 
 ## Harfbuzz

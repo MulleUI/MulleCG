@@ -48,7 +48,7 @@ PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 
 static CGDrawableOptions  defaultOptions =
 {
-   0.0f, 1.0f, 0.0f, NO
+   0.0f, 1.0f, 0.0f, NO   // corner, alpha, rotation, scale
 };
 
 
@@ -75,8 +75,6 @@ static CGDrawableOptions  defaultOptions =
 
    vg = CGContextGetNVGContext( context);
 
-   nvgBeginPath( vg);
-
    size        = [self size];
    patternRect = rect;
    if( ! options->scale || (imageFlags & NVG_IMAGE_REPEATX))
@@ -93,6 +91,7 @@ static CGDrawableOptions  defaultOptions =
                                     textureID,
                                     options->alpha);
 
+   nvgBeginPath( vg);
    nvgRoundedRect( vg, rect.origin.x,
                        rect.origin.y,
                        rect.size.width,
