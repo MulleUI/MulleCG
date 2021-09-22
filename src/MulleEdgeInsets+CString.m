@@ -10,7 +10,7 @@
 
 
 // cast this to CGRect as the code is identical ?
-char   *MulleEdgeInsetsCStringDescription( MulleEdgeInsets insets)
+char   *MulleEdgeInsetsUTF8String( MulleEdgeInsets insets)
 {
    auto char  *s;
 

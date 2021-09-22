@@ -6,6 +6,6 @@
 
 #include "include.h"
 
-char   *MulleEdgeInsetsCStringDescription( MulleEdgeInsets insets);
+char   *MulleEdgeInsetsUTF8String( MulleEdgeInsets insets);
 
 #endif

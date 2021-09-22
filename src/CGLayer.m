@@ -16,7 +16,6 @@
 
    assert( context && [context isKindOfClass:[CGContext class]]);
    assert( info.encoding == CGBitmapEncodingRGBABytes);
-   assert( info.nColorComponents == 4);
 
    vg           = CGContextGetNVGContext( context);
    _framebuffer = nvgluCreateFramebuffer( vg,
@@ -84,7 +83,7 @@
    // render view into a framebuffer tied to the texture
    nvgluBindFramebuffer( _framebuffer);
    [_context beginRender:renderInfo];
-   [_context clearFramebuffer];
+   [_context clearFramebuffer];  // suspect and too early ?=
 }
 
 

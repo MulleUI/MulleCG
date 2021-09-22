@@ -30,8 +30,8 @@
 // accessible. The image dies functionally at the very least, when the
 // context dies (or when it gets finalized). You can not share it with another
 // context. If you want to do more, use UIImage. You can only create it
-// during rendering! It's trickym you are generally better off with UIImage
-// for imgae management.
+// during rendering! It's tricky, you are generally better off with UIImage
+// for image management.
 //
 // Textures (images) in NVG can be created with different flags, for example
 // REPEAT_X and REPEAT_Y. When we are asking the CGContext for a textureID
@@ -64,10 +64,12 @@
                                     imageFlags:(NSUInteger) imageFlags
                                        context:(CGContext *) context;
 
+// data can be discarded after init
 - (instancetype) initWithFileCData:(struct mulle_data) fileCData
                         imageFlags:(NSUInteger) imageFlags
                            context:(CGContext *) context;
 
+// bytes are not retained, you can free them after init
 - (instancetype) initWithRGBABytes:(void *) bytes
                         bitmapSize:(struct CGBitmapSize) bitmapSize
                         imageFlags:(NSUInteger) imageFlags

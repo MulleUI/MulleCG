@@ -16,11 +16,12 @@
       return( nil);
    }
 
-   [context addToResources:self];
 
    _imageFlags = imageFlags;
    _context    = context;
    _textureID  = textureID;
+
+   [_context addToResources:self];
 
    return( self);
 }
@@ -29,7 +30,9 @@
 - (void) contextDidRemoveObject:(CGContext *) context
 {
    if( _textureID)
-      nvgDeleteImage( CGContextGetNVGContext( context), _textureID);
+   {
+      [context deleteTextureID:_textureID]; 
+   }
    _context = nil;
 }
 
@@ -55,12 +58,11 @@
 - (struct CGBitmapInfo) bitmapInfo
 {
    return( CGBitmapInfoMake( [self bitmapSize],
-                             4,
                              CGBitmapEncodingRGBABytes));
 }
 
 
-- (struct CGBitmapSize) bitmapSize;  // just integer value of size
+- (struct CGBitmapSize) bitmapSize  // just integer value of size
 {
    int  w;
    int  h;
@@ -77,7 +79,7 @@
 {
    int   textureID;
 
-   assert( [context isRendering]);
+   assert( [context isActive]);
 
    textureID = nvgCreateImage( CGContextGetNVGContext( context),
                                filename,
@@ -94,8 +96,7 @@
 {
    int   textureID;
 
-   assert( [context isRendering]);
-
+   assert( [context isActive]);
 
    textureID = nvgCreateImageMem( CGContextGetNVGContext( context),
                                   imageFlags & 0x3F,
@@ -114,10 +115,11 @@
 {
    int   textureID;
 
-   assert( [context isRendering]);
    assert( bytes);
    assert( bitmapSize.width >= 1);
    assert( bitmapSize.height >= 1);
+
+   assert( [context isActive]);
 
    textureID = nvgCreateImageRGBA( CGContextGetNVGContext( context),
                                    bitmapSize.width,
@@ -132,8 +134,7 @@
 
 - (void) setBytes:(void *) bytes
 {
-   assert( [_context isRendering]);
-
+   assert( [_context isActive]);
 
    nvgUpdateImage( CGContextGetNVGContext( _context),
                    _textureID,

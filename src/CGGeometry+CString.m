@@ -7,7 +7,7 @@
 //
 // todo: use MulleCG_asprintf here
 //
-char   *CGPointCStringDescription( CGPoint point)
+char   *CGPointUTF8String( CGPoint point)
 {
    auto char  *s;
 
@@ -16,7 +16,7 @@ char   *CGPointCStringDescription( CGPoint point)
 }
 
 
-char   *CGRectCStringDescription( CGRect rect)
+char   *CGRectUTF8String( CGRect rect)
 {
    auto char  *s;
 

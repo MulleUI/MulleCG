@@ -1,17 +1,17 @@
 #include "include.h"
 
-char   *CGRectCStringDescription( CGRect rect);
-char   *CGPointCStringDescription( CGPoint point);
+char   *CGRectUTF8String( CGRect rect);
+char   *CGPointUTF8String( CGPoint point);
 
 
-static inline char   *CGVectorCStringDescription( CGVector point)
+static inline char   *CGVectorUTF8String( CGVector point)
 {
-   return( CGPointCStringDescription( * (CGPoint *) &point));
+   return( CGPointUTF8String( * (CGPoint *) &point));
 }
 
 
-static inline char   *CGSizeCStringDescription( CGSize size)
+static inline char   *CGSizeUTF8String( CGSize size)
 {
-   return( CGPointCStringDescription( * (CGPoint *) &size));
+   return( CGPointUTF8String( * (CGPoint *) &size));
 }
 

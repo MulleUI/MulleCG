@@ -6,19 +6,21 @@ struct CGFrameInfo;
 
 // Better name: CGFramebufferImage ?
 
+// TODO: memo handle PixelBufferObjects too ?
 
 // This used to be called MulleTextureImage, which fits better, but the
 // historic name is CGLayer. It has nothing to do with a CALayer though.
 
 //
-// An image rendered into a texture. In technical terms a wrapper for
-// a texture created with nvgluCreateFramebuffer.
+// An drawing rendered into a texture. 
+// In technical terms a wrapper for a texture created with 
+// nvgluCreateFramebuffer (usually). A texture can not be created during 
+// rendering. It has to be done before or after.
 //
-// The texture lives as long as the CGContext is active. But! If the context
+// The texture lives at most as long as the CGContext is active. If the context
 // vanishes, the texture is invalid. So that means that when the context
-// finalizes it also needs to finalize the texture. There is no reason, why
-// a texture image can't be retained. So the lifetime of a MulleTextureImage
-// shouldn't exceed that of the CGContext, but that can't be guaranteed.
+// finalizes it also needs to finalize the texture.
+//
 // The CGContext keeps track of all texture images, but doesn't retain them.
 // When the time comes, it calls -finalize on all texture images.
 //
@@ -30,8 +32,9 @@ struct CGFrameInfo;
 //
 // options is imageFlags currently
 //
+
 - (instancetype) initWithBitmapInfo:(struct CGBitmapInfo) size
-                      imageFlags:(NSUInteger) imageFlags
+                         imageFlags:(NSUInteger) imageFlags
                             context:(CGContext *) context;
 
 - (struct mulle_data) readRGBACData:(struct mulle_allocator *) allocator;

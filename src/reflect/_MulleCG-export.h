@@ -12,6 +12,7 @@
 #import "CGAffineTransform+CString.h"
 #import "CGAffineTransform.h"
 #import "CGAffineTransform+nanovg.h"
+#import "CGBitmap.h"
 #import "CGColor+MulleObjC.h"
 #import "CGContext+CGFont.h"
 #import "CGContext+Render.h"

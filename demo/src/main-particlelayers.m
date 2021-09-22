@@ -199,7 +199,7 @@ int   main()
    app    = [UIApplication sharedInstance];
    window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
                                 titleCString:"Demo"
-                                   styleMask:EDGE_ANTIALIAS ? 0 : MulleWindowStyleMaskNoEdgeAntialias] autorelease];
+                                   styleMask:EDGE_ANTIALIAS ? 0 : UIWindowStyleNoEdgeAntialias] autorelease];
    [app addWindow:window];
 
    [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];

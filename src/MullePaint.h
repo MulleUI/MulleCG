@@ -30,6 +30,8 @@
 
 @property( readonly, assign) CGContext   *context;
 
+// TODO: revert to C, don't keep it around as an object
+
 + (instancetype) linearGradientWithRect:(CGRect) rect
                              innerColor:(CGColorRef) innerColor
                              outerColor:(CGColorRef) outerColor

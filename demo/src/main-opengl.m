@@ -8,7 +8,7 @@
 // you can place OpenGL behind or in front of the scene. Consequently this
 // demo rather belongs in MulleUICore
 //
-void  drawOpenGL1( UIWindow *window, struct CGFrameInfo *info)
+void  drawOpenGL1( UIWindow *window, CGContext *context, struct CGFrameInfo *info)
 {
    glColor3f( 0.0f, 0.0f, 1.0f ); // blue color
 
@@ -23,7 +23,7 @@ void  drawOpenGL1( UIWindow *window, struct CGFrameInfo *info)
 }
 
 
-void  drawOpenGL2( UIWindow *window, struct CGFrameInfo *info)
+void  drawOpenGL2( UIWindow *window, CGContext *context, struct CGFrameInfo *info)
 {
    glColor3f( 1.0f, 1.0f, 0.0f ); // yellow color
 
@@ -76,8 +76,8 @@ int   main( int argc, char *argv[])
    [app addWindow:window];
 
    setupScene( window);
-   [window setWillEndRenderCallback:drawOpenGL1];
-   [window setDidEndRenderCallback:drawOpenGL2];
+   [window setWillBeginRenderCallback:drawOpenGL1];
+   [window setdidRenderCallback:drawOpenGL2];  // doesn't work anymore, context is dead
    [window renderLoop];
 
    [app terminate];

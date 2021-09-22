@@ -75,13 +75,8 @@ static char  geometryShaderSource[] =
 "    return normalize(cross(a, b));\n"
 "}\n"
 "\n"
-"void main() {\n"
-"    vec3 normal = GetNormal();\n"
-"\n"
-"    gl_Position = explode(gl_in[0].gl_Position, normal);\n"
-"    TexCoords = gs_in[0].texCoords;\n"
-"    EmitVertex();\n"
-"    gl_Position = explode(gl_in[1].gl_Position, normal);\n"
+"void main() {\n"   _context = nil;   
+l_Position, normal);\n"
 "    TexCoords = gs_in[1].texCoords;\n"
 "    EmitVertex();\n"
 "    gl_Position = explode(gl_in[2].gl_Position, normal);\n"
@@ -98,13 +93,13 @@ static char  geometryShaderSource[] =
 //
 - (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
               useStencilStrokes:(BOOL) useStencilStrokes
-
+                      os_window:(id) os_window
 {
    int   flags;
 
    flags  = edgeAntialiasing ? NVG_ANTIALIAS : 0;
    flags |= useStencilStrokes ? NVG_STENCIL_STROKES : 0;
-#if DEBUG
+#ifdef DEBUG
    flags |= NVG_DEBUG;
 #endif
 
@@ -127,65 +122,26 @@ static char  geometryShaderSource[] =
       [self release];
       return( nil);
    }
-/*
-#if MULLE_CG_GL
-VERSION != MULLE_GLES2
-   {
-      struct GLNVGcontext   *vgl = (struct GLNVGcontext *) _vg;
-      unsigned int          program;
-      unsigned int          geometryShader;
-      char                  *str[ 2];
-	   static char           *shaderHeader = ""
-#ifdef NANOVG_GL2_IMPLEMENTATION
-#elif defined( NANOVG_GL3_IMPLEMENTATION)
-		"#version 330 core\n"
-#elif defined( NANOVG_GLES2_IMPLEMENTATION)
-		"#version 100\n"
-#elif defined( NANOVG_GLES3_IMPLEMENTATION)
-		"#version 300 es\n"
-#endif
-      ;
 
-      program        = vgl->shader.prog;
-      geometryShader = glCreateShader (GL_GEOMETRY_SHADER);
-      str[ 0] = shaderHeader;
-      str[ 1] = geometryShaderSource;
-      glShaderSource( geometryShader, 1, str, NULL);
-      glCompileShader( geometryShader);
-      assert_shader_compiler_errors( geometryShader);
-      glAttachShader( program, geometryShader);
-      glLinkProgram( program);
-      glDeleteShader( geometryShader);     // release basically
-   }
-#endif
-*/
+   _os_window = os_window;
+
    [self _initFontCache];
 
    _mulle__pointerset_init( &_resources, 0, MulleObjCInstanceGetAllocator( self));
+   _mulle__pointerarray_init( &_deletedTexturedIDs, 0, MulleObjCInstanceGetAllocator( self));
+
    return( self);
-}
-
-
-- (instancetype) init
-{
-   return( [self initWithEdgeAntialiasing:YES
-                        useStencilStrokes:YES]);
-}
-
-
-- (struct NVGcontext *) nvgContext
-{
-   return( _vg);
 }
 
 
 - (void) finalize
 {
+   assert( _isActive);
    assert( ! _isRendering);
 
    [self _resetFontCache];
-
    [self removeAllResources];
+   [self deleteTextureIDs];
 
    mulle_thread_mutex_lock( &Self._freeTypeLock);
    {
@@ -200,7 +156,16 @@ VERSION != MULLE_GLES2
 #endif
    }
    mulle_thread_mutex_unlock( &Self._freeTypeLock);
+
+   if( _offScreenFramebuffer)
+   {
+   	nvgluDeleteFramebuffer((NVGLUframebuffer *) _offScreenFramebuffer);
+      _offScreenFramebuffer = NULL;
+   }
+
    _vg = NULL;
+   _os_window = NULL;
+
    [super finalize];
 }
 
@@ -209,13 +174,24 @@ VERSION != MULLE_GLES2
 {
    [self _doneFontCache];
 
+   _mulle__pointerarray_done( &_deletedTexturedIDs, MulleObjCInstanceGetAllocator( self));
+   _mulle__pointerset_done( &_resources, MulleObjCInstanceGetAllocator( self));
+
    [super dealloc];
+}
+
+
+- (struct NVGcontext *) nvgContext
+{
+   return( _vg);
 }
 
 
 - (void) clearFramebuffer
 {
    CGFloat   rgba[ 4];
+
+   assert( _isRendering);
 
    MulleColorGetComponents( _backgroundColor, rgba);
    glClearColor( rgba[ 0], rgba[ 1], rgba[ 2], rgba[ 3]);
@@ -227,8 +203,11 @@ VERSION != MULLE_GLES2
 #define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
 
 
-- (void) continueRender
+- (void) resumeRender
 {
+   assert( _isActive);
+   assert( _isRendering);
+
    glViewport( _currentFrameInfo.viewportFrame.origin.x,
                _currentFrameInfo.viewportFrame.origin.y,
                _currentFrameInfo.viewportFrame.size.width,
@@ -239,40 +218,90 @@ VERSION != MULLE_GLES2
 }
 
 
+- (void) prepareOffScreenFramebuffer:(CGFrameInfo *) info
+{
+   if( ! CGBitmapSizeEqualToSize( _offScreenFramebufferSize, info->framebufferSize))
+   {
+      if( _offScreenFramebuffer)
+      	nvgluDeleteFramebuffer((NVGLUframebuffer *) _offScreenFramebuffer);
+
+      _offScreenFramebuffer = nvgluCreateFramebuffer( _vg,
+                                                      (int) info->framebufferSize.width,
+                                                      (int) info->framebufferSize.height,
+                                                      0);
+//      fprintf( stderr, "created new offscreen framebuffer\n");
+      if( ! _offScreenFramebuffer)
+         abort();
+      _offScreenFramebufferSize = info->framebufferSize;     
+      // torch old FB, create new one
+   }   
+   assert( _offScreenFramebuffer);
+}
+
+
+- (void) deleteTextureIDs
+{
+   struct mulle__pointerarrayenumerator  rover;
+   void                                  *textureID;
+
+   rover = _mulle__pointerarray_enumerate( &_deletedTexturedIDs);
+   while( _mulle__pointerarrayenumerator_next( &rover, &textureID))
+         nvgDeleteImage( _vg, (int) (NSUInteger) textureID);
+   mulle__pointerarrayenumerator_done( &rover);
+
+   _mulle__pointerarray_reset( &_deletedTexturedIDs);
+}
+
+
 - (void) beginRender:(struct CGFrameInfo *) info
 {
    double   t;
    GLint    value;
-
+   
+   assert( _isActive);
    assert( ! _isRendering);
    assert( info);
+   assert( info->pixelRatio != 0.0);
 
-   _isRendering = YES;
-   _lastRenderStart  = _currentFrameInfo.renderStart
-                          ? _currentFrameInfo.renderStart
-                          : info->renderStart;
-   _frameDelta       = _currentFrameInfo.renderStart - _lastRenderStart;
+   _isRendering     = YES;
+   // not 100% sure why anymore this written this way
+   _lastRenderStart = _renderStart;
+   _renderStart     = mulle_timeinterval_now();
+   _frameDelta      = 0.0;
+   if( _lastRenderStart == 0.0)
+      _frameDelta = _renderStart - _lastRenderStart;
 
    _currentFrameInfo = *info;
    _alpha            = 1.0;
+
+   // delete all queued textureIDs
+   [self deleteTextureIDs];
 
 #if RENDER_DEBUG
    if( ! CGSizeEqualToSize( info->viewportFrame.size, info->framebufferSize) ||
        ! CGSizeEqualToSize( info->viewportFrame.size, info->size) ||
        ! CGSizeEqualToSize( info->framebufferSize, info->size))
       fprintf( stderr, "Viewport: %s, FB: %s, Window: %s\n",
-               CGSizeCStringDescription( info->viewportFrame.size),
-               CGSizeCStringDescription( info->framebufferSize),
-               CGSizeCStringDescription( info->size));
+               CGSizeUTF8String( info->viewportFrame.size),
+               CGSizeUTF8String( info->framebufferSize),
+               CGSizeUTF8String( info->size));
 #endif
    // < performance measurement
-   [self continueRender];
+   if( _rendersOffScreen)
+   {
+      [self prepareOffScreenFramebuffer:info];
+      // create or reuse existing offscreen framebuffer
+      nvgluBindFramebuffer( _offScreenFramebuffer);
+   }
+   [self resumeRender];
 }
 
 
 - (void) suspendRender
 {
-   // MEMO: this also flushes the font cache, not sure if this desirable or 
+   assert( _isActive);
+
+   // MEMO: this also flushes the font cache, not sure if this desirable or
    //       necessary or too painful ??
    //
    // We could write a simpler:
@@ -281,7 +310,7 @@ VERSION != MULLE_GLES2
    // {
    //    ctx->params.renderFlush(ctx->params.userPtr);
    // }
-   // 
+   //
    nvgEndFrame( _vg);
 }
 
@@ -290,7 +319,13 @@ VERSION != MULLE_GLES2
 {
    assert( _isRendering);
 
+   // copy over, but kill current to catch moar problems
+   _lastFrameInfo = _currentFrameInfo;
+   memset( &_currentFrameInfo, 0xAD, sizeof( _currentFrameInfo));
+
    [self suspendRender];
+   nvgluBindFramebuffer( NULL);
+   _numberOfRenderedFrames++;
    _isRendering = NO;
 }
 
@@ -301,24 +336,134 @@ VERSION != MULLE_GLES2
 }
 
 
-
-- (struct CGFrameInfo *) currentFrameInfo
+- (BOOL) isActive
 {
-   return( &_currentFrameInfo);
+   return( _isActive);
 }
 
 
+static inline BOOL   haveLastFrameInfo( CGContext *self)
+{
+   return( self->_lastFrameInfo.pixelRatio != 0.0);
+}
+
+
+- (struct CGFrameInfo *) lastFrameInfo
+{
+   return( haveLastFrameInfo( self) ? &_lastFrameInfo : NULL);
+}
+
+
+- (struct CGFrameInfo *) currentFrameInfo
+{
+   return( _isRendering ? &_currentFrameInfo : NULL);
+}
+
+
+- (NSUInteger) numberOfRenderedFrames
+{
+   return( _numberOfRenderedFrames);
+}
+
+
+// not really used
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info
 {
    assert( info);
    assert( _currentFrameInfo.pixelRatio);  // not yet initialized!!
+   assert( _isRendering);
+
    *info = _currentFrameInfo;
 }
 
 
 - (void) resetTransform
 {
+   assert( _isRendering);
+
    nvgResetTransform( _vg);
+}
+
+
+- (struct CGFramebufferBitmap) grabFramebufferAtRect:(struct CGBitmapRect) rect
+                                            inFlight:(BOOL) inFlight
+                                           allocator:(struct mulle_allocator *) allocator;
+{
+   struct CGFramebufferBitmap   fb;
+
+   fb.allocator        = allocator ? allocator : &mulle_default_allocator;
+   
+   fb.info.size.width  = rect.size.width;
+   fb.info.size.height = rect.size.height;
+   fb.info.encoding    = CGBitmapEncodingFlipYRGBABytes;
+
+   fb.data.length = CGBitmapInfoGetLineLength( fb.info) * fb.info.size.height;
+   fb.data.bytes  = mulle_allocator_malloc( fb.allocator, fb.data.length);
+
+   
+   glReadBuffer( inFlight ? GL_BACK : GL_FRONT);
+   glReadPixels( (int) rect.origin.x, (int) rect.origin.y,
+                 (int) fb.info.size.width,
+                 (int) fb.info.size.height,
+                 GL_RGBA,
+                 GL_UNSIGNED_BYTE,
+                 fb.data.bytes);
+   // TODO: check OpenGL errors
+   return( fb);
+}
+
+
+- (struct CGFramebufferBitmap) grabLastRenderedFramebuffer:(struct mulle_allocator *) allocator;
+{
+   struct CGBitmapRect    rect;
+   struct CGFrameInfo    *info;
+
+   rect.origin = CGBitmapPointMake( 0, 0);
+   info = [self lastFrameInfo];
+   if( info)
+      rect.size = info->framebufferSize;
+   return( [self grabFramebufferAtRect:rect
+                              inFlight:NO
+                             allocator:allocator]);
+}
+
+
+- (struct CGFramebufferBitmap) grabLastRenderedOffscreenFramebuffer:(struct mulle_allocator *) allocator
+{
+   struct CGFramebufferBitmap   fb;
+
+   assert( ! _isRendering);  // bad bad bad
+
+   if( ! _offScreenFramebuffer)
+   {
+      memset( &fb, 0, sizeof( fb));
+      return( fb);
+   }
+
+   fb.allocator        = allocator ? allocator : &mulle_default_allocator;
+
+   fb.info.size.width  = _offScreenFramebufferSize.width;
+   fb.info.size.height = _offScreenFramebufferSize.height;
+   fb.info.encoding    = CGBitmapEncodingFlipYRGBABytes;
+
+   fb.data.length      = _offScreenFramebufferSize.width * 
+                         _offScreenFramebufferSize.height * 4;
+   // implicity transparent background
+   fb.data.bytes  = mulle_allocator_calloc( fb.allocator, 1, fb.data.length);
+
+   nvgluBindFramebuffer( _offScreenFramebuffer);
+   {
+      // TODO: check return value or error or something
+      glReadPixels( 0, 0,
+                   _offScreenFramebufferSize.width,
+                   _offScreenFramebufferSize.height,
+                   GL_RGBA,
+                   GL_UNSIGNED_BYTE,
+                   fb.data.bytes);
+   }
+   nvgluBindFramebuffer( NULL);
+
+   return( fb);
 }
 
 
@@ -378,5 +523,17 @@ VERSION != MULLE_GLES2
    _mulle__pointerset_done( &tmp, MulleObjCInstanceGetAllocator( self));
 }
 
+
+//
+// When a CGImage gets reaped by an NSAutoreleasePool the context may not
+// be activated and it could be tricky to ascertain, that it isn't in use
+// by another thread. So we queue these delete requests up
+// TODO: may need to lock this... ?
+- (void) deleteTextureID:(NSUInteger) textureID
+{
+   _mulle__pointerarray_add( &_deletedTexturedIDs, 
+                             (void *) textureID, 
+                             MulleObjCInstanceGetAllocator( self));
+}
 
 @end
