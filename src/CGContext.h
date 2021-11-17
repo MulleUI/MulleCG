@@ -8,11 +8,12 @@ struct NVGcontext;
 @class CGFont;
 @class CGLayer;
 @class CGContext;
+@class CGImage;
 
 
 @protocol CGContextResource
 
-// tricky, but context may not be activated! it's not a good idea to 
+// tricky, but context may not be activated! it's not a good idea to
 // activate the context. See how CGImage does it
 - (void) contextDidRemoveObject:(CGContext *) context;
 
@@ -27,6 +28,7 @@ typedef struct CGFrameInfo
    struct CGBitmapRect    viewportFrame;    // used for the viewport (use: 0, 0, frameSize)
    CGVector               UIScale;
    CGFloat                pixelRatio;
+   mulle_timeinterval_t   now;              // CAAbsoluteTime
 } CGFrameInfo;
 
 
@@ -110,26 +112,31 @@ static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
 //
 @interface CGContext : NSObject
 {
-	struct NVGcontext           *_vg;
-   struct CGFrameInfo          _currentFrameInfo;
-   struct CGFrameInfo          _lastFrameInfo;
-   struct mulle__pointerset    _resources;
-   struct mulle_map            _fontMap;
-   struct mulle__pointerarray  _deletedTexturedIDs;
-   NSUInteger                  _numberOfRenderedFrames;
-   mulle_timeinterval_t        _renderStart;
-   mulle_timeinterval_t        _lastRenderStart;
-   BOOL                        _isRendering;
-   BOOL                        _isActive;
-   void                        *_offScreenFramebuffer;
-   struct CGBitmapSize         _offScreenFramebufferSize;
+	struct NVGcontext            *_vg;
+   struct CGFrameInfo           _currentFrameInfo;
+   struct CGFrameInfo           _lastFrameInfo;
+   struct mulle__pointerset     _resources;
+   struct mulle_set             _loanedResources;
+   struct mulle_map             _fontMap;
+   struct mulle_map             _gpuTextureMap;
+   struct mulle__pointerarray   _deletedTexturedIDs;
+   NSUInteger                   _numberOfRenderedFrames;
+   mulle_timeinterval_t         _renderStartTime;
+   mulle_timeinterval_t         _lastRenderStartTime;
+   BOOL                         _isRendering;
+   BOOL                         _isActive;
+   void                         *_offScreenFramebuffer;
+   struct CGBitmapSize          _offScreenFramebufferSize;
+   CGImage                      *_offScreenFramebufferImage;
 }
-@property( assign) CGFloat      alpha;
+@property( assign) CGFloat       alpha;
 
 // not animatable though, better use windows ?
-@property( assign) CGColorRef    backgroundColor;
+@property( assign) CGColor       backgroundColor;
 @property( assign) BOOL          rendersOffScreen;
 @property( assign, readonly) id  os_window;  // GLFWWindow
+@property( assign) BOOL          debugEnabled;
+@property( assign) char          *debugNameUTF8String;  // useful for debugging
 
 
 @property( readonly) mulle_timeinterval_t   frameDelta;
@@ -143,18 +150,45 @@ static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
 - (void) beginRender:(struct CGFrameInfo *) info;
 - (void) endRender;
 
+- (void) _endRender; // does not call suspendRender
+
+// does not delete textures, calculate frame timings, and does not
+// set the offscreen buffer if needed. This method can be useful for
+// intermediate changes to a different fbo during rendering. Be sure
+// to save and restore -alpha and _currentFrameInfo.
+// Use:
+//    oldAlpha = [context alpha];
+//    oldInfo  = *[context currentFrameInfo];
+//    [context suspendRender];
+//    [context _beginNestedRender:&myInfo];
+//    ...
+//    [context suspendRender];
+//    [context _beginNestedRender:&oldInfo];
+//    [context setAlpha:oldAlpha];
+// 
+- (void) _beginNestedRender:(struct CGFrameInfo *) info; 
+
 //
 // used to intermix OpenGL or other commands, this flushes commands
 // cleans some font state and sets the viewport.
-// Maybe rename to -flush and -start ?
 //
-- (void) suspendRender;
-- (void) resumeRender;
+- (void) suspendRender;  // flushes and resets
+- (void) resumeRender;   // resumes after a suspend
+
+- (void) changeRender:(struct CGFrameInfo *) info 
+                alpha:(CGFloat) alpha;
+
+// to return to the "default" framebuffer, either the offscreen or the window
+// one, if no offscreen exists               
+- (void) bindDefaultFramebuffer;
 
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info;
 
 - (struct CGFrameInfo *) currentFrameInfo;
 - (struct CGFrameInfo *) lastFrameInfo;
+
+// used to restore state.. might go away soonish
+- (void) _setCurrentFrameInfo:(struct CGFrameInfo *) info;
 
 - (void) resetTransform;
 - (void) clearFramebuffer;
@@ -162,19 +196,30 @@ static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
 // with 60hz and 32 bit wraps in a little more than 2 years
 // value changes during -endRender
 - (NSUInteger) numberOfRenderedFrames;
-
+- (mulle_timeinterval_t) renderStartTime;
 //
 // Images and maybe future other resources, that are only valid as long as
 // the context is valid, are registered here. When the context goes down all
-// resources will be finalized.
-//
+// resources will be finalized. The resource is *NOT* retained by he context.
+// If you want the context to "own" it. Use *giftResource*.
+
 - (void) addToResources:(id <CGContextResource>) resource;
 - (void) _removeFromResources:(id <CGContextResource>) resource; // will not callback
 - (void) removeFromResources:(id <CGContextResource>) resource;
 - (void) removeAllResources;
 
+// if you want the context to retain the resource (and) release it on finalize
+// you can loan it. A resource must have been added with addToResources: before
+// though. Calling removeFromResources on a loaned resource is an error.
+// You need to reposses the resource first.
+//
+- (void) loanResource:(id <CGContextResource>) resource;
+- (void) repossessResource:(id <CGContextResource>) resource;
+- (void) releaseAllLoanedResources;
+
 // these are queued and deleted on the next render
-- (void) deleteTextureID:(NSUInteger) id;
+// the imageID is the nanovg texture not the GPU texture
+- (void) deleteTextureID:(NSInteger) id;
 
 // between beginRender: and endRender:
 - (BOOL) isRendering;
@@ -198,6 +243,9 @@ static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
 // otherwise this could be stale or return something empty
 - (struct CGFramebufferBitmap) grabLastRenderedOffscreenFramebuffer:(struct mulle_allocator *) allocator;
 
+// only useable until the offscreen renderer hits again
+- (CGImage *) framebufferImage;
+
 @end
 
 typedef CGContext   *CGContextRef;
@@ -208,6 +256,13 @@ static inline struct NVGcontext   *CGContextGetNVGContext( CGContextRef self)
 
    return( ((struct{ @defs( CGContext); } *) self)->_vg);
 }
+
+
+static inline struct NVGcontext   *_CGContextGetNVGContext( CGContextRef self)
+{
+   return( ((struct{ @defs( CGContext); } *) self)->_vg);
+}
+
 
 
 static inline void   CGContextSetAlpha( CGContextRef self, CGFloat alpha)

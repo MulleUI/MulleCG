@@ -12,7 +12,7 @@
 // Paint is either a gradient or a texture. Actually behind the scenes
 // its a texture anyway :)
 //
-// The image handle (textureID) is managed by nanovg though.
+// The image handle (imageID) is managed by nanovg though.
 // It will not be available via the context. Therefore a paint can only
 // exist in one context currently. TODO: make this more like UIImage so
 // we can use it in multiple contexts. (otherwise its fairly useless)
@@ -33,20 +33,20 @@
 // TODO: revert to C, don't keep it around as an object
 
 + (instancetype) linearGradientWithRect:(CGRect) rect
-                             innerColor:(CGColorRef) innerColor
-                             outerColor:(CGColorRef) outerColor
+                             innerColor:(CGColor) innerColor
+                             outerColor:(CGColor) outerColor
                                 context:(CGContext *) context;
 + (instancetype) radialGradientCenterPoint:(CGPoint) point
                                innerRadius:(CGFloat) innerRadius
                                outerRadius:(CGFloat) outerRadius
-                                innerColor:(CGColorRef) innerColor
-                                outerColor:(CGColorRef) outerColor
+                                innerColor:(CGColor) innerColor
+                                outerColor:(CGColor) outerColor
                                    context:(CGContext *) context;
 + (instancetype) boxGradientWithRect:(CGRect) point
                         cornerRadius:(CGFloat) cornerRadius
                              feather:(CGFloat) feather
-                          innerColor:(CGColorRef) innerColor
-                          outerColor:(CGColorRef) outerColor
+                          innerColor:(CGColor) innerColor
+                          outerColor:(CGColor) outerColor
                              context:(CGContext *) context;
 + (instancetype) patternWithImage:(CGImage *) image
                              rect:(CGRect) rect
@@ -57,21 +57,21 @@
 // the paint is valid for the NVGcontext only, but the nvg context is
 // not kept, and the nvgContext doesnt keep the paint
 - (instancetype) initLinearGradientWithRect:(CGRect) rect
-                                 innerColor:(CGColorRef) innerColor
-                                 outerColor:(CGColorRef) outerColor
+                                 innerColor:(CGColor) innerColor
+                                 outerColor:(CGColor) outerColor
                                     context:(CGContext *) context;
 
 - (instancetype) initRadialGradientWithCenterPoint:(CGPoint) point
                                        innerRadius:(CGFloat) innerRadius
                                        outerRadius:(CGFloat) outerRadius
-                                        innerColor:(CGColorRef) innerColor
-                                        outerColor:(CGColorRef) outerColor
+                                        innerColor:(CGColor) innerColor
+                                        outerColor:(CGColor) outerColor
                                            context:(CGContext *) context;
 - (instancetype) initBoxGradientWithRect:(CGRect) point
                             cornerRadius:(CGFloat) cornerRadius
                                  feather:(CGFloat) feather
-                              innerColor:(CGColorRef) innerColor
-                              outerColor:(CGColorRef) outerColor
+                              innerColor:(CGColor) innerColor
+                              outerColor:(CGColor) outerColor
                                  context:(CGContext *) context;
 
 // it's not necessary to keep the image i believe (so we don't)
@@ -82,8 +82,8 @@
                               context:(CGContext *) context;
 
 
-- (CGColorRef) innerColor;
-- (CGColorRef) outerColor;
+- (CGColor) innerColor;
+- (CGColor) outerColor;
 - (CGFloat) radius;
 - (CGFloat) feather;
 

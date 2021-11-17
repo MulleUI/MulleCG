@@ -55,19 +55,16 @@ static CGDrawableOptions  defaultOptions =
 - (void) drawRect:(CGRect) rect
           options:(CGDrawableOptions *) options
           context:(CGContext *) context
+          imageID:(NSInteger) imageID
+       imageFlags:(NSUInteger) imageFlags
 {
-   int          textureID;
    NVGcontext   *vg;
    NVGpaint     imgPaint;
    CGSize       size;
    CGRect       patternRect;
-   NSInteger    imageFlags;
 
-   imageFlags = [self imageFlags];
-   textureID  = [self textureIDWithContext:context
-                                imageFlags:imageFlags];
-   assert( textureID != -1);
-   if( textureID == -1)
+   assert( imageID != -1);
+   if( imageID == -1)
       return;
 
    if( ! options)
@@ -88,7 +85,7 @@ static CGDrawableOptions  defaultOptions =
                                     patternRect.size.width,
                                     patternRect.size.height,
                                     options->rotation,
-                                    textureID,
+                                    imageID,
                                     options->alpha);
 
    nvgBeginPath( vg);
@@ -99,6 +96,24 @@ static CGDrawableOptions  defaultOptions =
                        options->cornerRadius);
    nvgFillPaint( vg, imgPaint);
    nvgFill( vg);
+}
+
+
+- (void) drawRect:(CGRect) rect
+          options:(CGDrawableOptions *) options
+          context:(CGContext *) context
+{
+   NSInteger    imageID;
+   NSInteger    imageFlags;
+
+   imageFlags = [self imageFlags];
+   imageID    = [self nvgImageWithContext:context
+                               imageFlags:imageFlags];
+   [self drawRect:rect
+          options:options
+          context:context
+          imageID:imageID
+       imageFlags:imageFlags];
 }
 
 

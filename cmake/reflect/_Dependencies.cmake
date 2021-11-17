@@ -14,7 +14,7 @@ endif()
 #
 # Generated from sourcetree: e670491e-d104-45c1-a5e0-798bd854f01f;freetype;no-all-load,no-cmake-inherit,no-cmake-searchpath,no-header,no-import,no-inplace,only-liftheaders;freetyped,freetype
 # Disable with : `mulle-sourcetree mark freetype no-link`
-# Disable for this platform: `mulle-sourcetree mark freetype no-cmake-platform-linux`
+# Disable for this platform: `mulle-sourcetree mark freetype no-cmake-platform-5.11.0-38-generic`
 #
 if( NOT FREETYPED_LIBRARY)
    find_library( FREETYPED_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}freetyped${CMAKE_STATIC_LIBRARY_SUFFIX} freetyped ${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_STATIC_LIBRARY_SUFFIX} freetype NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
@@ -44,7 +44,7 @@ endif()
 #
 # Generated from sourcetree: 22EBC69D-E0BB-4EC7-BAC7-FD3AECC7D2E4;MulleObjC;no-singlephase;
 # Disable with : `mulle-sourcetree mark MulleObjC no-link`
-# Disable for this platform: `mulle-sourcetree mark MulleObjC no-cmake-platform-linux`
+# Disable for this platform: `mulle-sourcetree mark MulleObjC no-cmake-platform-5.11.0-38-generic`
 #
 if( NOT MULLE_OBJC_LIBRARY)
    find_library( MULLE_OBJC_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleObjC${CMAKE_STATIC_LIBRARY_SUFFIX} MulleObjC NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
@@ -124,7 +124,7 @@ endif()
 #
 # Generated from sourcetree: BC187FCD-1722-4313-BFA8-FADA57629452;mulle-container;no-all-load,no-cmake-inherit,no-cmake-searchpath,no-import,no-singlephase;
 # Disable with : `mulle-sourcetree mark mulle-container no-link`
-# Disable for this platform: `mulle-sourcetree mark mulle-container no-cmake-platform-linux`
+# Disable for this platform: `mulle-sourcetree mark mulle-container no-cmake-platform-5.11.0-38-generic`
 #
 if( NOT MULLE_CONTAINER_LIBRARY)
    find_library( MULLE_CONTAINER_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-container${CMAKE_STATIC_LIBRARY_SUFFIX} mulle-container NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
@@ -154,7 +154,7 @@ endif()
 #
 # Generated from sourcetree: 4BFB6924-F24F-4369-959C-B56F012E768F;mulle-buffer;no-all-load,no-cmake-searchpath,no-import,no-singlephase;
 # Disable with : `mulle-sourcetree mark mulle-buffer no-link`
-# Disable for this platform: `mulle-sourcetree mark mulle-buffer no-cmake-platform-linux`
+# Disable for this platform: `mulle-sourcetree mark mulle-buffer no-cmake-platform-5.11.0-38-generic`
 #
 if( NOT MULLE_BUFFER_LIBRARY)
    find_library( MULLE_BUFFER_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-buffer${CMAKE_STATIC_LIBRARY_SUFFIX} mulle-buffer NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
@@ -225,7 +225,7 @@ endif()
 #
 # Generated from sourcetree: 3B31CCA0-4431-4AE0-BB6B-DE668CC29C30;mulle-layout;no-all-load,no-cmake-inherit,no-cmake-searchpath,no-import,no-singlephase;
 # Disable with : `mulle-sourcetree mark mulle-layout no-link`
-# Disable for this platform: `mulle-sourcetree mark mulle-layout no-cmake-platform-linux`
+# Disable for this platform: `mulle-sourcetree mark mulle-layout no-cmake-platform-5.11.0-38-generic`
 #
 if( NOT MULLE_LAYOUT_LIBRARY)
    find_library( MULLE_LAYOUT_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-layout${CMAKE_STATIC_LIBRARY_SUFFIX} mulle-layout NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
@@ -255,7 +255,7 @@ endif()
 #
 # Generated from sourcetree: 44DBC7BB-6395-427E-A36E-5659F68D16DA;mulle-sprintf;no-cmake-searchpath,no-import,no-singlephase;
 # Disable with : `mulle-sourcetree mark mulle-sprintf no-link`
-# Disable for this platform: `mulle-sourcetree mark mulle-sprintf no-cmake-platform-linux`
+# Disable for this platform: `mulle-sourcetree mark mulle-sprintf no-cmake-platform-5.11.0-38-generic`
 #
 if( NOT MULLE_SPRINTF_LIBRARY)
    find_library( MULLE_SPRINTF_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-sprintf${CMAKE_STATIC_LIBRARY_SUFFIX} mulle-sprintf NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
@@ -335,7 +335,7 @@ endif()
 #
 # Generated from sourcetree: FA6B0416-A6AF-4D16-A916-3A5606D75179;mulle-time;no-all-load,no-cmake-loader,no-cmake-searchpath,no-import,no-singlephase;
 # Disable with : `mulle-sourcetree mark mulle-time no-link`
-# Disable for this platform: `mulle-sourcetree mark mulle-time no-cmake-platform-linux`
+# Disable for this platform: `mulle-sourcetree mark mulle-time no-cmake-platform-5.11.0-38-generic`
 #
 if( NOT MULLE_TIME_LIBRARY)
    find_library( MULLE_TIME_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-time${CMAKE_STATIC_LIBRARY_SUFFIX} mulle-time NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)

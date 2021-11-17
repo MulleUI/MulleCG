@@ -1,8 +1,8 @@
 #define _GNU_SOURCE
 
-#include "CGColor.h"
+#import "CGColor.h"
 
-#include "include-private.h"
+#import "import-private.h"
 
 #include <string.h>
 #include <stdint.h>
@@ -452,7 +452,7 @@ static void   mulle_normalized_hsl_to_normalized_rgb(float hsl[3], float rgb[3])
 
 
 
-CGColorRef   MulleColorMakeFromCString( char *string)
+CGColor   CGColorMakeWithUTF8String( char *string)
 {
    size_t          len;
    unsigned int    rgba[ 4];
@@ -463,7 +463,7 @@ CGColorRef   MulleColorMakeFromCString( char *string)
    int             i;
 
    if( ! string)
-      return( getNVGColor( 0));
+      return( CGColorMakeWithUnsignedInteger( 0));
 
    len = strlen( string);
 
@@ -495,7 +495,7 @@ CGColorRef   MulleColorMakeFromCString( char *string)
          break;
 
       default :
-         return( getNVGColor( 0));
+         return( CGColorMakeWithUnsignedInteger( 0));
       }
       return( nvgRGBA( rgba[ 0], rgba[ 1], rgba[ 2], rgba[ 3]));
    }
@@ -511,7 +511,7 @@ CGColorRef   MulleColorMakeFromCString( char *string)
          if( string[ i] == '(')
          {
             if( decode_rgba_array( &string[ i], rgbaf, i))
-               return( getNVGColor( 0));
+               return( CGColorMakeWithUnsignedInteger( 0));
 
             return( nvgRGBAf( rgbaf[ 0] / 255.0,
                               rgbaf[ 1] / 255.0,
@@ -531,7 +531,7 @@ CGColorRef   MulleColorMakeFromCString( char *string)
          if( string[ i] == '(')
          {
             if( decode_hsla_array( &string[ i], hslaf, i))
-               return( getNVGColor( 0));
+               return( CGColorMakeWithUnsignedInteger( 0));
 
             hslaf[ 0] /= 360.0;
             hslaf[ 1] /= 100.0;
@@ -544,16 +544,15 @@ CGColorRef   MulleColorMakeFromCString( char *string)
       }
    }
    color = mulle_colorname_to_uint32( string);
-   return( getNVGColor( color));
+   return( CGColorMakeWithUnsignedInteger( color));
 }
 
 
 
-
-// https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately/54024653#54024653
-// input: h in [0,360] and s,v in [0,1] - output: r,g,b in [0,1]
 //
-CGColorRef   MulleColorMakeHSVA( CGFloat h, CGFloat s, CGFloat v, CGFloat a)
+// https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately/54024653#54024653
+//
+CGColor   CGColorMakeHSVA( CGFloat h, CGFloat s, CGFloat v, CGFloat a)
 {
    double   r;
    double   g;
@@ -564,6 +563,13 @@ CGColorRef   MulleColorMakeHSVA( CGFloat h, CGFloat s, CGFloat v, CGFloat a)
    double   p;
    double   q;
    double   t;
+
+   assert( h >= 0.0 && h <= 1.0);
+   assert( s >= 0.0 && s <= 1.0);
+   assert( v >= 0.0 && v <= 1.0);
+   assert( a >= 0.0 && a <= 1.0);
+
+  //  h = 360.0 * h;
 
    i = floor( h * 6);
    f = h * 6 - i;
@@ -586,7 +592,7 @@ CGColorRef   MulleColorMakeHSVA( CGFloat h, CGFloat s, CGFloat v, CGFloat a)
 
 
 // https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately/54024653#54024653
-void  MulleColorGetHSVAComponents( CGColorRef color, CGFloat *components)
+void  CGColorGetHSVAComponents( CGColor color, CGFloat *components)
 {
    double   r;
    double   g;
@@ -645,7 +651,7 @@ void  MulleColorGetHSVAComponents( CGColorRef color, CGFloat *components)
  * @param   Number  b       The blue color value
  * @return  Array           The HSL representation
  */
-void  MulleColorGetHSLAComponents( CGColorRef color, CGFloat *components)
+void  CGColorGetHSLAComponents( CGColor color, CGFloat *components)
 {
    double max;
    double min;

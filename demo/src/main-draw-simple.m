@@ -1,76 +1,57 @@
-#define _GNU_SOURCE
-
 #import <MulleUICore/MulleUICore.h>
 
-#include <string.h>
-#include <time.h>
 
-
-
-static void   drawStuff( CALayer *layer, CGContext *context)
+static void   drawStuff1( CALayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
    CGRect              canvas;
 
    vg = CGContextGetNVGContext( context);
 
-   canvas = [layer canvas];
+   canvas               = [layer canvas];
    canvas.size.height  /= 3.0;
 
+   // red stripe
    nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x, 
-                canvas.origin.y, 
-                canvas.size.width, 
+   nvgRect( vg, canvas.origin.x,
+                canvas.origin.y,
+                canvas.size.width,
                 canvas.size.height);
-   nvgFillColor( vg, [UIColor redColor]);
+   nvgFillColor( vg, nvgRGBAf( 0.95, 0.0, 0.0, 1.0));
    nvgFill( vg);
 
+   // white stripe
    nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x, 
-                canvas.origin.y + canvas.size.height * 2, 
-                canvas.size.width, 
+   nvgRect( vg, canvas.origin.x,
+                canvas.origin.y + canvas.size.height * 1,
+                canvas.size.width,
                 canvas.size.height);
-   nvgFillColor( vg, [UIColor blueColor]);
-   nvgFill( vg);   
-}
+   nvgFillColor( vg, nvgRGBAf( 1.0, 1.0, 1.0, 1.0));
+   nvgFill( vg);
 
-
-void   setupScene( UIWindow *window)
-{
-   UIView   *view;
-   CGRect   frame;
-
-   frame  = [[window contentPlane] contentRect];
-   view   = [UIView viewWithFrame:frame];
-   [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
-   [view setDrawCallback:drawStuff];
-   [[window contentPlane] addSubview:view];
+   // blue stripe
+   nvgBeginPath( vg);
+   nvgRect( vg, canvas.origin.x,
+                canvas.origin.y + canvas.size.height * 2,
+                canvas.size.width,
+                canvas.size.height);
+   nvgFillColor( vg, nvgRGBAf( 0.0, 0.0, 1.0, 1.0));
+   nvgFill( vg);
 }
 
 
 int   main( int argc, char *argv[])
 {
-   UIWindow         *window;
-   UIApplication    *app;
-   NSUInteger        styleMask;
+   UIApplication   *app;
 
    app = [UIApplication sharedInstance];
    @autoreleasepool
    {
-      // UIWindowStyleRenderNonRetainedOnly
-      styleMask = 0;
-//      styleMask |= UIWindowStyleRenderNonRetainedOnly;
-      styleMask |= UIWindowStyleResizable;
-
-      window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 200, 200)
-                                   titleCString:"Demo"
-                                      styleMask:styleMask] autorelease];
-
-      assert( window);
-      [window setBackgroundColor:CGColorMakeRGBA( 1.0, 1.0, 1.0, 1.0)];
-      setupScene( window);
-      [app addWindow:window];
-      [window renderLoop];
+      [app runWindowForDrawCallback:drawStuff1
+                         canvasSize:CGSizeMake( 200, 200)
+                         windowSize:CGSizeZero   // CGSizeMake( 200, 400)
+                    titleUTF8String:NULL
+                        frameRateHz:100.0];
    }
    [app terminate];
 }

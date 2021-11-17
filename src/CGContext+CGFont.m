@@ -52,12 +52,12 @@ static void  autorelease( struct mulle_container_valuecallback *callback,
 //
 // description is a bet on the future
 //
-static void   *describe( struct mulle_container_valuecallback *callback,
+static char   *describe( struct mulle_container_valuecallback *callback,
                          void *obj,
                          struct mulle_allocator **p_allocator)
 {
    *p_allocator = NULL;
-   return( mulle_objc_object_call( obj, @selector( description), obj));
+   return( mulle_objc_object_call( obj, @selector( UTF8String), obj));
 }
 
 
@@ -99,7 +99,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 }
 
 - (void) addFontWithCData:(struct mulle_data) data
-          fontNameCString:(char *) name
+          fontNameUTF8String:(char *) name
 {
    CGFont   *font;
    int      fontIndex;
@@ -107,7 +107,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    assert( ! mulle_map_get( &_fontMap, name));
 
    fontIndex = nvgCreateFontMem( _vg, name, data.bytes, (int) data.length, 0);
-   font      = [CGFont fontWithNameCString:name
+   font      = [CGFont fontWithNameUTF8String:name
                                  fontIndex:fontIndex];
 
    mulle_map_insert( &_fontMap, name, font);
@@ -115,7 +115,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
 
 - (void) addFontWithContentsOfFileWithFileRepresentationString:(char *) filename
-                                               fontNameCString:(char *) name
+                                               fontNameUTF8String:(char *) name
 {
    CGFont   *font;
    int      fontIndex;
@@ -123,7 +123,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    assert( ! mulle_map_get( &_fontMap, name));
 
    fontIndex = nvgCreateFont( _vg, name, filename);
-   font      = [CGFont fontWithNameCString:name
+   font      = [CGFont fontWithNameUTF8String:name
                                  fontIndex:fontIndex];
 
    mulle_map_insert( &_fontMap, name, font);
@@ -147,7 +147,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
                                  fallback_font_ttf,
                                  (int) sizeof( fallback_font_ttf),
                                  0);
-   font      = [CGFont fontWithNameCString:"fallback"
+   font      = [CGFont fontWithNameUTF8String:"fallback"
                           fontIndex:fontIndex];
 
    mulle_map_insert( &_fontMap, "fallback", font);
@@ -155,7 +155,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 }
 
 
-- (CGFont *) fontWithNameCString:(char *) s
+- (CGFont *) fontWithNameUTF8String:(char *) s
 {
    CGFont   *font;
    CGFont   *fallbackFont;
@@ -191,7 +191,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    if( fallbackFont)
       nvgAddFallbackFontId( _vg, fontIndex, [fallbackFont fontIndex]);
 
-   font = [CGFont fontWithNameCString:s
+   font = [CGFont fontWithNameUTF8String:s
                             fontIndex:fontIndex];
    assert( font);
    mulle_map_insert( &_fontMap, s, font);
@@ -202,10 +202,24 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
 - (void) setFont:(CGFont *) font
 {
+   assert( [self isActive]);
+
    if( font)
-      nvgFontFace( _vg, [font nameCString]);
+      nvgFontFace( _vg, [font nameUTF8String]);
    else
       nvgFontFace( _vg, "sans");
+}
+
+
+- (void) useFontWithNameUTF8String:(char *) name
+{
+   CGFont   *font;
+
+   assert( [self isActive]);
+
+   font = [self fontWithNameUTF8String:name];
+   if( font)
+      nvgFontFace( _vg, name);
 }
 
 @end

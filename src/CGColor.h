@@ -1,7 +1,4 @@
-#ifndef cg_color_h__
-#define cg_color_h__
-
-#include "include.h"
+#import "import.h"  // want NSUInteger
 
 #include <math.h>
 #include <stdint.h>
@@ -10,13 +7,14 @@
 #include <assert.h>
 
 
-typedef NVGcolor   CGColorRef;   // actually a little struct we have this
+typedef NVGcolor   CGColor;      // actually a little struct we have this
                                  // misnomer for compatibility
-typedef void       *CGColorSpaceRef;
+typedef void       *CGColorSpace;  // unsure yet, probably an enum later on
 
 
 // NVGColor is a float[ 4] in reality
-static inline NVGcolor getNVGColor( uint32_t color)
+// MEMO: called "With" because we are not creating an unsigndInteger
+static inline CGColor   CGColorMakeWithUnsignedInteger( NSUInteger color)
 {
 	return nvgRGBA(
 		(color >> 24) & 0xff,
@@ -25,59 +23,47 @@ static inline NVGcolor getNVGColor( uint32_t color)
 		(color >> 0) & 0xff);
 }
 
-// TODO: rename to make as we don't create objects
-static inline CGColorRef   MulleColorMake( uint32_t color)
-{
-   return( getNVGColor( color));
-}
-
-
-static inline CGColorRef
-   MulleColorMakeGrayOpaque( CGFloat gray)
+// MEMO: NOT called "With" because we are making a gray color
+static inline CGColor   CGColorMakeGray( CGFloat gray, CGFloat alpha)
 {
    assert( gray >= 0.0 && gray <= 1.0);
 
-   return( nvgRGBA( (uint32_t) round( 0xff * gray),
-                    (uint32_t) round( 0xff * gray),
-                    (uint32_t) round( 0xff * gray),
-                    0xff));
+   return( nvgRGBAf( gray, gray, gray, alpha));
 }
 
 
-static inline CGColorRef   MulleColorMakeRandom( uint32_t color, uint32_t mask)
+static inline CGColor   CGColorMakeGrayOpaque( CGFloat gray)
 {
-   uint32_t  value;
+   assert( gray >= 0.0 && gray <= 1.0);
 
-   color &= ~mask;
-   color |= ((uint32_t) rand()) & mask;
-   return( getNVGColor( color));
+   return( nvgRGB( gray, gray, gray));
 }
 
 
-static inline CGColorRef   MulleColorMakeRandomOpaque( void)
+static inline CGColor   CGColorMakeRGBA( CGFloat r, CGFloat g, CGFloat b, CGFloat a)
 {
-   return( MulleColorMakeRandom( 0xFF, 0xFFFFFF00));
+   assert( r >= 0.0 && r <= 1.0);
+   assert( g >= 0.0 && g <= 1.0);
+   assert( b >= 0.0 && b <= 1.0);
+   assert( a >= 0.0 && a <= 1.0);
+
+   return( nvgRGBAf( r, g, b, a));
 }
 
 
-static inline CGColorRef
-   MulleColorMakeRGB( CGFloat r, CGFloat g, CGFloat b)
+static inline CGColor   CGColorMakeRGB( CGFloat r, CGFloat g, CGFloat b)
 {
    assert( r >= 0.0 && r <= 1.0);
    assert( g >= 0.0 && g <= 1.0);
    assert( b >= 0.0 && b <= 1.0);
 
-   return( nvgRGBA( (uint32_t) round( 0xff * r),
-                    (uint32_t) round( 0xff * g),
-                    (uint32_t) round( 0xff * b),
-                    0xff));
+   return( nvgRGBf( r, g, b));
 }
 
 
 // Returns color value specified by hue, saturation and lightness.
 // HSL values are all in range [0..1], alpha will be set to 1.0.
-static inline CGColorRef
-   MulleColorMakeHSL( CGFloat h, CGFloat s, CGFloat l)
+static inline CGColor   CGColorMakeHSL( CGFloat h, CGFloat s, CGFloat l)
 {
    assert( h >= 0.0 && h <= 1.0);
    assert( s >= 0.0 && s <= 1.0);
@@ -87,8 +73,8 @@ static inline CGColorRef
 }
 
 // here alpha is not like nvg 0-255 but 0-1
-static inline CGColorRef
-   MulleColorMakeHSLA( CGFloat h, CGFloat s, CGFloat l, CGFloat a)
+static inline CGColor
+   CGColorMakeHSLA( CGFloat h, CGFloat s, CGFloat l, CGFloat a)
 {
    assert( h >= 0.0 && h <= 1.0);
    assert( s >= 0.0 && s <= 1.0);
@@ -98,62 +84,50 @@ static inline CGColorRef
    return( nvgHSLA( h, s, l, a * 255.0));
 }
 
+// this is additonal code, not found in nanoVG
+// hue is 0-1 (not 0-360)
+CGColor   CGColorMakeHSVA( CGFloat h, CGFloat s, CGFloat v, CGFloat a);
 
-CGColorRef   MulleColorMakeHSVA( CGFloat h, CGFloat s, CGFloat v, CGFloat a);
-
-
-// HSL values are all in range [0..1], alpha will be set to 255.
-static inline CGColorRef
-   MulleColorMakeHSV( CGFloat h, CGFloat s, CGFloat l)
+// HSL values are all in range [0..1], alpha will be set to 1.0.
+static inline CGColor
+   CGColorMakeHSV( CGFloat h, CGFloat s, CGFloat l)
 {
-   return( MulleColorMakeHSVA( h, s, l, 1.0));
+   return( CGColorMakeHSVA( h, s, l, 1.0));
 }
 
-// just convenience for same color, differenr name
-static inline CGColorRef
-   MulleColorMakeHSBA( CGFloat h, CGFloat s, CGFloat l, CGFloat a)
+// just convenience for same color, different name
+static inline CGColor   CGColorMakeHSBA( CGFloat h, CGFloat s, CGFloat l, CGFloat a)
 {
-   return( MulleColorMakeHSVA( h, s, l, a));
+   return( CGColorMakeHSVA( h, s, l, a));
 }
 
-static inline CGColorRef
-   MulleColorMakeHSB( CGFloat h, CGFloat s, CGFloat l)
+static inline CGColor   CGColorMakeHSB( CGFloat h, CGFloat s, CGFloat l)
 {
-   return( MulleColorMakeHSVA( h, s, l, 1.0));
-}
-
-
-static inline CGColorRef
-   CGColorMakeRGBA( CGFloat r, CGFloat g, CGFloat b, CGFloat a)
-{
-   assert( r >= 0.0 && r <= 1.0);
-   assert( g >= 0.0 && g <= 1.0);
-   assert( b >= 0.0 && g <= 1.0);
-   assert( a >= 0.0 && a <= 1.0);
-
-   return( nvgRGBA( (uint32_t) round( 0xff * r),
-                    (uint32_t) round( 0xff * g),
-                    (uint32_t) round( 0xff * b),
-                    (uint32_t) round( 0xff * a)));
+   return( CGColorMakeHSVA( h, s, l, 1.0));
 }
 
 
-static inline CGColorRef CGColorCreate( CGColorSpaceRef space, const CGFloat *components)
+static inline CGColor   CGColorMakeRandom( NSUInteger color, NSUInteger mask)
 {
-   return( CGColorMakeRGBA( components[ 0],
-                                    components[ 1],
-                                    components[ 2],
-                                    components[ 3]));
+   color &= ~mask;
+   color |= ((NSUInteger) rand()) & mask;
+   return( CGColorMakeWithUnsignedInteger( color));
 }
 
 
-static inline int    CGColorGetNumberOfComponents(CGColorRef color)
+static inline CGColor   CGColorMakeRandomOpaque( void)
+{
+   return( CGColorMakeRandom( 0xFF, 0xFFFFFF00));
+}
+
+
+static inline int    CGColorGetNumberOfComponents( CGColor color)
 {
    return( 4);
 }
 
 
-static inline void   MulleColorGetComponents(CGColorRef color, CGFloat *components)
+static inline void   CGColorGetComponents( CGColor color, CGFloat *components)
 {
    components[ 0] = color.r;
    components[ 1] = color.g;
@@ -162,77 +136,75 @@ static inline void   MulleColorGetComponents(CGColorRef color, CGFloat *componen
 }
 
 
-void  MulleColorGetHSLAComponents( CGColorRef color, CGFloat *components);
+static inline NSUInteger   CGColorGetUnsignedInteger( CGColor color)
+{
+   return( ((uint32_t) (color.r * 0xFF) << 24)
+           | ((uint32_t) (color.g * 0xFF) << 16)
+           | ((uint32_t) (color.b * 0xFF) << 8)
+           | ((uint32_t) (color.a * 0xFF)) );
+}
+
+
+void  CGColorGetHSLAComponents( CGColor color, CGFloat *components);
 
 // this is the same as HSBA, third parameter is weird brightness :)
 // Lossless back and forth conversion between RGBA and HSBA is not possible.
-// Nanovg only works with RGBA. It's best to keep HSBA separate operate on 
+// Nanovg only works with RGBA. It's best to keep HSBA separate operate on
 // it and then convert to RGBA for actual drawing.
 //
-void  MulleColorGetHSVAComponents( CGColorRef color, CGFloat *components);
+void  CGColorGetHSVAComponents( CGColor color, CGFloat *components);
 
 // HSL values are all in range [0..1], alpha will be set to 255.
 static inline void
-   MulleColorGetHSBAComponents( CGColorRef color, CGFloat *components)
+   CGColorGetHSBAComponents( CGColor color, CGFloat *components)
 {
-   MulleColorGetHSVAComponents( color, components);
+   CGColorGetHSVAComponents( color, components);
 }
 
 
-
-static inline CGColorRef   MulleMakeColorWithColorAndAlpha( CGColorRef color,
-                                                            CGFloat alpha)
-{
-   color.a = alpha;
-   return( color);
-}
-
-
-static inline CGFloat   CGColorGetAlpha( CGColorRef color)
+static inline CGFloat   CGColorGetAlpha( CGColor color)
 {
    return( color.a);
 }
 
 
-static inline CGColorRef   CGColorDim( CGColorRef color, CGFloat factor)
+static inline CGColor   CGColorDim( CGColor color, CGFloat factor)
 {
    assert( factor > 0.0 && factor < 1.0);
    color.a = color.a * factor;
    return( color);
 }
 
-static inline int   MulleAlphaIsTransparent( CGFloat a)
+static inline int   CGAlphaIsTransparent( CGFloat a)
 {
    return( a < 0.5 / 32767.0);  // assume rounding up and 16 bit color depth
 }
 
 
-static inline int   MulleAlphaIsOpaque( CGFloat a)
+static inline int   CGAlphaIsOpaque( CGFloat a)
 {
    return( a >= 1.0 - 0.5 / 32767.0);  // assume rounding up and 16 bit color depth
 }
 
 
 
-static inline int   MulleColorIsTransparent( CGColorRef color)
+static inline int   CGColorIsTransparent( CGColor color)
 {
-   return( MulleAlphaIsTransparent( color.a));  // assume rounding up and 16 bit color depth
+   return( CGAlphaIsTransparent( color.a));  // assume rounding up and 16 bit color depth
 }
 
 
-static inline int   MulleColorIsOpaque( CGColorRef color)
+static inline int   CGColorIsOpaque( CGColor color)
 {
-   return( MulleAlphaIsOpaque( color.a));
+   return( CGAlphaIsOpaque( color.a));
 }
 
 
-static inline int   CGColorEqualToColor( CGColorRef color, CGColorRef other)
+static inline int   CGColorEqualToColor( CGColor color, CGColor other)
 {
-   // CGColorRef is not really a ref..
-   return( ! memcmp( &color, &other, sizeof( CGColorRef)));
+   // CGColor is not really a ref..
+   return( ! memcmp( &color, &other, sizeof( CGColor)));
 }
 
 
-CGColorRef   MulleColorMakeFromCString( char *s);
-
-#endif
+CGColor   CGColorMakeWithUTF8String( char *s);

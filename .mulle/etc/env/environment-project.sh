@@ -7,7 +7,7 @@ export PROJECT_NAME="MulleCG"
 #
 #
 #
-export PROJECT_TYPE="executable"
+export PROJECT_TYPE="library"
 
 
 #
