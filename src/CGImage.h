@@ -2,6 +2,7 @@
 
 #import "CGContext.h" // needed for protocol
 
+
 //
 //                             .------------.
 //                             | CGDrawable |
@@ -25,6 +26,20 @@
 
 
 //
+// Container for the OpenGL imageID, it's merely used for retain
+// counting. Therefore it must never be autoreleased!
+//
+@interface CGSharedGPUTexture : NSObject
+
+@property( readonly, assign) void  *gpuTexture;
+
+- (instancetype) initWithGPUTexture:(void *) gpuTexture;
+
+@end
+
+
+
+//
 // This is a wrapper for all the nanovg image functionality.
 // Such an image lives in the graphics context. The image bytes are not
 // accessible. The image dies functionally at the very least, when the
@@ -33,30 +48,44 @@
 // during rendering! It's tricky, you are generally better off with UIImage
 // for image management.
 //
+// You can keep it between render passes though. You can not use it in a
+// different context!
+//
 // Textures (images) in NVG can be created with different flags, for example
-// REPEAT_X and REPEAT_Y. When we are asking the CGContext for a textureID
+// REPEAT_X and REPEAT_Y. When we are asking the CGContext for a imageID
 // for an image this will create such a NVG texture. As the context cashes the
-// textureID for each MulleImage it's simplest to store the imageFlags here
+// imageID for each MulleImage it's simplest to store the imageFlags here
 // (readonly) and to clone MulleImages for different flags. The actual image
 // data can be shared w/o a problem. The default is 0:
-
-@interface CGImage : NSObject <CGBitmapDrawable, CGContextResource>
-{
-   int  _textureID;
-}
-@property( readonly, assign) CGContext   *context;
-@property( readonly, assign) NSUInteger  imageFlags;  // rename sometime
-
-- (instancetype) initWithTextureID:(int) textureID
-                        imageFlags:(NSUInteger) imageFlags
-                           context:(CGContext *) context;
-
 //
-// if imageflags or context don't match, this will return -1 
-// UIImage can derive multiple CGImages from itself.
-//                           
-- (int) textureIDWithContext:(CGContext *) context
-                  imageFlags:(NSUInteger) imageFlags;
+// textureIDs are strictly ascending, create() -> 1; close(1); create() -> 2
+// and aren't reused.
+//
+@interface CGImage : NSObject <CGBitmapDrawable, CGContextResource>
+
+@property( readonly, assign) NSUInteger              imageID;
+@property( readonly, assign) NSUInteger              imageFlags;       // rename sometime
+@property( readonly, assign) CGContext               *context;
+@property( readonly, retain) CGSharedGPUTexture      *sharedGPUTexture;
+
+// don't use, use nvgImageWithContext:imageFlags:
+// - (int)  _imageID;
+
+- (instancetype) initWithNVGImage:(NSInteger) imageID
+                       imageFlags:(NSUInteger) imageFlags
+                          context:(CGContext *) context;
+
+- (instancetype) initWithGPUTextureRGBA:(void *) gpuTexture
+                       sharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
+                             bitmapSize:(struct CGBitmapSize) size
+                             imageFlags:(NSUInteger) imageFlags
+                                context:(CGContext *) context;
+//
+// if imageflags or context don't match, this will return -1
+// UIImage can derive multiple CGImages from itself. But CGImage can not.
+//
+- (NSInteger) nvgImageWithContext:(CGContext *) context
+                       imageFlags:(NSUInteger) imageFlags;
 
 // these methods are germane to CGImage, subclasses may not support this
 // I wanted to avoid inserting another class here
@@ -75,7 +104,19 @@
                         imageFlags:(NSUInteger) imageFlags
                            context:(CGContext *) context;
 
-- (struct CGBitmapSize) bitmapSize;  // just integer value of size
+// CGImage size is not mutable, if the bitmap size changes
+// you need to create a new CGImage. The bytes can be freed by the
+// caller afterwards. The bytes are pushed to the GPU immediately.
+//
 - (void) setBytes:(void *) bytes;
+
+- (struct CGBitmapSize)  bitmapSize;
+
+//
+// If otherContext is sharing textures with the CGImage context, we can
+// share the texture by creating a nvg image copy in otherContext. otherContext
+// needs to be active. May return nil, if the copying is not possible.
+//
+- (CGImage *) shareWithContext:(CGContext *) otherContext;
 
 @end

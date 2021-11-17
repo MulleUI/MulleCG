@@ -146,8 +146,8 @@ PROTOCOLCLASS_END()
 //
 PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
 
-- (int) textureIDWithContext:(CGContext *) context
-                  imageFlags:(NSUInteger) imageFlags;
+- (NSInteger) nvgImageWithContext:(CGContext *) context
+                       imageFlags:(NSUInteger) imageFlags;
 
 - (struct CGBitmapInfo) bitmapInfo;
 
@@ -156,6 +156,12 @@ PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
 - (void) drawRect:(CGRect) rect
           options:(CGDrawableOptions *) options
           context:(CGContext *) context;
+
+- (void) drawRect:(CGRect) rect
+          options:(CGDrawableOptions *) options
+          context:(CGContext *) context
+          imageID:(NSInteger) imageID
+       imageFlags:(NSUInteger) imageFlags;
 
 // -1, then it didn't work
 - (NSInteger) imageFlags; // default 0

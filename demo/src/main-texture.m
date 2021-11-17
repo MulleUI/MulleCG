@@ -25,7 +25,7 @@ static void   drawTexture( CGContext *context, CGSize size)
    nvgBeginPath( vg);
    {
       nvgRect( vg, 0, 0, size.width, size.height);
-      nvgFillColor( vg, MulleColorMake( 0xFFFF20FF));
+      nvgFillColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFF20FF));
    }
    nvgFill( vg);
 
@@ -36,7 +36,7 @@ static void   drawTexture( CGContext *context, CGSize size)
       radius /= 2.0;
 
       nvgCircle( vg, size.width / 2.0, size.height / 2.0, radius);
-      nvgStrokeColor( vg, MulleColorMake( 0x2040FFFF));
+      nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x2040FFFF));
       nvgStrokeWidth( vg, 4.0);
    }
    nvgStroke( vg);
@@ -58,6 +58,7 @@ static void  createTexture( CGContext *context,
 
    // we create small 32x32 texture
    bitmapInfo = CGBitmapInfoMake( CGBitmapSizeMake( 32, 32),
+                                  0,
                                   CGBitmapEncodingRGBABytes);
 
    frameInfo = CGFrameInfoFBMake( bitmapInfo.size, pixelRatio, 1.0);
@@ -111,7 +112,7 @@ static void  drawStuff( CALayer *layer, CGContext *context)
                                                 context:context] autorelease];
       nvgFillPaint( vg, [paint nvgPaint]);
 #else
-      nvgFillColor( vg, MulleColorMake( 0xFFFF00FF));
+      nvgFillColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFF00FF));
 #endif
    }
    nvgFill( vg);

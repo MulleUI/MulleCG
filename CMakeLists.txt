@@ -1,6 +1,8 @@
 cmake_minimum_required( VERSION 3.15)
 
 project( MulleCG C)
+add_definitions( -DMULLE_CG_EXTERN_GLOBAL=extern)
+
 
 ### mulle-sde environment
 
@@ -11,6 +13,10 @@ list( INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake")
 
 include( Environment)
 
+add_compile_definitions( NANOVG_CLEARTYPE
+FONS_USE_FREETYPE
+)
+
 include( Files)
 
 ### Library
@@ -19,10 +25,6 @@ if( HEADERS_PHASE)
    install( FILES ${INSTALL_PUBLIC_HEADERS}  DESTINATION "include/${PROJECT_NAME}")
    install( FILES ${INSTALL_PRIVATE_HEADERS} DESTINATION "include/${PROJECT_NAME}/private")
    install( FILES ${CMAKE_INCLUDES}          DESTINATION "include/${PROJECT_NAME}/cmake")
-   # hopefully temporary fix for Objective-C
-   if( EXISTS "src/reflect/objc-loader.inc")
-      install( FILES src/reflect/objc-loader.inc DESTINATION "include/${PROJECT_NAME}")
-   endif()
 
    # short cut out
    if( NOT COMPILE_PHASE AND NOT LINK_PHASE)

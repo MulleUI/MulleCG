@@ -28,8 +28,8 @@
 - (instancetype) initBoxGradientWithRect:(CGRect) rect
                             cornerRadius:(CGFloat) cornerRadius
                                  feather:(CGFloat) feather
-                              innerColor:(CGColorRef) innerColor
-                              outerColor:(CGColorRef) outerColor
+                              innerColor:(CGColor) innerColor
+                              outerColor:(CGColor) outerColor
                                  context:(CGContext *) context
 {
    // todo move to CGContext
@@ -50,8 +50,8 @@
 + (instancetype) boxGradientWithRect:(CGRect) point
                         cornerRadius:(CGFloat) cornerRadius
                              feather:(CGFloat) feather
-                          innerColor:(CGColorRef) innerColor
-                          outerColor:(CGColorRef) outerColor
+                          innerColor:(CGColor) innerColor
+                          outerColor:(CGColor) outerColor
                              context:(CGContext *) context
 {
    return( [[[self alloc] initBoxGradientWithRect:point
@@ -71,8 +71,8 @@
 - (instancetype) initRadialGradientWithCenterPoint:(CGPoint) point
                                        innerRadius:(CGFloat) innerRadius
                                        outerRadius:(CGFloat) outerRadius
-                                        innerColor:(CGColorRef) innerColor
-                                        outerColor:(CGColorRef) outerColor
+                                        innerColor:(CGColor) innerColor
+                                        outerColor:(CGColor) outerColor
                                           context:(CGContext *) context
 {
    // todo move to CGContext
@@ -91,8 +91,8 @@
 + (instancetype) radialGradientCenterPoint:(CGPoint) point
                                innerRadius:(CGFloat) innerRadius
                                outerRadius:(CGFloat) outerRadius
-                                innerColor:(CGColorRef) innerColor
-                                outerColor:(CGColorRef) outerColor
+                                innerColor:(CGColor) innerColor
+                                outerColor:(CGColor) outerColor
                                    context:(CGContext *) context
 {
    return( [[[self alloc] initRadialGradientWithCenterPoint:point
@@ -109,8 +109,8 @@
 // not kept by the paint, and the nvgContext doesnt keep the paint
 //
 - (instancetype) initLinearGradientWithRect:(CGRect) rect
-                                 innerColor:(CGColorRef) innerColor
-                                 outerColor:(CGColorRef) outerColor
+                                 innerColor:(CGColor) innerColor
+                                 outerColor:(CGColor) outerColor
                                     context:(CGContext *) context
 {
    // todo move to CGContext
@@ -127,8 +127,8 @@
 
 
 + (instancetype) linearGradientWithRect:(CGRect) rect
-                             innerColor:(CGColorRef) innerColor
-                             outerColor:(CGColorRef) outerColor
+                             innerColor:(CGColor) innerColor
+                             outerColor:(CGColor) outerColor
                                 context:(CGContext *) context
 {
    return( [[[self alloc] initLinearGradientWithRect:rect
@@ -147,7 +147,7 @@
 {
    int   imageID;
 
-   imageID = [image textureIDWithContext:context
+   imageID = [image nvgImageWithContext:context
                               imageFlags:[image imageFlags]];
    if( imageID == -1)
    {
@@ -187,7 +187,7 @@
 }
 
 
-- (int) textureIDWithContext:(CGContext *) context
+- (NSInteger) nvgImageWithContext:(CGContext *) context
 {
    if( context == _context)
       return( _paint.image);
@@ -195,13 +195,13 @@
 }
 
 
-- (CGColorRef) innerColor
+- (CGColor) innerColor
 {
    return( _paint.innerColor);
 }
 
 
-- (CGColorRef) outerColor
+- (CGColor) outerColor
 {
    return( _paint.outerColor);
 }

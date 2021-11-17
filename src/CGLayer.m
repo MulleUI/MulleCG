@@ -5,7 +5,6 @@
 #import "import-private.h"
 
 
-
 @implementation CGLayer
 
 - (instancetype) initWithBitmapInfo:(struct CGBitmapInfo) info
@@ -33,7 +32,7 @@
    // TextureImage is threfore retained by the context and not the other way
    // (how long does the context live though)
    //
-   return( [self initWithTextureID:((NVGLUframebuffer *) _framebuffer)->image
+   return( [self initWithNVGImage:((NVGLUframebuffer *) _framebuffer)->image
                         imageFlags:imageFlags
                            context:context]);
 }
@@ -49,7 +48,7 @@
    }
 
    // assume nvgluDeleteFramebuffer did delete the texture already
-   _textureID = 0;
+   _imageID = 0;
    [super finalize];
 }
 

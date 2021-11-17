@@ -1,6 +1,6 @@
 #import "CGAffineTransform+nanovg.h"
 
-#import "CGAffineTransform+CString.h"
+#import "CGAffineTransform+UTF8String.h"
 
 
 char   *NVGscissorUTF8String( _NVGtransform value);

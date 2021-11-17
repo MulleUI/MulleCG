@@ -14,7 +14,7 @@ endif()
 #
 # Generated from sourcetree: 4edeaf88-96fa-49de-a075-3e49d3d939b3;GL;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-platform-darwin,no-update;
 # Disable with : `mulle-sourcetree mark GL `
-# Disable for this platform: `mulle-sourcetree mark GL no-cmake-platform-linux`
+# Disable for this platform: `mulle-sourcetree mark GL no-cmake-platform-5.11.0-38-generic`
 #
 if( NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    if( NOT GL_LIBRARY)
@@ -87,7 +87,7 @@ endif()
 #
 # Generated from sourcetree: 4f8c9930-b601-4bed-9ef6-59002def0b11;m;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-update;
 # Disable with : `mulle-sourcetree mark m `
-# Disable for this platform: `mulle-sourcetree mark m no-cmake-platform-linux`
+# Disable for this platform: `mulle-sourcetree mark m no-cmake-platform-5.11.0-38-generic`
 #
 if( NOT M_LIBRARY)
    find_library( M_LIBRARY NAMES m)
@@ -158,7 +158,7 @@ endif()
 #
 # Generated from sourcetree: 8be56cd3-eb2f-4805-ae2a-bb7b14522a8b;harfbuzz;no-all-load,no-build,no-cmake-inherit,no-delete,no-dependency,no-fs,no-header,no-import,no-share,no-update;
 # Disable with : `mulle-sourcetree mark harfbuzz `
-# Disable for this platform: `mulle-sourcetree mark harfbuzz no-cmake-platform-linux`
+# Disable for this platform: `mulle-sourcetree mark harfbuzz no-cmake-platform-5.11.0-38-generic`
 #
 if( NOT HARFBUZZ_LIBRARY)
    find_library( HARFBUZZ_LIBRARY NAMES harfbuzz)

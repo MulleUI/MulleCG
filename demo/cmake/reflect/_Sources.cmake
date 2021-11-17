@@ -12,11 +12,13 @@ endif()
 #
 set( SOURCES
 src/main-cgimage.m
+src/main-colors.m
 src/main-draw.m
 src/main-draw-simple.m
 src/main-opengl.m
 src/main-particlelayers.m
 src/main-particles.m
 src/main-screenshot.m
+src/main-text.m
 src/main-texture.m
 )

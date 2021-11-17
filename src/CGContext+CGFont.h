@@ -17,21 +17,22 @@
 - (void) setFont:(CGFont *) font;
 
 - (CGFont *) fallbackFont;
-- (CGFont *) fontWithNameCString:(char *) s;
+- (CGFont *) fontWithNameUTF8String:(char *) s;
 - (CGFloat) fontScale;
 
 - (void) _initFontCache;
 - (void) _doneFontCache;
 - (void) _resetFontCache;
 
+- (void) useFontWithNameUTF8String:(char *) name;
 
 /*
  * Fill fontCache with fonts, don't use during draws as it does I/O
  */
 - (void) addFontWithContentsOfFileWithFileRepresentationString:(char *) filename
-                                               fontNameCString:(char *) name;
+                                            fontNameUTF8String:(char *) name;
 - (void) addFontWithCData:(struct mulle_data) data
-          fontNameCString:(char *) name;
+          fontNameUTF8String:(char *) name;
 @end
 
 

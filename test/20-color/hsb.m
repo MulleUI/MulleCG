@@ -2,7 +2,7 @@
 
 
 
-void   print_color( CGColorRef color)
+void   print_color( CGColor color)
 {
    CGFloat   components[ 4];
 
@@ -11,14 +11,14 @@ void   print_color( CGColorRef color)
                (int) round( color.g * 255),
                (int) round( color.b * 255));
 
-   MulleColorGetHSLAComponents( color, components);
+   CGColorGetHSLAComponents( color, components);
    printf( "  HSL: (%d°, %d%%, %d%%)",
                (int) round( components[ 0] * 360.0),
                (int) round( components[ 1] * 100.0),
                (int) round( components[ 2] * 100.0));
 
    // online tools love to give degrees and percent for this...
-   MulleColorGetHSVAComponents( color, components);
+   CGColorGetHSVAComponents( color, components);
    printf( "  HSB: (%d°, %d%%, %d%%)",
                (int) round( components[ 0] * 360.0),
                (int) round( components[ 1] * 100.0),
@@ -37,7 +37,7 @@ int   main( int argc, char *argv[])
       for( s = 0; s <= 3; s++)
          for( b = 0; b <= 3; b++)
          {
-            print_color( MulleColorMakeHSB( h / 3.0, s / 3.0, b / 3.0));
+            print_color( CGColorMakeHSB( h / 3.0, s / 3.0, b / 3.0));
          }
    return( 0);
 }

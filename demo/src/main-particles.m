@@ -58,7 +58,7 @@ struct Particle
 {
    CGPoint      location;
    CGVector     velocity;
-   CGColorRef   color;
+   CGColor   color;
 };
 
 
@@ -79,7 +79,7 @@ static inline void   ParticleInit( struct Particle *p, CGSize canvasSize)
    }
    while( (r + g + b) < 0.4);
 
-   p->color       = MulleColorMakeRGB( r, g, b);
+   p->color       = CGColorMakeRGB( r, g, b);
 }
 
 static inline void   ParticleDraw( struct Particle *p, NVGcontext *vg)
@@ -228,7 +228,7 @@ int   main()
    styleMask  = EDGE_ANTIALIAS ? 0 : UIWindowStyleNoEdgeAntialias;
    styleMask |= UIWindowStyleRenderNonRetainedOnly;
    window     = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
-                                    titleCString:"Demo"
+                                    titleUTF8String:"Demo"
                                        styleMask:styleMask] autorelease];
    [app addWindow:window];
 

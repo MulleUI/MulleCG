@@ -56,7 +56,7 @@
 {
    CGPoint      location;
    CGVector     velocity;
-   CGColorRef   color;
+   CGColor   color;
 }
 @end
 
@@ -87,7 +87,7 @@
    }
    while( (r + g + b) < 0.4);
 
-   self->color       = MulleColorMakeRGB( r, g, b);
+   self->color       = CGColorMakeRGB( r, g, b);
    return( self);
 }
 
@@ -198,7 +198,7 @@ int   main()
     */
    app    = [UIApplication sharedInstance];
    window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
-                                titleCString:"Demo"
+                                titleUTF8String:"Demo"
                                    styleMask:EDGE_ANTIALIAS ? 0 : UIWindowStyleNoEdgeAntialias] autorelease];
    [app addWindow:window];
 

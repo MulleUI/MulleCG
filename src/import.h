@@ -21,5 +21,9 @@
  */
 
 #import "_MulleCG-import.h"
+#ifndef MULLE_CG_EXTERN_GLOBAL
+# define MULLE_CG_EXTERN_GLOBAL MULLE_C_EXTERN_GLOBAL
+#endif
+
 
 /* You can add some more import statements here */

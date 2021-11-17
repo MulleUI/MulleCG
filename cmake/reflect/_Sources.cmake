@@ -12,24 +12,25 @@ endif()
 #
 set( SOURCES
 nanovg/src/nanovg.c
-src/CGAffineTransform+CString.m
+src/CGAffineTransform+UTF8String.m
 src/CGAffineTransform.c
-src/CGColor.c
+src/CGBitmap+UTF8String.m
+src/CGColor.m
 src/CGContext+CGFont.m
+src/CGContext+OpenGL.m
 src/CGContext+Render.m
 src/CGContext.m
 src/CGDrawable.m
 src/CGFont.m
-src/CGGeometry+CString.m
+src/CGGeometry+UTF8String.m
 src/CGImage.m
 src/CGLayer.m
 src/CGPath.c
 src/CGPath+nanovg.c
-src/MulleCG_asprintf.m
-src/MulleEdgeInsets+CString.m
+src/MulleEdgeInsets+UTF8String.m
 src/MullePaint.m
 src/bmp-writer.c
-src/nanovg+CString.m
+src/nanovg+UTF8String.m
 )
 
 #

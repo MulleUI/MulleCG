@@ -1,12 +1,9 @@
 //
 // Copyright (c) 2020 Nat!, Mulle kybernetiK
 //
-#include "MulleEdgeInsets+CString.h"
+#import "MulleEdgeInsets+UTF8String.h"
 
-#include "include-private.h"
-
-#include "MulleCG_asprintf.h"
-
+#import "import-private.h"
 
 
 // cast this to CGRect as the code is identical ?
@@ -14,7 +11,7 @@ char   *MulleEdgeInsetsUTF8String( MulleEdgeInsets insets)
 {
    auto char  *s;
 
-   s = MulleCG_asprintf( "%.2f %.2f %.2f %.2f",
+   s = MulleObjC_asprintf( "%.2f %.2f %.2f %.2f",
          insets.top,
          insets.left,
          insets.bottom,

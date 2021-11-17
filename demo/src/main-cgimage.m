@@ -13,7 +13,7 @@
 #define W   0xFF, 0xFF, 0xFF, 0xFF
 #define _   0x00, 0x00, 0x00, 0xFF
 
-static unsigned char    bitmap[4 * 8*8] = 
+static unsigned char    bitmap[4 * 8*8] =
 {
    B, B, B, B,  R, R, R, R,
    B, B, B, B,  R, R, R, R,
@@ -33,7 +33,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    CGRect              rect;
    CGImage             *image;
   struct NVGcontext    *vg;
-   
+
    rect = [layer canvas];
 
    vg = CGContextGetNVGContext( context);
@@ -43,7 +43,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    {
       nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
       nvgStrokeWidth( vg, 8);
-      nvgStrokeColor( vg, MulleColorMake( 0x8020A0FF));
+      nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x8020A0FF));
    }
    nvgStroke( vg);
 
@@ -85,7 +85,7 @@ int   main( int argc, char *argv[])
    @autoreleasepool
    {
       window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 200, 200)
-                                   titleCString:"Demo"
+                                   titleUTF8String:"Demo"
                                       styleMask:UIWindowStyleRenderNonRetainedOnly] autorelease];
 
       assert( window);

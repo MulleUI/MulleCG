@@ -3,9 +3,9 @@
 #import "import.h"
 
 
-static inline void   MulleObjectSetCGColorRef( id obj, SEL sel, CGColorRef color)
+static inline void   MulleObjectSetCGColor( id obj, SEL sel, CGColor color)
 {
-   mulle_metaabi_struct_void_return( struct { CGColorRef color; })  param;
+   mulle_metaabi_struct_void_return( struct { CGColor color; })  param;
 
    param.p.color = color;
 
@@ -13,9 +13,9 @@ static inline void   MulleObjectSetCGColorRef( id obj, SEL sel, CGColorRef color
 }
 
 
-static inline CGColorRef   MulleObjectGetCGColorRef( id obj, SEL sel)
+static inline CGColor   MulleObjectGetCGColor( id obj, SEL sel)
 {
-   mulle_metaabi_struct_void_parameter( struct { CGColorRef color; })  param;
+   mulle_metaabi_struct_void_parameter( struct { CGColor color; })  param;
 
    mulle_objc_object_call( obj, (mulle_objc_methodid_t) sel, &param);
    return( param.r.color);

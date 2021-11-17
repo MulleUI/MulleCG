@@ -10,8 +10,8 @@
 //
 @implementation CGFont
 
-- (instancetype) initWithNameCString:(char *) name
-                           fontIndex:(int) fontIndex
+- (instancetype) initWithNameUTF8String:(char *) name
+                             fontIndex:(NSInteger) fontIndex
 {
 	if( _fontIndex == -1)
    {
@@ -19,30 +19,31 @@
       return( nil);
 	}
 
-   [self setNameCString:name];
+   [self setNameUTF8String:name];
 	_fontIndex = fontIndex;
    return( self);
 }
 
 
-+ (instancetype) fontWithNameCString:(char *) name
-                           fontIndex:(int) fontIndex
++ (instancetype) fontWithNameUTF8String:(char *) name
+                              fontIndex:(NSInteger) fontIndex
 {
-   return( [[[self alloc] initWithNameCString:name
+   return( [[[self alloc] initWithNameUTF8String:name
                                    fontIndex:fontIndex] autorelease]);
 }
 
 
-- (void) setNameCString:(char *) s
+- (void) setNameUTF8String:(char *) s
 {
-   MulleObjCObjectSetDuplicatedCString( self, &_nameCString, s);
+   MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, s);
 }
 
 
 - (void) dealloc
 {
-   MulleObjCInstanceDeallocateMemory( self, _nameCString);
+   MulleObjCInstanceDeallocateMemory( self, _nameUTF8String);
    [super dealloc];
 }
+
 
 @end

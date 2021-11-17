@@ -37,6 +37,20 @@ void  drawOpenGL2( UIWindow *window, CGContext *context, struct CGFrameInfo *inf
    glFlush();   
 }
 
+void  drawOpenGL3( UIWindow *window, CGContext *context, struct CGFrameInfo *info)
+{
+   glColor3f( 1.0f, 0.0f, 1.0f ); // magenta color
+
+   glBegin( GL_LINE_LOOP );
+      glVertex3f( -0.40f, 0.0f, 0.0f );
+      glVertex3f( 0.0f, -0.40f, 0.0f );
+      glVertex3f( 0.40f, 0.0f, 0.0f );
+      glVertex3f( 0.0f, 0.40f, 0.0f );
+   glEnd();
+
+   glFlush();   
+}
+
 
 void   setupScene( UIWindow *window)
 {
@@ -76,8 +90,9 @@ int   main( int argc, char *argv[])
    [app addWindow:window];
 
    setupScene( window);
-   [window setWillBeginRenderCallback:drawOpenGL1];
-   [window setdidRenderCallback:drawOpenGL2];  // doesn't work anymore, context is dead
+   [window setWillRenderCallback:drawOpenGL1];
+   [window setWillEndRenderCallback:drawOpenGL2];  
+   [window setDidRenderCallback:drawOpenGL3];  
    [window renderLoop];
 
    [app terminate];

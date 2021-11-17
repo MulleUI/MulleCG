@@ -9,23 +9,24 @@
  *
  *      mulle-sde environment set MULLE_MATCH_TO_C_RUN DISABLE
  */
-#import "CGAffineTransform+CString.h"
+#import "CGAffineTransform+UTF8String.h"
 #import "CGAffineTransform.h"
 #import "CGAffineTransform+nanovg.h"
+#import "CGBitmap+UTF8String.h"
 #import "CGBitmap.h"
 #import "CGColor+MulleObjC.h"
 #import "CGContext+CGFont.h"
+#import "CGContext+OpenGL.h"
 #import "CGContext+Render.h"
 #import "CGContext.h"
 #import "CGDrawable.h"
 #import "CGFont.h"
-#import "CGGeometry+CString.h"
+#import "CGGeometry+UTF8String.h"
 #import "CGImage.h"
 #import "CGLayer.h"
 #import "CGPath.h"
 #import "CGPath+nanovg.h"
-#import "MulleCG_asprintf.h"
-#import "MulleEdgeInsets+CString.h"
+#import "MulleEdgeInsets+UTF8String.h"
 #import "MulleObjCLoader+MulleCG.h"
 #import "MullePaint.h"
 //

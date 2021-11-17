@@ -1,8 +1,8 @@
 //
 // Copyright (c) 2020 Nat!, Mulle kybernetiK
 //
-#ifndef mulle_edge_insets_cstring_h__
-#define mulle_edge_insets_cstring_h__
+#ifndef mulle_edge_insets_utf8string_h__
+#define mulle_edge_insets_utf8string_h__
 
 #include "include.h"
 
