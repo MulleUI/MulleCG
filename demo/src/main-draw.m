@@ -278,8 +278,8 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    NSUInteger          i;
    NSUInteger          j;
    struct NVGcontext   *vg;
-   CGColor          fore;
-   CGColor          back;
+   CGColor             fore;
+   CGColor             back;
    CGRect              canvas;
 
    vg = CGContextGetNVGContext( context);
@@ -514,9 +514,9 @@ int   main( int argc, char *argv[])
 //      styleMask |= UIWindowStyleRenderNonRetainedOnly;
       styleMask |= UIWindowStyleResizable;
 
-      window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 800, 600)
-                                   titleUTF8String:"Demo"
-                                      styleMask:styleMask] autorelease];
+      window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 800, 600)
+                         titleUTF8String:"Demo"
+                               styleMask:styleMask];
 
       assert( window);
       [window setBackgroundColor:CGColorMakeRGBA( 1.0, 1.0, 1.0, 1.0)];

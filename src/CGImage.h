@@ -104,6 +104,11 @@
                         imageFlags:(NSUInteger) imageFlags
                            context:(CGContext *) context;
 
+- (instancetype) initWithBytes:(void *) bytes
+                    bitmapInfo:(struct CGBitmapInfo) bitmapInfo
+                    imageFlags:(NSUInteger) imageFlags
+                       context:(CGContext *) context;
+
 // CGImage size is not mutable, if the bitmap size changes
 // you need to create a new CGImage. The bytes can be freed by the
 // caller afterwards. The bytes are pushed to the GPU immediately.

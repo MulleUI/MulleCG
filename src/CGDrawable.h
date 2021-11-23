@@ -1,7 +1,5 @@
 #import "import.h"
 
-#import "CGBitmap.h"
-
 
 // The whole "drawable" concept doesn't exist in CoreGraphics
 

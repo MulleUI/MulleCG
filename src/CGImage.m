@@ -239,7 +239,12 @@
 {
    NSInteger   imageID;
 
-   assert( bytes);
+   if( ! bytes)
+   {
+      [self release];
+      return( nil);
+   }
+
    assert( bitmapSize.width >= 1);
    assert( bitmapSize.height >= 1);
 
@@ -253,6 +258,56 @@
    return( [self initWithNVGImage:imageID
                         imageFlags:imageFlags
                            context:context]);
+}
+
+
+- (instancetype) initWithBytes:(void *) bytes
+                    bitmapInfo:(struct CGBitmapInfo) bitmapInfo
+                    imageFlags:(NSUInteger) imageFlags
+                       context:(CGContext *) context
+{
+   NSInteger    imageID;
+   BOOL         isRGBA;
+   void         *freeBytes;
+
+   if( ! bytes)
+   {
+      [self release];
+      return( nil);
+   }
+   assert( bitmapInfo.size.width >= 1);
+   assert( bitmapInfo.size.height >= 1);
+
+   assert( [context isActive]);
+
+   // we flip imageFlags on encoding, it allows more control for the
+   // user, who will usually set this to 0
+   freeBytes = NULL;
+   switch( CGBitmapInfoGetEncoding( bitmapInfo))
+   {
+   case CGBitmapEncodingFlipYRGBABytes : imageFlags ^= NVG_IMAGE_FLIPY;
+   case CGBitmapEncodingRGBABytes      : break;
+   default :
+      freeBytes = CGBitmapConvertBytesToEncoding( bytes, bitmapInfo, CGBitmapEncodingRGBABytes, NULL);
+      if( ! freeBytes)
+      {
+         fprintf( stderr, "unsupported CGImage format\n");
+         [self release];
+         return( nil);
+      }
+      bytes = freeBytes;
+   }
+
+   imageID = nvgCreateImageRGBA( CGContextGetNVGContext( context),
+                                 bitmapInfo.size.width,
+                                 bitmapInfo.size.height,
+                                 imageFlags,
+                                 bytes);
+   mulle_free( freeBytes);
+
+   return( [self initWithNVGImage:imageID
+                       imageFlags:imageFlags
+                          context:context]);
 }
 
 

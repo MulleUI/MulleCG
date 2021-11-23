@@ -12,8 +12,8 @@
 #import "CGAffineTransform+UTF8String.h"
 #import "CGAffineTransform.h"
 #import "CGAffineTransform+nanovg.h"
+#import "CGBitmap+Geometry.h"
 #import "CGBitmap+UTF8String.h"
-#import "CGBitmap.h"
 #import "CGColor+MulleObjC.h"
 #import "CGContext+CGFont.h"
 #import "CGContext+OpenGL.h"
@@ -26,7 +26,6 @@
 #import "CGLayer.h"
 #import "CGPath.h"
 #import "CGPath+nanovg.h"
-#import "MulleEdgeInsets+UTF8String.h"
 #import "MulleObjCLoader+MulleCG.h"
 #import "MullePaint.h"
 //

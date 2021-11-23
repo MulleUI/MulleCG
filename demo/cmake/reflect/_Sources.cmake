@@ -15,6 +15,8 @@ src/main-cgimage.m
 src/main-colors.m
 src/main-draw.m
 src/main-draw-simple.m
+src/main-glfw-draw-simple.m
+src/main-grab.m
 src/main-opengl.m
 src/main-particlelayers.m
 src/main-particles.m

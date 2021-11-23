@@ -63,8 +63,8 @@ nanovg/src/stb_truetype.h
 src/CGAffineTransform+UTF8String.h
 src/CGAffineTransform.h
 src/CGAffineTransform+nanovg.h
+src/CGBitmap+Geometry.h
 src/CGBitmap+UTF8String.h
-src/CGBitmap.h
 src/CGColor+MulleObjC.h
 src/CGColor.h
 src/CGContext+CGFont.h
@@ -80,11 +80,9 @@ src/CGPath.h
 src/CGPath+nanovg.h
 src/_MulleCGBackend.h
 src/MulleCG.h
-src/MulleEdgeInsets+UTF8String.h
 src/MulleObjCLoader+MulleCG.h
 src/MullePaint.h
 src/_Roboto-Regular.inc
-src/bmp-writer.h
 src/_emoji.inc
 src/_entypo.inc
 src/nanovg+UTF8String.h

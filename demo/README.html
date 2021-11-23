@@ -1,0 +1,88 @@
+<h1>demos</h1>
+
+<h2>MulleCG + MulleGLFW</h2>
+
+<h3>glfw-draw-simple</h3>
+
+<p>Just draws three bars of color. Can&#39;t get much simpler than that. If this
+demo fails, something very basic is going wrong. The window is a basic GLFW
+window. We need to subclass GLFWWindow actually to tie MulleCG and MulleGLFW
+together.</p>
+
+<p><img src="glfw-draw-simple.png" alt="glfw-draw-simple"></p>
+
+<p><a href="src/main-glfw-draw-simple.m">main-glfw-draw-simple.m</a></p>
+
+<h2>MulleCG + MulleUICore</h2>
+
+<p>From here on we use MulleUICore to demonstrate MulleCG features.</p>
+
+<h3>draw-simple</h3>
+
+<p>This is glfw-draw-simple for MulleUICore. It&#39;s much, much less code. There is
+no need for a UIWindow subclass. We don&#39;t need to implement
+<code>-[CGContext setActive:]</code>. We don&#39;t have to bother with matching GLFW windows
+hints with the required GLFW window hints.</p>
+
+<p><img src="draw-simple.png" alt="draw-simple"></p>
+
+<p><a href="src/main-draw-simple.m">main-draw-simple.m</a></p>
+
+<h3>draw</h3>
+
+<p>This demo is actually very resource intensive. MulleCG (and nanovg) don&#39;t like
+drawing many discrete lines. Notice the performance problems when resizing
+(or not)</p>
+
+<p><img src="draw.png" alt="draw"></p>
+
+<p><a href="src/main-draw.m">main-draw.m</a></p>
+
+<h3>cgimage</h3>
+
+<p>A very basic textured square. Pretty much the simplest texture example
+possible.</p>
+
+<p><img src="cgimage.png" alt="cgimage"></p>
+
+<p><a href="src/main-cgimage.m">main-cgimage.m</a></p>
+
+<h3>particles</h3>
+
+<p><img src="particles.png" alt="particles"></p>
+
+<p><a href="src/main-particles.m">main-particles.m</a></p>
+
+<h3>particlelayers</h3>
+
+<p>Same as particles, but uses a CALayer for each particle.</p>
+
+<p><img src="particlelayers.png" alt="particlelayers"></p>
+
+<p><a href="src/main-particlelayers.m">main-particlelayers.m</a></p>
+
+<h3>colors</h3>
+
+<p>Colors demonstrate the several color models available.</p>
+
+<p><img src="colors.png" alt="colors"></p>
+
+<p><a href="src/main-colors.m">main-colors.m</a></p>
+
+<h3>text</h3>
+
+<p>Small text demo with varying size of text.</p>
+
+<p><img src="text.png" alt="text"></p>
+
+<p><a href="src/main-text.m">main-text.m</a></p>
+
+<h2>Build</h2>
+
+<p>This is a <a href="https://mulle-sde.github.io/">mulle-sde</a> project.</p>
+
+<p>It comes with its own virtual environment and list of dependencies.
+To fetch and build everything say:</p>
+
+<pre><code>mulle-sde craft
+</code></pre>
