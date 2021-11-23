@@ -14,18 +14,18 @@ void   screenshot( UIWindow *window)
    struct CGFramebufferBitmap   fb;
    CGContext                    *context;
 
-   context = [window activateContext];
+   context = [window activateWindowContext];
    assert( [context isActive]);
 
    [image mullePerformFinalize];
    [image release];
 
-   fb    = [context grabLastRenderedFramebuffer:NULL];
-   image = [[CGImage alloc] initWithRGBABytes:fb.data.bytes
+   fb    = [context lastRenderedFramebuffer];
+   image = [[CGImage alloc] initWithRGBABytes:fb.bytes
                                    bitmapSize:fb.info.size
                                    imageFlags:0 // NVG_IMAGE_REPEATX
                                       context:context];
-   [window deactivateContext:context];
+   [window deactivateWindowContext:context];
 
    assert( image);
 }

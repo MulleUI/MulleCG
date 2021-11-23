@@ -11,7 +11,6 @@
  */
 #include "nanovg.h"
 #include "CGColor.h"
-#include "bmp-writer.h"
 #include "nanovg+UTF8String.h"
 //
 // MULLE_MATCH_TO_C_IGNORE_HEADERS=fontstash.h:nanovg_gl.h:nanovg_gl_utils.h:stb_image.h:stb_truetype.h

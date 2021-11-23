@@ -27,9 +27,7 @@ src/CGImage.m
 src/CGLayer.m
 src/CGPath.c
 src/CGPath+nanovg.c
-src/MulleEdgeInsets+UTF8String.m
 src/MullePaint.m
-src/bmp-writer.c
 src/nanovg+UTF8String.m
 )
 

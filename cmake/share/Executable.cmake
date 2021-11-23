@@ -34,7 +34,7 @@ endif()
 include( PreExecutable OPTIONAL)
 
 if( NOT EXECUTABLE_SOURCES)
-   message( FATAL_ERROR "There are no sources to compile for executable ${EXECUTABLE_NAME}. Did mulle-sde update run yet ?")
+   message( FATAL_ERROR "There are no sources to compile for executable ${EXECUTABLE_NAME}. Did `mulle-sde reflect` run yet ?")
 endif()
 
 
@@ -195,3 +195,9 @@ Frameworks aren't force loaded.")
       unset( __EXECUTABLE_SOURCES_UNSET)
    endif()
 endif()
+
+
+# extension : mulle-sde/cmake
+# directory : project/all
+# template  : .../Executable.cmake
+# Suppress this comment with `export MULLE_SDE_GENERATE_FILE_COMMENTS=NO`

@@ -1,7 +1,7 @@
 #import "import.h"
 
 #import "CGColor.h"
-#import "CGBitmap.h"
+
 
 struct NVGcontext;
 
@@ -9,6 +9,15 @@ struct NVGcontext;
 @class CGLayer;
 @class CGContext;
 @class CGImage;
+
+
+enum CGContextBackend
+{
+   CG_GL3,
+   CG_GLES2,
+   CG_GLES3
+};
+
 
 
 @protocol CGContextResource
@@ -20,80 +29,6 @@ struct NVGcontext;
 @end
 
 
-// mulle addition
-typedef struct CGFrameInfo
-{
-   CGSize                 size;             // window coordinates size
-   struct CGBitmapSize    framebufferSize;  // actual pixels (frameSize * pixelRatio)
-   struct CGBitmapRect    viewportFrame;    // used for the viewport (use: 0, 0, frameSize)
-   CGVector               UIScale;
-   CGFloat                pixelRatio;
-   mulle_timeinterval_t   now;              // CAAbsoluteTime
-} CGFrameInfo;
-
-
-// this is a convenience constructor, it's not fully flexible
-static inline struct CGFrameInfo
-   CGFrameInfoSFMake( CGSize size, struct CGBitmapSize framebufferSize, CGFloat scale)
-{
-   struct CGFrameInfo   info;
-
-   memset( &info, 0, sizeof( info));
-   info.size               = size;
-   info.framebufferSize    = framebufferSize;
-   info.viewportFrame.size = framebufferSize;
-   info.UIScale            = CGVectorMake( scale, scale);
-   info.pixelRatio         = size.width / framebufferSize.width;
-
-   return( info);
-}
-
-
-static inline struct CGFrameInfo
-   CGFrameInfoFBMake( struct CGBitmapSize framebufferSize, CGFloat pixelRatio, CGFloat scale)
-{
-   struct CGFrameInfo   info;
-
-   memset( &info, 0, sizeof( info));
-   info.size               = CGSizeMake( framebufferSize.width * pixelRatio,
-                                         framebufferSize.height * pixelRatio);
-   info.framebufferSize    = framebufferSize;
-   info.viewportFrame.size = framebufferSize;
-   info.UIScale            = CGVectorMake( scale, scale);
-   info.pixelRatio         = pixelRatio;
-
-   return( info);
-}
-
-
-struct CGFramebufferBitmap
-{
-   struct mulle_data        data;
-   struct CGBitmapInfo      info;
-   struct mulle_allocator   *allocator;
-   int                      isFlipped;
-};
-
-static inline  void   CGFramebufferBitmapInit( struct CGFramebufferBitmap *p,
-                                               struct mulle_data data,
-                                               struct CGBitmapInfo info,
-                                               struct mulle_allocator *allocator)
-{
-   if( ! p)
-      return;
-   p->data      = data;
-   p->info      = info;
-   p->allocator = allocator; // if NULL no free
-}
-
-
-static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
-{
-   if( p && p->allocator)
-      mulle_allocator_free( p->allocator, p->data.bytes);
-}
-
-
 //
 // for OpenGL we have one context per OpenGL, to keep fonts and
 // other textures around. Each frame is encloded in a
@@ -103,11 +38,11 @@ static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
 // The glfw window is necessary to the set the current OpenGL context.
 // Therefore there is a 1:1 relationship between a context and a window. A
 // thread can have multiple contexts though. But each context needs to be
-// switched in and out. This is done with [UIWindow os_startRender]. The
+// switched in and out. This is done with [UIWindow os_activateContext]. The
 // nanovg context is tied to the OpenGL context. Effectively you have to
 // enclose drawing calls and OpenGL state calls with
-// os_startRender/os_endRender. This is locking, so that there is no
-// accidental switching. If the context is tied to an OpenGL (or Vulcan
+// os_activateContext/os_deactivateContext. This is locking, so that there is
+// no accidental switching. If the context is tied to an OpenGL (or Vulcan
 // whatever) context -isActive will say YES.
 //
 @interface CGContext : NSObject
@@ -125,6 +60,10 @@ static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
    mulle_timeinterval_t         _lastRenderStartTime;
    BOOL                         _isRendering;
    BOOL                         _isActive;
+   // its more convenient to use a private framebuffer for offscreen rendering
+   // than the default framebuffer of a offscreen window. So even if this
+   // context is tied to an offscreen window, it will/should use this
+   // offScreenFramebuffer instead.
    void                         *_offScreenFramebuffer;
    struct CGBitmapSize          _offScreenFramebufferSize;
    CGImage                      *_offScreenFramebufferImage;
@@ -134,16 +73,17 @@ static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
 // not animatable though, better use windows ?
 @property( assign) CGColor       backgroundColor;
 @property( assign) BOOL          rendersOffScreen;
-@property( assign, readonly) id  os_window;  // GLFWWindow
+
 @property( assign) BOOL          debugEnabled;
 @property( assign) char          *debugNameUTF8String;  // useful for debugging
 
 
 @property( readonly) mulle_timeinterval_t   frameDelta;
 
++ (enum CGContextBackend) backend;
+
 - (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
-              useStencilStrokes:(BOOL) useStencilStrokes
-                      os_window:(id) os_window;
+              useStencilStrokes:(BOOL) useStencilStrokes;
 
 - (struct NVGcontext *) nvgContext;
 
@@ -165,8 +105,8 @@ static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
 //    [context suspendRender];
 //    [context _beginNestedRender:&oldInfo];
 //    [context setAlpha:oldAlpha];
-// 
-- (void) _beginNestedRender:(struct CGFrameInfo *) info; 
+//
+- (void) _beginNestedRender:(struct CGFrameInfo *) info;
 
 //
 // used to intermix OpenGL or other commands, this flushes commands
@@ -175,11 +115,11 @@ static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
 - (void) suspendRender;  // flushes and resets
 - (void) resumeRender;   // resumes after a suspend
 
-- (void) changeRender:(struct CGFrameInfo *) info 
+- (void) changeRender:(struct CGFrameInfo *) info
                 alpha:(CGFloat) alpha;
 
 // to return to the "default" framebuffer, either the offscreen or the window
-// one, if no offscreen exists               
+// one, if no offscreen exists
 - (void) bindDefaultFramebuffer;
 
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info;
@@ -229,22 +169,35 @@ static inline void   CGFramebufferBitmapDone( struct CGFramebufferBitmap *p)
 // calls for example.
 - (BOOL) isActive;
 
-// if you use inFlight, remember to flush with suspendRender/resumeRender
-// otherwise likely you will see nothing. Rect is in framebuffer pixels,
-// currently!!)
-- (struct CGFramebufferBitmap) grabFramebufferAtRect:(struct CGBitmapRect) rect
-                                            inFlight:(BOOL) inFlight
-                                           allocator:(struct mulle_allocator *) allocator;
 
-// TODO: combine with grabLastRenderedOffscreenFramebuffer
-- (struct CGFramebufferBitmap) grabLastRenderedFramebuffer:(struct mulle_allocator *) allocator;
+// the low-level glReadPixels routine, allocates memory of appropriate size
+- (struct CGFramebufferBitmap) framebufferBitmapAtRect:(struct CGBitmapRect) rect
+                                 framebufferBitmapType:(enum CGFramebufferBitmapType) type
+                                             allocator:(struct mulle_allocator *) allocator;
+
+// if you use inFlight, remember to flush with suspendRender/resumeRender
+// otherwise likely you will see nothing.
+- (struct CGFramebufferBitmap)
+   lastRenderedFramebufferBitmapType:(enum CGFramebufferBitmapType) type
+                            inFlight:(BOOL) inFlight
+                           allocator:(struct mulle_allocator *) allocator;
+
+- (struct CGFramebufferBitmap) lastRenderedFramebuffer;
 
 // this is available with renderOffScreen==YES and a render has gone through
 // otherwise this could be stale or return something empty
-- (struct CGFramebufferBitmap) grabLastRenderedOffscreenFramebuffer:(struct mulle_allocator *) allocator;
+- (struct CGFramebufferBitmap)
+   lastRenderedOffscreenFramebufferBitmapType:(enum CGFramebufferBitmapType) type
+                                    allocator:(struct mulle_allocator *) allocator;
+
+- (struct CGFramebufferBitmap) lastRenderedOffscreenFramebuffer;
 
 // only useable until the offscreen renderer hits again
 - (CGImage *) framebufferImage;
+- (void) drawFramebufferBitmap:(struct CGFramebufferBitmap *) fb;
+
+- (char *) shaderHeaderUTF8String;
+- (void *) gpuTextureForImageID:(NSInteger) imageID;
 
 @end
 

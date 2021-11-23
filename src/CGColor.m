@@ -301,7 +301,7 @@ static inline int  decode_hsla_array( char *s, float hsla[ 4], unsigned int n)
             if( i || strncmp( end, "rad", 3))
                return( -1);
             // only for h
-            hsla[ i] = hsla[ i] / (2 * M_PI) * max[ i];
+            hsla[ i] = hsla[ i] / (2 * M_2_PIf) * max[ i];
             end      = end + 3;
             break;
          }

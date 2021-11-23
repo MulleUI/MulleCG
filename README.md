@@ -3,6 +3,20 @@
 💫 MulleCG Coregraphics for MulleUI
 
 
+Provides CGContext which uses a nanoVG context to do drawing.
+Manages textures, fonts and shaders.
+
+Does not do any animation or layouting. Does not do Windowing. Does not
+handle events.
+
+> #### Note
+>
+> MulleGLFW provides OpenGL (Vulkan) etc. MulleCG brings nanovg into the picture,
+> which resides on top of OpenGL. MulleCG/nanovg don't depend on MulleGLFW though,
+> so that in the future there might be a MulleSDL and MulleCG doesn't have to
+> change for it.
+
+
 
 ### You are here
 

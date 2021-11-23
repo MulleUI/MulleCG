@@ -105,6 +105,18 @@ l_Position, normal);\n"
 "}\n"
 ;
 */
++ (enum CGContextBackend) backend
+{
+#ifdef NANOVG_GL3_IMPLEMENTATION
+   return( CG_GL3);
+#endif
+#ifdef NANOVG_GLES2_IMPLEMENTATION
+   return( CG_GLES2);
+#endif
+#ifdef NANOVG_GLES3_IMPLEMENTATION
+   return( CG_GLES3);
+#endif
+}
 
 // due to freetype being singlethreaded (mostly ?) the nvgCreate routines
 // need to run locked so only one thread can create a NVG context at the
@@ -112,7 +124,6 @@ l_Position, normal);\n"
 //
 - (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
               useStencilStrokes:(BOOL) useStencilStrokes
-                      os_window:(id) os_window
 {
    int   flags;
 
@@ -139,11 +150,10 @@ l_Position, normal);\n"
 
    if( ! _vg)
    {
+      fprintf( stderr, "Could not create nanovg context\n");
       [self release];
       return( nil);
    }
-
-   _os_window = os_window;
 
    [self _initFontCache];
 
@@ -205,7 +215,6 @@ l_Position, normal);\n"
    mulle_thread_mutex_unlock( &Self._freeTypeLock);
 
    _vg = NULL;
-   _os_window = NULL;
 
    [super finalize];
 }
@@ -228,9 +237,54 @@ l_Position, normal);\n"
 }
 
 
+- (char *) shaderHeaderUTF8String
+{
+#ifdef NANOVG_GL3_IMPLEMENTATION
+   return( "#version 150 core\n");
+#endif
+#ifdef NANOVG_GLES2_IMPLEMENTATION
+   return( "#version 100\n");
+#endif
+#ifdef NANOVG_GLES3_IMPLEMENTATION
+   return( "version 300 es\n");
+#endif
+   return( "");
+}
+
+
+- (void *) gpuTextureForImageID:(NSInteger) imageID
+{
+#ifdef NANOVG_GL3_IMPLEMENTATION
+   return( (void *) (uintptr_t) nvglImageHandleGL3( _vg, imageID));
+#endif
+#ifdef NANOVG_GLES2_IMPLEMENTATION
+   return( (void *) (uintptr_t) nvglImageHandleGLES2( _vg, imageID));
+#endif
+#ifdef NANOVG_GLES3_IMPLEMENTATION
+   return( (void *) (uintptr_t) nvglImageHandleGLES3( _vg, imageID));
+#endif
+   abort();
+}
+
+
 - (struct NVGcontext *) nvgContext
 {
    return( CGContextGetNVGContext( self));
+}
+
+
+static void  checkGLError( const char* str)
+{
+#ifdef DEBUG
+	GLenum err;
+
+	err = glGetError();
+	if (err != GL_NO_ERROR) {
+		printf("Error %08x after %s\n", err, str);
+      assert( err == GL_NO_ERROR);
+		return;
+	}
+#endif
 }
 
 
@@ -241,6 +295,7 @@ l_Position, normal);\n"
    CGColorGetComponents( _backgroundColor, rgba);
    glClearColor( rgba[ 0], rgba[ 1], rgba[ 2], rgba[ 3]);
    glClear( GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+   checkGLError( "after clear framebuffer");
 }
 
 
@@ -248,7 +303,7 @@ l_Position, normal);\n"
 #define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
 
 
-- (void) changeRender:(struct CGFrameInfo *) info 
+- (void) changeRender:(struct CGFrameInfo *) info
                 alpha:(CGFloat) alpha
 {
    assert( _isActive);
@@ -257,13 +312,19 @@ l_Position, normal);\n"
    _currentFrameInfo = *info;
    _alpha            = alpha;
 
+   checkGLError( "before nvgChangeFrame");
+
+   // MEMO: the gLViewPort should be done afterwards
    nvgChangeFrame( _vg, _currentFrameInfo.size.width,
                         _currentFrameInfo.size.height,
                         _currentFrameInfo.pixelRatio);
+   checkGLError( "after nvgChangeFrame");
+
    glViewport( _currentFrameInfo.viewportFrame.origin.x,
                _currentFrameInfo.viewportFrame.origin.y,
                _currentFrameInfo.viewportFrame.size.width,
                _currentFrameInfo.viewportFrame.size.height);
+   checkGLError( "after glViewport");
 }
 
 
@@ -272,13 +333,18 @@ l_Position, normal);\n"
    assert( _isActive);
    assert( _isRendering);
 
-   nvgBeginFrame( _vg, _currentFrameInfo.size.width,
-                       _currentFrameInfo.size.height,
-                       _currentFrameInfo.pixelRatio);
+   checkGLError( "before resumeRender");
+
    glViewport( _currentFrameInfo.viewportFrame.origin.x,
                _currentFrameInfo.viewportFrame.origin.y,
                _currentFrameInfo.viewportFrame.size.width,
                _currentFrameInfo.viewportFrame.size.height);
+   checkGLError( "glViewPort");
+
+   nvgBeginFrame( _vg, _currentFrameInfo.size.width,
+                       _currentFrameInfo.size.height,
+                       _currentFrameInfo.pixelRatio);
+   checkGLError( "nvgBeginFrame");
 }
 
 
@@ -286,6 +352,8 @@ l_Position, normal);\n"
 {
    if( ! CGBitmapSizeEqualToSize( _offScreenFramebufferSize, info->framebufferSize))
    {
+      checkGLError( "before framebuffer delete");
+
       if( _offScreenFramebuffer)
       	nvgluDeleteFramebuffer((NVGLUframebuffer *) _offScreenFramebuffer);
 
@@ -295,10 +363,14 @@ l_Position, normal);\n"
       [_offScreenFramebufferImage autorelease];
       _offScreenFramebufferImage = nil;
 
+      checkGLError( "before framebuffer create");
+
       _offScreenFramebuffer = nvgluCreateFramebuffer( _vg,
                                                       (int) info->framebufferSize.width,
                                                       (int) info->framebufferSize.height,
                                                       0);
+       checkGLError( "after framebuffer create");
+
 //      fprintf( stderr, "created new offscreen framebuffer\n");
       if( ! _offScreenFramebuffer)
          abort();
@@ -346,18 +418,28 @@ l_Position, normal);\n"
    if( _lastRenderStartTime == 0.0)
       _frameDelta = _renderStartTime - _lastRenderStartTime;
 
+   checkGLError( "before begin nested render");
 
    [self _beginNestedRender:info];
    // now vg calls can happen
+
+   checkGLError( "before delete textureIDs");
 
    // delete all queued textureIDs
    [self deleteTextureIDs];
 
    if( _rendersOffScreen)
    {
+      checkGLError( "before prepareOffScreenFramebuffer");
+
       [self prepareOffScreenFramebuffer:info];
       // create or reuse existing offscreen framebuffer
+
+      checkGLError( "before bind buffer");
+
       nvgluBindFramebuffer( _offScreenFramebuffer);
+
+      checkGLError( "after bind buffer");
    }
 }
 
@@ -365,6 +447,8 @@ l_Position, normal);\n"
 - (void) bindDefaultFramebuffer
 {
    nvgluBindFramebuffer( _rendersOffScreen ? _offScreenFramebuffer : NULL);
+
+   checkGLError( "after bind buffer");
 }
 
 - (mulle_timeinterval_t) renderStartTime
@@ -397,6 +481,8 @@ l_Position, normal);\n"
 
    nvgluBindFramebuffer( NULL);
    _isRendering = NO;
+
+   checkGLError( "after unbind buffer");
 }
 
 - (void) _finishRender
@@ -492,36 +578,69 @@ static inline BOOL   haveLastFrameInfo( CGContext *self)
    _mulle__pointerarray_reset( &_deletedTexturedIDs);
 }
 
-
-- (struct CGFramebufferBitmap) grabFramebufferAtRect:(struct CGBitmapRect) rect
-                                            inFlight:(BOOL) inFlight
-                                           allocator:(struct mulle_allocator *) allocator;
+/*
+ * Read framebuffer information from GPU to CPU
+ */
+- (struct CGFramebufferBitmap) framebufferBitmapAtRect:(struct CGBitmapRect) rect
+                                 framebufferBitmapType:(enum CGFramebufferBitmapType) type
+                                             allocator:(struct mulle_allocator *) allocator
 {
    struct CGFramebufferBitmap   fb;
+   enum CGBitmapEncoding        encoding;
+   GLenum                       format;
+   GLenum                       type;
+   size_t                       size;
 
-   fb.allocator        = allocator ? allocator : &mulle_default_allocator;
+   switch( type)
+   {
+   case CGFramebufferRGBABytes     : encoding = CGBitmapEncodingFlipYRGBABytes;
+                                     format   = GL_RGBA;
+                                     type     = GL_UNSIGNED_BYTE;
+                                     break;
+   case CGFramebufferRGBAFloats    : encoding = CGBitmapEncodingFlipYRGBABytes;
+                                     format   = GL_RGBA;
+                                     type     = GL_FLOAT;
+                                     break;
+//   case CGFramebufferStencilBytes  : encoding = CGBitmapEncodingFlipYMonochromeBytes;
+//                                     format   = GL_STENCIL_INDEX;
+//                                     type     = GL_UNSIGNED_BYTE;
+//                                     break;
+   case CGFramebufferStencilFloats : encoding = CGBitmapEncodingFlipYMonochromeFloats;
+                                     format   = GL_STENCIL_INDEX;
+                                     type     = GL_FLOAT;
+                                     break;
+//   case CGFramebufferDepthBytes    : encoding = CGBitmapEncodingFlipYMonochromeBytes;
+//                                     format   = GL_DEPTH_COMPONENT;
+//                                     type     = GL_UNSIGNED_BYTE;
+//                                     break;
+   case CGFramebufferDepthFloats   : encoding = CGBitmapEncodingFlipYMonochromeFloats;
+                                     format   = GL_DEPTH_COMPONENT;
+                                     type     = GL_FLOAT;
+                                     break;
+   }
 
-   fb.info.size.width  = rect.size.width;
-   fb.info.size.height = rect.size.height;
-   fb.info.encoding    = CGBitmapEncodingFlipYRGBABytes;
+   fb.info        = CGBitmapInfoMake( rect.size, 0, encoding);
+   size           = CGBitmapInfoGetAllocationSize( fb.info);
+   fb.allocator   = allocator ? allocator : &mulle_default_allocator;
+   // nvidia seemingly has problems if rect has some off values(guess)
+   // so we add something for safety (valgrinds better)
+   size          += 16;
+   fb.bytes       = mulle_allocator_malloc( fb.allocator, size);
 
-   fb.data.length = CGBitmapInfoGetLineLength( fb.info) * fb.info.size.height;
-   fb.data.bytes  = mulle_allocator_malloc( fb.allocator, fb.data.length);
-
-
-   glReadBuffer( inFlight ? GL_BACK : GL_FRONT);
-   glReadPixels( (int) rect.origin.x, (int) rect.origin.y,
-                 (int) fb.info.size.width,
-                 (int) fb.info.size.height,
-                 GL_RGBA,
-                 GL_UNSIGNED_BYTE,
-                 fb.data.bytes);
-   // TODO: check OpenGL errors
+   glReadPixels( (int) rect.origin.x,   (int) rect.origin.y,
+                 (int) rect.size.width, (int) rect.size.height,
+                 format,
+                 type,
+                 fb.bytes);
+   checkGLError( "after glReadPixels");
    return( fb);
 }
 
 
-- (struct CGFramebufferBitmap) grabLastRenderedFramebuffer:(struct mulle_allocator *) allocator;
+- (struct CGFramebufferBitmap)
+   lastRenderedFramebufferBitmapType:(enum CGFramebufferBitmapType) type
+                            inFlight:(BOOL) inFlight
+                           allocator:(struct mulle_allocator *) allocator
 {
    struct CGBitmapRect    rect;
    struct CGFrameInfo    *info;
@@ -530,15 +649,27 @@ static inline BOOL   haveLastFrameInfo( CGContext *self)
    info = [self lastFrameInfo];
    if( info)
       rect.size = info->framebufferSize;
-   return( [self grabFramebufferAtRect:rect
-                              inFlight:NO
-                             allocator:allocator]);
+   glReadBuffer( inFlight ? GL_BACK : GL_FRONT);
+   return( [self framebufferBitmapAtRect:rect
+                   framebufferBitmapType:type
+                               allocator:allocator]);
 }
 
 
-- (struct CGFramebufferBitmap) grabLastRenderedOffscreenFramebuffer:(struct mulle_allocator *) allocator
+- (struct CGFramebufferBitmap) lastRenderedFramebuffer
+{
+   return( [self lastRenderedFramebufferBitmapType:CGFramebufferRGBABytes
+                                          inFlight:NO
+                                         allocator:NULL]);
+}
+
+
+- (struct CGFramebufferBitmap)
+   lastRenderedOffscreenFramebufferBitmapType:(enum CGFramebufferBitmapType) type
+                                    allocator:(struct mulle_allocator *) allocator
 {
    struct CGFramebufferBitmap   fb;
+   struct CGBitmapRect          bitmapRect;
 
    assert( ! _isRendering);  // bad bad bad
 
@@ -548,30 +679,27 @@ static inline BOOL   haveLastFrameInfo( CGContext *self)
       return( fb);
    }
 
-   fb.allocator        = allocator ? allocator : &mulle_default_allocator;
-
-   fb.info.size.width  = _offScreenFramebufferSize.width;
-   fb.info.size.height = _offScreenFramebufferSize.height;
-   fb.info.encoding    = CGBitmapEncodingFlipYRGBABytes;
-
-   fb.data.length      = _offScreenFramebufferSize.width *
-                         _offScreenFramebufferSize.height * 4;
-   // implicity transparent background
-   fb.data.bytes  = mulle_allocator_calloc( fb.allocator, 1, fb.data.length);
-
    nvgluBindFramebuffer( _offScreenFramebuffer);
+   checkGLError( "after bind buffer");
    {
-      // TODO: check return value or error or something
-      glReadPixels( 0, 0,
-                   _offScreenFramebufferSize.width,
-                   _offScreenFramebufferSize.height,
-                   GL_RGBA,
-                   GL_UNSIGNED_BYTE,
-                   fb.data.bytes);
+      bitmapRect = CGBitmapRectMake( 0, 0,
+                                     _offScreenFramebufferSize.width,
+                                     _offScreenFramebufferSize.height);
+      fb = [self framebufferBitmapAtRect:bitmapRect
+                   framebufferBitmapType:type
+                               allocator:allocator];
    }
    nvgluBindFramebuffer( NULL);
+   checkGLError( "after unbind buffer");
 
    return( fb);
+}
+
+
+- (struct CGFramebufferBitmap) lastRenderedOffscreenFramebuffer
+{
+   return( [self lastRenderedOffscreenFramebufferBitmapType:CGFramebufferRGBABytes
+                                                  allocator:NULL]);
 }
 
 
@@ -598,6 +726,64 @@ static inline BOOL   haveLastFrameInfo( CGContext *self)
    }
 
    return( _offScreenFramebufferImage);
+}
+
+
+
+- (void) drawFramebufferBitmap:(struct CGFramebufferBitmap *) fb
+{
+   CGImage                  *image;
+   CGDrawableOptions        options;
+   CGRect                   rect;
+   enum CGBitmapEncoding    targetEncoding;
+   void                     *bytes;
+   struct CGBitmapInfo      info;
+
+   targetEncoding = CGBitmapEncodingRGBABytes;
+   switch( CGBitmapInfoGetEncoding( fb->info))
+   {
+   case CGBitmapEncodingFlipYRGBABytes :
+   case CGBitmapEncodingRGBABytes :
+      image = [[[CGImage alloc] initWithBytes:fb->bytes
+                                 bitmapInfo:fb->info
+                                 imageFlags:0
+                                    context:self] autorelease];
+      break;
+
+   default:
+      bytes = CGBitmapConvertBytesToEncoding( fb->bytes, fb->info, targetEncoding, NULL);
+      if( ! bytes)
+         abort();
+      info  = CGBitmapInfoMake( fb->info.size, 0, targetEncoding);
+      image = [[[CGImage alloc] initWithBytes:fb->bytes
+                                   bitmapInfo:fb->info
+                                   imageFlags:0
+                                    context:self] autorelease];
+      mulle_free( bytes);
+   }
+
+   rect    = CGRectMake( 0, 0, fb->info.size.width, fb->info.size.height);
+   options = CGDrawableOptionsMake( 0.0, 1.0, 0.0, YES);
+   [image drawRect:rect
+           options:&options
+           context:self];
+
+   // just for debugging, draws a frame somewhere
+   {
+      struct NVGcontext   *vg;
+
+      vg = CGContextGetNVGContext( self);
+
+      // draw a rectangle on top so we know something is drawn...
+      nvgBeginPath( vg);
+      {
+         rect = CGRectInset( rect, 20, 20);
+         nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+         nvgStrokeWidth( vg, 3);
+         nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x8020A0FF));
+      }
+      nvgStroke( vg);
+   }
 }
 
 
