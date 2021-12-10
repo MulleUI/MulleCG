@@ -13,7 +13,6 @@ endif()
 set( SOURCES
 nanovg/src/nanovg.c
 src/CGAffineTransform+UTF8String.m
-src/CGAffineTransform.c
 src/CGBitmap+UTF8String.m
 src/CGColor.m
 src/CGContext+CGFont.m

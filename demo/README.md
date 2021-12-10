@@ -3,6 +3,10 @@
 
 ## MulleCG + MulleGLFW
 
+In the most basic setup **MulleGLFW** is used to get access to a window and
+OpenGL/Vulkan/Metal context. This is more cumbersome than using **UIWindow**
+though.
+
 ### glfw-draw-simple
 
 Just draws three bars of color. Can't get much simpler than that. If this
@@ -15,16 +19,29 @@ together.
 [main-glfw-draw-simple.m](src/main-glfw-draw-simple.m)
 
 
+### glfw-cglayer
+
+This creates a tiny 64x64 offscreen buffer and fills it with a uniform color.
+Then draws a circle into it. The buffer is written to a BMP file.
+
+
+![glfw-cglayer](glfw-cglayer.png)
+
+[main-glfw-cglayer.m](src/main-glfw-cglayer.m)
+
+> The idea of drawing into CGLayers is expanded on in **cglayer**.
+
+
 ## MulleCG + MulleUICore
 
-From here on we use MulleUICore to demonstrate MulleCG features.
+From here on **UIWindow** is used to demonstrate MulleCG features.
 
 ### draw-simple
 
 This is glfw-draw-simple for MulleUICore. It's much, much less code. There is
-no need for a UIWindow subclass. We don't need to implement
-`-[CGContext setActive:]`. We don't have to bother with matching GLFW windows
-hints with the required GLFW window hints.
+no need for a window subclass. We don't need to implement
+`-[CGContext setActive:]`. We don't have to bother with GLFW windows
+hints.
 
 ![draw-simple](draw-simple.png)
 
@@ -34,8 +51,7 @@ hints with the required GLFW window hints.
 ### draw
 
 This demo is actually very resource intensive. MulleCG (and nanovg) don't like
-drawing many discrete lines. Notice the performance problems when resizing
-(or not)
+drawing many discrete lines. Notice the performance problems when resizing.
 
 ![draw](draw.png)
 
@@ -52,7 +68,19 @@ possible.
 [main-cgimage.m](src/main-cgimage.m)
 
 
+### cglayer
+
+A drawing (the red/white/blue) flag is rendered into an offscreen
+framebuffer/texture and then used as an image to draw.
+
+![cglayer](cglayer.png)
+
+[main-cglayer.m](src/main-cglayer.m)
+
+
 ### particles
+
+This is a small demonstration of drawing particles with nanovg.
 
 ![particles](particles.png)
 
@@ -67,6 +95,7 @@ Same as particles, but uses a CALayer for each particle.
 
 [main-particlelayers.m](src/main-particlelayers.m)
 
+
 ### colors
 
 Colors demonstrate the several color models available.
@@ -74,6 +103,7 @@ Colors demonstrate the several color models available.
 ![colors](colors.png)
 
 [main-colors.m](src/main-colors.m)
+
 
 ### text
 

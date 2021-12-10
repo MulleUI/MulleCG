@@ -61,9 +61,7 @@ nanovg/src/nanovg.h
 nanovg/src/stb_image.h
 nanovg/src/stb_truetype.h
 src/CGAffineTransform+UTF8String.h
-src/CGAffineTransform.h
 src/CGAffineTransform+nanovg.h
-src/CGBitmap+Geometry.h
 src/CGBitmap+UTF8String.h
 src/CGColor+MulleObjC.h
 src/CGColor.h

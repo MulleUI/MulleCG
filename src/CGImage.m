@@ -142,8 +142,9 @@
 {
    if( _imageID)
    {
-      // the gpuTexture may have been nilled out by finalize
+      // the gpuTexture may have been nil-ed out by finalize
       [context deleteTextureID:_imageID];
+      _imageID = 0;
    }
    _context = nil;
 }
@@ -174,6 +175,7 @@
       //
       vg = _CGContextGetNVGContext( _context);
       nvgForgetImageTexture( vg, _imageID);
+      _imageID = 0;  // but don't delete it now
    }
 
    [_sharedGPUTexture release];

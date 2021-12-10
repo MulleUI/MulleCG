@@ -35,6 +35,19 @@
 #endif
 
 
+#if MULLE_CG_GLVERSION == MULLE_CG_GLES2
+# define GL_GLEXT_PROTOTYPES
+# include <GLES2/gl2.h>
+# include <GLES2/gl2ext.h>
+#endif
+
+#if MULLE_CG_GLVERSION == MULLE_CG_GLES3
+# define GL_GLEXT_PROTOTYPES
+# include <GLES3/gl3.h>
+# include <GLES3/gl3ext.h>
+#endif
+
+
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"
 

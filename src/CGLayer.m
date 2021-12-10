@@ -7,25 +7,34 @@
 
 @implementation CGLayer
 
-- (instancetype) initWithBitmapInfo:(struct CGBitmapInfo) info
++ (instancetype) layerWithBitmapSize:(struct CGBitmapSize) bitmapSize
+                         imageFlags:(NSUInteger) imageFlags
+                            context:(CGContext *) context
+{
+   return( [[[self alloc] initWithBitmapSize:bitmapSize
+                                  imageFlags:imageFlags
+                                     context:context] autorelease]);
+}
+
+- (instancetype) initWithBitmapSize:(struct CGBitmapSize) bitmapSize
                          imageFlags:(NSUInteger) imageFlags
                             context:(CGContext *) context
 {
    NVGcontext   *vg;
 
    assert( context && [context isKindOfClass:[CGContext class]]);
-   assert( info.encoding == CGBitmapEncodingRGBABytes);
 
    vg           = CGContextGetNVGContext( context);
    _framebuffer = nvgluCreateFramebuffer( vg,
-                                          info.size.width,
-                                          info.size.height,
+                                          bitmapSize.width,
+                                          bitmapSize.height,
                                           imageFlags);
    if( ! _framebuffer)
    {
       [self release];
       return( nil);
    }
+
 
    //
    // Image is dependent on the graphics context, and can't live without it
@@ -38,59 +47,73 @@
 }
 
 
-- (void) finalize
+- (void) contextDidRemoveObject:(CGContext *) context
 {
+   [super contextDidRemoveObject:context];
 
    if( _framebuffer)
    {
    	nvgluDeleteFramebuffer((NVGLUframebuffer *) _framebuffer);
       _framebuffer = NULL;
    }
-
-   // assume nvgluDeleteFramebuffer did delete the texture already
-   _imageID = 0;
-   [super finalize];
 }
 
 
-- (struct mulle_data) readRGBACData:(struct mulle_allocator *) allocator
+- (void) bindFramebuffer
+{
+   nvgluBindFramebuffer( _framebuffer);
+}
+
+
+- (void) unbindFramebuffer
+{
+   nvgluBindFramebuffer( NULL);
+}
+
+
+- (void *) readRGBABytes:(struct mulle_allocator *) allocator
 {
    struct mulle_data   data;
+   struct CGBitmapSize   bitmapSize;
 
-   data.length = _bitmapInfo.size.width * _bitmapInfo.size.height * 4;
+   bitmapSize  = [self bitmapSize];
+   data.length = bitmapSize.width * bitmapSize.height * 4;
+   assert( data.length);
 
    // implicity transparent background
    data.bytes  = mulle_allocator_calloc( allocator, 1, data.length);
 
-   nvgluBindFramebuffer( _framebuffer);
+   [self bindFramebuffer];
    {
       glReadPixels( 0, 0,
-                   _bitmapInfo.size.width,
-                   _bitmapInfo.size.height,
+                   bitmapSize.width,
+                   bitmapSize.height,
                    GL_RGBA,
                    GL_UNSIGNED_BYTE,
                    data.bytes);
    }
-   nvgluBindFramebuffer( NULL);
+   [self unbindFramebuffer];
 
-   return( data);
+   return( data.bytes);
 }
+
 
 
 - (void) beginRender:(struct CGFrameInfo *) renderInfo
 {
    // render view into a framebuffer tied to the texture
-   nvgluBindFramebuffer( _framebuffer);
+   [self bindFramebuffer];
    [_context beginRender:renderInfo];
-   [_context clearFramebuffer];  // suspect and too early ?=
 }
 
 
 - (void) endRender
 {
    [_context endRender];
-   nvgluBindFramebuffer( NULL);
+   [self unbindFramebuffer];
 }
+
+
 
 
 - (instancetype) initWithContentsOfFileCString:(char *) filename

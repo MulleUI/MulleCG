@@ -1,6 +1,7 @@
 #ifndef _mulle_cg_backend_h__
 #define _mulle_cg_backend_h__
 
+// TODO: unify with CG_GLES et al-
 #define MULLE_CG_GL      1
 #define MULLE_CG_GLES2   2
 #define MULLE_CG_GLES3   3
@@ -8,7 +9,7 @@
 
 // change the "backend" to use
 #ifndef MULLE_CG_GLVERSION
-# define MULLE_CG_GLVERSION   MULLE_CG_GL
+# define MULLE_CG_GLVERSION   MULLE_CG_GLES3
 #endif
 
 

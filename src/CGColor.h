@@ -11,6 +11,34 @@ typedef NVGcolor   CGColor;      // actually a little struct we have this
                                  // misnomer for compatibility
 typedef void       *CGColorSpace;  // unsure yet, probably an enum later on
 
+typedef NSUInteger    CGHexColor;
+
+// superflous make-pretend cast helper
+static inline CGHexColor   CGUnsignedIntegerAsHexColor( NSUInteger color)
+{
+   return( (CGHexColor) color);
+}
+
+// superflous make-pretend cast helper
+static inline NSUInteger   CGHexColorAsUnsignedInteger( CGHexColor color)
+{
+   return( (NSUInteger) color);
+}
+
+
+static inline CGHexColor   CGHexColorMakeWithRGBA( float r, float g, float b, float a)
+{
+   assert( r >= 0.0 && r <= 1.0);
+   assert( g >= 0.0 && g <= 1.0);
+   assert( b >= 0.0 && b <= 1.0);
+   assert( a >= 0.0 && a <= 1.0);
+
+   return( ((uint32_t) (0xFF * r) << 24) |
+           ((uint32_t) (0xFF * g) << 16) |
+           ((uint32_t) (0xFF * b) << 8) |
+           ((uint32_t) (0xFF * a)));
+}
+
 
 // NVGColor is a float[ 4] in reality
 // MEMO: called "With" because we are not creating an unsigndInteger
@@ -23,12 +51,17 @@ static inline CGColor   CGColorMakeWithUnsignedInteger( NSUInteger color)
 		(color >> 0) & 0xff);
 }
 
+static inline CGColor   CGColorMakeWithHexColor( CGHexColor color)
+{
+   return( CGColorMakeWithUnsignedInteger( (NSUInteger) color));
+}
+
 // MEMO: NOT called "With" because we are making a gray color
 static inline CGColor   CGColorMakeGray( CGFloat gray, CGFloat alpha)
 {
    assert( gray >= 0.0 && gray <= 1.0);
 
-   return( nvgRGBAf( gray, gray, gray, alpha));
+   return( nvgRGBAf( 0.2125f * gray, 0.7154f * gray, 0.0721f * gray, alpha));
 }
 
 
@@ -36,7 +69,7 @@ static inline CGColor   CGColorMakeGrayOpaque( CGFloat gray)
 {
    assert( gray >= 0.0 && gray <= 1.0);
 
-   return( nvgRGB( gray, gray, gray));
+   return( nvgRGB( 0.2125f * gray, 0.7154f * gray, 0.0721f * gray));
 }
 
 
@@ -143,6 +176,20 @@ static inline NSUInteger   CGColorGetUnsignedInteger( CGColor color)
            | ((uint32_t) (color.b * 0xFF) << 8)
            | ((uint32_t) (color.a * 0xFF)) );
 }
+
+
+static inline CGHexColor   CGColorGetHexColor( CGColor color)
+{
+   return( (CGHexColor) CGColorGetUnsignedInteger( color));
+}
+
+
+static inline CGFloat   CGColorGetGray( CGColor color)
+{
+   return( ((0.2125f * color.r) + (0.7154f * color.b) + (0.0721f * color.g)) * color.a);
+}
+
+
 
 
 void  CGColorGetHSLAComponents( CGColor color, CGFloat *components);
