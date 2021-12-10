@@ -1,13 +1,24 @@
-#import <MulleUICore/MulleUICore.h>
+#define _GNU_SOURCE
 
-#import <string.h>
+#import "import-private.h"
 
+#include <string.h>
+#include <stdlib.h>
 
 //
 // what does this demo ? It shows the UIWindow render callbacks, and how
 // you can place OpenGL behind or in front of the scene. Consequently this
-// demo rather belongs in MulleUICore
+// demo rather belongs in MulleUICore.
 //
+// This demo only works with OpenGL because OpenGLES does not support the
+// used commands. Rewriting it in OpenGLES would be to wordy for a demo.
+//
+// There is a danger in setting UIWindowOpenGLDeprecated. The nanovg
+// backend is hard-compiled against -[CGContext backend], so there could be
+// a mismatch. In what way this will impede nanovg needs to be determined
+// In this demo, there are no "real" nanovg calls, so it doesn't matter
+//
+
 void  drawOpenGL1( UIWindow *window, CGContext *context, struct CGFrameInfo *info)
 {
    glColor3f( 0.0f, 0.0f, 1.0f ); // blue color
@@ -19,7 +30,7 @@ void  drawOpenGL1( UIWindow *window, CGContext *context, struct CGFrameInfo *inf
       glVertex3f( 0.0f, 0.5f, 0.0f );
    glEnd();
 
-   glFlush();   
+   glFlush();
 }
 
 
@@ -34,8 +45,9 @@ void  drawOpenGL2( UIWindow *window, CGContext *context, struct CGFrameInfo *inf
       glVertex3f( 0.0f, 0.45f, 0.0f );
    glEnd();
 
-   glFlush();   
+   glFlush();
 }
+
 
 void  drawOpenGL3( UIWindow *window, CGContext *context, struct CGFrameInfo *info)
 {
@@ -48,7 +60,7 @@ void  drawOpenGL3( UIWindow *window, CGContext *context, struct CGFrameInfo *inf
       glVertex3f( 0.0f, 0.40f, 0.0f );
    glEnd();
 
-   glFlush();   
+   glFlush();
 }
 
 
@@ -70,7 +82,8 @@ void   setupScene( UIWindow *window)
    [view setBackgroundColor:[UIColor redColor]];
    [contentPlane addSubview:view];
 
-   frame.origin.x = CGRectGetMaxX( rect) - frame.size.width;  
+   frame.origin.x = CGRectGetMaxX( rect) - frame.size.width;
+
    view = [UIView viewWithFrame:frame];
    [view setBackgroundColor:[UIColor greenColor]];
    [contentPlane addSubview:view];
@@ -81,18 +94,36 @@ int   main( int argc, char *argv[])
 {
    UIWindow       *window;
    UIApplication  *app;
+   NSUInteger     bits;
+
    /*
     * window and app
     */
-   app    = [UIApplication sharedInstance];
-   window = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)];
+   app = [UIApplication sharedInstance];
+
+   window = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
+                      titleUTF8String:"Demo"
+                            styleMask:UIWindowOpenGLDeprecated];
+   if( ! window)
+   {
+      fprintf( stderr, "Need OpenGL for this demo\n");
+      return( 1);
+   }
+
    [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
    [app addWindow:window];
 
    setupScene( window);
-   [window setWillRenderCallback:drawOpenGL1];
-   [window setWillEndRenderCallback:drawOpenGL2];  
-   [window setDidRenderCallback:drawOpenGL3];  
+
+   bits = 7;
+   if( argc == 2)
+      bits= atoi( argv[ 1]);
+   if( bits & 1)
+      [window setWillRenderCallback:drawOpenGL1];
+   if( bits & 2)
+     [window setWillEndRenderCallback:drawOpenGL2];
+   if( bits & 4)
+      [window setDidRenderCallback:drawOpenGL3];
    [window renderLoop];
 
    [app terminate];

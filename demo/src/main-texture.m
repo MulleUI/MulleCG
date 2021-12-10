@@ -57,19 +57,15 @@ static void  createTexture( CGContext *context,
    assert( pixelRatio > 0.0);
 
    // we create small 32x32 texture
-   bitmapInfo = CGBitmapInfoMake( CGBitmapSizeMake( 32, 32),
-                                  0,
-                                  CGBitmapEncodingRGBABytes);
 
-   frameInfo = CGFrameInfoFBMake( bitmapInfo.size, pixelRatio, 1.0);
-
-   texture = [[CGLayer alloc] initWithBitmapInfo:bitmapInfo
-                                      imageFlags:imageFlags
-                                         context:context];
+   texture = [CGLayer layerWithBitmapSize:CGBitmapSizeMake( 32, 32)
+                               imageFlags:imageFlags
+                                  context:context];
    assert( texture);
 
-   // as we are inside a render, and we set a new frameInfo
-   // we suspend the current render (this will flush)
+   frameInfo = CGFrameInfoFBMake( CGBitmapSizeMake( 32, 32), pixelRatio, 1.0);
+
+   // to use beginRender the context needs to be active but not rendering
    [texture beginRender:&frameInfo];
    drawTexture( context, frameInfo.size);
    [texture endRender];
@@ -142,11 +138,11 @@ void   setupScene( UIWindow *window)
    // We want to do drawing outside of the render, so we
    // need to get an activated context from the window.
    //
-   context = [window activateWindowContext];
+   context = [window activateWindowGraphicsContext];
    createTexture( context,
                   [window pixelRatio],
                   NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
-   [window deactivateWindowContext:context];
+   [window deactivateWindowGraphicsContext:context];
 #endif
 }
 

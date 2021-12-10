@@ -14,6 +14,7 @@ struct NVGcontext;
 enum CGContextBackend
 {
    CG_GL3,
+   CG_GL3_2,
    CG_GLES2,
    CG_GLES3
 };
@@ -27,8 +28,6 @@ enum CGContextBackend
 - (void) contextDidRemoveObject:(CGContext *) context;
 
 @end
-
-
 //
 // for OpenGL we have one context per OpenGL, to keep fonts and
 // other textures around. Each frame is encloded in a
@@ -60,6 +59,8 @@ enum CGContextBackend
    mulle_timeinterval_t         _lastRenderStartTime;
    BOOL                         _isRendering;
    BOOL                         _isActive;
+   int                          _nvgFlags; // used for nvgCreate
+
    // its more convenient to use a private framebuffer for offscreen rendering
    // than the default framebuffer of a offscreen window. So even if this
    // context is tied to an offscreen window, it will/should use this
@@ -70,8 +71,6 @@ enum CGContextBackend
 }
 @property( assign) CGFloat       alpha;
 
-// not animatable though, better use windows ?
-@property( assign) CGColor       backgroundColor;
 @property( assign) BOOL          rendersOffScreen;
 
 @property( assign) BOOL          debugEnabled;
@@ -81,6 +80,7 @@ enum CGContextBackend
 @property( readonly) mulle_timeinterval_t   frameDelta;
 
 + (enum CGContextBackend) backend;
++ (char *) backendUTF8String;
 
 - (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
               useStencilStrokes:(BOOL) useStencilStrokes;
@@ -114,6 +114,7 @@ enum CGContextBackend
 //
 - (void) suspendRender;  // flushes and resets
 - (void) resumeRender;   // resumes after a suspend
+- (void) flushRender;    // suspends and resumes
 
 - (void) changeRender:(struct CGFrameInfo *) info
                 alpha:(CGFloat) alpha;
@@ -131,7 +132,13 @@ enum CGContextBackend
 - (void) _setCurrentFrameInfo:(struct CGFrameInfo *) info;
 
 - (void) resetTransform;
-- (void) clearFramebuffer;
+
+
+// call this after beginRender, if you don't redraw the whole framebuffer
+- (void) clearFramebufferWithHexColor:(NSUInteger) color;
+
+// call this after beginRender, if you redraw everything
+- (void) clearFramebufferMinimally;
 
 // with 60hz and 32 bit wraps in a little more than 2 years
 // value changes during -endRender
@@ -169,6 +176,9 @@ enum CGContextBackend
 // calls for example.
 - (BOOL) isActive;
 
+// retrieve openGLError if any, print and abort
+- (void) assertNoBackendError:(char *) str;
+
 
 // the low-level glReadPixels routine, allocates memory of appropriate size
 - (struct CGFramebufferBitmap) framebufferBitmapAtRect:(struct CGBitmapRect) rect
@@ -176,7 +186,8 @@ enum CGContextBackend
                                              allocator:(struct mulle_allocator *) allocator;
 
 // if you use inFlight, remember to flush with suspendRender/resumeRender
-// otherwise likely you will see nothing.
+// otherwise likely you will see nothing. This needs the window context
+// activated its not going to work with an offscreen framebuffer
 - (struct CGFramebufferBitmap)
    lastRenderedFramebufferBitmapType:(enum CGFramebufferBitmapType) type
                             inFlight:(BOOL) inFlight
@@ -198,6 +209,20 @@ enum CGContextBackend
 
 - (char *) shaderHeaderUTF8String;
 - (void *) gpuTextureForImageID:(NSInteger) imageID;
+
+
+// some very simple draw commands for debugging
+- (void) fillRect:(CGRect) rect
+         hexColor:(CGHexColor) hexColor;
+
+- (void) strokeRect:(CGRect) rect
+           hexColor:(CGHexColor) hexColor
+              width:(CGFloat) width;
+
+// used by UIWindow to blit...
+- (void) drawRect:(CGRect) rect
+            image:(id) image
+            scale:(BOOL) scale;
 
 @end
 
@@ -223,3 +248,6 @@ static inline void   CGContextSetAlpha( CGContextRef self, CGFloat alpha)
    [self setAlpha:alpha];
 }
 
+
+char   *CGNVGBackendErrorUTF8String( void);
+char   *_CGNVGBackendErrorUTF8String( void  *error);

@@ -13,6 +13,16 @@ together.</p>
 
 <p><a href="src/main-glfw-draw-simple.m">main-glfw-draw-simple.m</a></p>
 
+<h3>glfw-cglayer</h3>
+
+<p>This creates a tiny 64x64 offscreen buffer and fills it with a uniform color.
+Then a BMP file is written with it. The idea of drawing into CGLayers is
+expanded on in <strong>cglayer</strong>.</p>
+
+<p><img src="glfw-cglayer.png" alt="glfw-cglayer"></p>
+
+<p><a href="src/main-glfw-cglayer.m">main-glfw-cglayer.m</a></p>
+
 <h2>MulleCG + MulleUICore</h2>
 
 <p>From here on we use MulleUICore to demonstrate MulleCG features.</p>
@@ -46,6 +56,15 @@ possible.</p>
 <p><img src="cgimage.png" alt="cgimage"></p>
 
 <p><a href="src/main-cgimage.m">main-cgimage.m</a></p>
+
+<h3>cglayer</h3>
+
+<p>A drawing (the red/white/blue) flag is rendered into an offscreen
+framebuffer/texture and then used as an image to draw.</p>
+
+<p><img src="cglayer.png" alt="cglayer"></p>
+
+<p><a href="src/main-cglayer.m">main-cglayer.m</a></p>
 
 <h3>particles</h3>
 

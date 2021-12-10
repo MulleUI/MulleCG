@@ -3,16 +3,31 @@
 💫 MulleCG Coregraphics for MulleUI
 
 
+```
+TODO: dFdx not supported by OpenGLES2 (steal from shader compiler or 
+wherever)
+```
+
 Provides CGContext which uses a nanoVG context to do drawing.
 Manages textures, fonts and shaders.
 
 Does not do any animation or layouting. Does not do Windowing. Does not
 handle events.
 
+## Backends
+
+Currently MulleCG defines which backend is going to be used in
+[_MulleCGBackend.h](src/_MulleCGBackend.h). This value can be overridden at
+compile time. In your project, you can set this as
+
+```
+mulle-sde craftinfo set MulleCG OTHER_CFLAGS "-DMULLE_CG_GLVERSION=2" # choose OpenGLES2
+```
+
 > #### Note
 >
 > MulleGLFW provides OpenGL (Vulkan) etc. MulleCG brings nanovg into the picture,
-> which resides on top of OpenGL. MulleCG/nanovg don't depend on MulleGLFW though,
+> which resides on top of OpenGL. MulleCG/nanovg doesnt depend on MulleGLFW though,
 > so that in the future there might be a MulleSDL and MulleCG doesn't have to
 > change for it.
 
@@ -47,7 +62,7 @@ handle events.
 
 ```
 
-## Dependencies 
+## Dependencies
 
 ### Debian
 

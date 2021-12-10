@@ -1,4 +1,6 @@
-#import "import.h"
+#define _GNU_SOURCE
+
+#import "import-private.h"
 
 
 //
@@ -68,18 +70,20 @@ static void   drawStuff( CGRect canvas, CGContext *context)
 @end
 
 
-static void   display( GLFWWindow *window_in, struct CGFrameInfo *info)
+static void   display( GLFWWindow *window_in, CAAbsoluteTime now)
 {
-   MyWindow    *window = (MyWindow *) window_in;
-   CGRect      canvas;
-   CGContext   *context;
+   MyWindow      *window = (MyWindow *) window_in;
+   CGRect        canvas;
+   CGContext     *context;
+   CGFrameInfo   frameInfo;
 
    canvas.origin = CGPointZero;
-   canvas.size   = [window os_windowFrame].size;
+   canvas.size   = [window os_windowSize];
 
    context = [window context];
 
-   [context beginRender:info];
+   frameInfo = CGFrameInfoSFMake( canvas.size, [window os_framebufferSize], 1.0);
+   [context beginRender:&frameInfo];
    {
       drawStuff( canvas, context);
    }
@@ -101,6 +105,7 @@ int   main( int argc, char *argv[])
       switch( [CGContext backend])
       {
       case CG_GL3   : hints = GLFW_GL3_CONTEXT; break;
+      case CG_GL3_2 : hints = GLFW_GL3_2_CONTEXT; break;
       case CG_GLES2 : hints = GLFW_GLES2_CONTEXT; break;
       case CG_GLES3 : hints = GLFW_GLES3_CONTEXT; break;
       }
@@ -124,3 +129,42 @@ int   main( int argc, char *argv[])
    }
    [app terminate];
 }
+
+
+
+//
+//                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
+//                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
+//                  ╓#╜^*█⌐   `╕       █           ╓▌    `╙%w
+//               ╓ΦΓ      █    ╙⌐     ,█,,,Φ      ╓▌         ╙¥▄
+//            ,▄▀ █▄       █µ,╓╝,╓≤╗≡≡ª╨╨╨¥≡∞╗w╓,ª█,  ,       ]▄▀V,
+//          ,Φ└   ║"▀▄     ,▄▀╨"                 "╙¥▓▓       ▄▀  º▄¥,
+//        ,#▌Φ▓▄╓  Φ `█Q▄M╙                           ╙¥▄ ,▄▀ ╙▄⌐`  `Φ
+//       ▄▀   `V,"▀▀¼╓╩└                                 ╙¥▓╗ ,       ╙▄
+//      Φ       `¥═▄▀                            ╒          ▀▄          ▓
+//    .▓         ╓▓]V▄H       ▓                 ,Å            ▀,         ▀
+//    █      ,-ª▓╛  `██▀½      "▄  ,╓╓╓╓;╓▄▄▄▄╗▄█,             ╙▄         ▀
+//   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
+//  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
+//  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
+// █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
+// █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
+// █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
+// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
+//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+//  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
+//   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
+//   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀
+//    ╙▄     ╙▀███╙█▄▐██▄,╙▀█████▄▀▄▀▄   ,█M╗ ▀▄██▀╙""*ⁿ═─≈-,,▄▌,        ▄▀
+//     `▌╙µ,▄Φ▀x███▄██████████▀V███▀╙└ ,▄#▌████▀`"*«,      .█▀▄▀▄,      ▄╛
+//       ▀Ö█  ;▓████████▄▄█▀▄╙W "V▄██▀▀│▄███▀└ ▀╦     "*═╥▄▀ ║,  ║▀▄  ,▓
+//        ╙W▀ '█████╨▀▀█████████   "▀▀████└      ╙▄   ,▄▀'   `▀▀╣H ▐▀▄▀
+//          ╙▄  ▀▀Γ╓▌  ▄▀ⁿ`╙▀███      ██▌         ╓█R▀▄A█        ▀▀▄▀
+//            ╙W,Φ╙  ║█        ▄╙╙ª%≡╦██≤≤╗╗≡≡╜▀▀   ╣▌   █╕     ,▄▀
+//              `▀▄M█┘        ║▀▌   ╫"    *Φ▄  █       Φ` ▀▌, ▄M╙
+//                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
+//                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
+//                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+

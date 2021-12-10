@@ -26,26 +26,38 @@ struct CGFrameInfo;
 //
 @interface CGLayer : CGImage
 
-@property( readonly, assign) void                  *framebuffer;
-@property( readonly, assign) struct CGBitmapInfo   bitmapInfo;
+@property( readonly, assign) void   *framebuffer;
 
-//
-// options is imageFlags currently
-//
-
-- (instancetype) initWithBitmapInfo:(struct CGBitmapInfo) size
++ (instancetype) layerWithBitmapSize:(struct CGBitmapSize) size
                          imageFlags:(NSUInteger) imageFlags
                             context:(CGContext *) context;
 
-- (struct mulle_data) readRGBACData:(struct mulle_allocator *) allocator;
+- (instancetype) initWithBitmapSize:(struct CGBitmapSize) size
+                         imageFlags:(NSUInteger) imageFlags
+                            context:(CGContext *) context;
+
+- (void *) readRGBABytes:(struct mulle_allocator *) allocator;
 
 
-// binds the framebuffer and begins render of the context
-// do your drawing after calling it (use -context for CGContext)
+//
+// binds the framebuffer and begins render with the context.
+// Do your drawing after calling it (use -context for CGContext)
+// Use this outside of the render loop (you need to activate context before
+// though)
+// beginRender: does not clear the framebuffer
+//
 - (void) beginRender:(struct CGFrameInfo *) renderInfo;
 
 // end render of the context and unbind the framebuffer
 - (void) endRender;
+
+// inside the render loop use this to bind buffers (be sure to have
+// flushed previous render commands)
+- (void) bindFramebuffer;
+
+// better use [CGContext bindDefaultBuffer] when you are using retained windows
+// which is the default
+- (void) unbindFramebuffer;
 
 @end
 

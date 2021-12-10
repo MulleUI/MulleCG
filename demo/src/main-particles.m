@@ -1,4 +1,6 @@
-#import <MulleUICore/MulleUICore.h>
+#define _GNU_SOURCE
+
+#import "import-private.h"
 
 #import <string.h>
 
@@ -225,11 +227,14 @@ int   main()
     * window and app
     */
    app        = [UIApplication sharedInstance];
-   styleMask  = EDGE_ANTIALIAS ? 0 : UIWindowStyleNoEdgeAntialias;
-   styleMask |= UIWindowStyleRenderNonRetainedOnly;
+
+   styleMask  = UIWindowStyleMaskDefault;
+   styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleEdgeAntialias, EDGE_ANTIALIAS);
+   styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+
    window     = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
                                     titleUTF8String:"Demo"
-                                       styleMask:styleMask] autorelease];
+                                         styleMask:styleMask] autorelease];
    [app addWindow:window];
 
    [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];

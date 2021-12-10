@@ -1,4 +1,6 @@
-#import <MulleUICore/MulleUICore.h>
+#define _GNU_SOURCE
+
+#import "import-private.h"
 
 #import <string.h>
 
@@ -14,7 +16,7 @@ void   screenshot( UIWindow *window)
    struct CGFramebufferBitmap   fb;
    CGContext                    *context;
 
-   context = [window activateWindowContext];
+   context = [window activateWindowGraphicsContext];
    assert( [context isActive]);
 
    [image mullePerformFinalize];
@@ -25,7 +27,7 @@ void   screenshot( UIWindow *window)
                                    bitmapSize:fb.info.size
                                    imageFlags:0 // NVG_IMAGE_REPEATX
                                       context:context];
-   [window deactivateWindowContext:context];
+   [window deactivateWindowGraphicsContext:context];
 
    assert( image);
 }

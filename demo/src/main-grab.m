@@ -1,20 +1,9 @@
-#import <MulleUICore/MulleUICore.h>
+#define _GNU_SOURCE
+
+#import "import-private.h"
 
 #include <assert.h>
 
-
-static void   getFramebufferBitmapOfType( UIWindow *window,
-                                          enum CGFramebufferBitmapType type,
-                                          struct CGFramebufferBitmap *fb)
-{
-   CGContext   *context;
-
-   context = [window activateWindowContext];
-   *fb     = [window lastRenderedFramebufferBitmapType:type
-                                               inFlight:NO
-                                              allocator:NULL];
-   [window deactivateWindowContext:context];
-}
 
 
 static void   drawFramebufferBitmap( UIWindow *window,
@@ -23,7 +12,7 @@ static void   drawFramebufferBitmap( UIWindow *window,
    CGContext            *context;
    struct CGFrameInfo   info;
 
-   context = [window activateWindowContext];
+   context = [window activateWindowGraphicsContext];
    assert( context);
 
    {
@@ -34,9 +23,10 @@ static void   drawFramebufferBitmap( UIWindow *window,
          [context drawFramebufferBitmap:fb];
       }
       [context endRender];
-      [window swapBuffers];
    }
-   [window deactivateWindowContext:context];
+   [window deactivateWindowGraphicsContext:context];
+
+   [window swapBuffers];
 }
 
 
@@ -60,10 +50,14 @@ int   main( int argc, char *argv[])
    struct CGFramebufferBitmap   fb;
    struct CGFrameInfo           info;
    struct NVGcontext            *vg;
+   NSUInteger                   styleMask;
 
+   // the usual first step
    app = [UIApplication sharedInstance];
    @autoreleasepool
    {
+
+      // figure out window placements
       CGRectPartitionVertically( CGRectMake( 0, 0, 400, 400),
                                  16.0,
                                  2,
@@ -73,11 +67,16 @@ int   main( int argc, char *argv[])
                                       4.0,
                                       2,
                                       &frame[ i * 2]);
+      //
+      // create windows, we use non-retained because it's easier
+      // TODO: write version with different stylemask (or set option)
+      //
       for( i = 0; i < 4; i++)
       {
+         styleMask  = (UIWindowStyleMaskDefault & ~UIWindowStyleRetained);
          window[ i] = [UIWindow windowWithFrame:frame[ i]
                                 titleUTF8String:title[ i]
-                                      styleMask:UIWindowStyleRenderNonRetainedOnly];
+                                      styleMask:styleMask];
          [app addWindow:window[ i]];
       }
 
@@ -88,7 +87,7 @@ int   main( int argc, char *argv[])
          // build scene in window #1
          // as we are not doing anything with UIViews, we forego the usual
          // renderUpToNumberOfFrames:1 but do everything manually
-         context = [window[ 0] activateWindowContext];
+         context = [window[ 0] activateWindowGraphicsContext];
          {
             [window [0] getFrameInfo:&info];
             [context beginRender:&info];
@@ -104,22 +103,28 @@ int   main( int argc, char *argv[])
                nvgFill( vg);
             }
             [context endRender];
-            [window[ 0] swapBuffers];
          }
-         [window[ 0] deactivateWindowContext:context];
+         [window[ 0] deactivateWindowGraphicsContext:context];
+         [window[ 0] swapBuffers];
 
          // grab color info of window[ 0], display in window[ 1]
-         getFramebufferBitmapOfType( window[ 0], CGFramebufferRGBABytes, &fb);
+         fb  = [window[ 0] lastRenderedFramebufferBitmapType:CGFramebufferRGBABytes
+                                                    inFlight:NO
+                                                   allocator:NULL];
          drawFramebufferBitmap( window[ 1], &fb);
          CGFramebufferBitmapDone( &fb);
 
          // grab stencil info of window[ 0], display in window[ 2]
-         getFramebufferBitmapOfType( window[ 0], CGFramebufferStencilFloats, &fb);
+         fb  = [window[ 0] lastRenderedFramebufferBitmapType:CGFramebufferStencilFloats
+                                                    inFlight:NO
+                                                   allocator:NULL];
          drawFramebufferBitmap( window[ 2], &fb);
          CGFramebufferBitmapDone( &fb);
 
          // grab depth info of window[ 0], display in window[ 3]
-         getFramebufferBitmapOfType( window[ 0], CGFramebufferDepthFloats, &fb);
+         fb  = [window[ 0] lastRenderedFramebufferBitmapType:CGFramebufferDepthFloats
+                                                    inFlight:NO
+                                                   allocator:NULL];
          drawFramebufferBitmap( window[ 3], &fb);
          CGFramebufferBitmapDone( &fb);
 
@@ -130,3 +135,42 @@ int   main( int argc, char *argv[])
    }
    [app terminate];
 }
+
+
+
+//
+//                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
+//                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
+//                  ╓#╜^*█⌐   `╕       █           ╓▌    `╙%w
+//               ╓ΦΓ      █    ╙⌐     ,█,,,Φ      ╓▌         ╙¥▄
+//            ,▄▀ █▄       █µ,╓╝,╓≤╗≡≡ª╨╨╨¥≡∞╗w╓,ª█,  ,       ]▄▀V,
+//          ,Φ└   ║"▀▄     ,▄▀╨"                 "╙¥▓▓       ▄▀  º▄¥,
+//        ,#▌Φ▓▄╓  Φ `█Q▄M╙                           ╙¥▄ ,▄▀ ╙▄⌐`  `Φ
+//       ▄▀   `V,"▀▀¼╓╩└                                 ╙¥▓╗ ,       ╙▄
+//      Φ       `¥═▄▀                            ╒          ▀▄          ▓
+//    .▓         ╓▓]V▄H       ▓                 ,Å            ▀,         ▀
+//    █      ,-ª▓╛  `██▀½      "▄  ,╓╓╓╓;╓▄▄▄▄╗▄█,             ╙▄         ▀
+//   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
+//  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
+//  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
+// █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
+// █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
+// █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
+// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
+//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+//  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
+//   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
+//   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀
+//    ╙▄     ╙▀███╙█▄▐██▄,╙▀█████▄▀▄▀▄   ,█M╗ ▀▄██▀╙""*ⁿ═─≈-,,▄▌,        ▄▀
+//     `▌╙µ,▄Φ▀x███▄██████████▀V███▀╙└ ,▄#▌████▀`"*«,      .█▀▄▀▄,      ▄╛
+//       ▀Ö█  ;▓████████▄▄█▀▄╙W "V▄██▀▀│▄███▀└ ▀╦     "*═╥▄▀ ║,  ║▀▄  ,▓
+//        ╙W▀ '█████╨▀▀█████████   "▀▀████└      ╙▄   ,▄▀'   `▀▀╣H ▐▀▄▀
+//          ╙▄  ▀▀Γ╓▌  ▄▀ⁿ`╙▀███      ██▌         ╓█R▀▄A█        ▀▀▄▀
+//            ╙W,Φ╙  ║█        ▄╙╙ª%≡╦██≤≤╗╗≡≡╜▀▀   ╣▌   █╕     ,▄▀
+//              `▀▄M█┘        ║▀▌   ╫"    *Φ▄  █       Φ` ▀▌, ▄M╙
+//                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
+//                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
+//                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+
