@@ -172,6 +172,8 @@ static inline void   ParticleUpdate( struct Particle *p, CGSize canvasSize)
    CGRect       canvas;
    NSUInteger   i;
 
+   mulle_fprintf( stderr, "%@: %@ drawInContext\n", [NSThread currentThread], self);
+
    [super drawInContext:context];
 
    vg     = CGContextGetNVGContext( context);
@@ -231,20 +233,18 @@ int   main()
    styleMask  = UIWindowStyleMaskDefault;
    styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleEdgeAntialias, EDGE_ANTIALIAS);
    styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+   styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleEdgeAntialias, EDGE_ANTIALIAS);
 
-   window     = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
-                                    titleUTF8String:"Demo"
-                                         styleMask:styleMask] autorelease];
+   window     = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
+                          titleUTF8String:"Demo"
+                                styleMask:styleMask];
    [app addWindow:window];
 
    [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
-
+   [window setFrameRate:UIWindowFrameRateSynced];
    setupSceneInView( [window contentPlane]);
 
-   [window renderLoop];
-
-   [app terminate];
-   return( 0);
+   return( [app run]);
 }
 
 

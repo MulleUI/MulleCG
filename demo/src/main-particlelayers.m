@@ -199,19 +199,17 @@ int   main()
     * window and app
     */
    app    = [UIApplication sharedInstance];
-   window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
-                                titleUTF8String:"Demo"
-                                   styleMask:EDGE_ANTIALIAS ? UIWindowStyleEdgeAntialias : UIWindowStyleNop] autorelease];
+   window = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
+                      titleUTF8String:"Demo"
+                            styleMask:EDGE_ANTIALIAS ? UIWindowStyleEdgeAntialias : UIWindowStyleNop];
    [app addWindow:window];
 
    [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
+   [window setFrameRate:UIWindowFrameRateSynced];
 
    setupSceneInView( [window contentPlane]);
 
-   [window renderLoop];
-
-   [app terminate];
-   return( 0);
+   return( [app run]);
 }
 
 

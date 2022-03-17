@@ -59,9 +59,6 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
 int   main( int argc, char *argv[])
 {
-   // convenience to the max...
-   fprintf( stderr, "%s\n", [CGContext backendUTF8String]);
-
    [UIApplication runWindowForDrawCallback:drawStuff
                                 canvasSize:CGSizeMake( 200, 200)
                                 windowSize:CGSizeZero   // CGSizeMake( 200, 400)

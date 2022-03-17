@@ -4,17 +4,18 @@
 @class CGContext;
 struct CGFrameInfo;
 
+// TODO: rename this
 // Better name: CGFramebufferImage ?
 
 // TODO: memo handle PixelBufferObjects too ?
 
 // This used to be called MulleTextureImage, which fits better, but the
 // historic name is CGLayer. It has nothing to do with a CALayer though.
-
 //
-// An drawing rendered into a texture. 
-// In technical terms a wrapper for a texture created with 
-// nvgluCreateFramebuffer (usually). A texture can not be created during 
+//
+// An drawing rendered into a texture.
+// In technical terms a wrapper for a texture created with
+// nvgluCreateFramebuffer (usually). A texture can not be created during
 // rendering. It has to be done before or after.
 //
 // The texture lives at most as long as the CGContext is active. If the context
@@ -29,35 +30,30 @@ struct CGFrameInfo;
 @property( readonly, assign) void   *framebuffer;
 
 + (instancetype) layerWithBitmapSize:(struct CGBitmapSize) size
-                         imageFlags:(NSUInteger) imageFlags
-                            context:(CGContext *) context;
+                          imageFlags:(NSUInteger) imageFlags
+                             context:(CGContext *) context;
 
 - (instancetype) initWithBitmapSize:(struct CGBitmapSize) size
                          imageFlags:(NSUInteger) imageFlags
                             context:(CGContext *) context;
 
-- (void *) readRGBABytes:(struct mulle_allocator *) allocator;
+// more or less for completeness... probably makes no sense
+- (instancetype) initWithImage:(CGImage *) image
+                    imageFlags:(NSUInteger) imageFlags
+                       context:(CGContext *) context;
 
 
-//
-// binds the framebuffer and begins render with the context.
-// Do your drawing after calling it (use -context for CGContext)
-// Use this outside of the render loop (you need to activate context before
-// though)
-// beginRender: does not clear the framebuffer
-//
-- (void) beginRender:(struct CGFrameInfo *) renderInfo;
+- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
 
-// end render of the context and unbind the framebuffer
-- (void) endRender;
+@end
 
-// inside the render loop use this to bind buffers (be sure to have
-// flushed previous render commands)
+
+@interface CGLayer( CGContext)
+
+// Use CGContext bindFramebuffer: to bind/unbind a layer, don't call directly
 - (void) bindFramebuffer;
-
-// better use [CGContext bindDefaultBuffer] when you are using retained windows
-// which is the default
 - (void) unbindFramebuffer;
 
 @end
+
 

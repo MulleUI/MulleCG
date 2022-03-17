@@ -1,7 +1,6 @@
 cmake_minimum_required( VERSION 3.15)
 
 project( MulleCG C)
-add_definitions( -DMULLE_CG_EXTERN_GLOBAL=extern)
 
 
 ### mulle-sde environment

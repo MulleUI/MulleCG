@@ -4,12 +4,20 @@
 
 
 ```
-TODO: dFdx not supported by OpenGLES2 (steal from shader compiler or 
+TODO: dFdx not supported by OpenGLES2 (steal from shader compiler or
 wherever)
 ```
 
 Provides CGContext which uses a nanoVG context to do drawing.
 Manages textures, fonts and shaders.
+
+> #### Note
+>
+> Typedefs CGColor! For that reason, if you
+> have MulleCA and MulleCG in your project, ensure that MulleCG is before
+> MulleCA in your dependency list. MulleGraphics will have the proper order
+> but MulleUICore will include MulleCA, so also have MulleGraphics before
+> MulleUICore.
 
 Does not do any animation or layouting. Does not do Windowing. Does not
 handle events.
@@ -32,35 +40,11 @@ mulle-sde craftinfo set MulleCG OTHER_CFLAGS "-DMULLE_CG_GLVERSION=2" # choose O
 > change for it.
 
 
-
 ### You are here
 
-```
-  .-----------------------------------------.
-  | MulleUIFoundation                       |
-  '-----------------------------------------'
-  .-----------------------------------------.
-  | MulleUIViews                            |
-  '-----------------------------------------'
-  .-----------------. .---------------------.
-  | MulleUIImage    | | MulleUICore         |
-  '-----------------' '--------------.------.
-  .--------------------------------. | glfw |
-  | MulleGraphics                  | | X11  |
-  '--------------------------------' '------'
-  .=================.
-  | MulleCG         |
-  '================='
-  | nanovg   |
-  | freetype |
-  | harfbuzz |        .------------.
-  |          |        | MulleCA    |
-  '----------'        '------------'
-  .--------------------------------.
-  | MulleLayout                    |
-  '--------------------------------'
+![Overview](overview.dot.svg)
 
-```
+
 
 ## Dependencies
 

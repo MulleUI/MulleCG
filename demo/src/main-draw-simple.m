@@ -45,11 +45,11 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 int   main( int argc, char *argv[])
 {
    // convenience to the max...
-   [UIApplication runWindowForDrawCallback:drawStuff
-                                canvasSize:CGSizeMake( 200, 200)
-                                windowSize:CGSizeZero   // CGSizeMake( 200, 400)
-                           titleUTF8String:NULL
-                               frameRateHz:100.0];
+   return( [UIApplication runWindowForDrawCallback:(CALayerDrawCallback_t *) drawStuff
+                                        canvasSize:CGSizeMake( 200, 200)
+                                        windowSize:CGSizeZero   // CGSizeMake( 200, 400)
+                                   titleUTF8String:NULL
+                                       frameRateHz:100.0f]);
 }
 
 

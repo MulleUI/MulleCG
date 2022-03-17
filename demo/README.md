@@ -11,7 +11,7 @@ though.
 
 Just draws three bars of color. Can't get much simpler than that. If this
 demo fails, something very basic is going wrong. The window is a basic GLFW
-window. We need to subclass GLFWWindow actually to tie MulleCG and MulleGLFW
+window. We need to subclass GLFWOSWindow actually to tie MulleCG and MulleGLFW
 together.
 
 ![glfw-draw-simple](glfw-draw-simple.png)
@@ -52,6 +52,10 @@ hints.
 
 This demo is actually very resource intensive. MulleCG (and nanovg) don't like
 drawing many discrete lines. Notice the performance problems when resizing.
+You can pass command line parameter '-r' to use retained (multi-threaded)
+code. Notice how the problems vanish. If you use '-m' for running retained on
+the main thread, the problems reappear. Using the retained mode on the main
+thread can be useful though to detect basic OpenGL/glfw problems.
 
 ![draw](draw.png)
 

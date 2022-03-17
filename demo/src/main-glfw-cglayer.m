@@ -22,7 +22,7 @@
 // -[CGContext setActive:] needs to be implemented by the context owner.
 // This is not a bug.
 // setActive: is not supposed to be seen outside of the windoW, Hho sets this
-// context active. (Locking is done in GLFWWindow with the implicit context!)
+// context active. (Locking is done in GLFWOSWindow with the implicit context!)
 //
 @implementation CGContext( MyWindow)
 
@@ -63,10 +63,11 @@ static void   draw( struct NVGcontext   *vg)
 
 int   main( int argc, char *argv[])
 {
-   GLFWWindow          *window;
-   CGContext           *context;
-   CGLayer             *cgLayer;
-   void                *bytes;
+   GLFWOSWindow          *window;
+   CGContext             *context;
+   CGLayer               *cgLayer;
+   void                  *bytes;
+   struct CGBitmap       bitmap;
 
    // ensure that we don't leak (at least not in MulleCG) code
    // leaks in nanovg/OpenGL are harder to detect (use valgrind)
@@ -82,14 +83,14 @@ int   main( int argc, char *argv[])
       {
          // create an invisible window, we need it to be able to create a
          // CGContext
-         window = [GLFWWindow windowWithFrame:CGRectMake( 0, 0, 200, 200)
+         window = [GLFWOSWindow windowWithFrame:CGRectMake( 0, 0, 200, 200)
                               titleUTF8String:"Demo"
                                     styleMask:UIWindowStyleInvisible
                               graphicsHints:0];
 
          // need to explicitly activate the "OS" context, it will be locked and
          // only available to this thread during activation
-         [window os_activateContext];
+         [window os_activateGraphicsContext];
 
          // CGContext can now use the "OS" context
          context = [[[CGContext alloc] initWithEdgeAntialiasing:YES
@@ -124,9 +125,9 @@ int   main( int argc, char *argv[])
          // afterwards we can read the contents, here we dump the with
          // mulle_rgba_dump into a BMP file named dump-0000.bmp
 
-         bytes = [cgLayer readRGBABytes:NULL];
-         mulle_rgba_dump( bytes, W, H);
-         mulle_free( bytes);
+         bitmap = [cgLayer RGBABytesBitmap:NULL];
+         mulle_bitmap_rgba_dump( &bitmap);
+         CGBitmapDone( &bitmap);
 
          [cgLayer unbindFramebuffer];
       }

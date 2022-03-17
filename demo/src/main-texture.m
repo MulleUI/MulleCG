@@ -3,7 +3,7 @@
 #import <string.h>
 
 
-//#define HAVE_TEXTURE
+#define HAVE_TEXTURE
 
 #ifdef HAVE_TEXTURE
 
@@ -25,7 +25,7 @@ static void   drawTexture( CGContext *context, CGSize size)
    nvgBeginPath( vg);
    {
       nvgRect( vg, 0, 0, size.width, size.height);
-      nvgFillColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFF20FF));
+      nvgFillColor( vg, CGColorMakeWithHexColor( 0xFFFF20FF));
    }
    nvgFill( vg);
 
@@ -36,23 +36,23 @@ static void   drawTexture( CGContext *context, CGSize size)
       radius /= 2.0;
 
       nvgCircle( vg, size.width / 2.0, size.height / 2.0, radius);
-      nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x2040FFFF));
+      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x2040FFFF));
       nvgStrokeWidth( vg, 4.0);
    }
    nvgStroke( vg);
 }
 
-//
-// Must be done outside of the render!!
-//
+
 static void  createTexture( CGContext *context,
                             CGFloat pixelRatio,
                             NSUInteger imageFlags)
 {
-   CGFrameInfo           *info;
-   CGFloat               radius;
-   struct CGBitmapInfo   bitmapInfo;
-   struct CGFrameInfo    frameInfo;
+   CGFrameInfo                   *info;
+   CGFloat                       radius;
+   struct CGBitmapInfo           bitmapInfo;
+   struct CGFrameInfo            frameInfo;
+   struct CGFrameInfo            oldFrameInfo;
+   struct CGContextFramebuffer   oldFramebuffer;
 
    assert( pixelRatio > 0.0);
 
@@ -63,12 +63,19 @@ static void  createTexture( CGContext *context,
                                   context:context];
    assert( texture);
 
-   frameInfo = CGFrameInfoFBMake( CGBitmapSizeMake( 32, 32), pixelRatio, 1.0);
+   frameInfo      = CGFrameInfoFBMake( CGBitmapSizeMake( 32, 32), pixelRatio, 1.0);
 
-   // to use beginRender the context needs to be active but not rendering
-   [texture beginRender:&frameInfo];
-   drawTexture( context, frameInfo.size);
-   [texture endRender];
+   //
+   // with the push functionality, we should be able to run this also inside
+   // an active render.
+   //
+   oldFramebuffer = [context bindFramebuffer:CGContextFramebufferMakeWithLayer( texture)];
+   oldFrameInfo   = [context bindRender:&frameInfo];
+   {
+      drawTexture( context, frameInfo.size);
+   }
+   [context bindRender:&oldFrameInfo];
+   [context bindFramebuffer:oldFramebuffer];
 }
 
 #endif
@@ -108,7 +115,7 @@ static void  drawStuff( CALayer *layer, CGContext *context)
                                                 context:context] autorelease];
       nvgFillPaint( vg, [paint nvgPaint]);
 #else
-      nvgFillColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFF00FF));
+      nvgFillColor( vg, CGColorMakeWithHexColor( 0xFFFF00FF));
 #endif
    }
    nvgFill( vg);
@@ -142,34 +149,37 @@ void   setupScene( UIWindow *window)
    createTexture( context,
                   [window pixelRatio],
                   NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
-   [window deactivateWindowGraphicsContext:context];
+   [window deactivateContext:context];
 #endif
 }
 
 
 int   main( int argc, char *argv[])
 {
-   UIWindow       *window;
-   UIApplication  *app;
+   UIWindow        *window;
+   UIApplication   *app;
+   NSUInteger      styleMask;
 
    /*
     * window and app
     */
-   app    = [UIApplication sharedInstance];
-   window = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)];
-   [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
-   [window setFrameRateHz:60];
-   [app addWindow:window];
+   app = [UIApplication sharedInstance];
 
+   styleMask = UIWindowStyleMaskDefault;
+   styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
+   styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+
+   window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 600.0f)
+                             titleUTF8String:"Demo"
+                                   styleMask:styleMask] autorelease];
+
+   [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
+   [window setFrameRateHz:60.0f];
    setupScene( window);
 
-   [window renderLoop];
+   [app addWindow:window];
 
-   [app terminate];
-#ifdef HAVE_TEXTURE
-   [texture release];
-#endif
-   return( 0);
+   return( [app run]);
 }
 
 

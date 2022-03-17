@@ -48,7 +48,7 @@ PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 
 static CGDrawableOptions  defaultOptions =
 {
-   0.0f, 1.0f, 0.0f, NO   // corner, alpha, rotation, scale
+   0.0f, 1.0f, 0.0f, YES   // corner, alpha, rotation, scale
 };
 
 

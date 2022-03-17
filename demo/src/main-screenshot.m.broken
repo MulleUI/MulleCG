@@ -13,7 +13,7 @@ static CGImage   *image;
 
 void   screenshot( UIWindow *window)
 {
-   struct CGFramebufferBitmap   fb;
+   struct CGBitmap   fb;
    CGContext                    *context;
 
    context = [window activateWindowGraphicsContext];
@@ -27,7 +27,7 @@ void   screenshot( UIWindow *window)
                                    bitmapSize:fb.info.size
                                    imageFlags:0 // NVG_IMAGE_REPEATX
                                       context:context];
-   [window deactivateWindowGraphicsContext:context];
+   [window deactivateContext:context];
 
    assert( image);
 }
@@ -143,7 +143,7 @@ int   main( int argc, char *argv[])
 {
    UIWindow       *window;
    UIApplication  *app;
-   CGFloat        frameRateHz;
+   double          frameRateHz;
 
    /*
     * window and app
@@ -164,7 +164,7 @@ int   main( int argc, char *argv[])
    // 100hz: super stable
    // 500hz: super stable
    //
-   // MEMO: could apparently fix this somewhat with _needsWindowRefresh being set
+   // MEMO: could apparently fix this somewhat with _needsRefresh being set
    // by the window refresh event and preempting event processing. Does not
    // cure green flicker though. Reduces 30Hz flicker to rare.
 
@@ -202,7 +202,7 @@ int   main( int argc, char *argv[])
       [window setWillSwapCallback:screenshot];
 #endif
 
-   [window renderLoop];
+   [window frameLoop];
 
    [app terminate];
    return( 0);

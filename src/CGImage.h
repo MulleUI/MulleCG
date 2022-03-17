@@ -63,13 +63,12 @@
 //
 @interface CGImage : NSObject <CGBitmapDrawable, CGContextResource>
 
-@property( readonly, assign) NSUInteger              imageID;
-@property( readonly, assign) NSUInteger              imageFlags;       // rename sometime
-@property( readonly, assign) CGContext               *context;
-@property( readonly, retain) CGSharedGPUTexture      *sharedGPUTexture;
+// usually don't use imageID, use nvgImageWithContext:imageFlags:
+@property( readonly, assign) NSUInteger           imageID;
+@property( readonly, assign) NSUInteger           imageFlags;       // rename sometime
+@property( readonly, assign) CGContext            *context;
+@property( readonly, retain) CGSharedGPUTexture   *sharedGPUTexture;
 
-// don't use, use nvgImageWithContext:imageFlags:
-// - (int)  _imageID;
 
 - (instancetype) initWithNVGImage:(NSInteger) imageID
                        imageFlags:(NSUInteger) imageFlags
@@ -80,6 +79,7 @@
                              bitmapSize:(struct CGBitmapSize) size
                              imageFlags:(NSUInteger) imageFlags
                                 context:(CGContext *) context;
+
 //
 // if imageflags or context don't match, this will return -1
 // UIImage can derive multiple CGImages from itself. But CGImage can not.
@@ -117,11 +117,15 @@
 
 - (struct CGBitmapSize)  bitmapSize;
 
+- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
+
+- (void *) gpuTexture;
+
 //
 // If otherContext is sharing textures with the CGImage context, we can
 // share the texture by creating a nvg image copy in otherContext. otherContext
 // needs to be active. May return nil, if the copying is not possible.
 //
-- (CGImage *) shareWithContext:(CGContext *) otherContext;
+- (id) shareWithContext:(id) otherContext;
 
 @end

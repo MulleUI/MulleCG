@@ -8,7 +8,7 @@
 
 @implementation CGContext ( Render)
 
-- (void) renderObjects:(struct mulle_pointerarray *) objects
+- (void) drawObjects:(struct mulle_pointerarray *) objects
 {
    struct mulle_pointerarrayenumerator   rover;
    id <CGRenderObject>                   obj;

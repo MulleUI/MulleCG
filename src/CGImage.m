@@ -1,6 +1,8 @@
 #import "CGImage.h"
 
 #import "CGContext.h"
+#import "CGContext+OpenGL.h"
+#import "CGContext+Resources.h"
 
 #include <errno.h>
 
@@ -102,7 +104,7 @@
 
    _imageFlags = imageFlags;
    _context    = context;
-   _imageID  = imageID;
+   _imageID    = imageID;
 
    [_context addToResources:self];
 
@@ -118,12 +120,12 @@
 {
    NSUInteger   imageID;
 
-   imageID =  nvgCreateImageTexture( CGContextGetNVGContext( context),
-                                     size.width,
-                                     size.height,
-                                     imageFlags,
-                                     NVG_TEXTURE_RGBA,
-                                     gpuTexture);
+   imageID = nvgCreateImageTexture( CGContextGetNVGContext( context),
+                                    size.width,
+                                    size.height,
+                                    imageFlags,
+                                    NVG_TEXTURE_RGBA,
+                                    gpuTexture);
    self = [self initWithNVGImage:imageID
                       imageFlags:imageFlags
                          context:context];
@@ -312,12 +314,6 @@
                           context:context]);
 }
 
-
-// - (int)  _ImageID
-// {
-//    return( _ImageID);
-// }
-
 // MEMO: A texture id can be reused. So the referencing image imageID can
 //       eventually deviate between contexts. The sharing of a imageID
 //       happens through the binding.
@@ -406,7 +402,7 @@
 }
 
 
-- (CGImage *) shareWithContext:(CGContext *) otherContext
+- (id) shareWithContext:(id) otherContext
 {
    NVGcontext           *vg;
    CGContext            *context;
@@ -470,5 +466,13 @@
 
    return( image);
 }
+
+
+- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
+{
+   return( [_context RGBABytesBitmapOfImage:self
+                                  allocator:allocator]);
+}
+
 
 @end

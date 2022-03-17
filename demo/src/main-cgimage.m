@@ -43,7 +43,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    {
       nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
       nvgStrokeWidth( vg, 8);
-      nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x8020A0FF));
+      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
    }
    nvgStroke( vg);
 
@@ -86,15 +86,14 @@ int   main( int argc, char *argv[])
    {
       window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 200, 200)
                                    titleUTF8String:"Demo"
-                                         styleMask:UIWindowStyleMaskDefault&~UIWindowStyleRetained] autorelease];
+                                         styleMask:UIWindowStyleMaskDefault & ~UIWindowStyleRetained] autorelease];
 
       assert( window);
       [window setBackgroundColor:CGColorMakeRGBA( 0.5, 0.5, 0.5, 1.0)];
       setupScene( window);
       [app addWindow:window];
-      [window renderLoop];
    }
-   [app terminate];
+   return( [app run]);
 }
 
 
