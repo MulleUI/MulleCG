@@ -17,7 +17,7 @@ endif()
 # Disable for this platform: `mulle-sourcetree mark mulle-testallocator no-cmake-platform-${MULLE_UNAME}`
 #
 if( NOT MULLE_TESTALLOCATOR_LIBRARY)
-   find_library( MULLE_TESTALLOCATOR_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-testallocator${CMAKE_STATIC_LIBRARY_SUFFIX} mulle-testallocator NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
+   find_library( MULLE_TESTALLOCATOR_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-testallocator${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-testallocator${CMAKE_STATIC_LIBRARY_SUFFIX} mulle-testallocator NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
    message( STATUS "MULLE_TESTALLOCATOR_LIBRARY is ${MULLE_TESTALLOCATOR_LIBRARY}")
    #
    # The order looks ascending, but due to the way this file is read
@@ -88,7 +88,7 @@ endif()
 # Disable for this platform: `mulle-sourcetree mark MulleObjC-startup no-cmake-platform-${MULLE_UNAME}`
 #
 if( NOT MULLE_OBJC_STARTUP_LIBRARY)
-   find_library( MULLE_OBJC_STARTUP_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleObjC-startup${CMAKE_STATIC_LIBRARY_SUFFIX} NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
+   find_library( MULLE_OBJC_STARTUP_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleObjC-startup${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_STATIC_LIBRARY_PREFIX}MulleObjC-startup${CMAKE_STATIC_LIBRARY_SUFFIX} NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
    message( STATUS "MULLE_OBJC_STARTUP_LIBRARY is ${MULLE_OBJC_STARTUP_LIBRARY}")
    #
    # The order looks ascending, but due to the way this file is read
@@ -126,7 +126,7 @@ endif()
 # Disable for this platform: `mulle-sourcetree mark MulleUIImage no-cmake-platform-${MULLE_UNAME}`
 #
 if( NOT MULLE_UI_IMAGE_LIBRARY)
-   find_library( MULLE_UI_IMAGE_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIImage${CMAKE_STATIC_LIBRARY_SUFFIX} MulleUIImage NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
+   find_library( MULLE_UI_IMAGE_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIImage${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIImage${CMAKE_STATIC_LIBRARY_SUFFIX} MulleUIImage NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
    message( STATUS "MULLE_UI_IMAGE_LIBRARY is ${MULLE_UI_IMAGE_LIBRARY}")
    #
    # The order looks ascending, but due to the way this file is read
@@ -201,92 +201,12 @@ endif()
 
 
 #
-# Generated from sourcetree: 8D6691CB-F735-42C1-A1B6-1A88B2C39CF6;MulleCG;no-singlephase;
-# Disable with : `mulle-sourcetree mark MulleCG no-link`
-# Disable for this platform: `mulle-sourcetree mark MulleCG no-cmake-platform-${MULLE_UNAME}`
-#
-if( NOT MULLE_CG_LIBRARY)
-   find_library( MULLE_CG_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleCG${CMAKE_STATIC_LIBRARY_SUFFIX} MulleCG NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
-   message( STATUS "MULLE_CG_LIBRARY is ${MULLE_CG_LIBRARY}")
-   #
-   # The order looks ascending, but due to the way this file is read
-   # it ends up being descending, which is what we need.
-   #
-   if( MULLE_CG_LIBRARY)
-      #
-      # Add MULLE_CG_LIBRARY to ALL_LOAD_DEPENDENCY_LIBRARIES list.
-      # Disable with: `mulle-sourcetree mark MulleCG no-cmake-add`
-      #
-      set( ALL_LOAD_DEPENDENCY_LIBRARIES
-         ${ALL_LOAD_DEPENDENCY_LIBRARIES}
-         ${MULLE_CG_LIBRARY}
-         CACHE INTERNAL "need to cache this"
-      )
-      #
-      # Inherit information from dependency.
-      # Encompasses: no-cmake-searchpath,no-cmake-dependency,no-cmake-loader
-      # Disable with: `mulle-sourcetree mark MulleCG no-cmake-inherit`
-      #
-      # temporarily expand CMAKE_MODULE_PATH
-      get_filename_component( _TMP_MULLE_CG_ROOT "${MULLE_CG_LIBRARY}" DIRECTORY)
-      get_filename_component( _TMP_MULLE_CG_ROOT "${_TMP_MULLE_CG_ROOT}" DIRECTORY)
-      #
-      #
-      # Search for "DependenciesAndLibraries.cmake" to include.
-      # Disable with: `mulle-sourcetree mark MulleCG no-cmake-dependency`
-      #
-      foreach( _TMP_MULLE_CG_NAME "MulleCG")
-         set( _TMP_MULLE_CG_DIR "${_TMP_MULLE_CG_ROOT}/include/${_TMP_MULLE_CG_NAME}/cmake")
-         # use explicit path to avoid "surprises"
-         if( EXISTS "${_TMP_MULLE_CG_DIR}/DependenciesAndLibraries.cmake")
-            unset( MULLE_CG_DEFINITIONS)
-            list( INSERT CMAKE_MODULE_PATH 0 "${_TMP_MULLE_CG_DIR}")
-            #
-            include( "${_TMP_MULLE_CG_DIR}/DependenciesAndLibraries.cmake")
-            #
-            #
-            list( REMOVE_ITEM CMAKE_MODULE_PATH "${_TMP_MULLE_CG_DIR}")
-            set( INHERITED_DEFINITIONS
-               ${INHERITED_DEFINITIONS}
-               ${MULLE_CG_DEFINITIONS}
-               CACHE INTERNAL "need to cache this"
-            )
-            break()
-         else()
-            message( STATUS "${_TMP_MULLE_CG_DIR}/DependenciesAndLibraries.cmake not found")
-         endif()
-      endforeach()
-      #
-      # Search for "MulleObjCLoader+<name>.h" in include directory.
-      # Disable with: `mulle-sourcetree mark MulleCG no-cmake-loader`
-      #
-      if( NOT NO_INHERIT_OBJC_LOADERS)
-         foreach( _TMP_MULLE_CG_NAME "MulleCG")
-            set( _TMP_MULLE_CG_FILE "${_TMP_MULLE_CG_ROOT}/include/${_TMP_MULLE_CG_NAME}/MulleObjCLoader+${_TMP_MULLE_CG_NAME}.h")
-            if( EXISTS "${_TMP_MULLE_CG_FILE}")
-               set( INHERITED_OBJC_LOADERS
-                  ${INHERITED_OBJC_LOADERS}
-                  ${_TMP_MULLE_CG_FILE}
-                  CACHE INTERNAL "need to cache this"
-               )
-               break()
-            endif()
-         endforeach()
-      endif()
-   else()
-      # Disable with: `mulle-sourcetree mark MulleCG no-require-link`
-      message( FATAL_ERROR "MULLE_CG_LIBRARY was not found")
-   endif()
-endif()
-
-
-#
 # Generated from sourcetree: E006D74A-0A52-40DD-BA3F-40427AA218C8;MulleUI;no-singlephase;
 # Disable with : `mulle-sourcetree mark MulleUI no-link`
 # Disable for this platform: `mulle-sourcetree mark MulleUI no-cmake-platform-${MULLE_UNAME}`
 #
 if( NOT MULLE_UI_LIBRARY)
-   find_library( MULLE_UI_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUI${CMAKE_STATIC_LIBRARY_SUFFIX} MulleUI NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
+   find_library( MULLE_UI_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUI${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUI${CMAKE_STATIC_LIBRARY_SUFFIX} MulleUI NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
    message( STATUS "MULLE_UI_LIBRARY is ${MULLE_UI_LIBRARY}")
    #
    # The order looks ascending, but due to the way this file is read
@@ -366,7 +286,7 @@ endif()
 # Disable for this platform: `mulle-sourcetree mark MulleUIPerf no-cmake-platform-${MULLE_UNAME}`
 #
 if( NOT MULLE_UI_PERF_LIBRARY)
-   find_library( MULLE_UI_PERF_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIPerf${CMAKE_STATIC_LIBRARY_SUFFIX} MulleUIPerf NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
+   find_library( MULLE_UI_PERF_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIPerf${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIPerf${CMAKE_STATIC_LIBRARY_SUFFIX} MulleUIPerf NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
    message( STATUS "MULLE_UI_PERF_LIBRARY is ${MULLE_UI_PERF_LIBRARY}")
    #
    # The order looks ascending, but due to the way this file is read
@@ -436,5 +356,85 @@ if( NOT MULLE_UI_PERF_LIBRARY)
    else()
       # Disable with: `mulle-sourcetree mark MulleUIPerf no-require-link`
       message( FATAL_ERROR "MULLE_UI_PERF_LIBRARY was not found")
+   endif()
+endif()
+
+
+#
+# Generated from sourcetree: 8D6691CB-F735-42C1-A1B6-1A88B2C39CF6;MulleCG;no-singlephase;
+# Disable with : `mulle-sourcetree mark MulleCG no-link`
+# Disable for this platform: `mulle-sourcetree mark MulleCG no-cmake-platform-${MULLE_UNAME}`
+#
+if( NOT MULLE_CG_LIBRARY)
+   find_library( MULLE_CG_LIBRARY NAMES ${CMAKE_STATIC_LIBRARY_PREFIX}MulleCG${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_STATIC_LIBRARY_PREFIX}MulleCG${CMAKE_STATIC_LIBRARY_SUFFIX} MulleCG NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH)
+   message( STATUS "MULLE_CG_LIBRARY is ${MULLE_CG_LIBRARY}")
+   #
+   # The order looks ascending, but due to the way this file is read
+   # it ends up being descending, which is what we need.
+   #
+   if( MULLE_CG_LIBRARY)
+      #
+      # Add MULLE_CG_LIBRARY to ALL_LOAD_DEPENDENCY_LIBRARIES list.
+      # Disable with: `mulle-sourcetree mark MulleCG no-cmake-add`
+      #
+      set( ALL_LOAD_DEPENDENCY_LIBRARIES
+         ${ALL_LOAD_DEPENDENCY_LIBRARIES}
+         ${MULLE_CG_LIBRARY}
+         CACHE INTERNAL "need to cache this"
+      )
+      #
+      # Inherit information from dependency.
+      # Encompasses: no-cmake-searchpath,no-cmake-dependency,no-cmake-loader
+      # Disable with: `mulle-sourcetree mark MulleCG no-cmake-inherit`
+      #
+      # temporarily expand CMAKE_MODULE_PATH
+      get_filename_component( _TMP_MULLE_CG_ROOT "${MULLE_CG_LIBRARY}" DIRECTORY)
+      get_filename_component( _TMP_MULLE_CG_ROOT "${_TMP_MULLE_CG_ROOT}" DIRECTORY)
+      #
+      #
+      # Search for "DependenciesAndLibraries.cmake" to include.
+      # Disable with: `mulle-sourcetree mark MulleCG no-cmake-dependency`
+      #
+      foreach( _TMP_MULLE_CG_NAME "MulleCG")
+         set( _TMP_MULLE_CG_DIR "${_TMP_MULLE_CG_ROOT}/include/${_TMP_MULLE_CG_NAME}/cmake")
+         # use explicit path to avoid "surprises"
+         if( EXISTS "${_TMP_MULLE_CG_DIR}/DependenciesAndLibraries.cmake")
+            unset( MULLE_CG_DEFINITIONS)
+            list( INSERT CMAKE_MODULE_PATH 0 "${_TMP_MULLE_CG_DIR}")
+            #
+            include( "${_TMP_MULLE_CG_DIR}/DependenciesAndLibraries.cmake")
+            #
+            #
+            list( REMOVE_ITEM CMAKE_MODULE_PATH "${_TMP_MULLE_CG_DIR}")
+            set( INHERITED_DEFINITIONS
+               ${INHERITED_DEFINITIONS}
+               ${MULLE_CG_DEFINITIONS}
+               CACHE INTERNAL "need to cache this"
+            )
+            break()
+         else()
+            message( STATUS "${_TMP_MULLE_CG_DIR}/DependenciesAndLibraries.cmake not found")
+         endif()
+      endforeach()
+      #
+      # Search for "MulleObjCLoader+<name>.h" in include directory.
+      # Disable with: `mulle-sourcetree mark MulleCG no-cmake-loader`
+      #
+      if( NOT NO_INHERIT_OBJC_LOADERS)
+         foreach( _TMP_MULLE_CG_NAME "MulleCG")
+            set( _TMP_MULLE_CG_FILE "${_TMP_MULLE_CG_ROOT}/include/${_TMP_MULLE_CG_NAME}/MulleObjCLoader+${_TMP_MULLE_CG_NAME}.h")
+            if( EXISTS "${_TMP_MULLE_CG_FILE}")
+               set( INHERITED_OBJC_LOADERS
+                  ${INHERITED_OBJC_LOADERS}
+                  ${_TMP_MULLE_CG_FILE}
+                  CACHE INTERNAL "need to cache this"
+               )
+               break()
+            endif()
+         endforeach()
+      endif()
+   else()
+      # Disable with: `mulle-sourcetree mark MulleCG no-require-link`
+      message( FATAL_ERROR "MULLE_CG_LIBRARY was not found")
    endif()
 endif()

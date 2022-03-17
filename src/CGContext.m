@@ -1,12 +1,20 @@
-#define DEFINE_NANOVG_GL_IMPLEMENTATION
-
 #import "import-private.h"
 
 #import "CGContext.h"
+
 #import "CGContext+CGFont.h"
+#import "CGContext+OpenGL.h"
+#import "CGContext+Resources.h"
+#import "CGBitmap+UTF8String.h"
 #import "CGGeometry+UTF8String.h"
 #import "CGImage.h"
+#import "CGLayer.h"
 #include <stdio.h>
+
+
+#define SWAP_DEBUG
+#define RESIZE_DEBUG
+#define RENDER_DEBUG
 
 
 @interface NSObject( ShareId)
@@ -16,11 +24,58 @@
 @end
 
 
+static void   *acquire_ivar_pointer( mulle_atomic_pointer_t *p)
+{
+   void   *value;
+   void   *actual;
 
-#define HAVE_MEM_GRAPH
+   value = _mulle_atomic_pointer_read( p);
+   if( ! value)
+      return( value);
 
-// #define RENDER_DEBUG
+   for(;;)
+   {
+      // zero out _drawnLayer if its contents are "layer"
+      // don't zero on mismatch
+      // return the actual contents of _drawnLayer (before zeroing)
+      actual = __mulle_atomic_pointer_cas( p, NULL, value);
+      if( actual == NULL)
+         return( value);
+      value = actual;
+   }
+}
 
+
+static void   *acquire_ivar_object( mulle_atomic_pointer_t *p)
+{
+   id   obj;
+
+   obj = acquire_ivar_pointer( p);
+   return( [obj autorelease]);
+}
+
+
+static inline int   recycle_ivar_pointer( mulle_atomic_pointer_t *p, void *value)
+{
+   return( _mulle_atomic_pointer_cas( p, value, NULL));
+}
+
+
+static void   recycle_ivar_object( mulle_atomic_pointer_t *p, id obj)
+{
+   if( ! obj)
+      return;
+
+   [obj retain];
+   if( ! recycle_ivar_pointer( p, obj))
+      [obj release];  // if it fails, undo retain
+}
+
+
+
+//
+// there shall be no OpenGL calls or constants here. Just nanovg stuff
+//
 @implementation CGContext
 
 static struct
@@ -44,6 +99,7 @@ static struct
 {
    mulle_thread_mutex_done( &Self._freeTypeLock);
 }
+
 
 + (void) setDebugEnabled:(BOOL) flag
 {
@@ -105,34 +161,6 @@ l_Position, normal);\n"
 "}\n"
 ;
 */
-+ (char *) backendUTF8String
-{
-#ifdef NANOVG_GL3_IMPLEMENTATION
-   return( "OpenGL v3.0+");
-#endif
-#ifdef NANOVG_GLES2_IMPLEMENTATION
-   return( "GLES v2.0+");
-#endif
-#ifdef NANOVG_GLES3_IMPLEMENTATION
-   return( "GLES v3.2+");
-#endif
-   abort();
-}
-
-
-+ (enum CGContextBackend) backend
-{
-#ifdef NANOVG_GL3_IMPLEMENTATION
-   return( CG_GL3);
-#endif
-#ifdef NANOVG_GLES2_IMPLEMENTATION
-   return( CG_GLES2);
-#endif
-#ifdef NANOVG_GLES3_IMPLEMENTATION
-   return( CG_GLES3);
-#endif
-   abort();
-}
 
 // due to freetype being singlethreaded (mostly ?) the nvgCreate routines
 // need to run locked so only one thread can create a NVG context at the
@@ -141,23 +169,12 @@ l_Position, normal);\n"
 - (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
               useStencilStrokes:(BOOL) useStencilStrokes
 {
-   _nvgFlags  = edgeAntialiasing ? NVG_ANTIALIAS : 0;
-   _nvgFlags |= useStencilStrokes ? NVG_STENCIL_STROKES : 0;
-#ifdef DEBUG
-   _nvgFlags |= NVG_DEBUG;
-#endif
+   struct mulle_allocator   *allocator;
 
    mulle_thread_mutex_lock( &Self._freeTypeLock);
    {
-#ifdef NANOVG_GL3_IMPLEMENTATION
-      _vg  = nvgCreateGL3( _nvgFlags);
-#endif
-#ifdef NANOVG_GLES2_IMPLEMENTATION
-      _vg  = nvgCreateGLES2( _nvgFlags);
-#endif
-#ifdef NANOVG_GLES3_IMPLEMENTATION
-      _vg  = nvgCreateGLES3( _nvgFlags);
-#endif
+      [self _initBackendWithEdgeAntialiasing:edgeAntialiasing
+                           useStencilStrokes:useStencilStrokes];
    }
    mulle_thread_mutex_unlock( &Self._freeTypeLock);
 
@@ -170,16 +187,17 @@ l_Position, normal);\n"
 
    [self _initFontCache];
 
-   _mulle__pointerset_init( &_resources, 0, MulleObjCInstanceGetAllocator( self));
-   _mulle__pointerarray_init( &_deletedTexturedIDs, 0, MulleObjCInstanceGetAllocator( self));
+   allocator = MulleObjCInstanceGetAllocator( self);
+   _mulle__pointerset_init( &_resources, 0, allocator);
+   _mulle__pointerarray_init( &_deletedTexturedIDs, 0, allocator);
 
    mulle_set_init( &_loanedResources,
                    0,
                    &mulle_container_keycallback_nonowned_pointer,
-                   MulleObjCInstanceGetAllocator( self));
+                   allocator);
 
    // this is merely there to provide a mapping, it doesn't own the CGImage
-   _mulle_map_init( &_gpuTextureMap, 0, &Self._callback, MulleObjCInstanceGetAllocator( self));
+   _mulle_map_init( &_gpuTextureMap, 0, &Self._callback, allocator);
 
    _debugEnabled = Self._debugEnabled;
    if( _debugEnabled)
@@ -191,6 +209,8 @@ l_Position, normal);\n"
 
 - (void) finalize
 {
+   CGLayer   *layer;
+
    if( ! _vg)  // we died super early, so nothing to do
    {
       [super finalize];
@@ -200,40 +220,25 @@ l_Position, normal);\n"
    assert( ! _isRendering);
 
    if( _debugEnabled)
-      fprintf( stderr, "*** context %p: finalize\n", self);
-
+      mulle_fprintf( stderr, "*** context %p: finalize\n", self);
 
    [self _resetFontCache];
    [self releaseAllLoanedResources];
    [self removeAllResources];
    [self deleteTextureIDs];
 
-   if( _offScreenFramebuffer)
-   {
-   	nvgluDeleteFramebuffer((NVGLUframebuffer *) _offScreenFramebuffer);
-      _offScreenFramebuffer = NULL;
-   }
-
    if( _debugEnabled)
-      fprintf( stderr, "*** context %p: autorelease offScreenFramebufferImage %p\n", self, _offScreenFramebufferImage);
-   [_offScreenFramebufferImage autorelease];
-   _offScreenFramebufferImage = nil;
+      mulle_fprintf( stderr, "*** context %p: autorelease offScreenFramebuffer\n", self);
+
+   // by acquiring we nil and autorelease, which is what we want to do
+   acquire_ivar_object( &_drawnLayer);
+   acquire_ivar_object( &_scratchLayer);
 
    mulle_thread_mutex_lock( &Self._freeTypeLock);
    {
-#ifdef NANOVG_GL3_IMPLEMENTATION
-   	nvgDeleteGL3( _vg);
-#endif
-#ifdef NANOVG_GLES2_IMPLEMENTATION
-	   nvgDeleteGLES2(_vg);
-#endif
-#ifdef NANOVG_GLES3_IMPLEMENTATION
-	   nvgDeleteGLES3(_vg);
-#endif
+      [self _finalizeBackend];
    }
    mulle_thread_mutex_unlock( &Self._freeTypeLock);
-
-   _vg = NULL;
 
    [super finalize];
 }
@@ -241,6 +246,8 @@ l_Position, normal);\n"
 
 - (void) dealloc
 {
+   struct mulle_allocator   *allocator;
+
    if( _debugEnabled)
       fprintf( stderr, "*** context %p: dealloc\n", self);
 
@@ -249,40 +256,13 @@ l_Position, normal);\n"
    // images in _gpuTextureMap aren't retained just blow map away
    mulle_map_done( &_gpuTextureMap);
    mulle_set_done( &_loanedResources);
-   _mulle__pointerset_done( &_resources, MulleObjCInstanceGetAllocator( self));
-   _mulle__pointerarray_done( &_deletedTexturedIDs, MulleObjCInstanceGetAllocator( self));
+
+   allocator = MulleObjCInstanceGetAllocator( self);
+
+   _mulle__pointerset_done( &_resources, allocator);
+   _mulle__pointerarray_done( &_deletedTexturedIDs, allocator);
 
    [super dealloc];
-}
-
-
-- (char *) shaderHeaderUTF8String
-{
-#ifdef NANOVG_GL3_IMPLEMENTATION
-   return( "#version 150 core\n");
-#endif
-#ifdef NANOVG_GLES2_IMPLEMENTATION
-   return( "#version 100\n");
-#endif
-#ifdef NANOVG_GLES3_IMPLEMENTATION
-   return( "#version 300 es\n");
-#endif
-   return( "");
-}
-
-
-- (void *) gpuTextureForImageID:(NSInteger) imageID
-{
-#ifdef NANOVG_GL3_IMPLEMENTATION
-   return( (void *) (uintptr_t) nvglImageHandleGL3( _vg, imageID));
-#endif
-#ifdef NANOVG_GLES2_IMPLEMENTATION
-   return( (void *) (uintptr_t) nvglImageHandleGLES2( _vg, imageID));
-#endif
-#ifdef NANOVG_GLES3_IMPLEMENTATION
-   return( (void *) (uintptr_t) nvglImageHandleGLES3( _vg, imageID));
-#endif
-   abort();
 }
 
 
@@ -292,227 +272,84 @@ l_Position, normal);\n"
 }
 
 
-char   *_CGNVGBackendErrorShortUTF8String( void *error)
-{
-   switch( (intptr_t) error)
-   {
-   case GL_INVALID_ENUM      : return( "GL_INVALID_ENUM");
-   case GL_INVALID_VALUE     : return( "GL_INVALID_VALUE");
-   case GL_INVALID_OPERATION : return( "GL_INVALID_OPERATION");
-   case GL_NO_ERROR          : return( "GL_NO_ERROR");
-#if ! defined( NANOVG_GLES2_IMPLEMENTATION) && ! defined( NANOVG_GLES3_IMPLEMENTATION)
-   case GL_STACK_OVERFLOW    : return( "GL_STACK_OVERFLOW");
-   case GL_STACK_UNDERFLOW   : return( "GL_STACK_UNDERFLOW");
-#endif
-   case GL_OUT_OF_MEMORY     : return( "GL_OUT_OF_MEMORY");
-   default                   : abort();
-   }
-}
+/*
+ * petty accessors
+ */
 
-char   *_CGNVGBackendErrorUTF8String( void *error)
+- (BOOL) isRendering
 {
-   switch( (intptr_t) error)
-   {
-   case GL_INVALID_ENUM      : return( "An unacceptable value was specified for an enumerated argument");
-   case GL_INVALID_VALUE     : return( "A numeric argument was out of range");
-   case GL_INVALID_OPERATION : return( "The specified operation is not allowed in the current state");
-   case GL_NO_ERROR          : return( NULL);
-#if ! defined( NANOVG_GLES2_IMPLEMENTATION) && ! defined( NANOVG_GLES3_IMPLEMENTATION)
-   case GL_STACK_OVERFLOW    : return( "This function caused a stack overflow");
-   case GL_STACK_UNDERFLOW   : return( "This function caused a stack underflow");
-#endif
-   case GL_OUT_OF_MEMORY     : return( "There is not enough memory left to execute the function");
-   default                   : abort();
-   }
+   return( _isRendering);
 }
 
 
-char   *CGNVGBackendErrorUTF8String( void)
+- (BOOL) isActive
 {
-   GLenum   err;
-
-   err = glGetError();
-   return( _CGNVGBackendErrorUTF8String( (void *) (intptr_t) err));
+   return( _isActive);
 }
 
 
-static void  _checkGLError( char* str)
+- (struct CGFrameInfo *) currentFrameInfo
 {
-	GLenum       err;
-   static int   counter;
-
-	err = glGetError();
-	if( err != GL_NO_ERROR)
-   {
-      if( counter < 50)  // gets tedious fast
-      {
-		   fprintf( stderr, "%s error %s( %x) \"%s\" after %s\n",
-                                 [CGContext backendUTF8String],
-                                 _CGNVGBackendErrorShortUTF8String( (void *) (intptr_t) err),
-                                 err,
-                                 _CGNVGBackendErrorUTF8String( (void *) (intptr_t) err),
-                                 str ? str : "???");
-         ++counter;
-      }
-      assert( err == GL_NO_ERROR);
-		return;
-	}
-}
-
-static void  checkGLError( char* str)
-{
-#ifdef DEBUG
-   _checkGLError( str);
-#endif
+   return( _isRendering ? &_currentFrameInfo : NULL);
 }
 
 
-- (void) assertNoBackendError:(char *) str
+// not really used
+- (void) getCurrentFrameInfo:(struct CGFrameInfo *) info
 {
-#ifdef NANOVG_GL3_IMPLEMENTATION
-   _checkGLError( str);
-#endif
-#ifdef NANOVG_GLES2_IMPLEMENTATION
-   _checkGLError( str);
-#endif
-#ifdef NANOVG_GLES3_IMPLEMENTATION
-   _checkGLError( str);
-#endif
-}
-
-
-- (void) clearFramebufferMinimally
-{
-   if( _nvgFlags & NVG_STENCIL_STROKES)
-      glClear( GL_STENCIL_BUFFER_BIT);
-   checkGLError( "clear stencil and depth framebuffer");
-}
-
-
-- (void) clearFramebufferWithHexColor:(NSUInteger) hexColor
-{
-   CGFloat   rgba[ 4];
-   CGColor   color;
-   GLuint    bits;
-
-   color = CGColorMakeWithHexColor( hexColor);
-   CGColorGetComponents( color, rgba);
-   glClearColor( rgba[ 0], rgba[ 1], rgba[ 2], rgba[ 3]);
-
-   bits = GL_COLOR_BUFFER_BIT;
-   if( _nvgFlags & NVG_STENCIL_STROKES)
-      bits |= GL_STENCIL_BUFFER_BIT;
-
-   glClear( bits);
-   checkGLError( "clear framebuffer");
-}
-
-
-#define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX   0x9048
-#define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
-
-
-- (void) changeRender:(struct CGFrameInfo *) info
-                alpha:(CGFloat) alpha
-{
-   assert( _isActive);
+   assert( info);
+   assert( _currentFrameInfo.window.pixelRatio);  // not yet initialized!!
    assert( _isRendering);
 
-   _currentFrameInfo = *info;
-   _alpha            = alpha;
-
-   checkGLError( "before nvgChangeFrame");
-
-   // MEMO: the gLViewPort should be done afterwards
-   nvgChangeFrame( _vg, _currentFrameInfo.size.width,
-                        _currentFrameInfo.size.height,
-                        _currentFrameInfo.pixelRatio);
-   checkGLError( "nvgChangeFrame");
-
-   glViewport( _currentFrameInfo.viewportFrame.origin.x,
-               _currentFrameInfo.viewportFrame.origin.y,
-               _currentFrameInfo.viewportFrame.size.width,
-               _currentFrameInfo.viewportFrame.size.height);
-   checkGLError( "glViewport");
+   *info = _currentFrameInfo;
 }
 
 
-- (void) resumeRender
+- (CGFloat) alpha
 {
-   assert( _isActive);
-   assert( _isRendering);
-
-   checkGLError( "before resumeRender");
-
-   glViewport( _currentFrameInfo.viewportFrame.origin.x,
-               _currentFrameInfo.viewportFrame.origin.y,
-               _currentFrameInfo.viewportFrame.size.width,
-               _currentFrameInfo.viewportFrame.size.height);
-   checkGLError( "glViewPort");
-
-   nvgBeginFrame( _vg, _currentFrameInfo.size.width,
-                       _currentFrameInfo.size.height,
-                       _currentFrameInfo.pixelRatio);
-   checkGLError( "nvgBeginFrame");
+   return( _currentFrameInfo.alpha);
 }
 
 
-- (void) prepareOffScreenFramebuffer:(CGFrameInfo *) info
+- (NSUInteger) numberOfRenderedFrames
 {
-   if( ! CGBitmapSizeEqualToSize( _offScreenFramebufferSize, info->framebufferSize))
-   {
-      checkGLError( "before framebuffer delete");
-
-      if( _offScreenFramebuffer)
-      	nvgluDeleteFramebuffer((NVGLUframebuffer *) _offScreenFramebuffer);
-
-      if( _debugEnabled)
-         fprintf( stderr, "*** context %p: autorelease offScreenFramebufferImage %p\n", self, _offScreenFramebufferImage);
-
-      [_offScreenFramebufferImage autorelease];
-      _offScreenFramebufferImage = nil;
-
-      checkGLError( "before framebuffer create");
-
-      _offScreenFramebuffer = nvgluCreateFramebuffer( _vg,
-                                                      (int) info->framebufferSize.width,
-                                                      (int) info->framebufferSize.height,
-                                                      0);
-       checkGLError( "framebuffer create");
-
-//      fprintf( stderr, "created new offscreen framebuffer\n");
-      if( ! _offScreenFramebuffer)
-         abort();
-      _offScreenFramebufferSize = info->framebufferSize;
-      // torch old FB, create new one
-   }
-   assert( _offScreenFramebuffer);
+   return( _numberOfRenderedFrames);
 }
 
 
+- (mulle_relativetime_t) secondsSinceFirstRender
+{
+   return( _currentFrameInfo.now - _firstRenderTimeStamp);
+}
+
+
+/*
+ * render
+ */
 - (void) _beginNestedRender:(struct CGFrameInfo *) info
 {
-   assert( _isActive);
-   assert( info);
-   assert( info->pixelRatio != 0.0);
+}
 
-#if RENDER_DEBUG
-   if( ! CGSizeEqualToSize( info->viewportFrame.size, info->framebufferSize) ||
-       ! CGSizeEqualToSize( info->viewportFrame.size, info->size) ||
-       ! CGSizeEqualToSize( info->framebufferSize, info->size))
-      fprintf( stderr, "Viewport: %s, FB: %s, Window: %s\n",
-               CGSizeUTF8String( info->viewportFrame.size),
-               CGSizeUTF8String( info->framebufferSize),
-               CGSizeUTF8String( info->size));
+
+- (CGLayer *) layerWithSize:(struct CGBitmapSize) size
+{
+   CGLayer               *layer;
+   struct CGBitmapSize   oldSize;
+
+   layer   = acquire_ivar_object( &_scratchLayer);
+   oldSize = [layer bitmapSize];
+
+   if( ! CGBitmapSizeEqualToSize( oldSize, size))
+   {
+#ifdef RESIZE_DEBUG
+      mulle_fprintf( stderr, "%@: %@ create new layer with size %s\n",
+                        [NSThread currentThread], self, CGBitmapSizeUTF8String( size));
 #endif
-
-   _isRendering      = YES;
-   // not 100% sure why anymore this written this way
-
-   _currentFrameInfo = *info;
-   _alpha            = 1.0;
-
-   [self resumeRender];
+      layer = [CGLayer layerWithBitmapSize:size
+                                imageFlags:0
+                                   context:self];
+   }
+   return( layer);
 }
 
 
@@ -520,50 +357,74 @@ static void  checkGLError( char* str)
 {
    assert( ! _isRendering);
 
+   // not 100% sure why this is written this way
+   _isRendering = YES;
+
+   assert( _isActive);
+   assert( info);
+   assert( info->window.pixelRatio != 0.0);
+
+#ifdef RENDER_DEBUG
+   mulle_fprintf( stderr, "%@: %@ Viewport: %s, FB: %s, Window: %s\n",
+               [NSThread currentThread], self,
+               CGBitmapRectUTF8String( info->viewportFrame),
+               CGBitmapSizeUTF8String( info->window.framebufferSize),
+               CGSizeUTF8String( info->window.frame.size));
+#endif
+
    // not 100% sure why anymore this written this way
-   _lastRenderStartTime = _renderStartTime;
-   _renderStartTime     = info->now;
-   _frameDelta          = 0.0;
-   if( _lastRenderStartTime == 0.0)
-      _frameDelta = _renderStartTime - _lastRenderStartTime;
 
-   checkGLError( "before begin nested render");
+   _currentFrameInfo = *info;
 
-   [self _beginNestedRender:info];
+   if( _firstRenderTimeStamp == 0.0)
+      _firstRenderTimeStamp = _currentFrameInfo.now;
+
+   // sets opengl viewport and a beginFrame for nanovg
+   [self resumeRender];
+
    // now vg calls can happen
 
-   checkGLError( "before delete textureIDs");
-
-   // delete all queued textureIDs
+   // delete all queued for deletion textureIDs
    [self deleteTextureIDs];
+   CGContextCheckBackendError( self, "delete textureIDs");
 
    if( _rendersOffScreen)
    {
-      checkGLError( "before prepareOffScreenFramebuffer");
-
-      [self prepareOffScreenFramebuffer:info];
+      // will acuire hopefully a preexisting layer for reuse
+      _renderLayer = [[self layerWithSize:info->window.framebufferSize] retain];
       // create or reuse existing offscreen framebuffer
-
-      checkGLError( "before bind buffer");
-
-      nvgluBindFramebuffer( _offScreenFramebuffer);
-
-      checkGLError( "bind buffer");
    }
+
+   if( _rendersOffScreen)
+      [self bindFramebuffer:CGContextFramebufferMakeWithLayer( _renderLayer)];
 }
 
 
-- (void) bindDefaultFramebuffer
+static struct CGFrameInfo   emptyInfo;
+
+
+- (struct CGFrameInfo) bindRender:(struct CGFrameInfo *) info
 {
-   nvgluBindFramebuffer( _rendersOffScreen ? _offScreenFramebuffer : NULL);
+   struct CGFrameInfo   old;
 
-   checkGLError( "bind buffer");
-}
+   assert( info);
 
+   if( ! _isRendering)
+   {
+      [self beginRender:info];
+      return( emptyInfo);
+   }
 
-- (mulle_timeinterval_t) renderStartTime
-{
-   return( _renderStartTime);
+   if( ! info->window.pixelRatio)
+   {
+      [self endRender];
+      return( emptyInfo);
+   }
+
+   old = _currentFrameInfo;
+   [self changeRender:info];
+
+   return( old);
 }
 
 
@@ -581,33 +442,45 @@ static void  checkGLError( char* str)
    //    ctx->params.renderFlush(ctx->params.userPtr);
    // }
    //
-   checkGLError( "before nvgEndFrame");
+   CGContextCheckBackendError( self, "before nvgEndFrame");
 
    nvgEndFrame( _vg);
 
-   checkGLError( "nvgEndFrame");
-}
-
-
-// flushes drawings doesn't set glViewport
-- (void) flushRender
-{
-   nvgFlushFrame( _vg);
+   CGContextCheckBackendError( self, "nvgEndFrame");
 }
 
 
 - (void) _endRender
 {
+   CGLayer   *old;
+
    assert( _isRendering);
 
-   nvgluBindFramebuffer( NULL);  // technically not needed
-   _isRendering = NO;
-
-   checkGLError( "unbind buffer");
-
-   _lastFrameInfo = _currentFrameInfo;
-   memset( &_currentFrameInfo, 0xAD, sizeof( _currentFrameInfo));
+   _isRendering = 0;
    _numberOfRenderedFrames++;
+
+   [self bindFramebuffer:CGContextFramebufferMakeDefault()];
+   CGContextCheckBackendError( self, "unbind buffer");
+
+   if( _rendersOffScreen)
+   {
+      // get rid of old "valid" framebuffer previously
+      old = acquire_ivar_object( &_drawnLayer);
+      recycle_ivar_object( &_scratchLayer, old);
+
+      // by recycling it in _drawnLayer we store it there, since
+      // CGContext is the only one who is _supposed_ to write any NON-NULL value
+      // into _drawnLayer, this can't fail, and if it does it gets
+      // harmlessly reaped
+#ifdef SWAP_DEBUG
+      mulle_fprintf( stderr, "%@: %s %@ (least recent layer %@)\n",
+               [NSThread currentThread], __PRETTY_FUNCTION__, self, _renderLayer);
+      [[_renderLayer bitmapImage] writeToPNGFileWithSystemRepresentation:"layer.png"];
+#endif
+      recycle_ivar_object( &_drawnLayer, _renderLayer);
+      [_renderLayer autorelease];
+      _renderLayer = nil;
+   }
 }
 
 
@@ -615,61 +488,17 @@ static void  checkGLError( char* str)
 {
    assert( _isRendering);
 
+// draw a rectangle when in offscreen for debugging, this will be
+// surrounded by a green rectangle on swap
    [self suspendRender];
    [self _endRender];
 }
 
 
-- (BOOL) isRendering
+// flushes drawings doesn't set glViewport
+- (void) flushRender
 {
-   return( _isRendering);
-}
-
-
-- (BOOL) isActive
-{
-   return( _isActive);
-}
-
-
-static inline BOOL   haveLastFrameInfo( CGContext *self)
-{
-   return( self->_lastFrameInfo.pixelRatio != 0.0);
-}
-
-
-- (struct CGFrameInfo *) lastFrameInfo
-{
-   return( haveLastFrameInfo( self) ? &_lastFrameInfo : NULL);
-}
-
-
-- (struct CGFrameInfo *) currentFrameInfo
-{
-   return( _isRendering ? &_currentFrameInfo : NULL);
-}
-
-
-- (void) _setCurrentFrameInfo:(struct CGFrameInfo *) info
-{
-   if( info)
-      _currentFrameInfo = *info;
-}
-
-- (NSUInteger) numberOfRenderedFrames
-{
-   return( _numberOfRenderedFrames);
-}
-
-
-// not really used
-- (void) getCurrentFrameInfo:(struct CGFrameInfo *) info
-{
-   assert( info);
-   assert( _currentFrameInfo.pixelRatio);  // not yet initialized!!
-   assert( _isRendering);
-
-   *info = _currentFrameInfo;
+   nvgFlushFrame( _vg);
 }
 
 
@@ -681,184 +510,103 @@ static inline BOOL   haveLastFrameInfo( CGContext *self)
 }
 
 
-- (void) deleteTextureIDs
+- (void) resetScissor
 {
-   struct mulle__pointerarrayenumerator  rover;
-   void                                  *imageID;
+   assert( _isRendering);
 
-   rover = _mulle__pointerarray_enumerate( &_deletedTexturedIDs);
-   while( _mulle__pointerarrayenumerator_next( &rover, &imageID))
-      nvgDeleteImage( _vg, (int) (NSInteger) imageID);
-   mulle__pointerarrayenumerator_done( &rover);
-
-   _mulle__pointerarray_reset( &_deletedTexturedIDs);
+   nvgResetScissor( _vg);
 }
+
 
 /*
- * Read framebuffer information from GPU to CPU
+ * manage framebuffers
  */
-- (struct CGFramebufferBitmap) framebufferBitmapAtRect:(struct CGBitmapRect) rect
-                                 framebufferBitmapType:(enum CGFramebufferBitmapType) type
-                                             allocator:(struct mulle_allocator *) allocator
+- (void) clearFramebufferWithColor:(CGColor) color
 {
-   struct CGFramebufferBitmap   fb;
-   enum CGBitmapEncoding        encoding;
-   GLenum                       format;
-   GLenum                       type;
-   size_t                       size;
+   [self clearFramebufferBits:_framebufferBits
+                        color:color];
+}
 
-   switch( type)
+
+- (void) clearFramebuffer
+{
+   [self clearFramebufferBits:_framebufferBits
+                        color:CGColorMakeWithHexColor( 0x000000FF)];
+}
+
+
+
+- (struct CGContextFramebuffer) currentFramebuffer
+{
+   return( _currentFramebuffer);
+}
+
+
+- (struct CGContextFramebuffer) bindFramebuffer:(struct CGContextFramebuffer) fb
+{
+   struct CGContextFramebuffer   old;
+
+   assert( _isActive);
+
+   old = _currentFramebuffer;
+   switch( fb.type)
    {
-   case CGFramebufferRGBABytes     : encoding = CGBitmapEncodingFlipYRGBABytes;
-                                     format   = GL_RGBA;
-                                     type     = GL_UNSIGNED_BYTE;
-                                     break;
-   case CGFramebufferRGBAFloats    : encoding = CGBitmapEncodingFlipYRGBABytes;
-                                     format   = GL_RGBA;
-                                     type     = GL_FLOAT;
-                                     break;
-//   case CGFramebufferStencilBytes  : encoding = CGBitmapEncodingFlipYMonochromeBytes;
-//                                     format   = GL_STENCIL_INDEX;
-//                                     type     = GL_UNSIGNED_BYTE;
-//                                     break;
-#if ! defined( NANOVG_GLES2_IMPLEMENTATION) && ! defined( NANOVG_GLES3_IMPLEMENTATION)
-   case CGFramebufferStencilFloats : encoding = CGBitmapEncodingFlipYMonochromeFloats;
-                                     format   = GL_STENCIL_INDEX;
-                                     type     = GL_FLOAT;
-                                     break;
-//   case CGFramebufferDepthBytes    : encoding = CGBitmapEncodingFlipYMonochromeBytes;
-//                                     format   = GL_DEPTH_COMPONENT;
-//                                     type     = GL_UNSIGNED_BYTE;
-//                                     break;
-   case CGFramebufferDepthFloats   : encoding = CGBitmapEncodingFlipYMonochromeFloats;
-                                     format   = GL_DEPTH_COMPONENT;
-                                     type     = GL_FLOAT;
-                                     break;
-#endif
+   case CGContextDefaultFramebuffer :
+      // this is GL on the "bottom" anyway
+      nvgluBindFramebuffer( NULL);
+      break;
+
+   case CGContextLayerFramebuffer :
+      [(CGLayer *) fb.handle bindFramebuffer];  // nvg will restore
+      break;
+
+   case CGContextOpenGLFramebuffer  :
+      [self bindOpenGLFramebuffer:fb.handle];
+      break;
 
    default :
-#ifdef DEBUG
-      fprintf( stderr, "CGFramebufferBitmapType %d is not supported\n", type);
-#endif
-      memset( &fb, 0, sizeof( fb));
-      return( fb);
+      abort();
    }
+   CGContextCheckBackendError( self, "bind buffer");
 
-   fb.info        = CGBitmapInfoMake( rect.size, 0, encoding);
-   size           = CGBitmapInfoGetAllocationSize( fb.info);
-   fb.allocator   = allocator ? allocator : &mulle_default_allocator;
-   // nvidia seemingly has problems if rect has some off values(guess)
-   // so we add something for safety (valgrinds better)
-   size          += 16;
-   fb.bytes       = mulle_allocator_malloc( fb.allocator, size);
+   _currentFramebuffer = fb;
 
-   glReadPixels( (int) rect.origin.x,   (int) rect.origin.y,
-                 (int) rect.size.width, (int) rect.size.height,
-                 format,
-                 type,
-                 fb.bytes);
-   checkGLError( "glReadPixels");
-   return( fb);
+   return( old);
 }
 
 
-- (struct CGFramebufferBitmap)
-   lastRenderedFramebufferBitmapType:(enum CGFramebufferBitmapType) type
-                            inFlight:(BOOL) inFlight
-                           allocator:(struct mulle_allocator *) allocator
+
+/*
+ * Offscreenbuffer cycle.
+ *
+ * ## Generation
+ *
+ * When it's time to draw a new framebuffer, then we use the
+ * _scratchLayer. If there is no _scratchLayer a new CGLayer is
+ * generated. If there was a _scratchLayer it is now set to nil.
+ * The layer once finished is moved to _drawnLayer. If there was a
+ * previous _drawnLayer it is attempted to place it into
+ * _scratchLayer. If that doesn't succeed it gets releases. If it does
+ * the fine. The drawing part is done.
+ *
+ * ## Display
+ *
+ * The _drawnLayer is acquired (take and _drawnLayer set to nil)
+ * by the main thread usually. If it's nil, well shucks nothing to draw then.
+ * Once the _drawnLayer has been used by the main thread it gets
+ * repossesed. If there is no room in _scratchLayer it will get
+ * discarded.
+ */
+- (id) acquireOffscreenFramebuffer
 {
-   struct CGBitmapRect    rect;
-   struct CGFrameInfo    *info;
-
-   rect.origin = CGBitmapPointMake( 0, 0);
-   info = [self lastFrameInfo];
-   if( info)
-      rect.size = info->framebufferSize;
-
-   // By default, mode is GL_FRONT in single-buffered configurations
-   // and GL_BACK in double-buffered configurations.
-   // just have no luck with GLES2 setting this
-#ifndef NANOVG_GLES2_IMPLEMENTATION
-   glReadBuffer( inFlight ? GL_BACK : GL_FRONT);
-   _checkGLError( "glReadBuffer");
-#endif
-
-   return( [self framebufferBitmapAtRect:rect
-                   framebufferBitmapType:type
-                               allocator:allocator]);
+   return( acquire_ivar_object( &_drawnLayer));
 }
 
 
-- (struct CGFramebufferBitmap) lastRenderedFramebuffer
+// get a layer from an outside source back
+- (void) recycleFramebuffer:(id) layer
 {
-   return( [self lastRenderedFramebufferBitmapType:CGFramebufferRGBABytes
-                                          inFlight:NO
-                                         allocator:NULL]);
-}
-
-
-- (struct CGFramebufferBitmap)
-   lastRenderedOffscreenFramebufferBitmapType:(enum CGFramebufferBitmapType) type
-                                    allocator:(struct mulle_allocator *) allocator
-{
-   struct CGFramebufferBitmap   fb;
-   struct CGBitmapRect          bitmapRect;
-
-   assert( ! _isRendering);  // bad bad bad
-
-   if( ! _offScreenFramebuffer)
-   {
-      memset( &fb, 0, sizeof( fb));
-      return( fb);
-   }
-
-   nvgluBindFramebuffer( _offScreenFramebuffer);
-   checkGLError( "bind buffer");
-   {
-      bitmapRect = CGBitmapRectMake( 0, 0,
-                                     _offScreenFramebufferSize.width,
-                                     _offScreenFramebufferSize.height);
-      fb = [self framebufferBitmapAtRect:bitmapRect
-                   framebufferBitmapType:type
-                               allocator:allocator];
-   }
-   nvgluBindFramebuffer( NULL);
-   checkGLError( "unbind buffer");
-
-   return( fb);
-}
-
-
-- (struct CGFramebufferBitmap) lastRenderedOffscreenFramebuffer
-{
-   return( [self lastRenderedOffscreenFramebufferBitmapType:CGFramebufferRGBABytes
-                                                  allocator:NULL]);
-}
-
-
-// TODO: move to category
-- (CGImage *) framebufferImage
-{
-   int   imageID;
-
-   if( ! _offScreenFramebuffer)
-      return( nil);
-
-   assert( ! _isRendering);
-
-   if( ! _offScreenFramebufferImage)
-   {
-      imageID = ((NVGLUframebuffer *) _offScreenFramebuffer)->image;
-      _offScreenFramebufferImage = [[CGImage alloc] initWithNVGImage:imageID
-                                                          imageFlags:NVG_IMAGE_FLIPY
-                                                             context:self];
-      if( _debugEnabled)
-         fprintf( stderr, "*** context %p: created offScreenFramebufferImage "
-                          "CGImage %p (nvgImage %d)\n",
-                          self, _offScreenFramebufferImage, imageID);
-   }
-
-   return( _offScreenFramebufferImage);
+   recycle_ivar_object( &_scratchLayer, layer);
 }
 
 
@@ -880,209 +628,5 @@ static inline BOOL   haveLastFrameInfo( CGContext *self)
 //
 //    return( image);
 // }
-
-- (void) addToResources:(id) resource
-{
-   // resources are not retained! If you want them retained, use
-   // loanResource after adding
-   _mulle__pointerset_insert( &_resources, resource, MulleObjCInstanceGetAllocator( self));
-}
-
-
-- (void) _removeFromResources:(id) resource
-{
-   assert( ! mulle_set_get( &_loanedResources, resource));
-
-   _mulle__pointerset_remove( &_resources, resource, MulleObjCInstanceGetAllocator( self));
-}
-
-
-- (void) removeFromResources:(id) resource
-{
-   assert( ! mulle_set_get( &_loanedResources, resource));
-
-   if( _mulle__pointerset_remove( &_resources, resource, MulleObjCInstanceGetAllocator( self)))
-      [resource contextDidRemoveObject:self];
-}
-
-
-- (void) removeAllResources
-{
-   struct mulle__pointersetenumerator   rover;
-   struct mulle__pointerset             tmp;
-   id                                   resource;
-
-   if( _debugEnabled)
-      fprintf( stderr, "*** context %p: removeAllResources\n", self);
-
-   tmp = _resources;
-   _mulle__pointerset_init( &_resources, 0, MulleObjCInstanceGetAllocator( self));
-
-   rover = _mulle__pointerset_enumerate( &tmp);
-   while( _mulle__pointersetenumerator_next( &rover, (void **) &resource))
-      [resource contextDidRemoveObject:self];
-   mulle__pointersetenumerator_done( &rover);
-
-   _mulle__pointerset_done( &tmp, MulleObjCInstanceGetAllocator( self));
-}
-
-
-- (void) loanResource:(id <CGContextResource>) resource
-{
-   assert( _mulle__pointerset_get( &_resources, resource));
-   assert( ! mulle_set_get( &_loanedResources, resource));
-
-   [(id) resource retain];
-   mulle_set_insert( &_loanedResources, resource);
-}
-
-
-- (void) repossessResource:(id <CGContextResource>) resource
-{
-   id <CGContextResource>  found;
-
-   assert( mulle_set_get( &_loanedResources, resource));
-
-   mulle_set_remove( &_loanedResources, resource);
-   [(id) resource autorelease];
-}
-
-
-- (void) releaseAllLoanedResources
-{
-   struct mulle_setenumerator   rover;
-   struct mulle_set             tmp;
-   id                           resource;
-
-   if( _debugEnabled)
-      fprintf( stderr, "*** context %p: releaseAllLoanedResources\n", self);
-   tmp = _loanedResources;
-   mulle_set_init( &_loanedResources,
-                   0,
-                   &mulle_container_keycallback_nonowned_pointer,
-                   MulleObjCInstanceGetAllocator( self));
-
-   rover = _mulle_set_enumerate( &tmp);
-   while( mulle_setenumerator_next( &rover, (void **) &resource))
-      [resource autorelease];
-   mulle_setenumerator_done( &rover);
-
-   mulle_set_done( &tmp);
-}
-
-
-
-//
-// When a CGImage gets reaped by an NSAutoreleasePool the context may not
-// be activated and it could be tricky to ascertain, that it isn't in use
-// by another thread. So we queue these delete requests up
-// TODO: may need to lock this... ?
-- (void) deleteTextureID:(NSInteger) imageID
-{
-   _mulle__pointerarray_add( &_deletedTexturedIDs,
-                             (void *) imageID,
-                             MulleObjCInstanceGetAllocator( self));
-}
-
-
-
-- (void) fillRect:(CGRect) rect
-         hexColor:(NSUInteger) hexColor
-{
-   nvgBeginPath( _vg);
-   {
-      nvgRect( _vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgFillColor( _vg, CGColorMakeWithUnsignedInteger( hexColor));
-   }
-   nvgFill( _vg);
-}
-
-
-- (void) strokeRect:(CGRect) rect
-           hexColor:(NSUInteger) hexColor
-              width:(CGFloat) width
-{
-   nvgBeginPath( _vg);
-   {
-      nvgRect( _vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgStrokeWidth( _vg, width);
-      nvgStrokeColor( _vg, CGColorMakeWithUnsignedInteger( hexColor));
-   }
-   nvgStroke( _vg);
-}
-
-
-- (void) drawRect:(CGRect) rect
-            image:(id) image
-            scale:(BOOL) scale
-{
-   CGDrawableOptions   options;
-
-   options = CGDrawableOptionsMake( 0.0, 1.0, 0.0, scale);
-   [image drawRect:rect
-           options:&options
-           context:self];
-}
-
-
-
-- (void) drawFramebufferBitmap:(struct CGFramebufferBitmap *) fb
-{
-   CGImage                  *image;
-   CGDrawableOptions        options;
-   CGRect                   rect;
-   enum CGBitmapEncoding    targetEncoding;
-   void                     *bytes;
-   struct CGBitmapInfo      info;
-
-   if( ! fb->bytes)
-      return;
-
-   targetEncoding = CGBitmapEncodingRGBABytes;
-   switch( CGBitmapInfoGetEncoding( fb->info))
-   {
-   case CGBitmapEncodingFlipYRGBABytes :
-   case CGBitmapEncodingRGBABytes      :
-      image = [[[CGImage alloc] initWithBytes:fb->bytes
-                                 bitmapInfo:fb->info
-                                 imageFlags:0
-                                    context:self] autorelease];
-      break;
-
-   default:
-      bytes = CGBitmapConvertBytesToEncoding( fb->bytes, fb->info, targetEncoding, NULL);
-      if( ! bytes)
-         abort();
-      info  = CGBitmapInfoMake( fb->info.size, 0, targetEncoding);
-      image = [[[CGImage alloc] initWithBytes:fb->bytes
-                                   bitmapInfo:fb->info
-                                   imageFlags:0
-                                    context:self] autorelease];
-      mulle_free( bytes);
-   }
-
-   rect    = CGRectMake( 0, 0, fb->info.size.width, fb->info.size.height);
-   options = CGDrawableOptionsMake( 0.0, 1.0, 0.0, YES);
-   [image drawRect:rect
-           options:&options
-           context:self];
-
-   // just for debugging, draws a frame somewhere
-   {
-      struct NVGcontext   *vg;
-
-      vg = CGContextGetNVGContext( self);
-
-      // draw a rectangle on top so we know something is drawn...
-      nvgBeginPath( vg);
-      {
-         rect = CGRectInset( rect, 20, 20);
-         nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-         nvgStrokeWidth( vg, 3);
-         nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x8020A0FF));
-      }
-      nvgStroke( vg);
-   }
-}
 
 @end

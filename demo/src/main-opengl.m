@@ -19,7 +19,7 @@
 // In this demo, there are no "real" nanovg calls, so it doesn't matter
 //
 
-void  drawOpenGL1( UIWindow *window, CGContext *context, struct CGFrameInfo *info)
+BOOL  drawOpenGL1( UIWindow *window, id <UIGraphicsContext> context, struct CGFrameInfo *info)
 {
    glColor3f( 0.0f, 0.0f, 1.0f ); // blue color
 
@@ -31,10 +31,11 @@ void  drawOpenGL1( UIWindow *window, CGContext *context, struct CGFrameInfo *inf
    glEnd();
 
    glFlush();
+   return( YES);
 }
 
 
-void  drawOpenGL2( UIWindow *window, CGContext *context, struct CGFrameInfo *info)
+void  drawOpenGL2( UIWindow *window, id <UIGraphicsContext> context, struct CGFrameInfo *info)
 {
    glColor3f( 1.0f, 1.0f, 0.0f ); // yellow color
 
@@ -49,7 +50,7 @@ void  drawOpenGL2( UIWindow *window, CGContext *context, struct CGFrameInfo *inf
 }
 
 
-void  drawOpenGL3( UIWindow *window, CGContext *context, struct CGFrameInfo *info)
+void  drawOpenGL3( UIWindow *window, id <UIGraphicsContext> context, struct CGFrameInfo *info)
 {
    glColor3f( 1.0f, 0.0f, 1.0f ); // magenta color
 
@@ -119,15 +120,13 @@ int   main( int argc, char *argv[])
    if( argc == 2)
       bits= atoi( argv[ 1]);
    if( bits & 1)
-      [window setWillRenderCallback:drawOpenGL1];
+      [window setWillDrawCallback:drawOpenGL1];
    if( bits & 2)
-     [window setWillEndRenderCallback:drawOpenGL2];
+      [window setDidDrawObjectsCallback:drawOpenGL2];
    if( bits & 4)
-      [window setDidRenderCallback:drawOpenGL3];
-   [window renderLoop];
+      [window setDidDrawCallback:drawOpenGL3];
 
-   [app terminate];
-   return( 0);
+   return( [app run]);
 }
 
 

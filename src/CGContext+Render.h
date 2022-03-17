@@ -20,6 +20,6 @@
 // The objects will *NOT* be retained. The objects array will not be copied or
 // kept.
 //
-- (void) renderObjects:(struct mulle_pointerarray *) layers;
+- (void) drawObjects:(struct mulle_pointerarray *) layers;
 
 @end

@@ -67,7 +67,6 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 }
 
 
-
 void   setupScene( UIWindow *window)
 {
    UIView        *view;
@@ -87,45 +86,11 @@ void   setupScene( UIWindow *window)
 }
 
 
-static void   usage( void)
-{
-   fprintf( stderr, "\n"
-"Usage:\n"
-"   draw [options]\n"
-"\n"
-"Options:\n"
-"   -i <v>  : swap interval (0-2)\n"
-"   -a      : async\n"
-"   -u      : no sync\n"
-"   -s      : sync\n"
-"   -f <hz> : refresh in hz\n"
-"\n");
-   exit( 1);
-}
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
    UIWindow        *window;
-   int             i;
    NSUInteger      styleMask;
-
-   /*
-    * window and app
-    */
-   for( i = 1; i < argc; i++)
-   {
-      if( argv[ i][ 0] != '-')
-         break;
-      switch( argv[ i][ 1])
-      {
-      default :
-         usage();
-      }
-   }
-
-   if( i != argc)
-      usage();
 
    app = [UIApplication sharedInstance];
 
@@ -135,20 +100,18 @@ int   main( int argc, char *argv[])
       styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
       styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
 
-      window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 800, 600)
-                                titleUTF8String:"Demo"
-                                      styleMask:styleMask] autorelease];
+      window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 800, 600)
+                         titleUTF8String:"Demo"
+                               styleMask:styleMask];
 
       assert( window);
       [window setBackgroundColor:CGColorMakeRGBA( 1.0, 1.0, 1.0, 1.0)];
       setupScene( window);
 
       [app addWindow:window];
-      [window renderLoop];
    }
-   [app terminate];
+   return( [app run]);
 }
-
 
 
 //

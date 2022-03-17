@@ -2,41 +2,37 @@
 
 
 // The whole "drawable" concept doesn't exist in CoreGraphics
-
+//
 //
 //                                             .------------.
 //                                             | CGDrawable |--------.
 //                                             '------------'        |
 //   .---------.                                      |              |
 //   | CGImage |------------------------.             |              |
-//   '---------'          |             |             |              |
-//        |               |             |             |              |
-//        |               |             |             |              |
-//        |               |             |             |              |
-//        |               |             v             |              |
-//        |               |   .------------------.    |              |
-//        |               |   | CGBitmapDrawable |<---'              |
-//        |               |   '------------------'                   |
-//        |               |                                          |
-//        |               |                                          |
-//        v               v                                          |
-//   .---------. .----------------.                                  |
-//   | CGLayer | | CGTextureImage |                                  v
-//   '---------' '----------------'                        .------------------.
+//   '---------'                        |             |              |
+//        |                             v             |              |
+//        |                   .------------------.    |              |
+//        |                   | CGBitmapDrawable |<---'              |
+//        |                   '------------------'                   |
+//        v                                                          |
+//   .---------.                                                     |
+//   | CGLayer |                                                     v
+//   '---------'                                           .------------------.
 //                                                         | CGVectorDrawable |
 //                                                         '------------------'
-//                 .---------.         .---------------.             ^
-//               .-| UIImage |-------->| UISVGImage |-------------'
-//               | '---------'         '---------------'
-//               |
+//                 .---------.         .-------------.             ^
+//               .-| UIImage |-------->| UISVGImage  |-------------'
+//               | '---------'         '-------------'
 //               |
 //               v
-//     .------------------.
+//     .---------------.
 //     | UIBitmapImage |
-//     '------------------'
+//     '---------------'
 //
-//
-// Drawable is the common base for vector drawings and bitmap drawings.
+// CGDrawable is the common base for vector drawings (CGVectorDrawable) and
+// bitmap drawings (CGBitmapDrawable). UIImage is the base for off-GPU images,
+// vector style (UISVGImage) or bitmap style (UIBitmapImage). CGImage is the
+// base for on-GPU images (e.g. textures).
 //
 // If you have a bitmap image, you have a certain extent of bytes in
 // x and y axis, starting at 0.0. Easy, that's the size. The "canvas"
@@ -100,7 +96,6 @@ static inline CGDrawableOptions   CGDrawableOptionsMake( CGFloat cornerRadius,
                                  .rotation     = rotation,
                                  .scale        = scale });
 }
-
 
 //
 // A CGDrawable can draw itself in a context. In case of a vector image, this

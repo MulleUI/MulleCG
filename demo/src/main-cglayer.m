@@ -11,15 +11,15 @@
 //
 static void   drawStuff( CALayer *layer, CGContext *context)
 {
-   struct NVGcontext    *vg;
-   CGRect               originalCanvas;
-   CGLayer              *cgLayer;
-   CGRect               canvas;
-   struct CGBitmapInfo  bitmapInfo;
-   struct CGFrameInfo   frameInfo;
-   struct CGFrameInfo   oldFrameInfo;
-   CGFloat              oldAlpha;
-   CGRect               rect;
+   struct NVGcontext             *vg;
+   CGRect                        originalCanvas;
+   CGLayer                       *cgLayer;
+   CGRect                        canvas;
+   struct CGBitmapInfo           bitmapInfo;
+   struct CGFrameInfo            frameInfo;
+   struct CGFrameInfo            oldFrameInfo;
+   CGRect                        rect;
+   struct CGContextFramebuffer   previous;
 
    originalCanvas = [layer canvas];
 
@@ -39,7 +39,6 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
    // 1. remember current drawing environment
    [context getCurrentFrameInfo:&oldFrameInfo];
-   oldAlpha = [context alpha];
 
    //
    // 2. create a CGLayer where we want to draw to. Size is fairly arbitrary.
@@ -56,12 +55,11 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    [context flushRender];
 
    // 4. now set the drawing destination to the CGLayer framebuffer
-   [cgLayer bindFramebuffer];
+   previous = [context  bindFramebuffer:CGContextFramebufferMakeWithLayer( cgLayer)];
 
    // 5. tell CGContext about the new dimensions
    frameInfo = CGFrameInfoFBMake( CGSizeGetBitmapSize( canvas.size), 1.0, 1.0);
-   [context changeRender:&frameInfo
-                  alpha:1.0];
+   [context changeRender:&frameInfo];
 
    // drawing code as such is unchanged from main-draw-simple.m
    {
@@ -110,19 +108,11 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    // UIWindowStyleRenderNonRetainedOnly window! It's better to let the
    // context do it with `bindDefaultFramebuffer`
    // [cgLayer unbindFramebuffer];
-   [context bindDefaultFramebuffer];
+   [context bindFramebuffer:previous];
 
    // 8. restore render to what was before (and done)
-   [context changeRender:&oldFrameInfo
-                  alpha:oldAlpha];
+   [context changeRender:&oldFrameInfo];
 
-//   {
-//      void   *bytes;
-//
-//      bytes = [cgLayer readRGBABytes:NULL];
-//      mulle_rgba_dump( bytes, canvas.size.width, canvas.size.height);
-//      exit( 0);
-//   }
 
    {
       CGRect       rows[ 2];
@@ -170,9 +160,8 @@ int   main( int argc, char *argv[])
       [window setFrameRateHz:100.0];
       [[window contentPlane] setDrawCallback:drawStuff];
       [app addWindow:window];
-      [window renderLoop];
    }
-   return( [app terminate]);
+   return( [app run]);
 }
 
 

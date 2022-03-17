@@ -45,32 +45,33 @@ static void   drawStuff( CGRect canvas, CGContext *context)
 }
 
 
-@interface MyWindow : GLFWWindow
+
+
+@interface MyWindow : GLFWOSWindow
 
 @property( retain) CGContext  *context;
 
 @end
 
 @implementation MyWindow
-@end
 
-
-//
-// This needs to be implemented by the context owner. This is not a bug.
-// setActive: is not supposed to be seen outside of the window setting this
-// context active. (Locking is done in GLFWWindow with the implicit context!)
-//
-@implementation CGContext( MyWindow)
-
-- (void) setActive:(BOOL) flag
+- (void) finalize
 {
-   _isActive = flag;
+   [self os_activateGraphicsContext];
+   {
+      // have to do this manually
+      [_context mullePerformFinalize];
+   }
+   [self os_deactivateGraphicsContext];
+
+   [super finalize];
 }
 
 @end
 
 
-static void   display( GLFWWindow *window_in, CAAbsoluteTime now)
+
+static void   display( GLFWOSWindow *window_in)
 {
    MyWindow      *window = (MyWindow *) window_in;
    CGRect        canvas;
@@ -89,6 +90,22 @@ static void   display( GLFWWindow *window_in, CAAbsoluteTime now)
    }
    [context endRender];
 }
+
+
+//
+// This needs to be implemented by the context owner. This is not a bug.
+// setActive: is not supposed to be seen outside of the window setting this
+// context active. (Locking is done in GLFWOSWindow with the implicit context!)
+//
+@implementation CGContext( MyWindow)
+
+- (void) setActive:(BOOL) flag
+{
+   _isActive = flag;
+}
+
+@end
+
 
 
 int   main( int argc, char *argv[])
@@ -112,22 +129,25 @@ int   main( int argc, char *argv[])
 
       window = [[[MyWindow alloc] initWithFrame:CGRectMake( 0, 0, 200, 200)
                                 titleUTF8String:"Demo"
-                                      styleMask:0
+                                      styleMask:GLFWOSWindowStyleMaskDefault
                                   graphicsHints:hints] autorelease];
-      [window os_activateContext];
+      assert( window);
 
+      [window os_activateGraphicsContext];
       context = [[[CGContext alloc] initWithEdgeAntialiasing:YES
                                            useStencilStrokes:YES] autorelease];
-      // have to do this manually
+      // have to do this manually, because the context is created manually
       [context setActive:YES];
+      [window os_deactivateGraphicsContext];
 
       // remember context for "display" callback
       [window setContext:context];
-      [window setRenderCallback:display];
+      [window setRenderFrameCallback:display];
+      [window setFrameRate:UIWindowFrameRateSynced];
 
-      [window renderLoopHz:100.0];
+      [app addWindow:window];
    }
-   [app terminate];
+   return( [app run]);
 }
 
 

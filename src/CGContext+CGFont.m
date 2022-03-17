@@ -75,7 +75,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
 - (CGFloat) fontScale
 {
-   return( _currentFrameInfo.UIScale.dx * 1.35); // Still true ????
+   return( _currentFrameInfo.window.UIScale.dx * 1.35); // Still true ????
 }
 
 
@@ -115,7 +115,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
 
 - (void) addFontWithContentsOfFileWithFileRepresentationString:(char *) filename
-                                               fontNameUTF8String:(char *) name
+                                            fontNameUTF8String:(char *) name
 {
    CGFont   *font;
    int      fontIndex;

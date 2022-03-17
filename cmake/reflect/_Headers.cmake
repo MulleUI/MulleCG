@@ -63,11 +63,11 @@ nanovg/src/stb_truetype.h
 src/CGAffineTransform+UTF8String.h
 src/CGAffineTransform+nanovg.h
 src/CGBitmap+UTF8String.h
-src/CGColor+MulleObjC.h
-src/CGColor.h
 src/CGContext+CGFont.h
+src/CGContext+Drawing.h
 src/CGContext+OpenGL.h
 src/CGContext+Render.h
+src/CGContext+Resources.h
 src/CGContext.h
 src/CGDrawable.h
 src/CGFont.h

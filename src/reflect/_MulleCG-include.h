@@ -27,19 +27,19 @@
 #include <mulle-framebuffer/mulle-framebuffer.h>   // mulle-framebuffer
 
 // You can tweak the following #include with these commands.
-// (Use BC187FCD-1722-4313-BFA8-FADA57629452 instead of mulle-container if there are duplicate entries)
-//    remove:             `mulle-sde dependency mark mulle-container no-header`
-//    rename:             `mulle-sde dependency|library set mulle-container include whatever.h`
-//    reorder:            `mulle-sde dependency move mulle-container <up|down>`
-//    toggle #include:    `mulle-sde dependency mark mulle-container [no-]import`
-//    toggle public:      `mulle-sde dependency mark mulle-container [no-]public`
-//    toggle optional:    `mulle-sde dependency mark mulle-container [no-]require`
-//    remove for platform:`mulle-sde dependency mark mulle-container no-platform-<uname>`
+// (Use 8231E717-99EA-44B7-8118-8623B013D093 instead of mulle-color if there are duplicate entries)
+//    remove:             `mulle-sde dependency mark mulle-color no-header`
+//    rename:             `mulle-sde dependency|library set mulle-color include whatever.h`
+//    reorder:            `mulle-sde dependency move mulle-color <up|down>`
+//    toggle #include:    `mulle-sde dependency mark mulle-color [no-]import`
+//    toggle public:      `mulle-sde dependency mark mulle-color [no-]public`
+//    toggle optional:    `mulle-sde dependency mark mulle-color [no-]require`
+//    remove for platform:`mulle-sde dependency mark mulle-color no-platform-<uname>`
 //        (use `mulle-sourcetree-to-c --unames` to list known values)
-#include <mulle-container/mulle-container.h>   // mulle-container
+#include <mulle-color/mulle-color.h>   // mulle-color
 
 // You can tweak the following #include with these commands.
-// (Use 4BFB6924-F24F-4369-959C-B56F012E768F instead of mulle-buffer if there are duplicate entries)
+// (Use C7E821E7-BA00-4AB3-9B7F-BE749EF09276 instead of mulle-buffer if there are duplicate entries)
 //    remove:             `mulle-sde dependency mark mulle-buffer no-header`
 //    rename:             `mulle-sde dependency|library set mulle-buffer include whatever.h`
 //    reorder:            `mulle-sde dependency move mulle-buffer <up|down>`
@@ -51,15 +51,15 @@
 #include <mulle-buffer/mulle-buffer.h>   // mulle-buffer
 
 // You can tweak the following #include with these commands.
-// (Use 44DBC7BB-6395-427E-A36E-5659F68D16DA instead of mulle-sprintf if there are duplicate entries)
-//    remove:             `mulle-sde dependency mark mulle-sprintf no-header`
-//    rename:             `mulle-sde dependency|library set mulle-sprintf include whatever.h`
-//    reorder:            `mulle-sde dependency move mulle-sprintf <up|down>`
-//    toggle #include:    `mulle-sde dependency mark mulle-sprintf [no-]import`
-//    toggle public:      `mulle-sde dependency mark mulle-sprintf [no-]public`
-//    toggle optional:    `mulle-sde dependency mark mulle-sprintf [no-]require`
-//    remove for platform:`mulle-sde dependency mark mulle-sprintf no-platform-<uname>`
+// (Use 71D3F6E6-6969-43C1-A770-6DCD28688564 instead of mulle-container if there are duplicate entries)
+//    remove:             `mulle-sde dependency mark mulle-container no-header`
+//    rename:             `mulle-sde dependency|library set mulle-container include whatever.h`
+//    reorder:            `mulle-sde dependency move mulle-container <up|down>`
+//    toggle #include:    `mulle-sde dependency mark mulle-container [no-]import`
+//    toggle public:      `mulle-sde dependency mark mulle-container [no-]public`
+//    toggle optional:    `mulle-sde dependency mark mulle-container [no-]require`
+//    remove for platform:`mulle-sde dependency mark mulle-container no-platform-<uname>`
 //        (use `mulle-sourcetree-to-c --unames` to list known values)
-#include <mulle-sprintf/mulle-sprintf.h>   // mulle-sprintf
+#include <mulle-container/mulle-container.h>   // mulle-container
 
 #endif

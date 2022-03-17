@@ -12,17 +12,17 @@ endif()
 #
 set( SOURCES
 src/main-cgimage.m
+src/main-cgimage-write.m
 src/main-cglayer.m
-src/main-colors.m
 src/main-draw.m
 src/main-draw-simple.m
 src/main-glfw-cglayer.m
+src/main-glfw-draw-offscreen.m
 src/main-glfw-draw-simple.m
-src/main-grab.m
+src/main-glfw-two-windows.m
 src/main-opengl.m
 src/main-particlelayers.m
 src/main-particles.m
-src/main-screenshot.m
 src/main-suspend-resume.m
 src/main-text.m
 src/main-texture.m

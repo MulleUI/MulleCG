@@ -2,104 +2,121 @@
 
 #import "import-private.h"
 
-enum ColorModel
+#include <string.h>
+#include <time.h>
+
+
+#define R   0xFF, 0x00, 0x00, 0xFF
+#define G   0x00, 0xFF, 0x00, 0xFF
+#define B   0x00, 0x00, 0xFF, 0xFF
+#define Y   0xFF, 0xFF, 0x00, 0xFF
+#define W   0xFF, 0xFF, 0xFF, 0xFF
+#define _   0x00, 0x00, 0x00, 0xFF
+
+
+static unsigned char    bitmap[4 * 8 * 8] =
 {
-   RGB,
-   HSL,
-   HSV
+   B, B, B, B,  R, R, R, R,
+   B, B, B, B,  R, R, R, R,
+   B, B, _, _,  R, R, R, R,
+   B, B, _, _,  _, R, R, R,
+
+   Y, Y, Y, _,  _, _, G, G,
+   Y, Y, Y, Y,  _, _, G, G,
+   Y, Y, Y, Y,  G, G, G, G,
+   Y, Y, Y, Y,  G, G, G, G
 };
 
 
 static void   drawStuff( CALayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
-   CGRect              canvas;
-   CGRect              square;
-   CGRect              rows[ 6];
-   CGRect              grid[ 6][ 10];
-   NSUInteger          i;
-   NSUInteger          x, y;
+   CGDrawableOptions   options;
    CGRect              rect;
-   struct NVGpaint     paint;
-   CGColor             from;
-   CGColor             to;
-   enum ColorModel     model;
-   char                *name;
+   CGImage             *image;
+   CGLayer             *cgLayer;
+   struct NVGcontext   *vg;
+   static BOOL         written;
+   UIBitmapImage       *bitmapImage;
 
-   canvas = [layer canvas];
-   canvas = MulleEdgeInsetsInsetRect( MulleEdgeInsetsMake( 14, 14, 14, 14), canvas);
-
-   CGRectPartitionVertically( canvas, 4.0, 6, rows);
-   for( i = 0; i < 6; i++)
-      CGRectPartitionHorizontally( rows[ i], 4.0, 10, grid[ i]);
-
-   model = (long) ([context renderStartTime] / 2) % 3;
+   rect = [layer canvas];
 
    vg = CGContextGetNVGContext( context);
-   for( y = 0; y < 6; y++)
+
+   // gray rectangle so we know something is drawn...
+   nvgBeginPath( vg);
    {
-      for( x = 0; x < 10; x++)
-      {
-      switch( model)
-      {
-         case RGB :
-            name = "RGB";
-            from = CGColorMakeRGB( 1.0 - x / 9.0, y / 6.0f, x / 9.0);
-            to   = CGColorMakeRGB( y / 6.0f, x / 9.0, 1.0 - x / 9.0);
-            break;
-
-         case HSL :
-            name = "HSL";
-            from = CGColorMakeHSL( x / 9.0, y / 6.0f, 1.0);
-            to   = CGColorMakeHSL( x / 9.0, 1.0, y / 6.0f);
-            break;
-
-         case HSV :
-            name = "HSV";
-            from = CGColorMakeHSV( x / 9.0, y / 6.0f, 1.0);
-            to   = CGColorMakeHSV( x / 9.0, 1.0, y / 6.0f);
-         }
-         rect = grid[ y][ x];
-
-         square = CGSizePlaceInRectWithAspectCorrection( CGSizeMake( 1, 1), rect, NO);
-         nvgBeginPath( vg);
-
-         nvgMoveTo(vg, CGRectGetMidX( square), CGRectGetMinY( square));
-         nvgLineTo(vg, CGRectGetMaxX( square), CGRectGetMaxY( square));
-         nvgLineTo(vg, CGRectGetMinX( square), CGRectGetMaxY( square));
-         nvgClosePath(vg);
-
-
-         paint = nvgLinearGradient(vg, CGRectGetMinX( square), CGRectGetMinY( square),
-                                       CGRectGetMaxX( square), CGRectGetMaxY( square),
-                                       from, to);
-         nvgFillPaint(vg, paint);
-         nvgFill(vg);
-      }
+      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+      nvgStrokeWidth( vg, 8);
+      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
    }
+   nvgStroke( vg);
 
-   [context useFontWithNameUTF8String:"sans"];
-   nvgFontSize( vg, 32);
-   nvgFontBlur( vg, 3.0);
-   nvgTextColor( vg, [UIColor whiteColor], [UIColor darkGrayColor]);
-   nvgText( vg, 20, CGRectGetMaxY( canvas) - 60, name, NULL);
+   options = CGDrawableOptionsMake( 0.0, 1.0, 0.0, YES);
+
+   // if we immediately reclaim the image (via release) after drawing it
+   // is too early, and the texture is gone too soon
+   image   = [[[CGImage alloc] initWithRGBABytes:bitmap
+                                      bitmapSize:CGBitmapSizeMake( 8, 8)
+                                      imageFlags:NVG_IMAGE_NEAREST  // NVG_IMAGE_REPEATX
+                                         context:context] autorelease];
+   assert( image);
+
+   rect = CGRectInset( rect, 4, 4);
+   [image drawRect:rect
+           options:&options
+           context:context];
+
+   if( ! written)
+   {
+//      bitmapImage = [image bitmapImage];
+//      if( ! bitmapImage)
+//         abort();
+//
+//      [bitmapImage writeToPNGFileWithSystemRepresentation:"image.png"];
+//      written = YES;
+//
+//      cgLayer = [[[CGLayer alloc] initWithImage:image
+//                                     imageFlags:NVG_IMAGE_NEAREST
+//                                        context:context] autorelease];
+//      bitmapImage = [cgLayer bitmapImage];
+//      if( ! bitmapImage)
+//         abort();
+//
+//      [bitmapImage writeToPNGFileWithSystemRepresentation:"layer.png"];
+   }
+}
+
+
+void   setupScene( UIWindow *window)
+{
+   UIView   *view;
+   CGRect   frame;
+
+   frame = [[window contentPlane] contentRect];
+   view  = [UIView viewWithFrame:frame];
+   [[window contentPlane] setDrawCallback:drawStuff];
+   [[window contentPlane] addSubview:view];
 }
 
 
 int   main( int argc, char *argv[])
 {
-   UIApplication   *app;
+   UIWindow         *window;
+   UIApplication    *app;
 
    app = [UIApplication sharedInstance];
    @autoreleasepool
    {
-      [app runWindowForDrawCallback:drawStuff
-                         canvasSize:CGSizeMake( 640, 400)
-                         windowSize:CGSizeZero   // CGSizeMake( 200, 400)
-                    titleUTF8String:NULL
-                        frameRateHz:100.0];
+      window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 200, 200)
+                                   titleUTF8String:"Demo"
+                                         styleMask:UIWindowStyleMaskDefault & ~UIWindowStyleRetained] autorelease];
+
+      assert( window);
+      [window setBackgroundColor:CGColorMakeRGBA( 0.5, 0.5, 0.5, 1.0)];
+      setupScene( window);
+      [app addWindow:window];
    }
-   [app terminate];
+   return( [app run]);
 }
 
 
@@ -140,3 +157,5 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+
+

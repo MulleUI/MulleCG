@@ -143,7 +143,7 @@
                                  rect:(CGRect) rect
                                 angle:(CGFloat) angle
                                 alpha:(CGFloat) alpha
-                             context:(CGContext *) context
+                              context:(CGContext *) context
 {
    int   imageID;
 

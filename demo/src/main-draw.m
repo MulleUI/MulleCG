@@ -48,7 +48,7 @@ static void   _drawAlpha( NVGcontext *vg,
                        rect.size.width,
                        rect.size.height,
                        20);
-   nvgStrokeColor(vg, CGColorMakeWithUnsignedInteger( 0x8080007F));
+   nvgStrokeColor(vg, CGColorMakeWithHexColor( 0x8080007F));
    nvgStroke( vg);
 
    nvgBeginPath( vg);
@@ -57,7 +57,7 @@ static void   _drawAlpha( NVGcontext *vg,
                        rect.size.width,
                        rect.size.height,
                        20);
-   nvgStrokeColor(vg, CGColorMakeWithUnsignedInteger( 0x0080807F));
+   nvgStrokeColor(vg, CGColorMakeWithHexColor( 0x0080807F));
    nvgStroke( vg);
 
    nvgBeginPath( vg);
@@ -66,7 +66,7 @@ static void   _drawAlpha( NVGcontext *vg,
                        rect.size.width,
                        rect.size.height,
                        20);
-   nvgStrokeColor(vg, CGColorMakeWithUnsignedInteger( 0x8000807F));
+   nvgStrokeColor(vg, CGColorMakeWithHexColor( 0x8000807F));
    nvgStroke( vg);
 
    nvgBeginPath( vg);
@@ -75,7 +75,7 @@ static void   _drawAlpha( NVGcontext *vg,
                        rect.size.width,
                        rect.size.height,
                        20);
-   nvgStrokeColor(vg, CGColorMakeWithUnsignedInteger( 0x8080807F));
+   nvgStrokeColor(vg, CGColorMakeWithHexColor( 0x8080807F));
    nvgStroke( vg);
 
    nvgShapeAntiAlias( vg, 1);
@@ -132,14 +132,14 @@ static void   _drawColoredLinesH( NVGcontext *vg,
          nvgLineTo(vg, point.x, point.y);
          switch( i)
          {
-         case 0 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFFFFFF)); break;
-         case 1 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFF0000FF)); break;
-         case 2 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x00FF00FF)); break;
-         case 3 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x0000FFFF)); break;
-         case 4 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFF00FF)); break;
-         case 5 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFF00FFFF)); break;
-         case 6 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x00FFFFFF)); break;
-         case 7 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFFFFFF)); break;
+         case 0 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
+         case 1 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF0000FF)); break;
+         case 2 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FF00FF)); break;
+         case 3 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x0000FFFF)); break;
+         case 4 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFF00FF)); break;
+         case 5 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF00FFFF)); break;
+         case 6 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FFFFFF)); break;
+         case 7 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
          }
          nvgStroke( vg);
          if( lines >= 0)
@@ -177,14 +177,14 @@ static void   _drawColoredLinesV( NVGcontext *vg,
          nvgLineTo(vg, point.x, point.y);
          switch( i)
          {
-         case 0 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFFFFFF)); break;
-         case 1 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFF0000FF)); break;
-         case 2 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x00FF00FF)); break;
-         case 3 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x0000FFFF)); break;
-         case 4 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFF00FF)); break;
-         case 5 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFF00FFFF)); break;
-         case 6 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x00FFFFFF)); break;
-         case 7 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFFFFFF)); break;
+         case 0 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
+         case 1 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF0000FF)); break;
+         case 2 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FF00FF)); break;
+         case 3 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x0000FFFF)); break;
+         case 4 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFF00FF)); break;
+         case 5 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF00FFFF)); break;
+         case 6 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FFFFFF)); break;
+         case 7 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
          }
          nvgStroke( vg);
          if( lines >= 0)
@@ -227,14 +227,14 @@ static void   _drawColoredLinesHV( NVGcontext *vg,
          nvgLineTo(vg, point.x, point.y);
          switch( i)
          {
-         case 0 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFFFFFF)); break;
-         case 1 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFF0000FF)); break;
-         case 2 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x00FF00FF)); break;
-         case 3 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x0000FFFF)); break;
-         case 4 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFF00FF)); break;
-         case 5 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFF00FFFF)); break;
-         case 6 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x00FFFFFF)); break;
-         case 7 : nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0xFFFFFFFF)); break;
+         case 0 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
+         case 1 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF0000FF)); break;
+         case 2 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FF00FF)); break;
+         case 3 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x0000FFFF)); break;
+         case 4 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFF00FF)); break;
+         case 5 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF00FFFF)); break;
+         case 6 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FFFFFF)); break;
+         case 7 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
          }
          nvgStroke( vg);
          if( lines >= 0)
@@ -294,7 +294,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    {
       nvgStrokeWidth( vg, 1.0);
       nvgBeginPath( vg);
-      nvgStrokeColor( vg, CGColorMakeWithUnsignedInteger( 0x808080FF));
+      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x808080FF));
       nvgRoundedRect( vg, columns[ i].origin.x,
                           columns[ i].origin.y,
                           columns[ i].size.width,
@@ -325,13 +325,13 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       {
          if( j == 0)
          {
-            fore = CGColorMakeWithUnsignedInteger( 0xFFFFFFFF);
-            back = CGColorMakeWithUnsignedInteger( 0x000000FF);
+            fore = CGColorMakeWithHexColor( 0xFFFFFFFF);
+            back = CGColorMakeWithHexColor( 0x000000FF);
          }
          else
          {
-            back = CGColorMakeWithUnsignedInteger( 0xFFFFFFFF);
-            fore = CGColorMakeWithUnsignedInteger( 0x000000FF);
+            back = CGColorMakeWithHexColor( 0xFFFFFFFF);
+            fore = CGColorMakeWithHexColor( 0x000000FF);
          }
 
          nvgStrokeWidth( vg, 1.0);
@@ -373,13 +373,13 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       {
          if( j == 0)
          {
-            fore = CGColorMakeWithUnsignedInteger( 0xFFFFFFFF);
-            back = CGColorMakeWithUnsignedInteger( 0x000000FF);
+            fore = CGColorMakeWithHexColor( 0xFFFFFFFF);
+            back = CGColorMakeWithHexColor( 0x000000FF);
          }
          else
          {
-            back = CGColorMakeWithUnsignedInteger( 0xFFFFFFFF);
-            fore = CGColorMakeWithUnsignedInteger( 0x000000FF);
+            back = CGColorMakeWithHexColor( 0xFFFFFFFF);
+            fore = CGColorMakeWithHexColor( 0x000000FF);
          }
 
          nvgStrokeWidth( vg, 1.0);
@@ -447,25 +447,32 @@ static void   usage( void)
 "Options:\n"
 "   -i <v>  : swap interval (0-2)\n"
 "   -a      : async\n"
+"   -f <hz> : refresh in hz\n"
+"   -m      : retained on main thread\n"
+"   -r      : retained\n"
 "   -u      : no sync\n"
 "   -s      : sync\n"
-"   -f <hz> : refresh in hz\n"
 "\n");
    exit( 1);
 }
 
 int   main( int argc, char *argv[])
 {
-   UIApplication   *app;
-   UIWindow        *window;
-   int             i;
-   CGFloat         frameRate;
-   NSUInteger      swapInterval;
-   NSUInteger      styleMask;
-   MulleUIPerf     *perf;
+   UIApplication          *app;
+   UIWindow               *window;
+   int                    i;
+   mulle_relativetime_t   frameRate;
+   NSUInteger             swapInterval;
+   NSUInteger             styleMask;
+   MulleUIPerf            *perf;
+   BOOL                   isRetained;
+   BOOL                   isMainThread;
 
    swapInterval = 0;
    frameRate    = UIWindowFrameRateAsync;
+   isRetained   = NO;
+   isMainThread = NO;
+
    /*
     * window and app
     */
@@ -475,26 +482,35 @@ int   main( int argc, char *argv[])
          break;
       switch( argv[ i][ 1])
       {
+      case 'a' :
+         frameRate = UIWindowFrameRateAsync;
+         break;
+
+      case 'f' :
+         if( ++i < argc)
+            frameRate = 1 / atof( argv[ i]);
+         break;
+
       case 'i' :
          if( ++i < argc)
             swapInterval = atoi( argv[ i]);
          break;
 
-      case 'u' :
-         frameRate = UIWindowFrameRateUnsynced;
+      case 'm' :
+         isRetained   = YES;
+         isMainThread = YES;
          break;
 
-      case 'a' :
-         frameRate = UIWindowFrameRateAsync;
+      case 'r' :
+         isRetained = YES;
          break;
 
       case 's' :
          frameRate = UIWindowFrameRateSynced;
          break;
 
-      case 'f' :
-         if( ++i < argc)
-            frameRate = 1 / atof( argv[ i]);
+      case 'u' :
+         frameRate = UIWindowFrameRateUnsynced;
          break;
 
       default :
@@ -511,7 +527,12 @@ int   main( int argc, char *argv[])
    {
       // UIWindowStyleRenderNonRetainedOnly
       styleMask  = UIWindowStyleMaskDefault;
-      styleMask &= ~UIWindowStyleRetained;
+      if( ! isRetained)
+         styleMask &= ~UIWindowStyleRetained;
+      else
+         if( isMainThread)
+            styleMask |= UIWindowStyleRetainedOnMainThread;
+
       styleMask |= UIWindowStyleResizable;
 
       window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 800, 600)
@@ -522,15 +543,15 @@ int   main( int argc, char *argv[])
       [window setBackgroundColor:CGColorMakeRGBA( 1.0, 1.0, 1.0, 1.0)];
       setupScene( window);
 
-      perf = [MulleUIPerf object];
-      [window setRenderDelegate:perf];
-
       [window setSwapInterval:swapInterval];
       [window setFrameRate:frameRate];
       [app addWindow:window];
-      [window renderLoop];
    }
-   [app terminate];
+
+   perf = [MulleUIPerf object];
+   [window setFrameDelegate:perf];
+
+   return( [app run]);
 }
 
 
