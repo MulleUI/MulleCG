@@ -172,7 +172,7 @@ static inline void   ParticleUpdate( struct Particle *p, CGSize canvasSize)
    CGRect       canvas;
    NSUInteger   i;
 
-   mulle_fprintf( stderr, "%@: %@ drawInContext\n", [NSThread currentThread], self);
+   mulle_fprintf( stderr, "%#@: %#@ drawInContext\n", [NSThread currentThread], self);
 
    [super drawInContext:context];
 
