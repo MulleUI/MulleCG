@@ -342,7 +342,7 @@ l_Position, normal);\n"
    if( ! CGBitmapSizeEqualToSize( oldSize, size))
    {
 #ifdef RESIZE_DEBUG
-      mulle_fprintf( stderr, "%@: %@ create new layer with size %s\n",
+      mulle_fprintf( stderr, "%#@: %#@ create new layer with size %s\n",
                         [NSThread currentThread], self, CGBitmapSizeUTF8String( size));
 #endif
       layer = [CGLayer layerWithBitmapSize:size
@@ -365,7 +365,7 @@ l_Position, normal);\n"
    assert( info->window.pixelRatio != 0.0);
 
 #ifdef RENDER_DEBUG
-   mulle_fprintf( stderr, "%@: %@ Viewport: %s, FB: %s, Window: %s\n",
+   mulle_fprintf( stderr, "%#@: %#@ Viewport: %s, FB: %s, Window: %s\n",
                [NSThread currentThread], self,
                CGBitmapRectUTF8String( info->viewportFrame),
                CGBitmapSizeUTF8String( info->window.framebufferSize),
@@ -473,7 +473,7 @@ static struct CGFrameInfo   emptyInfo;
       // into _drawnLayer, this can't fail, and if it does it gets
       // harmlessly reaped
 #ifdef SWAP_DEBUG
-      mulle_fprintf( stderr, "%@: %s %@ (least recent layer %@)\n",
+      mulle_fprintf( stderr, "%#@: %s %@ (least recent layer %@)\n",
                [NSThread currentThread], __PRETTY_FUNCTION__, self, _renderLayer);
       [[_renderLayer bitmapImage] writeToPNGFileWithSystemRepresentation:"layer.png"];
 #endif
