@@ -139,7 +139,7 @@ static void   display( GLFWOSWindow *window_in)
 
    [context setActive:YES];
    {
-      frameInfo = CGFrameInfoSFMake( canvas.size, [window os_framebufferSize], 1.0);
+      frameInfo = CGFrameInfoSFMake( canvas, [window os_framebufferSize], 1.0);
 
       // tell the context to render offscreen
       [context setRendersOffScreen:NO];
@@ -223,7 +223,7 @@ static MyWindow   *create_window( unsigned int i,
 
       // remember context for "display" callback
       [window setContext:context];
-      [window setRenderFrameCallback:display];
+      [window setFrameCallback:display];
       [window setFrameRate:frameRate];
 
       [window setLeftColor:CGColorMakeWithHexColor( 0x008C45FF)];

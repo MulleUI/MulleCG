@@ -98,7 +98,7 @@ static void   display( GLFWOSWindow *window_in)
    canvas.size   = [window os_windowSize];
    context       = [window context];
 
-   frameInfo = CGFrameInfoSFMake( canvas.size, [window os_framebufferSize], 1.0);
+   frameInfo = CGFrameInfoSFMake( canvas, [window os_framebufferSize], 1.0);
 
    // tell the context to render offscreen
    [context setRendersOffScreen:YES];
@@ -173,7 +173,7 @@ int   main( int argc, char *argv[])
 
          // remember context for "display" callback
          [window setContext:context];
-         [window setRenderFrameCallback:display];
+         [window setFrameCallback:display];
          [window setFrameRate:UIWindowFrameRateAsync];
       }
       [window os_deactivateGraphicsContext];
