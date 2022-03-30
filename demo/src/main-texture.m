@@ -72,7 +72,7 @@ static void  createTexture( CGContext *context,
    oldFramebuffer = [context bindFramebuffer:CGContextFramebufferMakeWithLayer( texture)];
    oldFrameInfo   = [context bindRender:&frameInfo];
    {
-      drawTexture( context, frameInfo.size);
+      drawTexture( context, CGFrameInfoGetFrameSize( &frameInfo));
    }
    [context bindRender:&oldFrameInfo];
    [context bindFramebuffer:oldFramebuffer];
