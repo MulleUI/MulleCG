@@ -9,9 +9,7 @@
  *
  *      mulle-sde environment set MULLE_MATCH_TO_C_RUN DISABLE
  */
-#import "CGAffineTransform+UTF8String.h"
 #import "CGAffineTransform+nanovg.h"
-#import "CGBitmap+UTF8String.h"
 #import "CGContext+CGFont.h"
 #import "CGContext+Drawing.h"
 #import "CGContext+OpenGL.h"
@@ -20,7 +18,6 @@
 #import "CGContext.h"
 #import "CGDrawable.h"
 #import "CGFont.h"
-#import "CGGeometry+UTF8String.h"
 #import "CGImage.h"
 #import "CGLayer.h"
 #import "CGPath.h"

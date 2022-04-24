@@ -30,5 +30,21 @@
             image:(id) image
             scale:(BOOL) scale;
 
+- (void) drawAtPoint:(CGPoint) position
+          UTF8String:(char *) s
+            fontName:(char *) fontName
+            fontSize:(CGFloat) fontSize
+               color:(CGColor) color;
 
 @end
+
+
+static inline void  CGContextDrawText( CGContext *self, CGFloat x, CGFloat y, char *s, CGFloat fontSize, CGColor color)
+{
+   [self drawAtPoint:CGPointMake( x, y)
+          UTF8String:s
+            fontName:NULL
+            fontSize:fontSize
+               color:color];
+}
+

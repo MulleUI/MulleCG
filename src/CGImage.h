@@ -126,6 +126,8 @@
 // share the texture by creating a nvg image copy in otherContext. otherContext
 // needs to be active. May return nil, if the copying is not possible.
 //
+// Make sure that image is completely drawn by the GPU before calling this.
+// (use [CGContext barrier])
 - (id) shareWithContext:(id) otherContext;
 
 @end

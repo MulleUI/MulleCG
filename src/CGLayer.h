@@ -28,6 +28,7 @@ struct CGFrameInfo;
 @interface CGLayer : CGImage
 
 @property( readonly, assign) void   *framebuffer;
+@property char                      *debugNameUTF8String;  // useful for debugging
 
 + (instancetype) layerWithBitmapSize:(struct CGBitmapSize) size
                           imageFlags:(NSUInteger) imageFlags

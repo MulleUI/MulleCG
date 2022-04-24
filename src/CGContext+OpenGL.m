@@ -72,7 +72,7 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
    {
       if( counter < 50)  // gets tedious fast
       {
-         fprintf( stderr, "%s error %p %s( %x) \"%s\" after %s\n",
+         mulle_fprintf( stderr, "%s error %@ %s( 0x%x) \"%s\" after %s\n",
                                  [CGContext backendUTF8String],
                                  ctxt,
                                  _CGNVGBackendErrorShortUTF8String( (void *) (intptr_t) err),
@@ -132,7 +132,7 @@ static int  has_version_header( char *s)
       if( isblank( *s))
          return( 1);
    }
-   return( 0);   
+   return( 0);
 }
 
 
@@ -222,7 +222,7 @@ static int  has_version_header( char *s)
    GLuint   fragment;
    GLuint   shaderID;
    char     *sources[ 2];
-   
+
    vertex = glCreateShader( GL_VERTEX_SHADER);
 
    // put a "proper" version header on top of the shader, if there is none
@@ -257,7 +257,7 @@ static int  has_version_header( char *s)
 {
    glUseProgram( (GLuint) shaderID);
 }
- 
+
 
 - (void) assertNoBackendError:(char *) str
 {
@@ -303,7 +303,6 @@ static int  has_version_header( char *s)
 }
 
 
-
 - (void) clearFramebufferBits:(NSUInteger) bits
                         color:(CGColor) color
 {
@@ -320,7 +319,6 @@ static int  has_version_header( char *s)
    glClear( bits);
    CGContextCheckBackendError( self, "clear framebuffer");
 }
-
 
 
 //#define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX   0x9048
@@ -375,6 +373,18 @@ static int  has_version_header( char *s)
 {
    glBindFramebuffer( GL_FRAMEBUFFER, (GLuint) (uintptr_t) framebuffer);
    CGContextCheckBackendError( self, "glBindFramebuffer");
+}
+
+
+//
+// used by CGImage when sharing textures to ensure that a texture is ready
+// to be used:
+// https://stackoverflow.com/questions/23300895/sharing-textures-between-opengl-contexts-with-glfw3-is-not-working
+//
+- (void) barrier
+{
+   glFinish();
+   CGContextCheckBackendError( self, "glFinish");
 }
 
 
@@ -457,19 +467,18 @@ static int  has_version_header( char *s)
 
    assert( _isActive);
 
-   gpuTexture  = [image gpuTexture];
    bitmapSize  = [image bitmapSize];
    size        = bitmapSize.width * bitmapSize.height * 4;
    assert( size);
 
    // circumvent nvidia bug
-   size       += 16;
+   size            += 16;
 
    // implicity transparent background
    bitmap.allocator = allocator ? allocator : &mulle_default_allocator;
    bitmap.bytes     = mulle_allocator_calloc( bitmap.allocator, 1, size);
-   // not flipped interestingly
-   bitmap.info      = CGBitmapInfoMake( bitmapSize, 0, CGBitmapEncodingRGBABytes);
+   // flipped not flipped ?
+   bitmap.info      = CGBitmapInfoMake( bitmapSize, 0, CGBitmapEncodingFlipYRGBABytes);
 
    //
    // create a temporary framebuffer
@@ -484,6 +493,7 @@ static int  has_version_header( char *s)
    next     = CGContextFramebufferMakeWithOpenGLFramebuffer( (void *) (uintptr_t) tmpFramebuffer);
    previous = [self bindFramebuffer:next];
    {
+      gpuTexture = [image gpuTexture];
       glFramebufferTexture2D( GL_FRAMEBUFFER,
                               GL_COLOR_ATTACHMENT0,
                               GL_TEXTURE_2D,
@@ -513,6 +523,7 @@ static int  has_version_header( char *s)
                                  allocator:(struct mulle_allocator *) allocator
 {
    struct CGBitmap         bitmap;
+   struct CGBitmapSize     bitmapSize;
    enum CGBitmapEncoding   encoding;
    GLenum                  format;
    GLenum                  type;
@@ -526,24 +537,27 @@ static int  has_version_header( char *s)
    encoding = CGBitmapEncodingFlipYRGBABytes;
    format   = GL_RGBA;
    type     = GL_UNSIGNED_BYTE;
-
-   // imageID is OK here, because we don't care about repeats and stufff
-   imageID = [image imageID];
+   // imageID is OK here, because we don't care about repeats and stuff
 
    assert( [image context] == self);
 
-   vg = CGContextGetNVGContext( self);
+   vg      = CGContextGetNVGContext( self);
+   imageID = [image imageID];
    nvgImageTextureInfo( vg, imageID, NULL, NULL, &gpuTexture);
 
-   bitmap.info       = CGBitmapInfoMake( [image bitmapSize], 0, encoding);
-   size              = CGBitmapInfoGetAllocationSize( bitmap.info);
-   bitmap.allocator  = allocator ? allocator : &mulle_default_allocator;
+   bitmapSize        = [image bitmapSize];
+   size              = bitmapSize.width * bitmapSize.height * 4;
+   assert( size);
+
    // nvidia seemingly has problems if rect has some off values(guess)
    // so we add something for safety (valgrinds better)
    size             += 16;
+   bitmap.allocator  = allocator ? allocator : &mulle_default_allocator;
    bitmap.bytes      = mulle_allocator_malloc( bitmap.allocator, size);
+   bitmap.info       = CGBitmapInfoMake( bitmapSize, 0, encoding);
 
    glBindTexture( GL_TEXTURE_2D, (int) (intptr_t) gpuTexture);
+   CGContextCheckBackendError( self, "glBindTexture");
    {
       glGetTexImage( GL_TEXTURE_2D,
                      0, // level
@@ -553,6 +567,7 @@ static int  has_version_header( char *s)
       CGContextCheckBackendError( self, "glGetTexImage");
    }
    glBindTexture( GL_TEXTURE_2D, 0);
+   CGContextCheckBackendError( self, "glBindTexture");
 
    return( bitmap);
 }
@@ -624,6 +639,7 @@ static int  has_version_header( char *s)
                  type,
                  bitmap.bytes);
    CGContextCheckBackendError( self, "glReadPixels");
+
    return( bitmap);
 }
 

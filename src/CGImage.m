@@ -22,6 +22,19 @@
 }
 #endif
 
+
+- (char *) UTF8String
+{
+   char   *s;
+
+   s = MulleObjC_asprintf( "<%s %p gpuTexture=%p rc=%td>",
+                            MulleObjCInstanceGetClassNameUTF8String( self),
+                            self,
+                            self->_gpuTexture,
+                            [self retainCount]);
+   return( s);
+}
+
 @end
 
 
@@ -42,10 +55,7 @@
    if( image)
    {
       if( _debugEnabled)
-         fprintf( stderr, "*** context %p: reuse image %p nvgImage (%td) for texture %p (%p [%td])\n",
-                       self,
-                       image, [image imageID],
-                       [image sharedGPUTexture], [[image sharedGPUTexture] gpuTexture], [[image sharedGPUTexture] retainCount]);
+         MulleUILog( "reuse %#@ for gpuTexture %p", image, gpuTexture);
 
       assert( ! sharedGPUTexture || [image sharedGPUTexture] == sharedGPUTexture);
       return( [image imageFlags] == imageFlags ? image : nil);
@@ -57,10 +67,7 @@
                                          imageFlags:imageFlags
                                             context:self] autorelease];
    if( _debugEnabled)
-      fprintf( stderr, "*** context %p: remember image %p nvgImage (%td) for texture %p (%p [%td])\n",
-                       self,
-                       image, [image imageID],
-                       [image sharedGPUTexture], [[image sharedGPUTexture] gpuTexture], [[image sharedGPUTexture] retainCount]);
+      MulleUILog( "remember %#@ for gpuTexture %p", image, gpuTexture);
 
    mulle_map_insert( &_gpuTextureMap, gpuTexture, image);
    return( image);
@@ -73,10 +80,9 @@
 
    gpuTexture = [[image sharedGPUTexture] gpuTexture];
    if( _debugEnabled)
-      fprintf( stderr, "*** context %p: forget image %p nvgImage (%td) for texture %p (%p [%td])\n",
-                       self,
-                       image, [image imageID],
-                       [image sharedGPUTexture], [[image sharedGPUTexture] gpuTexture], [[image sharedGPUTexture] retainCount]);
+      MulleUILog( "forget %#@ for gpuTexture %p",
+                  image,
+                  [[image sharedGPUTexture] gpuTexture]);
    // if key is NULL its no problem
    mulle_map_remove( &_gpuTextureMap, gpuTexture);
 }
@@ -85,9 +91,7 @@
 
 
 
-
 @implementation CGImage
-
 
 - (instancetype) initWithNVGImage:(NSInteger) imageID
                         imageFlags:(NSUInteger) imageFlags
@@ -99,14 +103,11 @@
       return( nil);
    }
 
-   if( [_context debugEnabled])
-      fprintf( stderr, "*** context %p: create CGImage for nvgImage %td\n", context, imageID);
-
    _imageFlags = imageFlags;
    _context    = context;
    _imageID    = imageID;
 
-   [_context addToResources:self];
+   [_context addImageToResources:self];
 
    return( self);
 }
@@ -120,12 +121,10 @@
 {
    NSUInteger   imageID;
 
-   imageID = nvgCreateImageTexture( CGContextGetNVGContext( context),
-                                    size.width,
-                                    size.height,
-                                    imageFlags,
-                                    NVG_TEXTURE_RGBA,
-                                    gpuTexture);
+   imageID = [context textureIDWithGPUTextureRGBA:gpuTexture
+                                       bitmapSize:size
+                                       imageFlags:imageFlags];
+
    self = [self initWithNVGImage:imageID
                       imageFlags:imageFlags
                          context:context];
@@ -160,10 +159,7 @@
    NVGcontext   *vg;
 
    if( [_context debugEnabled])
-      fprintf( stderr, "*** context %p: finalize CGImage %p (nvgImage %td) with texture %p (%p [%td])\n",
-                       _context,
-                       self, _imageID,
-                       _sharedGPUTexture, [_sharedGPUTexture gpuTexture], [_sharedGPUTexture retainCount]);
+      MulleUILogThisMethod();
 
    [_context removeFromSharedGPUTextureMap:self];
 
@@ -175,8 +171,7 @@
       // We only patch a struct and don't hit OpenGL here so use
       // _CGContextGetNVGContext( _context);
       //
-      vg = _CGContextGetNVGContext( _context);
-      nvgForgetImageTexture( vg, _imageID);
+      [_context forgetTextureID:_imageID];
       _imageID = 0;  // but don't delete it now
    }
 
@@ -209,12 +204,12 @@
 
    assert( [context isActive]);
 
-   imageID = nvgCreateImage( CGContextGetNVGContext( context),
-                             filename,
-                             imageFlags & 0x3F);
+   imageID = [context textureIDWithContentsOfFileCString:filename
+                                              imageFlags:imageFlags & 0x3F];
+
    return( [self initWithNVGImage:imageID
-                        imageFlags:imageFlags
-                           context:context]);
+                       imageFlags:imageFlags
+                          context:context]);
 }
 
 
@@ -226,10 +221,13 @@
 
    assert( [context isActive]);
 
-   imageID = nvgCreateImageMem( CGContextGetNVGContext( context),
-                                imageFlags & 0x3F,
-                                fileCData.bytes,
-                                (int) fileCData.length);
+   // bounce to CGContext kind unneccessary now
+   // this was used to generate debug output, but this now done
+   // addImageToResources.
+   // Another theory is to isolate nvgCalls in CGContext, but really why ?
+   // They are isolated in this library already
+   imageID = [context textureIDWithFileCData:fileCData
+                                  imageFlags:imageFlags & 0x3F];
    return( [self initWithNVGImage:imageID
                         imageFlags:imageFlags
                            context:context]);
@@ -254,11 +252,10 @@
 
    assert( [context isActive]);
 
-   imageID = nvgCreateImageRGBA( CGContextGetNVGContext( context),
-                                   bitmapSize.width,
-                                   bitmapSize.height,
-                                   imageFlags & 0x3F,
-                                   bytes);
+   // bounce to context for debugging output of CGContext
+   imageID = [context textureIDWithBytes:bytes
+                              bitmapSize:bitmapSize
+                              imageFlags:imageFlags & 0x3F];
    return( [self initWithNVGImage:imageID
                         imageFlags:imageFlags
                            context:context]);
@@ -270,9 +267,9 @@
                     imageFlags:(NSUInteger) imageFlags
                        context:(CGContext *) context
 {
-   NSInteger    imageID;
-   BOOL         isRGBA;
-   void         *freeBytes;
+   NSInteger   imageID;
+   BOOL        isRGBA;
+   void        *freeBytes;
 
    if( ! bytes)
    {
@@ -302,11 +299,10 @@
       bytes = freeBytes;
    }
 
-   imageID = nvgCreateImageRGBA( CGContextGetNVGContext( context),
-                                 bitmapInfo.size.width,
-                                 bitmapInfo.size.height,
-                                 imageFlags,
-                                 bytes);
+   // bounce for debugging output of CGContext
+   imageID = [context textureIDWithBytes:bytes
+                              bitmapSize:bitmapInfo.size
+                              imageFlags:imageFlags];
    mulle_free( freeBytes);
 
    return( [self initWithNVGImage:imageID
@@ -379,7 +375,6 @@
 }
 
 
-
 - (void) setBytes:(void *) bytes
 {
    assert( [_context isActive]);
@@ -407,11 +402,11 @@
    NVGcontext           *vg;
    CGContext            *context;
    CGImage              *image;
+   CGSharedGPUTexture   *otherSharedGPUTexture;
    void                 *gpuTexture;
    int                  w, h;
    int                  type;
    int                  imageFlags;
-   CGSharedGPUTexture   *otherSharedGPUTexture;
 
    context = [self context];
    if( context == otherContext)
@@ -422,6 +417,15 @@
       errno = EINVAL;
       return( nil);
    }
+
+   //
+   // We wpuld like to put up a barrier here, so that "we" know we are done
+   // drawing the image and the other context doesn't get possibly an empty
+   // buffer.
+   // We can't be _really_ sure, that we are the active context though,
+   // as all these commands don't touch OpenGL, but remain in MulleCG and
+   // nanovg.
+   // [context barrier];
 
    // context need not be active, as we are just reading some internal
    // info
@@ -457,22 +461,31 @@
       _sharedGPUTexture = [[image sharedGPUTexture] retain];
 
       if( [_context debugEnabled])
-         fprintf( stderr, "*** context %p: new CGImage %p (nvgImage %td) "
-                        "shares texture %p (%p [%td]) with CGImage %p (nvgImage %td) of context %p\n",
-                        otherContext, image, image->_imageID,
-                        _sharedGPUTexture, [_sharedGPUTexture gpuTexture], [_sharedGPUTexture retainCount],
-                        self, self->_imageID, _context);
+         MulleUILog( "shared gpuTexture=%p in context %#@ with %#@ of %#@\n",
+                     [_sharedGPUTexture gpuTexture], _context, image, otherContext);
    }
 
    return( image);
 }
 
 
-- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
+- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
 {
    return( [_context RGBABytesBitmapOfImage:self
                                   allocator:allocator]);
 }
 
+
+- (char *) UTF8String
+{
+   char   *s;
+
+   s = MulleObjC_asprintf( "<%s %p imageID=%td %@>",
+                           MulleObjCInstanceGetClassNameUTF8String( self),
+                           self,
+                           self->_imageID,
+                           self->_sharedGPUTexture);
+   return( s);
+}
 
 @end

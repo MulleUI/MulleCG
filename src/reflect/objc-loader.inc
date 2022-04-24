@@ -1,3 +1,4 @@
+      { @selector( MulleObjCLoader), @selector( MulleUIBase) },      // 47a9beb6;MulleObjCLoader;3ebba954;MulleUIBase
       { @selector( CGBitmapDrawable), MULLE_OBJC_NO_CATEGORYID },      // ac0569ab;CGBitmapDrawable;;
       { @selector( CGContext), @selector( CGFont) },      // 80b7b568;CGContext;1881416f;CGFont
       { @selector( CGContext), @selector( CGImage) },      // 80b7b568;CGContext;6ec55940;CGImage

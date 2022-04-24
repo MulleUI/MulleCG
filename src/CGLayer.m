@@ -24,6 +24,7 @@
                             context:(CGContext *) context
 {
    NVGcontext   *vg;
+   NSInteger    imageID;
 
    assert( context && [context isKindOfClass:[CGContext class]]);
 
@@ -49,9 +50,10 @@
    // TextureImage is threfore retained by the context and not the other way
    // (how long does the context live though)
    //
-   return( [self initWithNVGImage:((NVGLUframebuffer *) _framebuffer)->image
-                        imageFlags:imageFlags
-                           context:context]);
+   imageID = ((NVGLUframebuffer *) _framebuffer)->image;
+   return( [self initWithNVGImage:imageID
+                       imageFlags:imageFlags
+                          context:context]);
 }
 
 
@@ -131,39 +133,64 @@
 }
 
 
-- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
+- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
 {
-   struct mulle_data             data;
-   struct CGBitmapSize           bitmapSize;
-   struct CGBitmap               fb;
-   size_t                        size;
-   struct CGContextFramebuffer   old;
-
-   bitmapSize  = [self bitmapSize];
-   size        = bitmapSize.width * bitmapSize.height * 4;
-   assert( size);
-
-   // circumvent nvidia bug
-   size        += 16;
-
-   // implicity transparent background
-   fb.info      = CGBitmapInfoMake( bitmapSize, 0, CGBitmapEncodingFlipYRGBABytes);
-   fb.allocator = allocator ? allocator : &mulle_default_allocator;
-   fb.bytes     = mulle_allocator_calloc( fb.allocator, 1, size);
-
-   old = [_context bindFramebuffer:CGContextFramebufferMakeWithLayer( self)];
-   {
-      glReadPixels( 0, 0,
-                   bitmapSize.width,
-                   bitmapSize.height,
-                   GL_RGBA,
-                   GL_UNSIGNED_BYTE,
-                   fb.bytes);
-   }
-   [_context bindFramebuffer:old];
-
-   return( fb);
+   return( [_context RGBABytesBitmapOfImage:self
+                                  allocator:allocator]);
 }
+
+
+- (void) setDebugNameUTF8String:(char *) s
+{
+   MulleObjCObjectSetDuplicatedUTF8String( self, &_debugNameUTF8String, s);
+}
+
+
+- (char *) UTF8String
+{
+   char        *result;
+   char        *s;
+   auto char   buf[ 64];
+   size_t      len;
+   char        *format;
+
+   s = MulleObjCClassGetNameUTF8String( NSClassFromObject( self));
+   sprintf( buf, "%p",  self);
+
+   format = "<%s %s>";
+   len    = _debugNameUTF8String ? strlen( _debugNameUTF8String) : 0;
+   if( len)
+   {
+      format = "<%s %s \"%s\">";
+      len   += 3; // < "">\0"
+   }
+   len    += strlen( s) + strlen( buf) + 4; // < "">\0"
+   result  = mulle_malloc( len);
+   sprintf( result, format, s, buf, _debugNameUTF8String);
+   return( MulleObjCAutoreleaseAllocation( result, NULL));
+}
+
+
+- (char *) colorizerPrefixUTF8String
+{
+   char        *s;
+   char        *result;
+   uintptr_t   hash;
+   int         color;
+
+   s = _debugNameUTF8String;
+   if( s)
+      hash = _mulle_string_hash( s);
+   else
+      hash  = mulle_pointer_hash( self);
+
+   color  = (hash % (200 - 42)) + 42;
+   mulle_asprintf( &result, "\033[38;5;%dm", color);;
+
+   return( MulleObjCAutoreleaseAllocation( result, NULL));
+}
+
+
 
 @end
 

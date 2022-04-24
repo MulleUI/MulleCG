@@ -13,6 +13,7 @@ endif()
 set( INCLUDE_DIRS
 nanovg/src
 src
+src/generic
 src/reflect
 )
 
@@ -28,8 +29,8 @@ src/reflect/_MulleCG-include-private.h
 # contents selected with patternfile ??-header--private-generic-headers
 #
 set( PRIVATE_GENERIC_HEADERS
-src/import-private.h
-src/include-private.h
+src/generic/import-private.h
+src/generic/include-private.h
 )
 
 #
@@ -46,8 +47,8 @@ src/reflect/_MulleCG-provide.h
 # contents selected with patternfile ??-header--public-generic-headers
 #
 set( PUBLIC_GENERIC_HEADERS
-src/import.h
-src/include.h
+src/generic/import.h
+src/generic/include.h
 )
 
 #
@@ -60,9 +61,7 @@ nanovg/src/nanovg_gl_utils.h
 nanovg/src/nanovg.h
 nanovg/src/stb_image.h
 nanovg/src/stb_truetype.h
-src/CGAffineTransform+UTF8String.h
 src/CGAffineTransform+nanovg.h
-src/CGBitmap+UTF8String.h
 src/CGContext+CGFont.h
 src/CGContext+Drawing.h
 src/CGContext+OpenGL.h
@@ -71,7 +70,6 @@ src/CGContext+Resources.h
 src/CGContext.h
 src/CGDrawable.h
 src/CGFont.h
-src/CGGeometry+UTF8String.h
 src/CGImage.h
 src/CGLayer.h
 src/CGPath.h
