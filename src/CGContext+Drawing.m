@@ -93,6 +93,7 @@
            context:self];
 
    // just for debugging, draws a frame somewhere
+#ifdef DEBUG
    {
       struct NVGcontext   *vg;
 
@@ -108,6 +109,28 @@
       }
       nvgStroke( vg);
    }
+#endif
 }
+
+
+- (void) drawAtPoint:(CGPoint) position
+          UTF8String:(char *) s
+            fontName:(char *) fontName
+            fontSize:(CGFloat) fontSize
+               color:(CGColor) color
+{
+   struct NVGcontext   *vg;
+
+   vg = CGContextGetNVGContext( self);
+
+   nvgFontFace( vg, fontName ? fontName : "sans");
+   nvgFontSize( vg, fontSize != 0.0 ? fontSize : 10.0);
+   nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+   nvgFillColor( vg, color);
+
+   nvgTextBox( vg, position.x, position.y, INFINITY, s, NULL);
+}
+
+
 
 @end

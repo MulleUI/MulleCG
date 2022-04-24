@@ -12,8 +12,6 @@ endif()
 #
 set( SOURCES
 nanovg/src/nanovg.c
-src/CGAffineTransform+UTF8String.m
-src/CGBitmap+UTF8String.m
 src/CGContext+CGFont.m
 src/CGContext+Drawing.m
 src/CGContext+OpenGL.m
@@ -22,7 +20,6 @@ src/CGContext+Resources.m
 src/CGContext.m
 src/CGDrawable.m
 src/CGFont.m
-src/CGGeometry+UTF8String.m
 src/CGImage.m
 src/CGLayer.m
 src/CGPath.c

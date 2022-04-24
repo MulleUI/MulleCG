@@ -42,7 +42,9 @@ typedef struct NVGcolor   CGColor;
 #endif
 
 /* You can add some more include statements here */
-
+#include <mulle-buffer/mulle-buffer.h>
+#include <mulle-container/mulle-container.h>
+#include <mulle-geometry/mulle-geometry.h>
 
 #endif
 

@@ -34,9 +34,28 @@
 - (void) repossessResource:(id <CGContextResource>) resource;
 - (void) releaseAllLoanedResources;
 
+// These methods are used by CGImage. Prefer use of CGImage over using these
+// methods.
+//
 // these are queued and deleted on the next render
 // the imageID is the nanovg texture not the GPU texture
-- (void) deleteTextureID:(NSInteger) id;
+- (void) addImageToResources:(CGImage *) image;
+
+- (NSInteger) textureIDWithBytes:(void *) bytes
+                      bitmapSize:(struct CGBitmapSize) size
+                      imageFlags:(NSUInteger) imageFlags;
+- (NSInteger) textureIDWithFileCData:(struct mulle_data) fileCData
+                          imageFlags:(NSUInteger) imageFlags;
+- (NSInteger) textureIDWithContentsOfFileCString:(char *) filename
+                                      imageFlags:(NSUInteger) imageFlags;
+- (NSInteger) textureIDWithGPUTextureRGBA:(void *) gpuTexture
+                               bitmapSize:(struct CGBitmapSize) size
+                               imageFlags:(NSUInteger) imageFlags;
+
+- (void) deleteTextureID:(NSInteger) imageID;
 - (void) deleteTextureIDs;
+
+// used by shared textures only
+- (void) forgetTextureID:(NSInteger) imageID;
 
 @end

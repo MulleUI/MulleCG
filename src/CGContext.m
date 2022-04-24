@@ -5,11 +5,12 @@
 #import "CGContext+CGFont.h"
 #import "CGContext+OpenGL.h"
 #import "CGContext+Resources.h"
-#import "CGBitmap+UTF8String.h"
-#import "CGGeometry+UTF8String.h"
 #import "CGImage.h"
 #import "CGLayer.h"
+
 #include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
 
 
 #define SWAP_DEBUG
@@ -51,6 +52,8 @@ static void   *acquire_ivar_object( mulle_atomic_pointer_t *p)
    id   obj;
 
    obj = acquire_ivar_pointer( p);
+   if( obj)
+      MulleUICLog( "Extracted %#@ from pointer %p, now nil", obj, p);
    return( [obj autorelease]);
 }
 
@@ -68,7 +71,14 @@ static void   recycle_ivar_object( mulle_atomic_pointer_t *p, id obj)
 
    [obj retain];
    if( ! recycle_ivar_pointer( p, obj))
+   {
+      MulleUICLog( "Failed to store %#@ into pointer %p", obj, p);
       [obj release];  // if it fails, undo retain
+   }
+   else
+   {
+      MulleUICLog( "Stored %#@ in pointer %p", obj, p);
+   }
 }
 
 
@@ -88,11 +98,16 @@ static struct
 
 + (void) initialize
 {
+   char   *s;
+
    mulle_thread_mutex_init( &Self._freeTypeLock);
 
    Self._callback.keycallback   = mulle_container_keycallback_nonowned_pointer;
    Self._callback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
-}
+
+   s = getenv( "CGContextDebugEnabled");
+   if( s)
+      Self._debugEnabled = (char) strtol( s, NULL, 0);}
 
 
 + (void) deinitialize
@@ -201,7 +216,7 @@ l_Position, normal);\n"
 
    _debugEnabled = Self._debugEnabled;
    if( _debugEnabled)
-      fprintf( stderr, "*** context %p: init\n", self);
+      MulleUILog( "init");
 
    return( self);
 }
@@ -220,7 +235,7 @@ l_Position, normal);\n"
    assert( ! _isRendering);
 
    if( _debugEnabled)
-      mulle_fprintf( stderr, "*** context %p: finalize\n", self);
+      MulleUILogThisMethod();
 
    [self _resetFontCache];
    [self releaseAllLoanedResources];
@@ -228,7 +243,7 @@ l_Position, normal);\n"
    [self deleteTextureIDs];
 
    if( _debugEnabled)
-      mulle_fprintf( stderr, "*** context %p: autorelease offScreenFramebuffer\n", self);
+      MulleUILog( "autorelease offScreenFramebuffer");
 
    // by acquiring we nil and autorelease, which is what we want to do
    acquire_ivar_object( &_drawnLayer);
@@ -249,7 +264,7 @@ l_Position, normal);\n"
    struct mulle_allocator   *allocator;
 
    if( _debugEnabled)
-      fprintf( stderr, "*** context %p: dealloc\n", self);
+      MulleUILogThisMethod();
 
    [self _doneFontCache];
 
@@ -341,13 +356,35 @@ l_Position, normal);\n"
 
    if( ! CGBitmapSizeEqualToSize( oldSize, size))
    {
-#ifdef RESIZE_DEBUG
-      mulle_fprintf( stderr, "%#@: %#@ create new layer with size %s\n",
-                        [NSThread currentThread], self, CGBitmapSizeUTF8String( size));
-#endif
       layer = [CGLayer layerWithBitmapSize:size
                                 imageFlags:0
                                    context:self];
+#ifdef DEBUG
+   {
+      static NSUInteger   count;
+      char                *s;
+
+      s = MulleObjC_asprintf( "CGLayer-%tu", count++);
+      [layer setDebugNameUTF8String:s];
+   }
+#endif
+#ifdef RESIZE_DEBUG
+      mulleui_log_object_method( self,
+                                 (char *) __PRETTY_FUNCTION__,
+                                 "created new layer %#@ with size %s",
+                                 layer,
+                                 CGBitmapSizeUTF8String( size));
+#endif
+   }
+   else
+   {
+#ifdef RESIZE_DEBUG
+      mulleui_log_object_method( self,
+                                 (char *) __PRETTY_FUNCTION__,
+                                 "reused layer %#@ with size %s",
+                                 layer,
+                                 CGBitmapSizeUTF8String( size));
+#endif
    }
    return( layer);
 }
@@ -365,11 +402,12 @@ l_Position, normal);\n"
    assert( info->window.pixelRatio != 0.0);
 
 #ifdef RENDER_DEBUG
-   mulle_fprintf( stderr, "%#@: %#@ Viewport: %s, FB: %s, Window: %s\n",
-               [NSThread currentThread], self,
-               CGBitmapRectUTF8String( info->viewportFrame),
-               CGBitmapSizeUTF8String( info->window.framebufferSize),
-               CGSizeUTF8String( info->window.frame.size));
+   mulleui_log_object_method( self,
+                              (char *) __PRETTY_FUNCTION__,
+                              "Viewport: %s, FB: %s, Window: %s",
+                              CGBitmapRectUTF8String( info->viewportFrame),
+                              CGBitmapSizeUTF8String( info->window.framebufferSize),
+                              CGSizeUTF8String( info->window.frame.size));
 #endif
 
    // not 100% sure why anymore this written this way
@@ -391,12 +429,12 @@ l_Position, normal);\n"
    if( _rendersOffScreen)
    {
       // will acuire hopefully a preexisting layer for reuse
+      assert( ! _renderLayer);
       _renderLayer = [[self layerWithSize:info->window.framebufferSize] retain];
       // create or reuse existing offscreen framebuffer
-   }
 
-   if( _rendersOffScreen)
       [self bindFramebuffer:CGContextFramebufferMakeWithLayer( _renderLayer)];
+   }
 }
 
 
@@ -453,8 +491,15 @@ static struct CGFrameInfo   emptyInfo;
 - (void) _endRender
 {
    CGLayer   *old;
+   char      *s;
 
    assert( _isRendering);
+
+#ifdef RENDER_DEBUG
+   mulleui_log_object_method( self,
+                              (char *) __PRETTY_FUNCTION__,
+                              "");
+#endif
 
    _isRendering = 0;
    _numberOfRenderedFrames++;
@@ -471,13 +516,21 @@ static struct CGFrameInfo   emptyInfo;
       // by recycling it in _drawnLayer we store it there, since
       // CGContext is the only one who is _supposed_ to write any NON-NULL value
       // into _drawnLayer, this can't fail, and if it does it gets
-      // harmlessly reaped
-#ifdef SWAP_DEBUG
-      mulle_fprintf( stderr, "%#@: %s %@ (least recent layer %@)\n",
-               [NSThread currentThread], __PRETTY_FUNCTION__, self, _renderLayer);
-      [[_renderLayer bitmapImage] writeToPNGFileWithSystemRepresentation:"layer.png"];
-#endif
+      // harmlessly reaped.
+      //
+      // Before making it available to other contexts
+      // possibly, we need to put up a barrier to ensure, that the drawing
+      // has completed. Else you get surprising empty layers on races.
+      [self barrier];
       recycle_ivar_object( &_drawnLayer, _renderLayer);
+
+#ifdef SWAP_DEBUG
+      MulleUIWriteImageToPNGFileSequenceAsync( _renderLayer, "render-layer");
+      mulleui_log_object_method( self,
+                                 (char *) __PRETTY_FUNCTION__,
+                                 "least recent layer %#@",
+                                 _renderLayer);
+#endif
       [_renderLayer autorelease];
       _renderLayer = nil;
    }

@@ -62,6 +62,8 @@
 
 - (void) bindOpenGLFramebuffer:(void *) framebuffer;
 
+- (void) barrier;
+
 //
 // TODO: remember under name as resource somehow
 //
