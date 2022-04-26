@@ -104,10 +104,10 @@
                         imageFlags:(NSUInteger) imageFlags
                            context:(CGContext *) context;
 
-- (instancetype) initWithBytes:(void *) bytes
-                    bitmapInfo:(struct CGBitmapInfo) bitmapInfo
-                    imageFlags:(NSUInteger) imageFlags
-                       context:(CGContext *) context;
+// bitmap bytes are not retained, you can free them after init
+- (instancetype) initWithBitmap:(struct CGBitmap *) bitmap
+                     imageFlags:(NSUInteger) imageFlags
+                        context:(CGContext *) context;
 
 // CGImage size is not mutable, if the bitmap size changes
 // you need to create a new CGImage. The bytes can be freed by the

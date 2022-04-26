@@ -150,6 +150,7 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 // one, if no offscreen exists
 - (void) clearFramebuffer;
 - (void) clearFramebufferWithColor:(CGColor) color;
+- (void) clearFramebufferNoColor;
 
 - (struct CGContextFramebuffer) bindFramebuffer:(struct CGContextFramebuffer) framebuffer;
 

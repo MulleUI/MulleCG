@@ -262,48 +262,56 @@
 }
 
 
-- (instancetype) initWithBytes:(void *) bytes
-                    bitmapInfo:(struct CGBitmapInfo) bitmapInfo
-                    imageFlags:(NSUInteger) imageFlags
-                       context:(CGContext *) context
+- (instancetype) initWithBitmap:(struct CGBitmap *) bitmap
+                     imageFlags:(NSUInteger) imageFlags
+                        context:(CGContext *) context
 {
-   NSInteger   imageID;
-   BOOL        isRGBA;
-   void        *freeBytes;
+   NSInteger               imageID;
+   BOOL                    isRGBA;
+   void                    *freeBytes;
+   struct CGBitmap         convertedBitmap;
+   struct CGBitmapInfo     convertedBitmapInfo;
+   BOOL                    isFlipped;
+   enum CGBitmapEncoding   encoding;
+   enum CGBitmapEncoding   convertedEncoding;
 
-   if( ! bytes)
+   if( ! bitmap)
    {
       [self release];
       return( nil);
    }
-   assert( bitmapInfo.size.width >= 1);
-   assert( bitmapInfo.size.height >= 1);
 
    assert( [context isActive]);
 
    // we flip imageFlags on encoding, it allows more control for the
    // user, who will usually set this to 0
-   freeBytes = NULL;
-   switch( CGBitmapInfoGetEncoding( bitmapInfo))
+
+   encoding          = _CGBitmapGetEncoding( bitmap);
+   isFlipped         = CGBitmapEncodingIsFlipped( encoding);
+   convertedEncoding = CGBitmapEncodingRGBABytes;
+   if( isFlipped)
    {
-   case CGBitmapEncodingFlipYRGBABytes : imageFlags ^= NVG_IMAGE_FLIPY;
-   case CGBitmapEncodingRGBABytes      : break;
-   default :
-      freeBytes = CGBitmapConvertBytesToEncoding( bytes, bitmapInfo, CGBitmapEncodingRGBABytes, NULL);
-      if( ! freeBytes)
-      {
-         fprintf( stderr, "unsupported CGImage format\n");
-         [self release];
-         return( nil);
-      }
-      bytes = freeBytes;
+      convertedEncoding = CGBitmapEncodingFlipYRGBABytes;
+      imageFlags       ^= NVG_IMAGE_FLIPY;
+   }
+
+   convertedBitmapInfo = CGBitmapInfoMake( bitmap->info.size, 0, convertedEncoding);
+
+   if( CGBitmapInitWithBitmapConversion( &convertedBitmap,
+                                         convertedBitmapInfo,
+                                         *bitmap,
+                                         NULL) < 0)
+   {
+      fprintf( stderr, "unsupported CGImage format\n");
+      [self release];
+      return( nil);
    }
 
    // bounce for debugging output of CGContext
-   imageID = [context textureIDWithBytes:bytes
-                              bitmapSize:bitmapInfo.size
+   imageID = [context textureIDWithBytes:convertedBitmap.bytes
+                              bitmapSize:convertedBitmap.info.size
                               imageFlags:imageFlags];
-   mulle_free( freeBytes);
+   CGBitmapDone( &convertedBitmap); // will not free fb, if no conversion
 
    return( [self initWithNVGImage:imageID
                        imageFlags:imageFlags

@@ -72,7 +72,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 //      if( ! bitmapImage)
 //         abort();
 //
-//      [bitmapImage writeToPNGFileWithSystemRepresentation:"image.png"];
+//      [bitmapImage writeToPNGUTF8String:"image.png"];
 //      written = YES;
 //
 //      cgLayer = [[[CGLayer alloc] initWithImage:image
@@ -82,7 +82,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 //      if( ! bitmapImage)
 //         abort();
 //
-//      [bitmapImage writeToPNGFileWithSystemRepresentation:"layer.png"];
+//      [bitmapImage writeToPNGUTF8String:"layer.png"];
    }
 }
 

@@ -16,7 +16,8 @@
 #define SWAP_DEBUG
 #define RESIZE_DEBUG
 #define RENDER_DEBUG
-
+// this writes out a PNG for each frame
+//#define RENDER_LAYER_DEBUG
 
 @interface NSObject( ShareId)
 
@@ -354,7 +355,7 @@ l_Position, normal);\n"
    layer   = acquire_ivar_object( &_scratchLayer);
    oldSize = [layer bitmapSize];
 
-   if( ! CGBitmapSizeEqualToSize( oldSize, size))
+   if( ! CGBitmapSizeEqualToBitmapSize( oldSize, size))
    {
       layer = [CGLayer layerWithBitmapSize:size
                                 imageFlags:0
@@ -524,8 +525,11 @@ static struct CGFrameInfo   emptyInfo;
       [self barrier];
       recycle_ivar_object( &_drawnLayer, _renderLayer);
 
-#ifdef SWAP_DEBUG
+#ifdef RENDER_LAYER_DEBUG
       MulleUIWriteImageToPNGFileSequenceAsync( _renderLayer, "render-layer");
+#endif
+
+#ifdef SWAP_DEBUG
       mulleui_log_object_method( self,
                                  (char *) __PRETTY_FUNCTION__,
                                  "least recent layer %#@",
@@ -588,7 +592,6 @@ static struct CGFrameInfo   emptyInfo;
 }
 
 
-
 - (struct CGContextFramebuffer) currentFramebuffer
 {
    return( _currentFramebuffer);
@@ -626,7 +629,6 @@ static struct CGFrameInfo   emptyInfo;
 
    return( old);
 }
-
 
 
 /*
