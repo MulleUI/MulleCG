@@ -56,35 +56,27 @@
    CGImage                  *image;
    CGDrawableOptions        options;
    CGRect                   rect;
-   enum CGBitmapEncoding    targetEncoding;
+   struct CGBitmapInfo      convertedBitmapInfo;
    void                     *bytes;
+   struct CGBitmap          convertedFb;
    struct CGBitmapInfo      info;
 
    if( ! fb->bytes)
       return;
 
-   targetEncoding = CGBitmapEncodingRGBABytes;
-   switch( CGBitmapInfoGetEncoding( fb->info))
+   convertedBitmapInfo = CGBitmapInfoMake( fb->info.size, 0, CGBitmapEncodingRGBABytes);
+   if( CGBitmapInitWithBitmapConversion( &convertedFb,
+                                         convertedBitmapInfo,
+                                         *fb,
+                                         NULL) < 0)
    {
-   case CGBitmapEncodingFlipYRGBABytes :
-   case CGBitmapEncodingRGBABytes      :
-      image = [[[CGImage alloc] initWithBytes:fb->bytes
-                                   bitmapInfo:fb->info
-                                   imageFlags:0
-                                      context:self] autorelease];
-      break;
-
-   default:
-      bytes = CGBitmapConvertBytesToEncoding( fb->bytes, fb->info, targetEncoding, NULL);
-      if( ! bytes)
-         abort();
-      info  = CGBitmapInfoMake( fb->info.size, 0, targetEncoding);
-      image = [[[CGImage alloc] initWithBytes:fb->bytes
-                                   bitmapInfo:fb->info
-                                   imageFlags:0
-                                      context:self] autorelease];
-      mulle_free( bytes);
+      abort();
    }
+
+   image = [[[CGImage alloc] initWithBitmap:&convertedFb
+                                 imageFlags:0
+                                    context:self] autorelease];
+   CGBitmapDone( &convertedFb);
 
    rect    = CGRectMake( 0, 0, fb->info.size.width, fb->info.size.height);
    options = CGDrawableOptionsMake( 0.0, 1.0, 0.0, YES);

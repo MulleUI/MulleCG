@@ -231,7 +231,6 @@ int   main()
    app        = [UIApplication sharedInstance];
 
    styleMask  = UIWindowStyleMaskDefault;
-   styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleEdgeAntialias, EDGE_ANTIALIAS);
    styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
    styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleEdgeAntialias, EDGE_ANTIALIAS);
 

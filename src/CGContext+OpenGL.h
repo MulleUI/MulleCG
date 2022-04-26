@@ -46,6 +46,10 @@
 - (void) clearFramebufferBits:(NSUInteger) bits
                         color:(CGColor) color;
 
+// acquire bits value for above call. If you can avoid clearing the color
+// pixels, set flag to NO
+- (NSUInteger) framebufferBitsWithColorBit:(BOOL) flag;
+
 
 - (void) changeRender:(struct CGFrameInfo *) info;
 - (void) resumeRender;

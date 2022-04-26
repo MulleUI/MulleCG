@@ -303,6 +303,14 @@ static int  has_version_header( char *s)
 }
 
 
+- (NSUInteger) framebufferBitsWithColorBit:(BOOL) flag
+{
+   if( flag)
+      return( _framebufferBits | GL_COLOR_BUFFER_BIT);
+   return( _framebufferBits & ~GL_COLOR_BUFFER_BIT);
+}
+
+
 - (void) clearFramebufferBits:(NSUInteger) bits
                         color:(CGColor) color
 {
@@ -318,6 +326,13 @@ static int  has_version_header( char *s)
 
    glClear( bits);
    CGContextCheckBackendError( self, "clear framebuffer");
+}
+
+
+- (void) clearFramebufferNoColor
+{
+   [self clearFramebufferBits:_framebufferBits & ~GL_COLOR_BUFFER_BIT
+                        color:CGColorMakeWithHexColor( 0x00000000)];
 }
 
 
