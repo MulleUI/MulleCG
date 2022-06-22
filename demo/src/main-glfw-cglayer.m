@@ -94,7 +94,9 @@ int   main( int argc, char *argv[])
 
          // CGContext can now use the "OS" context
          context = [[[CGContext alloc] initWithEdgeAntialiasing:YES
-                                             useStencilStrokes:YES] autorelease];
+                                              useStencilStrokes:YES
+                                                        shareID:[window shareID]
+                                                        backend:[window backend]] autorelease];
          if( ! context)
          {
             fprintf( stderr, "No CGContext for you\n");

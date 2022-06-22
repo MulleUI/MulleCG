@@ -185,12 +185,27 @@
 }
 
 
-- (NSInteger) nvgImageWithContext:(CGContext *) context
-                       imageFlags:(NSUInteger) imageFlags
+- (CGImage *) cgImageWithContext:(CGContext *) context
+                      imageFlags:(NSUInteger) imageFlags
 {
-   if( context == _context && imageFlags == _imageFlags)
-      return( _imageID);
-   return( -1);
+   if( [context shareID] != [_context shareID])
+   {
+      MulleUILog( "ImageID requested for context %#@ is in non-sharable context %#@",
+                  context, _context);
+      assert( 0);
+      return( nil);
+   }
+
+   if( imageFlags != _imageFlags)
+   {
+      MulleUILog( "Non standard imageFlags 0x%tx (0x%x) requested.", imageFlags, _imageFlags);
+      // would need to construct a new CGImage, but CGImage is too low level
+      // use UIBitmapImage instead
+      assert( 0);
+      return( nil);
+   }
+
+   return( self);
 }
 
 

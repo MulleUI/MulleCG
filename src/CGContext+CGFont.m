@@ -99,7 +99,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 }
 
 - (void) addFontWithCData:(struct mulle_data) data
-          fontNameUTF8String:(char *) name
+       fontNameUTF8String:(char *) name
 {
    CGFont   *font;
    int      fontIndex;

@@ -31,8 +31,8 @@
             scale:(BOOL) scale;
 
 - (void) drawAtPoint:(CGPoint) position
-          UTF8String:(char *) s
-            fontName:(char *) fontName
+      textUTF8String:(char *) s
+  fontNameUTF8String:(char *) fontNameUTF8String
             fontSize:(CGFloat) fontSize
                color:(CGColor) color;
 
@@ -42,8 +42,8 @@
 static inline void  CGContextDrawText( CGContext *self, CGFloat x, CGFloat y, char *s, CGFloat fontSize, CGColor color)
 {
    [self drawAtPoint:CGPointMake( x, y)
-          UTF8String:s
-            fontName:NULL
+      textUTF8String:s
+  fontNameUTF8String:NULL
             fontSize:fontSize
                color:color];
 }

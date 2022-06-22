@@ -147,7 +147,7 @@ int   main( int argc, char *argv[])
    UIApplication   *app;
    UIWindow        *window;
 
-   fprintf( stderr, "%s\n", [CGContext backendUTF8String]);
+   fprintf( stderr, "%s\n", [CGContext nanoVGBackendUTF8String]);
 
    app = [UIApplication sharedInstance];
    @autoreleasepool

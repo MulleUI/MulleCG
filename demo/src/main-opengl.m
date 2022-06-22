@@ -14,7 +14,7 @@
 // used commands. Rewriting it in OpenGLES would be to wordy for a demo.
 //
 // There is a danger in setting UIWindowOpenGLDeprecated. The nanovg
-// backend is hard-compiled against -[CGContext backend], so there could be
+// backend is hard-compiled against -[window backend], so there could be
 // a mismatch. In what way this will impede nanovg needs to be determined
 // In this demo, there are no "real" nanovg calls, so it doesn't matter
 //

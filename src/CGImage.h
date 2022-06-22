@@ -70,6 +70,8 @@
 @property( readonly, retain) CGSharedGPUTexture   *sharedGPUTexture;
 
 
+// imageFlags in this call is "informative", it will not affect the image
+// as it has been created already
 - (instancetype) initWithNVGImage:(NSInteger) imageID
                        imageFlags:(NSUInteger) imageFlags
                           context:(CGContext *) context;
@@ -80,15 +82,9 @@
                              imageFlags:(NSUInteger) imageFlags
                                 context:(CGContext *) context;
 
-//
-// if imageflags or context don't match, this will return -1
-// UIImage can derive multiple CGImages from itself. But CGImage can not.
-//
-- (NSInteger) nvgImageWithContext:(CGContext *) context
-                       imageFlags:(NSUInteger) imageFlags;
-
 // these methods are germane to CGImage, subclasses may not support this
 // I wanted to avoid inserting another class here
+// imageFlags will affect the texture
 - (instancetype) initWithContentsOfFileCString:(char *) filename
                                     imageFlags:(NSUInteger) imageFlags
                                        context:(CGContext *) context;

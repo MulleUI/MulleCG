@@ -9,7 +9,7 @@ struct NVGcontext;
 @class CGImage;
 
 
-enum CGContextBackend
+enum CGContextNanoVGBackend
 {
    CG_GL3,
    CG_GL3_2,
@@ -119,16 +119,24 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
    CGLayer                      *_renderLayer;  // ephemeral(!)
 }
 
-@property( assign) BOOL          rendersOffScreen;
+@property( assign, readonly) BOOL   shareID;
 
-@property( assign) BOOL          debugEnabled;
-@property( assign) char          *debugNameUTF8String;  // useful for debugging
+@property( assign) BOOL             rendersOffScreen;
 
-@property( assign) NSUInteger    framebufferBits;
-@property( assign) id            OSWindow;
+@property( assign) BOOL             debugEnabled;
+@property( assign) char             *debugNameUTF8String;  // useful for debugging
 
+@property( assign) NSUInteger       framebufferBits;
+@property( assign) id               OSWindow;
+
+@property( assign, readonly) enum UIGraphicsBackend    backend;
+
+
+// the context needs to be told, what backend is being used
 - (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
-              useStencilStrokes:(BOOL) useStencilStrokes;
+              useStencilStrokes:(BOOL) useStencilStrokes
+                        shareID:(NSUInteger) shareID
+                        backend:(enum UIGraphicsBackend) backend;
 
 - (struct NVGcontext *) nvgContext;
 
@@ -146,14 +154,16 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 - (void) flushRender;    // suspends and resumes
 
 
+// default is NULL until MulleUIOS comes into play
+- (char *) backendUTF8String;
+
+
 // to return to the "default" framebuffer, either the offscreen or the window
 // one, if no offscreen exists
 - (void) clearFramebuffer;
 - (void) clearFramebufferWithColor:(CGColor) color;
-- (void) clearFramebufferNoColor;
 
 - (struct CGContextFramebuffer) bindFramebuffer:(struct CGContextFramebuffer) framebuffer;
-
 
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info;
 - (struct CGFrameInfo *) currentFrameInfo;

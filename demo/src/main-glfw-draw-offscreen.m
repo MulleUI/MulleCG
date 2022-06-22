@@ -152,7 +152,7 @@ int   main( int argc, char *argv[])
    @autoreleasepool
    {
       hints = GLFW_DEFAULT_CONTEXT;
-      switch( [CGContext backend])
+      switch( [window backend])
       {
       case CG_GL3   : hints = GLFW_GL3_CONTEXT; break;
       case CG_GL3_2 : hints = GLFW_GL3_2_CONTEXT; break;
@@ -167,8 +167,9 @@ int   main( int argc, char *argv[])
       [window os_activateGraphicsContext];
       {
          context = [[[CGContext alloc] initWithEdgeAntialiasing:YES
-                                              useStencilStrokes:YES] autorelease];
-         // have to do this manually
+                                              useStencilStrokes:YES
+                                                        shareID:[window shareID]
+                                                        backend:[window backend]] autorelease];         // have to do this manually
          [context setActive:YES];
 
          // remember context for "display" callback

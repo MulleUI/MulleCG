@@ -2,6 +2,10 @@
 
 <h2>MulleCG + MulleGLFW</h2>
 
+<p>In the most basic setup <strong>MulleGLFW</strong> is used to get access to a window and
+OpenGL/Vulkan/Metal context. This is more cumbersome than using <strong>UIWindow</strong>
+though.</p>
+
 <h3>glfw-draw-simple</h3>
 
 <p>Just draws three bars of color. Can&#39;t get much simpler than that. If this
@@ -16,23 +20,26 @@ together.</p>
 <h3>glfw-cglayer</h3>
 
 <p>This creates a tiny 64x64 offscreen buffer and fills it with a uniform color.
-Then a BMP file is written with it. The idea of drawing into CGLayers is
-expanded on in <strong>cglayer</strong>.</p>
+Then draws a circle into it. The buffer is written to a BMP file.</p>
 
 <p><img src="glfw-cglayer.png" alt="glfw-cglayer"></p>
 
 <p><a href="src/main-glfw-cglayer.m">main-glfw-cglayer.m</a></p>
 
+<blockquote>
+<p>The idea of drawing into CGLayers is expanded on in <strong>cglayer</strong>.</p>
+</blockquote>
+
 <h2>MulleCG + MulleUICore</h2>
 
-<p>From here on we use MulleUICore to demonstrate MulleCG features.</p>
+<p>From here on <strong>UIWindow</strong> is used to demonstrate MulleCG features.</p>
 
 <h3>draw-simple</h3>
 
 <p>This is glfw-draw-simple for MulleUICore. It&#39;s much, much less code. There is
-no need for a UIWindow subclass. We don&#39;t need to implement
-<code>-[CGContext setActive:]</code>. We don&#39;t have to bother with matching GLFW windows
-hints with the required GLFW window hints.</p>
+no need for a window subclass. We don&#39;t need to implement
+<code>-[CGContext setActive:]</code>. We don&#39;t have to bother with GLFW windows
+hints.</p>
 
 <p><img src="draw-simple.png" alt="draw-simple"></p>
 
@@ -41,8 +48,11 @@ hints with the required GLFW window hints.</p>
 <h3>draw</h3>
 
 <p>This demo is actually very resource intensive. MulleCG (and nanovg) don&#39;t like
-drawing many discrete lines. Notice the performance problems when resizing
-(or not)</p>
+drawing many discrete lines. Notice the performance problems when resizing.
+You can pass command line parameter &#39;-r&#39; to use retained (multi-threaded)
+code. Notice how the problems vanish. If you use &#39;-m&#39; for running retained on
+the main thread, the problems reappear. Using the retained mode on the main
+thread can be useful though to detect basic OpenGL/glfw problems.</p>
 
 <p><img src="draw.png" alt="draw"></p>
 
@@ -57,6 +67,50 @@ possible.</p>
 
 <p><a href="src/main-cgimage.m">main-cgimage.m</a></p>
 
+<h3>cgimage-flip</h3>
+
+<p>Flipping the textured square along the horizontal axis, the vertical axis and
+both. This is done with the options in <code>-drawRect:options:context:</code> and can
+be done on any bitmap image, without having to change it.</p>
+
+<p><img src="cgimage-flip.png" alt="cgimage-flip"></p>
+
+<p><a href="src/main-cgimage-flip.m">main-cgimage-flip.m</a></p>
+
+<h3>cgimage-repeat</h3>
+
+<p>Repeat of the textured square along the horizontal axis, the vertical axis and
+both. This is done with an <code>UIBitmapImage</code> and options in
+<code>-drawRect:options:context:</code>.</p>
+
+<p>This will create four separate CGImages, since <q>repeat</q> is a property of an
+individual <code>CGImage</code>:</p>
+
+<p><img src="cgimage-repeat.png" alt="cgimage-repeat"></p>
+
+<p><a href="src/main-cgimage-repeat.m">main-cgimage-repeat.m</a></p>
+
+<h3>cgimage-rotate</h3>
+
+<p>Rotate the texture within the rectangle being displayed. You can also achieve
+rotation, by rotating the rectangle itself, but this rotates the texture:</p>
+
+<p><img src="cgimage-rotate.png" alt="cgimage-rotate"></p>
+
+<p><a href="src/main-cgimage-rotate.m">main-cgimage-rotate.m</a></p>
+
+<h3>cgimage-contentmode</h3>
+
+<p>An image that isn&#39;t set as <code>CGScaleToFit</code> (which is the default) can be placed
+into the center (default) or any corner with the <code>.flags.contentMode</code> of
+the <code>CGDrawableOptions</code>. Not super useful in most cases, as the clamping of
+OpenGL produces streaks of the outside pixels. This can be done with
+any bitmap image:</p>
+
+<p><img src="cgimage-contentmode.png" alt="cgimage-contentmode"></p>
+
+<p><a href="src/main-cgimage-contentmode.m">main-cgimage-contentmode.m</a></p>
+
 <h3>cglayer</h3>
 
 <p>A drawing (the red/white/blue) flag is rendered into an offscreen
@@ -67,6 +121,8 @@ framebuffer/texture and then used as an image to draw.</p>
 <p><a href="src/main-cglayer.m">main-cglayer.m</a></p>
 
 <h3>particles</h3>
+
+<p>This is a small demonstration of drawing particles with nanovg.</p>
 
 <p><img src="particles.png" alt="particles"></p>
 

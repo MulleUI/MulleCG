@@ -1,6 +1,31 @@
 #import "CGDrawable.h"
 
 #import "CGContext.h"
+#import "CGImage.h"
+
+
+CGDrawableOptions   CGDrawableOptionsDefault =
+{
+   .alpha             = 1.0f,
+   .cornerRadius      = 0.0f,
+   .rotation          = CGRotationNone,
+   .scale             = CGScaleNone,
+   .flags.flip        = CGFlipNone,
+   .flags.repeat      = CGRepeatNone,
+   .flags.contentMode = CGContentModeCenterPoint
+};
+
+
+CGDrawableOptions   CGDrawableOptionsScaleToFit =
+{
+   .alpha             = 1.0f,
+   .cornerRadius      = 0.0f,
+   .rotation          = CGRotationNone,
+   .scale             = CGScaleToFit,
+   .flags.flip        = CGFlipNone,
+   .flags.repeat      = CGRepeatNone,
+   .flags.contentMode = CGContentModeCenterPoint
+};
 
 
 PROTOCOLCLASS_IMPLEMENTATION( CGDrawable)
@@ -38,52 +63,419 @@ PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 }
 
 
-- (NSInteger) imageFlags
+// if you want to do more, do your own layer
+
+static CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians angle)
 {
-   return( 0);
+   CAPolarPoint   rotatedPolarPoint;
+   CAPolarPoint   centerPolarPoint;
+   CGPoint        rotatedPoint;
+   // texture is at 0.0, we calc the "scaled" texture point
+   CGPoint        centerPoint;
+   CGPoint        diffPoint;
+
+   // calculate position independent the amout of rotation for the
+   // center point
+   centerPoint       = CGPointMake( patternRect.size.width / 2.0, patternRect.size.height / 2.0);
+   centerPolarPoint  = CGPointAsPolarPoint( centerPoint);
+   rotatedPolarPoint = CAPolarPointAddAngle( centerPolarPoint, angle);
+   rotatedPoint      = CAPolarPointGetPoint( rotatedPolarPoint);
+   diffPoint         = CGPointMake( rotatedPoint.x - centerPoint.x,
+                                    rotatedPoint.y - centerPoint.y);
+   patternRect.origin.x -= diffPoint.x;
+   patternRect.origin.y -= diffPoint.y;
+   return( patternRect.origin);
 }
 
 
-// if you want to do more, do your own layer
-
-static CGDrawableOptions  defaultOptions =
+static CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
+                                                        CAAngleRadians angle,
+                                                        CGVector scaleFactor)
 {
-   0.0f, 1.0f, 0.0f, YES   // corner, alpha, rotation, scale
-};
+   CAPolarPoint   rotatedPolarPoint;
+   CAPolarPoint   centerPolarPoint;
+   CGPoint        rotatedPoint;
+   // texture is at 0.0, we calc the "scaled" texture point
+   CGPoint        centerPoint;
+   CGPoint        diffPoint;
+
+   // calculate position independent the amout of rotation for the
+   // center point
+   centerPoint       = CGPointMake( patternRect.size.width / 2.0, patternRect.size.height / 2.0);
+   centerPolarPoint  = CGPointAsPolarPoint( centerPoint);
+   rotatedPolarPoint = CAPolarPointAddAngle( centerPolarPoint, angle);
+   rotatedPoint      = CAPolarPointGetPoint( rotatedPolarPoint);
+   diffPoint         = CGPointMake( rotatedPoint.x - centerPoint.x,
+                                    rotatedPoint.y - centerPoint.y);
+   patternRect.origin.x -= diffPoint.x * scaleFactor.dx;
+   patternRect.origin.y -= diffPoint.y * scaleFactor.dy;
+   return( patternRect.origin);
+}
 
 
-- (void) drawRect:(CGRect) rect
-          options:(CGDrawableOptions *) options
-          context:(CGContext *) context
-          imageID:(NSInteger) imageID
-       imageFlags:(NSUInteger) imageFlags
+static CGAffineTransform   textureMapperTransform( CGRect rect,
+                                                   CGFloat angle,
+                                                   CGSize extent)
 {
-   NVGcontext   *vg;
-   NVGpaint     imgPaint;
-   CGSize       size;
-   CGRect       patternRect;
+   CGAffineTransform   rotate;
+   CGAffineTransform   translate;
+   CGAffineTransform   paint;
+   CGAffineTransform   shader;
+   CGAffineTransform   textureScale;
+   CGAffineTransform   fragment;
+   CGAffineTransform   bitmapScale;
+   CGAffineTransform   combined;
+   CGAffineTransform   reverse;
+
+   // stand in for current transformation
+   //   current  = CGAffineTransformMakeIdentity();
+
+   // NVGpaint nvgImagePattern(NVGcontext* ctx,
+   //                          float point_x, float point_y,
+   //                          float extent_w, float extent_h,
+   //                          float angle,
+   //                          int image,
+   //                          float alpha)
+   rotate        = CGAffineTransformMakeRotationInline( angle);
+   translate     = CGAffineTransformMakeTranslationInline( rect.origin.x, rect.origin.y);
+   paint         = CGAffineTransformConcatInline( rotate, translate);
+
+   //combined = CGAffineTransformConcat( current, paint);
+   shader        = CGAffineTransformInvertInline( paint);
+
+   // actual shader code is:
+   // "     // Calculate color fron texture\n"
+   // "     vec2 texturePoint = (shader * vec3( vertex,1.0)).xy / extent;\n"
+   // "     vec4 color = texture2D( image, texturePoint);\n"
+
+   textureScale  = CGAffineTransformMakeScaleInline( 1.0 / extent.width, 1.0 / extent.height);
+   fragment      = CGAffineTransformConcatInline( shader, textureScale);
+
+   return( fragment);
+}
+
+
+//
+// rect should not be changed, it's the rectangle to draw
+// bitmapSize should also be the correct max imageSize
+//
+CGAffineTransform   CGRectReverseImageMapperTransform( CGRect rect,
+                                                       CGFloat angle,
+                                                       CGSize extent,
+                                                       CGSize imageSize)
+{
+   CGAffineTransform   fragment;
+   CGAffineTransform   bitmapScale;
+   CGAffineTransform   combined;
+   CGAffineTransform   reverse;
+
+   fragment      = textureMapperTransform( rect, angle, extent);
+
+   bitmapScale   = CGAffineTransformMakeScaleInline( imageSize.width, imageSize.height);
+   combined      = CGAffineTransformConcatInline( fragment, bitmapScale);
+   reverse       = CGAffineTransformInvertInline( combined);
+
+   return( reverse);
+}
+
+
+//static CGPoint  CGRectGetOriginToCenterForAngleAndExtent( CGRect rect,
+//                                                          CAAngleRadians angle,
+//                                                          CGSize extent)
+//{
+//   CGPoint             imageCenterPoint;
+//   CGPoint             rotatedPoint;
+//   CGPoint             rotatedOrigin;
+//   CGPoint             centerPoint;
+//   CGSize              diff;
+//   CGAffineTransform   xform;
+//   CGPoint             patternPoint;
+//   CGRect              centeredRect;
+//
+//   fprintf( stderr, "rect=%s angle=%.3f extent=%s\n",
+//         CGRectUTF8String( rect), CAAngleRadiansToDegrees( angle), CGSizeUTF8String( extent));
+//
+//   // xform should place texture at center so
+//   //rect.origin        = CGRectGetCenterPoint( rect);
+//
+//   // if we draw unscaled and unangled, the image will be at top/left
+//   // so when we then calculate the imageCenter this will not be the center
+//   // of the drawing.
+//   // So we first have to fake the rect to be in the center of the drawing.
+//   centeredRect       = CGSizeCenterInRect( extent, rect);
+//   fprintf( stderr, "centeredRect     : %s\n", CGRectUTF8String( centeredRect));
+//   centerPoint        = CGRectGetCenterPoint( centeredRect);
+//   fprintf( stderr, "centerPoint      : %s\n", CGPointUTF8String( centerPoint));
+//
+//   xform              = textureMapperTransform( centeredRect, angle, extent);
+//   xform              = CGAffineTransformInvert( xform);
+//
+//   // now when we apply the transform to the center point of the texture
+//   // we get a rotated point, which can lie outside of centered rect (no problem)
+//   rotatedPoint       = CGPointApplyAffineTransform( CGPointMake( 0.5, 0.5), xform);
+//   fprintf( stderr, "rotatedPoint     : %s\n", CGPointUTF8String( rotatedPoint));
+//
+//   // rotatedPoint is the center of the texture, which we want to place in the
+//   // middle of the pattern. The extent is the size of the texture in  the
+//   // shader. Within "extent" texture coordinates are valid outside of the
+//   // extent they clamp.
+//   //
+//   // The shader will scan (pseudo code)
+//   // for( y = CGRectMinY( rect); y <= CGRectMaxY( rect); y++)
+//   //    for( x = CGRectMinX( rect); x <= CGRectMaxX( rect); x++)
+//   // {
+//   //    texture.x = x - patternRect.origin.x;
+//   //    texture.y = y - patternRect.origin.y;
+//   //    texture.x /= extent.size;
+//   //    texture.y /= extent.width;
+//   //    if( texture.x < 0.0) texture.x = 0.0;
+//   //    if( texture.x > 1.0) texture.x = 1.0;
+//   //    if( texture.y < 0.0) texture.y = 0.0;
+//   //    if( texture.y > 1.0) texture.y = 1.0;
+//   //    color = image[ texture.y * image.height][ texture.x * image.width]
+//   // }
+//   rotatedOrigin.x = (rotatedPoint.x - (extent.width / 2.0));
+//   rotatedOrigin.y = (rotatedPoint.y - (extent.height / 2.0));
+//   fprintf( stderr, "rotatedOrigin    : %s\n", CGPointUTF8String( rotatedOrigin));
+//
+//   patternPoint = CGPointMake( centeredRect.origin.x - (extent.width / 2.0) + (centerPoint.x - rotatedOrigin.x),
+//                               centeredRect.origin.y - (extent.height / 2.0) + (centerPoint.y - rotatedOrigin.y)); // + rotatedOrigin.y);/*
+//
+//   fprintf( stderr, "patternPoint     : %s\n\n", CGPointUTF8String( patternPoint));
+//   return( patternPoint);
+//}
+//
+
+
+CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
+                                                         CGPoint texturePoint,
+                                                         CAAngleRadians angle,
+                                                         CGSize extent)
+{
+   CGPoint             imageCenterPoint;
+   CGPoint             rotatedPoint;
+   CGPoint             rotatedOrigin;
+   CGPoint             centerPoint;
+   CGSize              diff;
+   CGAffineTransform   xform;
+   CGPoint             patternPoint;
+   CGRect              centeredRect;
+
+   fprintf( stderr, "rect=%s angle=%.3f extent=%s\n",
+         CGRectUTF8String( rect), CAAngleRadiansToDegrees( angle), CGSizeUTF8String( extent));
+
+   // xform should place texture at center so
+   //rect.origin        = CGRectGetCenterPoint( rect);
+
+   // if we draw unscaled and unangled, the image will be at top/left
+   // so when we then calculate the imageCenter this will not be the center
+   // of the drawing.
+   // So we first have to fake the rect to be in the center of the drawing.
+   centeredRect      = rect;
+   fprintf( stderr, "centeredRect     : %s\n", CGRectUTF8String( centeredRect));
+
+   centerPoint        = CGRectGetCenterPoint( centeredRect);
+   fprintf( stderr, "centerPoint      : %s\n", CGPointUTF8String( centerPoint));
+
+   xform              = textureMapperTransform( centeredRect, angle, extent);
+   xform              = CGAffineTransformInvert( xform);
+
+   // now when we apply the transform to the center point of the texture
+   // we get a rotated point, which can lie outside of centered rect (no problem)
+   rotatedPoint       = CGPointApplyAffineTransform( texturePoint, xform);
+   fprintf( stderr, "rotatedPoint     : %s\n", CGPointUTF8String( rotatedPoint));
+
+   // rotatedPoint is the center of the texture, which we want to place in the
+   // middle of the pattern. The extent is the size of the texture in  the
+   // shader. Within "extent" texture coordinates are valid outside of the
+   // extent they clamp.
+   //
+   // The shader will scan (pseudo code)
+   // for( y = CGRectMinY( rect); y <= CGRectMaxY( rect); y++)
+   //    for( x = CGRectMinX( rect); x <= CGRectMaxX( rect); x++)
+   // {
+   //    texture.x = x - patternRect.origin.x;
+   //    texture.y = y - patternRect.origin.y;
+   //    texture.x /= extent.size;
+   //    texture.y /= extent.width;
+   //    if( texture.x < 0.0) texture.x = 0.0;
+   //    if( texture.x > 1.0) texture.x = 1.0;
+   //    if( texture.y < 0.0) texture.y = 0.0;
+   //    if( texture.y > 1.0) texture.y = 1.0;
+   //    color = image[ texture.y * image.height][ texture.x * image.width]
+   // }
+   rotatedOrigin.x = (rotatedPoint.x - (extent.width / 2.0));
+   rotatedOrigin.y = (rotatedPoint.y - (extent.height / 2.0));
+   fprintf( stderr, "rotatedOrigin    : %s\n", CGPointUTF8String( rotatedOrigin));
+
+   patternPoint = CGPointMake( centeredRect.origin.x - (extent.width / 2.0) + (centerPoint.x - rotatedOrigin.x),
+                               centeredRect.origin.y - (extent.height / 2.0) + (centerPoint.y - rotatedOrigin.y)); // + rotatedOrigin.y);/*
+
+   fprintf( stderr, "patternPoint     : %s\n\n", CGPointUTF8String( patternPoint));
+   return( patternPoint);
+}
+
+
+static CGPoint  CGRectGetOriginToCenterForAngleAndExtent( CGRect rect,
+                                                          CAAngleRadians angle,
+                                                          CGSize extent)
+{
+   CGPoint             imageCenterPoint;
+   CGPoint             rotatedPoint;
+   CGPoint             rotatedOrigin;
+   CGPoint             centerPoint;
+   CGSize              diff;
+   CGAffineTransform   xform;
+   CGPoint             patternPoint;
+   CGRect              centeredRect;
+
+   fprintf( stderr, "rect=%s angle=%.3f extent=%s\n",
+         CGRectUTF8String( rect), CAAngleRadiansToDegrees( angle), CGSizeUTF8String( extent));
+
+   // xform should place texture at center so
+   //rect.origin        = CGRectGetCenterPoint( rect);
+
+   // if we draw unscaled and unangled, the image will be at top/left
+   // so when we then calculate the imageCenter this will not be the center
+   // of the drawing.
+   // So we first have to fake the rect to be in the center of the drawing.
+   centeredRect      = rect;
+   fprintf( stderr, "centeredRect     : %s\n", CGRectUTF8String( centeredRect));
+
+   centerPoint        = CGRectGetCenterPoint( centeredRect);
+   fprintf( stderr, "centerPoint      : %s\n", CGPointUTF8String( centerPoint));
+
+   xform              = textureMapperTransform( centeredRect, angle, extent);
+   xform              = CGAffineTransformInvert( xform);
+
+   // now when we apply the transform to the center point of the texture
+   // we get a rotated point, which can lie outside of centered rect (no problem)
+   rotatedPoint       = CGPointApplyAffineTransform( CGPointMake( 0.5, 0.5), xform);
+   fprintf( stderr, "rotatedPoint     : %s\n", CGPointUTF8String( rotatedPoint));
+
+   // rotatedPoint is the center of the texture, which we want to place in the
+   // middle of the pattern. The extent is the size of the texture in  the
+   // shader. Within "extent" texture coordinates are valid outside of the
+   // extent they clamp.
+   //
+   // The shader will scan (pseudo code)
+   // for( y = CGRectMinY( rect); y <= CGRectMaxY( rect); y++)
+   //    for( x = CGRectMinX( rect); x <= CGRectMaxX( rect); x++)
+   // {
+   //    texture.x = x - patternRect.origin.x;
+   //    texture.y = y - patternRect.origin.y;
+   //    texture.x /= extent.size;
+   //    texture.y /= extent.width;
+   //    if( texture.x < 0.0) texture.x = 0.0;
+   //    if( texture.x > 1.0) texture.x = 1.0;
+   //    if( texture.y < 0.0) texture.y = 0.0;
+   //    if( texture.y > 1.0) texture.y = 1.0;
+   //    color = image[ texture.y * image.height][ texture.x * image.width]
+   // }
+   rotatedOrigin.x = (rotatedPoint.x - (extent.width / 2.0));
+   rotatedOrigin.y = (rotatedPoint.y - (extent.height / 2.0));
+   fprintf( stderr, "rotatedOrigin    : %s\n", CGPointUTF8String( rotatedOrigin));
+
+   patternPoint = CGPointMake( centeredRect.origin.x - (extent.width / 2.0) + (centerPoint.x - rotatedOrigin.x),
+                               centeredRect.origin.y - (extent.height / 2.0) + (centerPoint.y - rotatedOrigin.y)); // + rotatedOrigin.y);/*
+
+   fprintf( stderr, "patternPoint     : %s\n\n", CGPointUTF8String( patternPoint));
+   return( patternPoint);
+}
+
+
+static NSInteger   CGBitmapDrawableGetImageID( id <CGBitmapDrawable> self, 
+                                               CGDrawableOptions *options,
+                                               CGContext *context)
+{
+   NSInteger    imageFlags;
+   NSInteger    imageID;
+   CGImage      *image;
+
+   // if we are a CGImage we can't really change, but a UIBitmapImage can
+   imageFlags = [self imageFlags] & ~(NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
+   if( options->flags.repeat & CGRepeatHorizontally)
+      imageFlags |= NVG_IMAGE_REPEATX;
+   if( options->flags.repeat & CGRepeatVertically)
+      imageFlags |= NVG_IMAGE_REPEATY;
+
+   image = [self cgImageWithContext:context
+                         imageFlags:imageFlags];
+
+   if( ! image)
+      return( -1);
+
+   imageID = [image imageID];
 
    assert( imageID != -1);
-   if( imageID == -1)
-      return;
+   return( imageID); 
+}
 
-   if( ! options)
-      options = &defaultOptions;
+
+static CGSize   CGBitmapDrawableGetBitmapExtent( id <CGBitmapDrawable> self, 
+                                                 CGSize size, 
+                                                 CGSize bitmapSize, 
+                                                 CGDrawableOptions *options)
+{
+   CGSize       extent;
+
+   extent = size;
+   if( options->scale == CGScaleNone || (options->flags.repeat & CGRepeatHorizontally))
+      extent.width = bitmapSize.width;
+   if( options->scale == CGScaleNone || (options->flags.repeat & CGRepeatVertically))
+      extent.height = bitmapSize.height;
+
+   if( options->scale != CGScaleToFit && options->scale != CGScaleNone)
+   {
+      extent.width  /= options->scale;
+      extent.height /= options->scale;
+   }  
+   return( extent); 
+}
+
+
+void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
+                                CGRect rect,
+                                CGPoint origin,
+                                CGSize extent,
+                                CGDrawableOptions *options,
+                                CGContext *context)
+{
+   NVGpaint     imgPaint;
+   NVGcontext   *vg;
+   NSInteger    imageID;
 
    vg = CGContextGetNVGContext( context);
 
-   size        = [self size];
-   patternRect = rect;
-   if( ! options->scale || (imageFlags & NVG_IMAGE_REPEATX))
-      patternRect.size.width = size.width;
-   if( ! options->scale || (imageFlags & NVG_IMAGE_REPEATY))
-      patternRect.size.height = size.height;
+   if( options->flags.flip & CGFlipHorizontally)
+   {
+      origin.x         += rect.size.width;
+      rect.origin.x    += rect.size.width;
+      rect.size.width  *= -1.0;
+      extent.width     *= -1.0;
+   }
 
-   // rotation some time in the future
-   imgPaint  = nvgImagePattern( vg, patternRect.origin.x,
-                                    patternRect.origin.y,
-                                    patternRect.size.width,
-                                    patternRect.size.height,
+   if( options->flags.flip & CGFlipVertically)
+   {
+      origin.y         += rect.size.height;
+      rect.origin.y    += rect.size.height;
+      rect.size.height *= -1.0;
+      extent.height    *= -1.0;
+   }
+
+   imageID = CGBitmapDrawableGetImageID( self, options, context);
+   if( imageID == -1)
+      return;  
+
+   // what this does is:
+   // origin is subtracted from rect.origin.x to get an initial value
+   // extent divides the resultant value, if we get a value between 0.0 and 1.0
+   // it's a valid texture.
+   //
+   imgPaint  = nvgImagePattern( vg, origin.x,
+                                    origin.y,
+                                    extent.width,
+                                    extent.height,
                                     options->rotation,
                                     imageID,
                                     options->alpha);
@@ -95,7 +487,7 @@ static CGDrawableOptions  defaultOptions =
                        rect.size.height,
                        options->cornerRadius);
    nvgFillPaint( vg, imgPaint);
-   nvgFill( vg);
+   nvgFill( vg);   
 }
 
 
@@ -103,18 +495,99 @@ static CGDrawableOptions  defaultOptions =
           options:(CGDrawableOptions *) options
           context:(CGContext *) context
 {
-   NSInteger    imageID;
-   NSInteger    imageFlags;
+   CGSize   extent;
+   CGPoint  origin;
+   CGRect   placedRect;
 
-   imageFlags = [self imageFlags];
-   imageID    = [self nvgImageWithContext:context
-                               imageFlags:imageFlags];
-   [self drawRect:rect
-          options:options
-          context:context
-          imageID:imageID
-       imageFlags:imageFlags];
+   if( ! options)
+      options = &CGDrawableOptionsDefault;
+
+   extent = CGBitmapDrawableGetBitmapExtent( self, rect.size, [self size], options);
+
+   //
+   // the nvg texture rotation is around the top left corner, but that's
+   // never useful (IMO), so we use the center point instead, except if we
+   // know we fill the whole texture anyway (and don't rotate)
+   // 
+   if( options->rotation != 0.0 || options->scale != CGScaleToFit)
+   {
+      placedRect = CGSizePlaceInRect( extent, rect, options->flags.contentMode);
+      origin     = CGRectGetOriginToCenterForAngleAndExtent( placedRect, options->rotation, extent);
+   }
+   else
+      origin = rect.origin;
+
+   CGBitmapDrawableDrawRect( self, rect, origin, extent, options, context);
 }
+
+
+- (void) drawRect:(CGRect) rect
+         fromRect:(CGRect) fromRect
+          options:(CGDrawableOptions *) options
+          context:(CGContext *) context
+{
+   NSInteger           imageID;
+   NSInteger           imageFlags;
+   NVGcontext          *vg;
+   NVGpaint            imgPaint;
+   CGSize              imageSize;
+   CGPoint             origin;
+   CGSize              size;
+   CGSize              extent;
+   CGRect              tmp;
+   CGRect              sectionRect;
+   CGPoint             sectionOrigin;
+   CGImage             *image;
+   CGAffineTransform   xform;
+   CGPoint             texturePoint;
+
+   if( ! options)
+      options = &CGDrawableOptionsDefault;
+
+   fprintf( stderr, "rect=%s fromRect=%s\n",
+         CGRectUTF8String( rect), 
+         CGRectUTF8String( fromRect));
+
+
+   xform       = CGRectReverseImageMapperTransform( rect, options->rotation, rect.size, [self size]);
+   // if fromRect is { CGPointZero, [self size] }, then sectionRect should be
+   // exactly rect, otherwise we get a subsection of rect
+   sectionRect = CGRectApplyAffineTransform( fromRect, xform);
+   fprintf( stderr, "sectionRect     : %s\n", CGRectUTF8String( sectionRect));
+
+//
+//  +----------+
+//  |          |  
+//  |  +       |
+//  |          |
+//  |          | 
+//  +----------+
+//
+   // reduce extent to fromRect.size
+   extent.width  = rect.size.width  * (rect.size.width / sectionRect.size.width);
+   extent.height = rect.size.height * (rect.size.height / sectionRect.size.height);
+   fprintf( stderr, "extent          : %s\n", CGSizeUTF8String( extent));
+
+   assert( options->scale == CGScaleToFit);
+   assert( options->flags.repeat      == CGRepeatNone);
+   assert( options->flags.contentMode == CGContentModeCenterPoint);
+
+   // get fromOrigin texture coordinate
+   texturePoint.x = (sectionRect.origin.x - rect.origin.x) / rect.size.width;
+   texturePoint.y = (sectionRect.origin.y - rect.origin.y) / rect.size.height;
+
+   fprintf( stderr, "texturePoint    : %s\n", CGPointUTF8String( texturePoint));
+   origin = CGRectGetOriginToTexturePointForAngleAndExtent( rect, texturePoint, options->rotation, extent);
+
+   // punkt: 
+
+   origin.x = rect.origin.x;
+   origin.y = rect.origin.y;
+   fprintf( stderr, "origin          : %s\n", CGPointUTF8String( origin));
+
+   CGBitmapDrawableDrawRect( self, rect, origin, extent, options, context);
+}
+
 
 
 - (void *) bytes
@@ -122,4 +595,10 @@ static CGDrawableOptions  defaultOptions =
    return( NULL);
 }
 
+
+- (NSUInteger) imageFlags 
+{
+   return( 0);
+
+}
 PROTOCOLCLASS_END()

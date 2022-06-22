@@ -14,8 +14,8 @@
 
 @interface CGContext( OpenGL)
 
-+ (enum CGContextBackend) backend;
-+ (char *) backendUTF8String;
++ (enum CGContextNanoVGBackend) nanoVGBackend;
++ (char *) nanoVGBackendUTF8String;
 
 - (char *) shaderHeaderUTF8String;
 - (void *) gpuTextureForImageID:(NSInteger) imageID;
@@ -55,9 +55,9 @@
 - (void) resumeRender;
 
 // called by -init / -finalize
-- (void) _initBackendWithEdgeAntialiasing:(BOOL) edgeAntialiasing
-                        useStencilStrokes:(BOOL) useStencilStrokes;
-- (void) _finalizeBackend;
+- (void) _initNanoVGWithEdgeAntialiasing:(BOOL) edgeAntialiasing
+                       useStencilStrokes:(BOOL) useStencilStrokes;
+- (void) _finalizeNanoVG;
 
 - (void) useShader:(NSUInteger) shaderID;
 

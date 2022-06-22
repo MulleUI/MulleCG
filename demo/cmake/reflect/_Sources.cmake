@@ -11,7 +11,13 @@ endif()
 # contents selected with patternfile ??-source--sources
 #
 set( SOURCES
+src/main-cgimage-contentmode.m
+src/main-cgimage-flip.m
 src/main-cgimage.m
+src/main-cgimage-mix.m
+src/main-cgimage-repeat.m
+src/main-cgimage-rotate.m
+src/main-cgimage-section.m
 src/main-cgimage-write.m
 src/main-cglayer.m
 src/main-draw.m
@@ -24,6 +30,7 @@ src/main-opengl.m
 src/main-particlelayers.m
 src/main-particles.m
 src/main-suspend-resume.m
+src/main-text-extent.m
 src/main-text.m
 src/main-texture.m
 )
