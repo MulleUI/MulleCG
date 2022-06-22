@@ -32,7 +32,7 @@
 - (void) addFontWithContentsOfFileWithFileRepresentationString:(char *) filename
                                             fontNameUTF8String:(char *) name;
 - (void) addFontWithCData:(struct mulle_data) data
-          fontNameUTF8String:(char *) name;
+       fontNameUTF8String:(char *) name;
 @end
 
 

@@ -76,34 +76,99 @@
 
 @class CGContext;
 
+enum CGFlip
+{
+   CGFlipNone         = 0x0,
+   CGFlipHorizontally = 0x1,
+   CGFlipVertically   = 0x2,
+   CGFlipBoth         = 0x3
+};
+
+enum CGRepeat
+{
+   CGRepeatNone         = 0x0,
+   CGRepeatHorizontally = 0x1,
+   CGRepeatVertically   = 0x2,
+   CGRepeatBoth         = 0x3
+};
+
+
+#define CGScaleToFit    0.0
+#define CGScaleNone     1.0
+
+#define CGRotationNone  0.0
+
 
 typedef struct CGDrawableOptions
 {
-   CGFloat   cornerRadius;
-   CGFloat   alpha;
-   CGFloat   rotation;      // 0 means no rotation
-   BOOL      scale;
+   CGFloat      alpha;
+   CGFloat      cornerRadius;  // cornerradius is used for bitmap images only
+   CGFloat      rotation;      // 0 means no rotation
+   CGFloat      scale;         // 0.0 means scale to fit,
+   struct
+   {
+      unsigned int   flip        : 3;
+      unsigned int   repeat      : 3;
+      unsigned int   contentMode : 4;
+   } flags;
 } CGDrawableOptions;
 
 
-static inline CGDrawableOptions   CGDrawableOptionsMake( CGFloat cornerRadius,
-                                                         CGFloat alpha,
+extern CGDrawableOptions   CGDrawableOptionsDefault;
+extern CGDrawableOptions   CGDrawableOptionsScaleToFit;
+
+
+static inline CGDrawableOptions   CGDrawableOptionsMake( CGFloat alpha,
+                                                         CGFloat cornerRadius,
                                                          CGFloat rotation,
-                                                         BOOL scale)
+                                                         CGFloat scale,
+                                                         enum CGFlip flip,
+                                                         enum CGRepeat repeat,
+                                                         enum CGContentMode contentMode)
 {
-   return( (CGDrawableOptions) { .cornerRadius = cornerRadius,
-                                 .alpha        = alpha,
-                                 .rotation     = rotation,
-                                 .scale        = scale });
+   return( (CGDrawableOptions) {
+                                 .alpha             = alpha,
+                                 .cornerRadius      = cornerRadius,
+                                 .rotation          = rotation,
+                                 .scale             = scale,
+                                 .flags.flip        = flip,
+                                 .flags.repeat      = repeat,
+                                 .flags.contentMode = contentMode
+                              });
 }
+
+
+static inline CGDrawableOptions   CGDrawableOptionsMakeDefault( void)
+{
+   return( CGDrawableOptionsMake( 1.0f,
+                                  0.0f,
+                                  CGRotationNone,
+                                  CGScaleNone,
+                                  CGFlipNone,
+                                  CGRepeatNone,
+                                  CGContentModeCenterPoint));
+}
+
+
+static inline CGDrawableOptions   CGDrawableOptionsMakeScaleToFit( void)
+{
+   return( CGDrawableOptionsMake( 1.0f,
+                                  0.0f,
+                                  CGRotationNone,
+                                  CGScaleToFit,
+                                  CGFlipNone,
+                                  CGRepeatNone,
+                                  CGContentModeCenterPoint));
+}
+
 
 //
 // A CGDrawable can draw itself in a context. In case of a vector image, this
 // is likely just a series of draw commands. This kind of drawable can be used
 // in multiple contexts without problem. A bitmap drawable has to be transferred
-// to a nvg texture first. This texture is context dependent. The most simple
-// CGTextureImage has a 1:1 connection with a context. You can not copy it
-// to another context.
+// to a CGDrawableImage first. This CGDrawableImage is context dependent.
+// The most simple CGDrawableImage has a 1:1 connection with the context.
+// You can not copy it to another context.
 //
 
 PROTOCOLCLASS_INTERFACE0( CGDrawable)
@@ -112,9 +177,8 @@ PROTOCOLCLASS_INTERFACE0( CGDrawable)
 
 
 //
-// rect is the canvas to draw to
-// corneradius is used for bitmap images only
-// shade is used with bitmap for alpha and vector images
+// rect is the canvas to draw to.
+//
 - (void) drawRect:(CGRect) rect
           options:(CGDrawableOptions *) options
           context:(CGContext *) context;
@@ -131,7 +195,7 @@ PROTOCOLCLASS_END()
 @end
 
 
-
+@class CGImage;
 //
 // The base CGBitmapDrawable does not let access you bytes, as it is also used
 // by textures that resides on the GPU so not in our addresspace.
@@ -139,28 +203,38 @@ PROTOCOLCLASS_END()
 //
 PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
 
-- (NSInteger) nvgImageWithContext:(CGContext *) context
-                       imageFlags:(NSUInteger) imageFlags;
+// this is called by drawRect to get a texture from the desired options.
+// The imageFlags in CGImage are not necessarily identical to
+// the passed in value, but reflect the actual image settings.Mostly this
+// means that a texture may be requested as flipped, but it is already, so
+// the imageFlags for FLIP_X are off
+- (CGImage *) cgImageWithContext:(CGContext *) context
+                      imageFlags:(NSUInteger) imageFlags;
 
 - (struct CGBitmapInfo) bitmapInfo;
 
 @optional
 - (struct CGBitmapSize) bitmapSize;  // just integer value of size
+
+//
+// this calls drawRect:options:context:drawableBitmapImage: after calling
+// cgImageWithContext:imageFlags:
+// A bitmap drawing is always centered, to make scaling and rotation
+// more useful.
+//
 - (void) drawRect:(CGRect) rect
           options:(CGDrawableOptions *) options
           context:(CGContext *) context;
 
+// TODO: vector code could just clip I guess ?
 - (void) drawRect:(CGRect) rect
+         fromRect:(CGRect) fromRect
           options:(CGDrawableOptions *) options
-          context:(CGContext *) context
-          imageID:(NSInteger) imageID
-       imageFlags:(NSUInteger) imageFlags;
-
-// -1, then it didn't work
-- (NSInteger) imageFlags; // default 0
-
+          context:(CGContext *) context;
 
 // default returns NULL, for images which aren't accessible
 - (void *) bytes;
+
+- (NSUInteger) imageFlags;
 
 PROTOCOLCLASS_END()

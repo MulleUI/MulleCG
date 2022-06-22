@@ -72,6 +72,55 @@ possible.
 [main-cgimage.m](src/main-cgimage.m)
 
 
+### cgimage-flip
+
+Flipping the textured square along the horizontal axis, the vertical axis and
+both. This is done with the options in `-drawRect:options:context:` and can
+be done on any bitmap image, without having to change it.
+
+![cgimage-flip](cgimage-flip.png)
+
+[main-cgimage-flip.m](src/main-cgimage-flip.m)
+
+
+### cgimage-repeat
+
+Repeat of the textured square along the horizontal axis, the vertical axis and
+both. This is done with an `UIBitmapImage` and options in
+`-drawRect:options:context:`.
+
+This will create four separate CGImages, since "repeat" is a property of an
+individual `CGImage`:
+
+![cgimage-repeat](cgimage-repeat.png)
+
+[main-cgimage-repeat.m](src/main-cgimage-repeat.m)
+
+
+
+### cgimage-rotate
+
+Rotate the texture within the rectangle being displayed. You can also achieve
+rotation, by rotating the rectangle itself, but this rotates the texture:
+
+![cgimage-rotate](cgimage-rotate.png)
+
+[main-cgimage-rotate.m](src/main-cgimage-rotate.m)
+
+
+### cgimage-contentmode
+
+An image that isn't set as `CGScaleToFit` (which is the default) can be placed
+into the center (default) or any corner with the `.flags.contentMode` of
+the `CGDrawableOptions`. Not super useful in most cases, as the clamping of
+OpenGL produces streaks of the outside pixels. This can be done with
+any bitmap image:
+
+![cgimage-contentmode](cgimage-contentmode.png)
+
+[main-cgimage-contentmode.m](src/main-cgimage-contentmode.m)
+
+
 ### cglayer
 
 A drawing (the red/white/blue) flag is rendered into an offscreen

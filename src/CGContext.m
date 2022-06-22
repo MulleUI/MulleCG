@@ -13,18 +13,12 @@
 #include <stdlib.h>
 
 
-#define SWAP_DEBUG
-#define RESIZE_DEBUG
-#define RENDER_DEBUG
+//#define IVAR_DEBUG
+//#define SWAP_DEBUG
+//#define RESIZE_DEBUG
+//#define RENDER_DEBUG
 // this writes out a PNG for each frame
 //#define RENDER_LAYER_DEBUG
-
-@interface NSObject( ShareId)
-
-- (NSInteger) shareId;
-
-@end
-
 
 static void   *acquire_ivar_pointer( mulle_atomic_pointer_t *p)
 {
@@ -53,8 +47,10 @@ static void   *acquire_ivar_object( mulle_atomic_pointer_t *p)
    id   obj;
 
    obj = acquire_ivar_pointer( p);
+#ifdef IVAR_DEBUG
    if( obj)
       MulleUICLog( "Extracted %#@ from pointer %p, now nil", obj, p);
+#endif
    return( [obj autorelease]);
 }
 
@@ -73,12 +69,16 @@ static void   recycle_ivar_object( mulle_atomic_pointer_t *p, id obj)
    [obj retain];
    if( ! recycle_ivar_pointer( p, obj))
    {
+#ifdef IVAR_DEBUG
       MulleUICLog( "Failed to store %#@ into pointer %p", obj, p);
+#endif
       [obj release];  // if it fails, undo retain
    }
    else
    {
+#ifdef IVAR_DEBUG
       MulleUICLog( "Stored %#@ in pointer %p", obj, p);
+#endif
    }
 }
 
@@ -184,13 +184,18 @@ l_Position, normal);\n"
 //
 - (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
               useStencilStrokes:(BOOL) useStencilStrokes
+                        shareID:(NSUInteger) shareID
+                        backend:(enum UIGraphicsBackend) backend
 {
    struct mulle_allocator   *allocator;
 
+   _backend = backend;
+   _shareID = shareID;
+
    mulle_thread_mutex_lock( &Self._freeTypeLock);
    {
-      [self _initBackendWithEdgeAntialiasing:edgeAntialiasing
-                           useStencilStrokes:useStencilStrokes];
+      [self _initNanoVGWithEdgeAntialiasing:edgeAntialiasing
+                          useStencilStrokes:useStencilStrokes];
    }
    mulle_thread_mutex_unlock( &Self._freeTypeLock);
 
@@ -252,7 +257,7 @@ l_Position, normal);\n"
 
    mulle_thread_mutex_lock( &Self._freeTypeLock);
    {
-      [self _finalizeBackend];
+      [self _finalizeNanoVG];
    }
    mulle_thread_mutex_unlock( &Self._freeTypeLock);
 
@@ -336,6 +341,11 @@ l_Position, normal);\n"
 - (mulle_relativetime_t) secondsSinceFirstRender
 {
    return( _currentFrameInfo.now - _firstRenderTimeStamp);
+}
+
+- (char *) backendUTF8String
+{
+   return( UIGraphicsBackendUTF8String( _backend));
 }
 
 

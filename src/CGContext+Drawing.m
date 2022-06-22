@@ -42,11 +42,12 @@
             image:(id) image
             scale:(BOOL) scale
 {
-   CGDrawableOptions   options;
+   CGDrawableOptions   *options;
 
-   options = CGDrawableOptionsMake( 0.0, 1.0, 0.0, scale);
+   options = scale ? &CGDrawableOptionsScaleToFit :
+                     &CGDrawableOptionsDefault;
    [image drawRect:rect
-           options:&options
+           options:options
            context:self];
 }
 
@@ -79,7 +80,7 @@
    CGBitmapDone( &convertedFb);
 
    rect    = CGRectMake( 0, 0, fb->info.size.width, fb->info.size.height);
-   options = CGDrawableOptionsMake( 0.0, 1.0, 0.0, YES);
+   options = CGDrawableOptionsMakeScaleToFit();
    [image drawRect:rect
            options:&options
            context:self];
@@ -106,8 +107,8 @@
 
 
 - (void) drawAtPoint:(CGPoint) position
-          UTF8String:(char *) s
-            fontName:(char *) fontName
+      textUTF8String:(char *) s
+  fontNameUTF8String:(char *) fontNameUTF8String
             fontSize:(CGFloat) fontSize
                color:(CGColor) color
 {
@@ -115,14 +116,13 @@
 
    vg = CGContextGetNVGContext( self);
 
-   nvgFontFace( vg, fontName ? fontName : "sans");
+   nvgFontFace( vg, fontNameUTF8String ? fontNameUTF8String : "sans");
    nvgFontSize( vg, fontSize != 0.0 ? fontSize : 10.0);
    nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
    nvgFillColor( vg, color);
 
    nvgTextBox( vg, position.x, position.y, INFINITY, s, NULL);
 }
-
 
 
 @end

@@ -147,9 +147,10 @@
 {
    int   imageID;
 
-   imageID = [image nvgImageWithContext:context
-                              imageFlags:[image imageFlags]];
-   if( imageID == -1)
+   image = [image cgImageWithContext:context
+                          imageFlags:[image imageFlags]];
+
+   if( image)
    {
       [self release];
       return( nil);
@@ -157,7 +158,14 @@
 //   CGSize    size;
 //
 //   size = [image size];
-   _paint = nvgImagePattern( CGContextGetNVGContext( context),
+   imageID = [image imageID];
+   if( imageID == -1)
+   {
+      assert( 0);
+      [self release];
+      return( nil);
+   }
+   _paint  = nvgImagePattern( CGContextGetNVGContext( context),
                              CGRectGetMinX( rect),
                              CGRectGetMinY( rect),
                              CGRectGetMaxX( rect),

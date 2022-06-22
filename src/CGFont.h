@@ -10,7 +10,7 @@
 //
 @interface CGFont : NSObject
 
-@property( assign) char       *nameUTF8String;   // NVG fontName
+@property( assign) char       *nameUTF8String;   // NVG fontNameUTF8String
 @property( assign) NSInteger   fontIndex;        // NVG index
 
 + (instancetype) fontWithNameUTF8String:(char *) name

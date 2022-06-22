@@ -47,7 +47,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    }
    nvgStroke( vg);
 
-   options = CGDrawableOptionsMake( 0.0, 1.0, 0.0, YES);
+   options = CGDrawableOptionsMakeScaleToFit();
 
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon

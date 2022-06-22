@@ -200,7 +200,7 @@ static MyWindow   *create_window( unsigned int i,
    CGContext     *context;
 
    hints = GLFW_DEFAULT_CONTEXT;
-   switch( [CGContext backend])
+   switch( [window backend])
    {
    case CG_GL3   : hints = GLFW_GL3_CONTEXT; break;
    case CG_GL3_2 : hints = GLFW_GL3_2_CONTEXT; break;
@@ -217,7 +217,9 @@ static MyWindow   *create_window( unsigned int i,
    [window os_activateGraphicsContext];
    {
       context = [[[CGContext alloc] initWithEdgeAntialiasing:YES
-                                           useStencilStrokes:YES] autorelease];
+                                           useStencilStrokes:YES
+                                                     shareID:[window shareID]
+                                                     backend:[window backend]] autorelease];
       [context setActive:YES];
       // have to do this manually
 

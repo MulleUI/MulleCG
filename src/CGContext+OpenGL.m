@@ -24,7 +24,6 @@ char   *CGNVGBackendErrorUTF8String( void)
 }
 
 
-
 char   *_CGNVGBackendErrorShortUTF8String( void *error)
 {
    switch( (intptr_t) error)
@@ -66,14 +65,19 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
 {
    GLenum       err;
    static int   counter;
+   char         *s;
 
    err = glGetError();
    if( err != GL_NO_ERROR)
    {
       if( counter < 50)  // gets tedious fast
       {
-         mulle_fprintf( stderr, "%s error %@ %s( 0x%x) \"%s\" after %s\n",
-                                 [CGContext backendUTF8String],
+         s = [ctxt backendUTF8String];
+         if( ! s)
+            s = [CGContext nanoVGBackendUTF8String];
+
+         mulle_fprintf( stderr, "%s error %@ %s( 0x%x) \"%s\": %s\n",
+                                 s,
                                  ctxt,
                                  _CGNVGBackendErrorShortUTF8String( (void *) (intptr_t) err),
                                  err,
@@ -85,7 +89,6 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
       return;
    }
 }
-
 
 
 static void   checkCompileErrors( GLuint shader, char *type, char *name)
@@ -141,22 +144,22 @@ static int  has_version_header( char *s)
 //       for example secondary framebuffers, which nanovg would not
 //        support
 //
-+ (char *) backendUTF8String
++ (char *) nanoVGBackendUTF8String
 {
 #ifdef NANOVG_GL3_IMPLEMENTATION
-   return( "OpenGL v3.0+");
+   return( "nanoVG OpenGL v3.0+");
 #endif
 #ifdef NANOVG_GLES2_IMPLEMENTATION
-   return( "GLES v2.0+");
+   return( "nanoVG GLES v2.0+");
 #endif
 #ifdef NANOVG_GLES3_IMPLEMENTATION
-   return( "GLES v3.2+");
+   return( "nanoVG GLES v3.2+");
 #endif
    abort();
 }
 
 
-+ (enum CGContextBackend) backend
++ (enum CGContextNanoVGBackend) nanoVGBackend
 {
 #ifdef NANOVG_GL3_IMPLEMENTATION
    return( CG_GL3);
@@ -171,9 +174,9 @@ static int  has_version_header( char *s)
 }
 
 
-- (void) _initBackendWithEdgeAntialiasing:(BOOL) edgeAntialiasing
-                        useStencilStrokes:(BOOL) useStencilStrokes
-{
+- (void) _initNanoVGWithEdgeAntialiasing:(BOOL) edgeAntialiasing
+                       useStencilStrokes:(BOOL) useStencilStrokes
+{ 
    _nvgFlags  = edgeAntialiasing ? NVG_ANTIALIAS : 0;
    _nvgFlags |= useStencilStrokes ? NVG_STENCIL_STROKES : 0;
 #ifdef DEBUG
@@ -196,7 +199,7 @@ static int  has_version_header( char *s)
 }
 
 
-- (void) _finalizeBackend
+- (void) _finalizeNanoVG
 {
 #ifdef NANOVG_GL3_IMPLEMENTATION
    nvgDeleteGL3( _vg);
