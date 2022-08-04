@@ -38,10 +38,12 @@ From here on **UIWindow** is used to demonstrate MulleCG features.
 
 ### draw-simple
 
-This is glfw-draw-simple for MulleUICore. It's much, much less code. There is
-no need for a window subclass. We don't need to implement
-`-[CGContext setActive:]`. We don't have to bother with GLFW windows
-hints.
+This is [glfw-draw-simple](#glfw-draw-simple) from adapted to MulleUICore.
+It's much, much less code:
+
+* There is no need for a window subclass.
+* We don't need to implement `-[CGContext setActive:]`.
+* We don't have to bother with GLFW windows hints.
 
 ![draw-simple](draw-simple.png)
 
@@ -65,7 +67,7 @@ thread can be useful though to detect basic OpenGL/glfw problems.
 ### cgimage
 
 A very basic textured square. Pretty much the simplest texture example
-possible.
+possible. The texture is only 8x8 pixels large.
 
 ![cgimage](cgimage.png)
 
@@ -76,7 +78,7 @@ possible.
 
 Flipping the textured square along the horizontal axis, the vertical axis and
 both. This is done with the options in `-drawRect:options:context:` and can
-be done on any bitmap image, without having to change it.
+be done on any bitmap image:
 
 ![cgimage-flip](cgimage-flip.png)
 
@@ -86,22 +88,23 @@ be done on any bitmap image, without having to change it.
 ### cgimage-repeat
 
 Repeat of the textured square along the horizontal axis, the vertical axis and
-both. This is done with an `UIBitmapImage` and options in
+both. This can only be done with an `UIBitmapImage` and options in
 `-drawRect:options:context:`.
 
-This will create four separate CGImages, since "repeat" is a property of an
-individual `CGImage`:
+The `UIBitmapImage` will create four separate CGImages, since "repeat" is a
+property of an individual `CGImage`:
 
 ![cgimage-repeat](cgimage-repeat.png)
 
 [main-cgimage-repeat.m](src/main-cgimage-repeat.m)
 
 
-
 ### cgimage-rotate
 
 Rotate the texture within the rectangle being displayed. You can also achieve
-rotation, by rotating the rectangle itself, but this rotates the texture:
+rotation, by rotating the rectangle itself, but this rotates the texture.
+
+The texture is 32x32 pixels large.
 
 ![cgimage-rotate](cgimage-rotate.png)
 
@@ -114,11 +117,27 @@ An image that isn't set as `CGScaleToFit` (which is the default) can be placed
 into the center (default) or any corner with the `.flags.contentMode` of
 the `CGDrawableOptions`. Not super useful in most cases, as the clamping of
 OpenGL produces streaks of the outside pixels. This can be done with
-any bitmap image:
+any bitmap image.
+
+The texture is 32x32 pixels large.
+
 
 ![cgimage-contentmode](cgimage-contentmode.png)
 
 [main-cgimage-contentmode.m](src/main-cgimage-contentmode.m)
+
+
+### cgimage-section
+
+This demo showcases partial use of a texture using
+`-drawRect:fromRect:options:context:`. Ever of the nine segments is created
+from the same OpenGL texture, but with different offsets and widths.
+
+The texture is 32x32 pixels large.
+
+![cgimage-section](cgimage-section.png)
+
+[main-cgimage-section.m](src/main-cgimage-section.m)
 
 
 ### cglayer

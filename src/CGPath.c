@@ -7,10 +7,10 @@
 
 void   _CGPathInit( struct CGPath *path, struct mulle_allocator *allocator)
 {
-   mulle_buffer_init_with_static_bytes(&path->_commands,
-                                       path->_initialStorage,
-                                       sizeof(path->_initialStorage),
-                                       allocator);
+   mulle_buffer_init_with_static_bytes( &path->_commands,
+                                        path->_initialStorage,
+                                        sizeof( path->_initialStorage),
+                                        allocator);
    _mulle_structarray_init( &path->_floats,
                             sizeof(CGFloat),
                             alignof(CGFloat),

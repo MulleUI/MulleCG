@@ -61,7 +61,7 @@ thread can be useful though to detect basic OpenGL/glfw problems.</p>
 <h3>cgimage</h3>
 
 <p>A very basic textured square. Pretty much the simplest texture example
-possible.</p>
+possible. The texture is only 8x8 pixels large.</p>
 
 <p><img src="cgimage.png" alt="cgimage"></p>
 
@@ -71,7 +71,7 @@ possible.</p>
 
 <p>Flipping the textured square along the horizontal axis, the vertical axis and
 both. This is done with the options in <code>-drawRect:options:context:</code> and can
-be done on any bitmap image, without having to change it.</p>
+be done on any bitmap image:</p>
 
 <p><img src="cgimage-flip.png" alt="cgimage-flip"></p>
 
@@ -80,11 +80,11 @@ be done on any bitmap image, without having to change it.</p>
 <h3>cgimage-repeat</h3>
 
 <p>Repeat of the textured square along the horizontal axis, the vertical axis and
-both. This is done with an <code>UIBitmapImage</code> and options in
+both. This can only be done with an <code>UIBitmapImage</code> and options in
 <code>-drawRect:options:context:</code>.</p>
 
-<p>This will create four separate CGImages, since <q>repeat</q> is a property of an
-individual <code>CGImage</code>:</p>
+<p>The <code>UIBitmapImage</code> will create four separate CGImages, since <q>repeat</q> is a
+property of an individual <code>CGImage</code>:</p>
 
 <p><img src="cgimage-repeat.png" alt="cgimage-repeat"></p>
 
@@ -93,7 +93,9 @@ individual <code>CGImage</code>:</p>
 <h3>cgimage-rotate</h3>
 
 <p>Rotate the texture within the rectangle being displayed. You can also achieve
-rotation, by rotating the rectangle itself, but this rotates the texture:</p>
+rotation, by rotating the rectangle itself, but this rotates the texture.</p>
+
+<p>The texture is 32x32 pixels large.</p>
 
 <p><img src="cgimage-rotate.png" alt="cgimage-rotate"></p>
 
@@ -105,11 +107,25 @@ rotation, by rotating the rectangle itself, but this rotates the texture:</p>
 into the center (default) or any corner with the <code>.flags.contentMode</code> of
 the <code>CGDrawableOptions</code>. Not super useful in most cases, as the clamping of
 OpenGL produces streaks of the outside pixels. This can be done with
-any bitmap image:</p>
+any bitmap image.</p>
+
+<p>The texture is 32x32 pixels large.</p>
 
 <p><img src="cgimage-contentmode.png" alt="cgimage-contentmode"></p>
 
 <p><a href="src/main-cgimage-contentmode.m">main-cgimage-contentmode.m</a></p>
+
+<h3>cgimage-section</h3>
+
+<p>This demo showcases partial use of a texture using
+<code>-drawRect:fromRect:options:context:</code>. Ever of the nine segments is created
+from the same OpenGL texture, but with different offsets and widths.</p>
+
+<p>The texture is 32x32 pixels large.</p>
+
+<p><img src="cgimage-section.png" alt="cgimage-section"></p>
+
+<p><a href="src/main-cgimage-section.m">main-cgimage-section.m</a></p>
 
 <h3>cglayer</h3>
 

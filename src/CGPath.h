@@ -11,6 +11,7 @@ enum CGPathCommand
 {
    CGPathMoveToPointCommand,
    CGPathAddLineCommand,
+   CGPathBezierCommand,
    CGPathCloseSubpathCommand
 };
 
@@ -53,6 +54,7 @@ static void inline  CGPathMoveToPoint( CGMutablePathRef path,
    _mulle_structarray_add( &path->_floats, &y);
 }
 
+
 static void inline  CGPathAddLineToPoint( CGMutablePathRef path,
                                           const CGAffineTransform *m,
                                           CGFloat x,
@@ -66,6 +68,31 @@ static void inline  CGPathAddLineToPoint( CGMutablePathRef path,
    _mulle_structarray_add( &path->_floats, &x);
    _mulle_structarray_add( &path->_floats, &y);
 }
+
+
+
+static void inline  CGPathBezierToPoint( CGMutablePathRef path,
+                                         const CGAffineTransform *m,
+                                         CGFloat x1,
+                                         CGFloat y1,
+                                         CGFloat x2,
+                                         CGFloat y2,                                                                                  
+                                         CGFloat x,
+                                         CGFloat y)
+{
+   if( ! path)
+      return;
+   assert( ! m);
+
+   mulle_buffer_add_byte( &path->_commands, CGPathBezierCommand);
+   _mulle_structarray_add( &path->_floats, &x1);
+   _mulle_structarray_add( &path->_floats, &y1);
+   _mulle_structarray_add( &path->_floats, &x2);
+   _mulle_structarray_add( &path->_floats, &y2);
+   _mulle_structarray_add( &path->_floats, &x);
+   _mulle_structarray_add( &path->_floats, &y);
+}
+
 
 
 static void inline  CGPathCloseSubpath( CGMutablePathRef path)

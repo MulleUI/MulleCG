@@ -1,0 +1,406 @@
+#define _GNU_SOURCE
+
+#import "import-private.h"
+
+#include <string.h>
+#include <time.h>
+
+
+static void   drawFilledRect( NVGcontext *vg, CGRect rect, CGColor color)
+{
+   nvgBeginPath( vg);
+   {
+      nvgRect( vg, rect.origin.x,
+                   rect.origin.y,
+                   rect.size.width,
+                   rect.size.height);
+      nvgFillColor( vg, color);
+   }
+   nvgFill( vg);
+}
+
+
+static void   drawStrokedRect( NVGcontext *vg, CGRect rect, CGColor color)
+{
+   nvgBeginPath( vg);
+   {
+      nvgRect( vg, rect.origin.x,
+                   rect.origin.y,
+                   rect.size.width,
+                   rect.size.height);
+      nvgStrokeWidth( vg, 1.0);
+      nvgStrokeColor( vg, color);
+   }
+   nvgStroke( vg);
+}
+
+
+
+static char* cpToUTF8(int cp, char* str)
+{
+   int n = 0;
+   if (cp < 0x80) n = 1;
+   else if (cp < 0x800) n = 2;
+   else if (cp < 0x10000) n = 3;
+   else if (cp < 0x200000) n = 4;
+   else if (cp < 0x4000000) n = 5;
+   else if (cp <= 0x7fffffff) n = 6;
+   str[n] = '\0';
+   switch (n) {
+   case 6: str[5] = 0x80 | (cp & 0x3f); cp = cp >> 6; cp |= 0x4000000;
+   case 5: str[4] = 0x80 | (cp & 0x3f); cp = cp >> 6; cp |= 0x200000;
+   case 4: str[3] = 0x80 | (cp & 0x3f); cp = cp >> 6; cp |= 0x10000;
+   case 3: str[2] = 0x80 | (cp & 0x3f); cp = cp >> 6; cp |= 0x800;
+   case 2: str[1] = 0x80 | (cp & 0x3f); cp = cp >> 6; cp |= 0xc0;
+   case 1: str[0] = cp;
+   }
+   return str;
+}
+
+
+static inline CGFloat   CGSizeGetMax( CGSize size)
+{
+   return( size.width > size.height ? size.width : size.height);
+}
+
+
+static inline CGFloat   CGSizeGetMin( CGSize size)
+{
+   return( size.width < size.height ? size.width : size.height);
+}
+
+
+static inline CGFloat   CGRectGetCornerRadiusValue( CGRect rect, CGFloat factor)
+{
+   CGFloat   corner;
+
+   corner  = CGSizeGetMin( rect.size);
+   corner *= factor;
+   return( corner);
+}
+
+
+// "inspired" by:
+//
+// https://www.vecteezy.com/vector-art/957623-modern-rounded-web-interface-buttons-set
+//
+static void   drawFancyButtonBackground( struct NVGcontext *vg, CGRect rect, CGColor color1, CGColor color2)
+{
+   NVGpaint   paint;
+   CGFloat    corner;
+
+   /*
+    * outer
+    */
+
+   corner = CGRectGetCornerRadiusValue( rect, 0.5);
+
+   nvgBeginPath( vg);
+   nvgRoundedRect( vg, rect.origin.x,
+                       rect.origin.y,
+                       rect.size.width,
+                       rect.size.height,
+                       corner);
+
+   paint = nvgLinearGradient( vg,
+                              CGRectGetMinX( rect),
+                              CGRectGetMinY( rect),
+                              CGRectGetMinX( rect),   // sic!, we dont want change across x
+                              CGRectGetMaxY( rect),
+                              color1,
+                              color2);
+   nvgFillPaint( vg, paint);
+   nvgFill( vg);
+}
+
+
+
+static void   drawFancyButtonHighlight( struct NVGcontext *vg, CGRect rect)
+{
+   NVGpaint   paint;
+   CGFloat    corner;
+
+   /*
+    * highlight
+    */
+
+   corner = CGRectGetCornerRadiusValue( rect, 0.5);
+
+
+   nvgBeginPath( vg);
+   nvgRoundedRectVarying( vg, rect.origin.x,
+                              rect.origin.y,
+                              rect.size.width,
+                              rect.size.height,
+                              corner,
+                              corner,
+                              0.0,
+                              0.0);
+
+   // now subtract the next rect to get a highlight shape
+   nvgPathWinding(vg, NVG_HOLE); // sets nvgRoundedRect as a hole
+
+   nvgRoundedRectVarying( vg, rect.origin.x,
+                              rect.origin.y + 8,
+                              rect.size.width,
+                              rect.size.height - 8,
+                              corner,
+                              corner,
+                              0.0,
+                              0.0);
+
+   paint = nvgLinearGradient( vg,
+                              CGRectGetMinX( rect),
+                              CGRectGetMinY( rect),
+                              CGRectGetMinX( rect),
+                              CGRectGetMinY( rect) + corner,
+                              CGColorMakeRGBA( 1.0, 1.0, 1.0, 0.8),
+                              CGColorMakeTransparent());
+//   nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
+   nvgFillPaint( vg, paint);
+   nvgFill( vg);
+}
+
+
+static void   drawFancyButtonLine( struct NVGcontext *vg, CGRect rect, CGColor color)
+{
+   CGFloat    corner;
+
+   corner = CGRectGetCornerRadiusValue( rect, 0.5);
+
+   nvgBeginPath( vg);
+
+   nvgRoundedRect( vg, rect.origin.x,
+                       rect.origin.y,
+                       rect.size.width,
+                       rect.size.height,
+                       corner);
+
+   nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
+   nvgStrokeColor( vg, color);
+   nvgStrokeWidth( vg, 1.5);
+   nvgStroke( vg);
+}
+
+
+static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 6])
+{
+   NVGpaint   paint;
+   CGFloat    corner;
+   CGRect     innerRect;
+   CGRect     lineRect;
+   CGRect     outerRect;
+   CGRect     middleRect;
+   CGFont     *font;
+
+   struct NVGcontext *vg;
+
+   vg = CGContextGetNVGContext( context);
+
+   nvgSave( vg);
+   {
+      /*
+       * outer
+       */
+
+      outerRect = rect;
+      drawFancyButtonBackground( vg, outerRect, colors[ 0], colors[ 1]);
+
+      /*
+       * inner
+       */
+      innerRect = CGRectInset( outerRect, 6, 6);
+      drawFancyButtonBackground( vg, innerRect, colors[ 1], colors[ 0]);
+
+
+      /*
+       * highlight
+       */
+      drawFancyButtonHighlight( vg, innerRect);
+
+      /*
+       * line
+       */
+      lineRect = CGRectInset( innerRect, 12, 12);
+      drawFancyButtonLine( vg, lineRect, colors[ 3]);
+
+      // draw text
+      char     icon[8];
+      float    iw = 0;
+      float    ih = 0;
+      int      preicon = 0xE740;
+      float    x, y, w, h;
+      char     *text = "button";
+      char     *iconText;
+      CGRect   iconRect;
+      CGRect   textRect;
+      CGRect   remainingRect;
+
+      struct MulleLayout     layout;
+
+      drawStrokedRect( vg, lineRect, CGColorMakeGray());
+
+      corner  = CGRectGetCornerRadiusValue( lineRect, 0.5);
+      corner /= 4;
+
+      MulleLayoutInitReverse( &layout, lineRect, MulleEdgeInsetsMake( corner, corner, corner, corner));
+
+      remainingRect = MulleLayoutGetRemainingRowContentRect( &layout);
+      drawStrokedRect( vg, remainingRect, CGColorMakeGray());
+
+      {
+         h = MulleLayoutGetRowContentSize( &layout).height;
+
+         if( preicon != 0)
+         {
+            font = [context fontWithNameUTF8String:"icons"];
+            assert( font);
+
+            nvgFontFace( vg, "icons");
+            nvgFontSize( vg, h);
+
+            iconText = cpToUTF8( preicon, icon);
+            iw       = nvgTextBounds( vg, 0, 0, iconText, NULL, NULL);
+
+            iconRect = MulleLayoutAddToRow( &layout,
+                                            CGSizeMake( iw, h),
+                                            MulleEdgeInsetsMake( 0, 8, 0, 0));
+
+            drawStrokedRect( vg, iconRect, CGColorMakeGray());
+
+            nvgTextAlign( vg, NVG_ALIGN_LEFT|NVG_ALIGN_MIDDLE);
+            nvgTextColor( vg, colors[ 3], colors[ 1]);
+            nvgText( vg, CGRectGetMinX( iconRect),
+                         CGRectGetMidY( iconRect),
+                         iconText,
+                         NULL);
+         }
+
+         textRect = MulleLayoutGetRemainingRowContentRect( &layout);
+         drawStrokedRect( vg, textRect, CGColorMakeBlack());
+
+         font = [context fontWithNameUTF8String:"sans"];
+         assert( font);
+         nvgFontFace(vg, "sans");
+
+         float  bounds[ 4];
+
+         nvgFontSize( vg, textRect.size.height);
+         nvgTextAlign( vg, NVG_ALIGN_CENTER|NVG_ALIGN_BASELINE);
+         nvgTextBounds( vg, 0, 0, text, NULL, bounds);
+
+         ih = bounds[ 3] - bounds[ 1];
+         fprintf( stderr, "%s: bounds: %g %g\n", CGRectUTF8String( textRect), bounds[ 1], bounds[ 3]);
+
+         nvgFontSize( vg, h);
+         nvgTextColor( vg, colors[ 3], colors[ 1]);
+         nvgScissor( vg, textRect.origin.x, textRect.origin.y, textRect.size.width, textRect.size.height);
+         nvgText( vg, CGRectGetMidX( textRect),
+                      CGRectGetMaxY( textRect),
+                      text,
+                      NULL);
+      }
+      MulleLayoutDone( &layout);
+   }
+   nvgRestore( vg);
+}
+
+
+
+static void   drawButton( CALayer *layer, CGContext *context)
+{
+   CGRect              canvas;
+   CGRect              rects[ 3][ 3];
+   NSUInteger          x, y;
+   CGColor             colors[ 6];
+
+   canvas = [layer canvas];
+   canvas = CGRectInset( canvas, 16, 16);
+
+   CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( 16, 16), 3, 3, (CGRect *) rects);
+
+   for( y = 0; y < 3; y++)
+      for( x = 0; x < 3; x++)
+      {
+         colors[ 0] = CGColorMakeHSV( 1.0 / 8.0 * (x + y * 3), 1.0, 1.0);
+         colors[ 1] = CGColorMakeHSV( 1.0 / 8.0 * (x + y * 3), 1.0, 0.5);
+         colors[ 2] = CGColorMakeTransparent();
+         colors[ 3] = CGColorMakeRGB( 1.0, 1.0, 1.0);
+
+         drawFancyButton( context, rects[ y][ x], colors);
+      }
+}
+
+
+void   setupScene( UIWindow *window)
+{
+   UIView   *view;
+   CGRect   frame;
+
+   frame  = [[window contentPlane] contentRect];
+   view   = [UIView viewWithFrame:frame];
+   [[window contentPlane] setDrawCallback:drawButton];
+   [[window contentPlane] addSubview:view];
+}
+
+
+int   main( int argc, char *argv[])
+{
+   UIWindow         *window;
+   UIApplication    *app;
+
+   app = [UIApplication sharedInstance];
+   @autoreleasepool
+   {
+      window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 400, 300)
+                                titleUTF8String:"Demo"
+                                      styleMask:UIWindowStyleMaskDefault & ~UIWindowStyleRetained] autorelease];
+
+      assert( window);
+      [window setBackgroundColor:CGColorMakeRGBA( 0.8, 0.8, 0.8, 1.0)];
+      setupScene( window);
+      [app addWindow:window];
+   }
+   return( [app run]);
+}
+
+
+
+
+//
+//                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
+//                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
+//                  ╓#╜^*█⌐   `╕       █           ╓▌    `╙%w
+//               ╓ΦΓ      █    ╙⌐     ,█,,,Φ      ╓▌         ╙¥▄
+//            ,▄▀ █▄       █µ,╓╝,╓≤╗≡≡ª╨╨╨¥≡∞╗w╓,ª█,  ,       ]▄▀V,
+//          ,Φ└   ║"▀▄     ,▄▀╨"                 "╙¥▓▓       ▄▀  º▄¥,
+//        ,#▌Φ▓▄╓  Φ `█Q▄M╙                           ╙¥▄ ,▄▀ ╙▄⌐`  `Φ
+//       ▄▀   `V,"▀▀¼╓╩└                                 ╙¥▓╗ ,       ╙▄
+//      Φ       `¥═▄▀                            ╒          ▀▄          ▓
+//    .▓         ╓▓]V▄H       ▓                 ,Å            ▀,         ▀
+//    █      ,-ª▓╛  `██▀½      "▄  ,╓╓╓╓;╓▄▄▄▄╗▄█,             ╙▄         ▀
+//   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
+//  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
+//  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
+// █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
+// █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
+// █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
+// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
+//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+//  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
+//   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
+//   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀
+//    ╙▄     ╙▀███╙█▄▐██▄,╙▀█████▄▀▄▀▄   ,█M╗ ▀▄██▀╙""*ⁿ═─≈-,,▄▌,        ▄▀
+//     `▌╙µ,▄Φ▀x███▄██████████▀V███▀╙└ ,▄#▌████▀`"*«,      .█▀▄▀▄,      ▄╛
+//       ▀Ö█  ;▓████████▄▄█▀▄╙W "V▄██▀▀│▄███▀└ ▀╦     "*═╥▄▀ ║,  ║▀▄  ,▓
+//        ╙W▀ '█████╨▀▀█████████   "▀▀████└      ╙▄   ,▄▀'   `▀▀╣H ▐▀▄▀
+//          ╙▄  ▀▀Γ╓▌  ▄▀ⁿ`╙▀███      ██▌         ╓█R▀▄A█        ▀▀▄▀
+//            ╙W,Φ╙  ║█        ▄╙╙ª%≡╦██≤≤╗╗≡≡╜▀▀   ╣▌   █╕     ,▄▀
+//              `▀▄M█┘        ║▀▌   ╫"    *Φ▄  █       Φ` ▀▌, ▄M╙
+//                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
+//                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
+//                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+
+

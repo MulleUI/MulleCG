@@ -34,7 +34,7 @@
 @end
 
 
-static void   draw( struct NVGcontext   *vg)
+static void   draw( struct NVGcontext *vg)
 {
    // clearing the framebuffer is usually done by -[CGContext clearFramebuffer]
    // which uses the backgroundColor of the context
@@ -63,11 +63,17 @@ static void   draw( struct NVGcontext   *vg)
 
 int   main( int argc, char *argv[])
 {
-   GLFWOSWindow          *window;
-   CGContext             *context;
-   CGLayer               *cgLayer;
-   void                  *bytes;
-   struct CGBitmap       bitmap;
+   GLFWOSWindow     *window;
+   CGContext        *context;
+   CGLayer          *cgLayer;
+   void             *bytes;
+   struct CGBitmap  bitmap;
+
+   if( ! getenv( "MULLE_OBJC_EPHEMERAL_SINGLETON"))
+   {
+      fprintf( stderr, "Run this with: MULLE_OBJC_EPHEMERAL_SINGLETON=YES\n");
+      exit( 1);
+   }
 
    // ensure that we don't leak (at least not in MulleCG) code
    // leaks in nanovg/OpenGL are harder to detect (use valgrind)
@@ -130,7 +136,7 @@ int   main( int argc, char *argv[])
          bitmap = [cgLayer RGBABytesBitmap:NULL];
          mulle_bitmap_rgba_dump( &bitmap);
          CGBitmapDone( &bitmap);
-
+         fprintf( stderr, "Check \"dump-????.bmp\" file for resultant drawing\n");
          [cgLayer unbindFramebuffer];
       }
 
