@@ -103,6 +103,12 @@ static void   drawStuff( CGRect canvas,
    [super finalize];
 }
 
++ (UIGraphicsBackend) defaultBackend
+{
+   return( UIGraphicsBackendDefault);
+}
+
+
 @end
 
 
@@ -200,7 +206,7 @@ static MyWindow   *create_window( unsigned int i,
    CGContext     *context;
 
    hints = GLFW_DEFAULT_CONTEXT;
-   switch( [window backend])
+   switch( [MyWindow defaultBackend])
    {
    case CG_GL3   : hints = GLFW_GL3_CONTEXT; break;
    case CG_GL3_2 : hints = GLFW_GL3_2_CONTEXT; break;

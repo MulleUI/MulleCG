@@ -16,7 +16,7 @@
 //#define IVAR_DEBUG
 //#define SWAP_DEBUG
 //#define RESIZE_DEBUG
-//#define RENDER_DEBUG
+#define RENDER_DEBUG
 // this writes out a PNG for each frame
 //#define RENDER_LAYER_DEBUG
 
@@ -185,7 +185,7 @@ l_Position, normal);\n"
 - (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
               useStencilStrokes:(BOOL) useStencilStrokes
                         shareID:(NSUInteger) shareID
-                        backend:(enum UIGraphicsBackend) backend
+                        backend:(UIGraphicsBackend) backend
 {
    struct mulle_allocator   *allocator;
 
@@ -562,7 +562,7 @@ static struct CGFrameInfo   emptyInfo;
 }
 
 
-// flushes drawings doesn't set glViewport
+// flushes drawings doesn't reset glViewport or reset internal caches
 - (void) flushRender
 {
    nvgFlushFrame( _vg);

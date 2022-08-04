@@ -6,94 +6,6 @@
 #include <time.h>
 
 
-CGAffineTransform   CGRectReverseImageMapperTransform( CGRect rect,
-                                                       CGFloat angle,
-                                                       CGSize extent,
-                                                       CGSize imageSize);
-
-
-CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
-                                                         CGPoint texturePoint,
-                                                         CAAngleRadians angle,
-                                                         CGSize extent);
-
-void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
-                                CGRect rect,
-                                CGPoint origin,
-                                CGSize extent,
-                                CGDrawableOptions *options,
-                                CGContext *context);
-
-@implementation CGImage ( Hacky)
-
-- (void) drawRect:(CGRect) rect
-         fromRect:(CGRect) fromRect
-          options:(CGDrawableOptions *) options
-          context:(CGContext *) context
-{
-   NSInteger           imageID;
-   NSInteger           imageFlags;
-   NVGcontext          *vg;
-   NVGpaint            imgPaint;
-   CGSize              imageSize;
-   CGPoint             origin;
-   CGSize              size;
-   CGSize              extent;
-   CGRect              tmp;
-   CGRect              sectionRect;
-   CGPoint             sectionOrigin;
-   CGImage             *image;
-   CGAffineTransform   xform;
-   CGPoint             texturePoint;
-
-   if( ! options)
-      options = &CGDrawableOptionsDefault;
-
-   fprintf( stderr, "rect=%s fromRect=%s\n",
-         CGRectUTF8String( rect), 
-         CGRectUTF8String( fromRect));
-
-
-   xform       = CGRectReverseImageMapperTransform( rect, options->rotation, rect.size, [self size]);
-   // if fromRect is { CGPointZero, [self size] }, then sectionRect should be
-   // exactly rect, otherwise we get a subsection of rect
-   sectionRect = CGRectApplyAffineTransform( fromRect, xform);
-   fprintf( stderr, "sectionRect     : %s\n", CGRectUTF8String( sectionRect));
-
-//
-//  +----------+
-//  |          |  
-//  |  +       |
-//  |          |
-//  |          | 
-//  +----------+
-//
-   // reduce extent to fromRect.size
-   extent.width  = rect.size.width  * (rect.size.width / sectionRect.size.width);
-   extent.height = rect.size.height * (rect.size.height / sectionRect.size.height);
-   fprintf( stderr, "extent          : %s\n", CGSizeUTF8String( extent));
-
-   assert( options->scale == CGScaleToFit);
-   assert( options->flags.repeat      == CGRepeatNone);
-   assert( options->flags.contentMode == CGContentModeCenterPoint);
-
-   // get fromOrigin texture coordinate
-   texturePoint.x = (CGRectGetMidX( sectionRect) - rect.origin.x) / rect.size.width;
-   texturePoint.y = (CGRectGetMidY( sectionRect) - rect.origin.y) / rect.size.height;
-
-   fprintf( stderr, "texturePoint    : %s\n", CGPointUTF8String( texturePoint));
-   origin = CGRectGetOriginToTexturePointForAngleAndExtent( rect, texturePoint, options->rotation, extent);
-
-   // punkt: 
-
-   fprintf( stderr, "origin          : %s\n", CGPointUTF8String( origin));
-
-   CGBitmapDrawableDrawRect( self, rect, origin, extent, options, context);
-}
-
-@end 
-
-
 #define R   0xFF, 0x00, 0x00, 0xFF
 #define G   0x00, 0xFF, 0x00, 0xFF
 #define B   0x00, 0x00, 0xFF, 0xFF
@@ -142,10 +54,11 @@ static unsigned char    bitmap2[ 4 * 32 * 32] =
 };
 
 
+
 #define ROWS    3
 #define COLUMNS 4
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static void   drawBitmap2( CALayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              canvas;
@@ -160,6 +73,9 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
    vg = CGContextGetNVGContext( context);
 
+   nvgShapeAntiAlias( vg, 1);  // makes no visual difference
+//   nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
+
    // gray rectangle so we know something is drawn...
    nvgBeginPath( vg);
    {
@@ -172,15 +88,16 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon
-   image   = [[[CGImage alloc] initWithRGBABytes:bitmap2
-                                      bitmapSize:CGBitmapSizeMake( 32, 32)
-                                      imageFlags:0  // NVG_IMAGE_REPEATX
-                                         context:context] autorelease];
+   image = [[[CGImage alloc] initWithRGBABytes:bitmap2
+                                    bitmapSize:CGBitmapSizeMake( 32, 32)
+                                    imageFlags:NVG_IMAGE_NEAREST  // NVG_IMAGE_REPEATX
+                                       context:context] autorelease];
    assert( image);
 
 
-   canvas    = CGRectInset( canvas, 4, 4);
+   canvas = CGRectInset( canvas, 4, 4);
 
+   // acquire extra COLUMN, whose space will be used to extend the middle
    CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( 4, 4), ROWS, COLUMNS, (CGRect *) rects);
 
    CGRectPartitionIntoRowsAndColumns( CGRectMake( 0, 0, 32, 32), CGSizeMake( 0, 0), 3, 3, (CGRect *) sections);
@@ -194,6 +111,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                                     CGRepeatNone,
                                     CGContentModeCenterPoint);
 
+   // extend middle
    assert( COLUMNS == 4);
    for( y = 0; y < ROWS; y++)
    {
@@ -202,7 +120,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    }
 
    for( y = 0; y < ROWS; y++)
-      for( x = 0; x < 3; x++)
+      for( x = 0; x < COLUMNS - 1; x++)
          [image drawRect:rects[ y][ x]
                 fromRect:sections[ y][ x]
                  options:&options
@@ -217,7 +135,7 @@ void   setupScene( UIWindow *window)
 
    frame  = [[window contentPlane] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:drawStuff];
+   [[window contentPlane] setDrawCallback:drawBitmap2];
    [[window contentPlane] addSubview:view];
 }
 

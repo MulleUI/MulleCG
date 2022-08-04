@@ -13,6 +13,8 @@ void   nvgAddCGPath( NVGcontext *nvg, CGPathRef path)
    unsigned char  *p;
    unsigned char  *sentinel;
    CGFloat         x, y;
+   CGFloat         x1, y1;
+   CGFloat         x2, y2;
 
    if( ! path)
       return;
@@ -39,6 +41,16 @@ void   nvgAddCGPath( NVGcontext *nvg, CGPathRef path)
          x = *f++;
          y = *f++;
          nvgLineTo(nvg, x, y);
+         break;
+
+      case CGPathBezierCommand:
+         x1 = *f++;
+         y1 = *f++;
+         x2 = *f++;
+         y2 = *f++;
+         x  = *f++;
+         y  = *f++;
+         nvgBezierTo(nvg, x1, y1, x2, y2, x, y);
          break;
 
       case CGPathCloseSubpathCommand:

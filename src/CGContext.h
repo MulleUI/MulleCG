@@ -129,14 +129,14 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 @property( assign) NSUInteger       framebufferBits;
 @property( assign) id               OSWindow;
 
-@property( assign, readonly) enum UIGraphicsBackend    backend;
+@property( assign, readonly) UIGraphicsBackend    backend;
 
 
 // the context needs to be told, what backend is being used
 - (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
               useStencilStrokes:(BOOL) useStencilStrokes
                         shareID:(NSUInteger) shareID
-                        backend:(enum UIGraphicsBackend) backend;
+                        backend:(UIGraphicsBackend) backend;
 
 - (struct NVGcontext *) nvgContext;
 
