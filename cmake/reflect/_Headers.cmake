@@ -14,6 +14,7 @@ set( INCLUDE_DIRS
 nanovg/src
 src
 src/generic
+src/microvg
 src/reflect
 )
 
@@ -81,6 +82,8 @@ src/MullePaint.h
 src/_Roboto-Regular.inc
 src/_emoji.inc
 src/_entypo.inc
+src/microvg/microvg.h
+src/microvg/millivg.h
 src/nanovg+UTF8String.h
 src/reflect/_MulleCG-import-public.h
 )

@@ -34,6 +34,8 @@ src/main-particles.m
 src/main-suspend-resume.m
 src/main-text-alignment.m
 src/main-text-bounds.m
+src/main-text-contentmode.m
+src/main-text-draw.m
 src/main-text-extent.m
 src/main-text.m
 src/main-texture.m

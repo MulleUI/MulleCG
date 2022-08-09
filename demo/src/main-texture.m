@@ -90,7 +90,7 @@ static void  drawStuff( CALayer *layer, CGContext *context)
    NSUInteger   frameNumber;
    NVGcontext   *vg;
 
-   frameNumber = [context numberOfRenderedFrames];
+   frameNumber = [context numberOfFrames];
 
    rect  = [layer canvas];
    shape = CGRectInset( rect, 60, 60);
@@ -181,7 +181,6 @@ int   main( int argc, char *argv[])
 
    return( [app run]);
 }
-
 
 
 //

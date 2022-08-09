@@ -225,16 +225,20 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
       drawFancyButtonLine( vg, lineRect, colors[ 3]);
 
       // draw text
+      // recognize that nvgText layout is somewhat broken, if using
+      // NVG_ALIGN_CENTER and NVG_ALIGN_RIGHT
+      //
       char     icon[8];
       float    iw = 0;
       float    ih = 0;
       int      preicon = 0xE740;
       float    x, y, w, h;
-      char     *text = "button";
+      char     *text = "auxo";
       char     *iconText;
       CGRect   iconRect;
       CGRect   textRect;
       CGRect   remainingRect;
+      CGSize   size;
 
       struct MulleLayout     layout;
 
@@ -243,37 +247,67 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
       corner  = CGRectGetCornerRadiusValue( lineRect, 0.5);
       corner /= 4;
 
-      MulleLayoutInitReverse( &layout, lineRect, MulleEdgeInsetsMake( corner, corner, corner, corner));
+      MulleLayoutInitReverse( &layout, lineRect, MulleEdgeInsetsMake( corner, corner + 8, corner, corner));
 
       remainingRect = MulleLayoutGetRemainingRowContentRect( &layout);
       drawStrokedRect( vg, remainingRect, CGColorMakeGray());
 
       {
-         h = MulleLayoutGetRowContentSize( &layout).height;
-
          if( preicon != 0)
          {
             font = [context fontWithNameUTF8String:"icons"];
             assert( font);
 
-            nvgFontFace( vg, "icons");
-            nvgFontSize( vg, h);
-
-            iconText = cpToUTF8( preicon, icon);
-            iw       = nvgTextBounds( vg, 0, 0, iconText, NULL, NULL);
-
-            iconRect = MulleLayoutAddToRow( &layout,
-                                            CGSizeMake( iw, h),
-                                            MulleEdgeInsetsMake( 0, 8, 0, 0));
-
+            size = MulleLayoutGetRowContentSize( &layout);
+            if( size.width > size.height)
+               iconRect = MulleLayoutAddToRow( &layout,
+                                               CGSizeMake( size.height, size.height),
+                                               MulleEdgeInsetsMake( 0, 8, 0, 0));
+            else
+               iconRect = MulleLayoutAddToRow( &layout,
+                                               CGSizeMake( size.width, size.width),
+                                               MulleEdgeInsetsMake( 0, 8, 0, 0));
             drawStrokedRect( vg, iconRect, CGColorMakeGray());
 
-            nvgTextAlign( vg, NVG_ALIGN_LEFT|NVG_ALIGN_MIDDLE);
-            nvgTextColor( vg, colors[ 3], colors[ 1]);
-            nvgText( vg, CGRectGetMinX( iconRect),
-                         CGRectGetMidY( iconRect),
-                         iconText,
-                         NULL);
+            nvgBeginPath( vg);
+            nvgCircle( vg, CGRectGetMidX( iconRect), CGRectGetMidY( iconRect), iconRect.size.width / 2.0);
+#if 0
+            paint = nvgLinearGradient( vg,
+                                       CGRectGetMinX( iconRect),
+                                       CGRectGetMinY( iconRect),
+                                       CGRectGetMinX( iconRect),
+                                       CGRectGetMaxY( iconRect),
+                                       CGColorMakeRGBA( 0.6, 0.6, 0.6, 0.6),
+                                       CGColorMakeRGBA( 0.2, 0.2, 0.2, 0.2));
+#else
+            paint = nvgRadialGradient( vg,
+                                       CGRectGetMidX( iconRect) - iconRect.size.width / 8.0,
+                                       CGRectGetMidY( iconRect) - iconRect.size.width / 8.0,
+                                       iconRect.size.width / 8.0,
+                                       iconRect.size.width / 2.0,
+                                       CGColorMakeRGBA( 1.0, 1.0, 1.0, 0.7),
+                                       CGColorMakeRGBA( 0.2, 0.2, 0.2, 0.2)),
+#endif
+            nvgFillPaint( vg, paint);
+            nvgFill( vg);
+            nvgStrokeColor( vg, CGColorMakeRGBA( 0.8, 0.8, 0.8, 0.8));
+            nvgStroke( vg);
+
+            iconRect = CGRectInset( iconRect, iconRect.size.width / 8.0, iconRect.size.width / 8.0);
+
+            nvgFontSize( vg, iconRect.size.height);
+            nvgFontFace( vg, "icons");
+
+
+            iconText = cpToUTF8( preicon, icon);
+
+            nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
+            nvgTextColor( vg, colors[ 3], CGColorByMultiplyingAlpha( colors[ 1], 0.2));
+            mvgTextInRect( vg, iconText,
+                               NULL,
+                               iconRect,
+                               CGContentModeScaleAspectFit,
+                               MVGTextAlignVisually);
          }
 
          textRect = MulleLayoutGetRemainingRowContentRect( &layout);
@@ -281,24 +315,16 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
 
          font = [context fontWithNameUTF8String:"sans"];
          assert( font);
+
          nvgFontFace(vg, "sans");
-
-         float  bounds[ 4];
-
-         nvgFontSize( vg, textRect.size.height);
-         nvgTextAlign( vg, NVG_ALIGN_CENTER|NVG_ALIGN_BASELINE);
-         nvgTextBounds( vg, 0, 0, text, NULL, bounds);
-
-         ih = bounds[ 3] - bounds[ 1];
-         fprintf( stderr, "%s: bounds: %g %g\n", CGRectUTF8String( textRect), bounds[ 1], bounds[ 3]);
-
-         nvgFontSize( vg, h);
-         nvgTextColor( vg, colors[ 3], colors[ 1]);
-         nvgScissor( vg, textRect.origin.x, textRect.origin.y, textRect.size.width, textRect.size.height);
-         nvgText( vg, CGRectGetMidX( textRect),
-                      CGRectGetMaxY( textRect),
-                      text,
-                      NULL);
+         nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
+         nvgTextColor( vg, CGColorMakeWhite(),
+                           CGColorByMultiplyingAlpha( colors[ 1], 1.0));
+         mvgTextInRect( vg, text,
+                            NULL,
+                            CGRectInset( textRect, 4, 4),
+                            CGContentModeScaleAspectFit,
+                            MVGTextAlignVisually);
       }
       MulleLayoutDone( &layout);
    }
@@ -306,13 +332,46 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
 }
 
 
+static inline CGRect   CGRectBeforeRect( CGRect rect, CGFloat width)
+{
+   rect.origin.x   = CGRectGetMinX( rect) - width;
+   rect.size.width = width;
+   return( rect);
+}
+
+
+static inline CGRect   CGRectAfterRect( CGRect rect, CGFloat width)
+{
+   rect.origin.x   = CGRectGetMaxX( rect);
+   rect.size.width = width;
+   return( rect);
+}
+
+
+static inline CGRect   CGRectAboveRect( CGRect rect, CGFloat height)
+{
+   rect.origin.y    = CGRectGetMinY( rect) - height;
+   rect.size.height = height;
+   return( rect);
+}
+
+
+static inline CGRect   CGRectBelowRect( CGRect rect, CGFloat height)
+{
+   rect.origin.y    = CGRectGetMaxY( rect);
+   rect.size.height = height;
+   return( rect);
+}
+
 
 static void   drawButton( CALayer *layer, CGContext *context)
 {
    CGRect              canvas;
    CGRect              rects[ 3][ 3];
+   CGRect              rect;
    NSUInteger          x, y;
    CGColor             colors[ 6];
+   NVGcontext          *vg;
 
    canvas = [layer canvas];
    canvas = CGRectInset( canvas, 16, 16);
@@ -327,7 +386,19 @@ static void   drawButton( CALayer *layer, CGContext *context)
          colors[ 2] = CGColorMakeTransparent();
          colors[ 3] = CGColorMakeRGB( 1.0, 1.0, 1.0);
 
-         drawFancyButton( context, rects[ y][ x], colors);
+         rect = CGRectIntegral( rects[ y][ x]);
+         drawFancyButton( context, rect, colors);
+
+         vg = CGContextGetNVGContext( context);
+         nvgFontSize( vg, 14.0f);
+         nvgFontFace( vg, "sans");
+         nvgTextColor( vg, CGColorMakeWhite(), CGColorMakeRGBA( 0.8, 0.8, 0.8, 1.0));
+         mvgTextInRect( vg,
+                        CGRectUTF8String( rect),
+                        NULL,
+                        CGRectBelowRect( rect, 16.0f),
+                        CGContentModeCenterPoint,
+                        0);
       }
 }
 
@@ -352,7 +423,7 @@ int   main( int argc, char *argv[])
    app = [UIApplication sharedInstance];
    @autoreleasepool
    {
-      window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 400, 300)
+      window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 1280, 500)
                                 titleUTF8String:"Demo"
                                       styleMask:UIWindowStyleMaskDefault & ~UIWindowStyleRetained] autorelease];
 

@@ -5,36 +5,6 @@
 #include <string.h>
 
 
-static void   drawFilledRect( NVGcontext *vg, CGRect rect, CGColor color)
-{
-   nvgBeginPath( vg);
-   {
-      nvgRect( vg, rect.origin.x,
-                   rect.origin.y,
-                   rect.size.width,
-                   rect.size.height);
-      nvgFillColor( vg, color);
-   }
-   nvgFill( vg);
-}
-
-
-static void   drawStrokedRect( NVGcontext *vg, CGRect rect, CGColor color)
-{
-   nvgBeginPath( vg);
-   {
-      nvgRect( vg, rect.origin.x,
-                   rect.origin.y,
-                   rect.size.width,
-                   rect.size.height);
-      nvgStrokeWidth( vg, 1.0);
-      nvgStrokeColor( vg, color);
-   }
-   nvgStroke( vg);
-}
-
-
-
 NSUInteger   alignments[] =
 {
    NVG_ALIGN_LEFT   | NVG_ALIGN_TOP,
@@ -68,7 +38,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    char                 *s;
    float                ascender, descender, lineh;
    char                 buf[ 256];
-   float                bounds[ 4];
+   float                bounds[ 6];
    CGPoint              origin;
    NVGglyphPosition     positions[ 32];
    int                  i;
@@ -83,7 +53,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    canvas = [layer canvas];
    canvas = CGRectInset( canvas, 4, 4);
 
-   CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( 4, 4), 9, N_ALIGNMENTS, rects);
+   CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( 4, 4), 9, N_ALIGNMENTS, (CGRect *) rects);
 
    text = "Yay! Yay! Yay! Yay! Yay! Yay! Yay!";
 
@@ -96,7 +66,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
          s       = buf;
 
          rect = rects[ y][ x];
-         drawStrokedRect( vg, rect, CGColorMakeGray());
+         mvgStrokeRect( vg, rect, CGColorMakeGray());
 
          nvgSave( vg);
          {
@@ -166,14 +136,12 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
 void   setupScene( UIWindow *window)
 {
-   UIView        *view;
-   CGRect         frame;
-   UIEdgeInsets   insets;
+   UIView   *view;
+   CGRect   frame;
 
    frame  = [[window contentPlane] contentRect];
 
    view  = [UIView viewWithFrame:frame];
-   [view setMargins:insets];
    [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
    [view setDrawCallback:drawStuff];
    [[window contentPlane] addSubview:view];
@@ -204,11 +172,11 @@ int   main( int argc, char *argv[])
 
       [app addWindow:window];
    }
+
    return( [app run]);
 }
 
 
-//
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
 //                  ╓#╜^*█⌐   `╕       █           ╓▌    `╙%w
