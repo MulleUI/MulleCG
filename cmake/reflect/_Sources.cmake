@@ -25,6 +25,8 @@ src/CGLayer.m
 src/CGPath.c
 src/CGPath+nanovg.c
 src/MullePaint.m
+src/microvg/microvg.c
+src/microvg/millivg.c
 src/nanovg+UTF8String.m
 )
 

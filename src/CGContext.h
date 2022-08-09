@@ -101,7 +101,7 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
    struct mulle_map             _fontMap;
    struct mulle_map             _gpuTextureMap;
    struct mulle__pointerarray   _deletedTexturedIDs;
-   NSUInteger                   _numberOfRenderedFrames;  // counts endRenders...
+   NSUInteger                   _numberOfFrames;  // counts endRenders...
    BOOL                         _isRendering;
    BOOL                         _isActive;
    int                          _nvgFlags; // used for nvgCreate
@@ -179,7 +179,7 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 // calls for example.
 - (BOOL) isActive;
 
-- (NSUInteger) numberOfRenderedFrames;
+- (NSUInteger) numberOfFrames;
 - (mulle_relativetime_t) secondsSinceFirstRender;
 
 - (CGFloat) alpha;

@@ -16,7 +16,7 @@
 //#define IVAR_DEBUG
 //#define SWAP_DEBUG
 //#define RESIZE_DEBUG
-#define RENDER_DEBUG
+//#define RENDER_DEBUG
 // this writes out a PNG for each frame
 //#define RENDER_LAYER_DEBUG
 
@@ -332,9 +332,9 @@ l_Position, normal);\n"
 }
 
 
-- (NSUInteger) numberOfRenderedFrames
+- (NSUInteger) numberOfFrames
 {
-   return( _numberOfRenderedFrames);
+   return( _numberOfFrames);
 }
 
 
@@ -513,7 +513,7 @@ static struct CGFrameInfo   emptyInfo;
 #endif
 
    _isRendering = 0;
-   _numberOfRenderedFrames++;
+   _numberOfFrames++;
 
    [self bindFramebuffer:CGContextFramebufferMakeDefault()];
    CGContextCheckBackendError( self, "unbind buffer");
