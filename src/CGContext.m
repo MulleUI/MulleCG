@@ -689,7 +689,7 @@ static struct CGFrameInfo   emptyInfo;
 //    // images are not retained!
 //    if( ! _layers)
 //       _layers = mulle_pointerarray_create( NULL);
-//    _mulle_pointerarray_add( _layers, image);
+//    _mulle_pointerarray_add( &_layers, image);
 //
 //    return( image);
 // }

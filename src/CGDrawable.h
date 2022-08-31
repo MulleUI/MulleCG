@@ -89,7 +89,8 @@ enum CGRepeat
    CGRepeatNone         = 0x0,
    CGRepeatHorizontally = 0x1,
    CGRepeatVertically   = 0x2,
-   CGRepeatBoth         = 0x3
+   CGRepeatBoth         = 0x3,
+   CGRepeatAsIs         = 0x4    // use what's there
 };
 
 
@@ -184,8 +185,9 @@ PROTOCOLCLASS_INTERFACE0( CGDrawable)
           context:(CGContext *) context;
 
 @optional
-- (CGRect) canvas;   // always 0,0, size
-- (CGRect) bounds;   // usually same as canvas for bitmaps
+- (CGRect) canvas;      // always 0,0, size
+- (CGRect) bounds;      // usually same as canvas for bitmaps
+- (BOOL) isRepeating;   // ususally NO, used by repeating bitmaps
 
 PROTOCOLCLASS_END()
 

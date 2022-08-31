@@ -41,6 +41,12 @@ PROTOCOLCLASS_IMPLEMENTATION( CGDrawable)
    return( [self canvas]);
 }
 
+- (BOOL) isRepeating
+{
+   return( NO);
+}
+
+
 PROTOCOLCLASS_END()
 
 
@@ -393,11 +399,15 @@ static NSInteger   CGBitmapDrawableGetImageID( id <CGBitmapDrawable> self,
    CGImage      *image;
 
    // if we are a CGImage we can't really change, but a UIBitmapImage can
-   imageFlags = [self imageFlags] & ~(NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
-   if( options->flags.repeat & CGRepeatHorizontally)
-      imageFlags |= NVG_IMAGE_REPEATX;
-   if( options->flags.repeat & CGRepeatVertically)
-      imageFlags |= NVG_IMAGE_REPEATY;
+   imageFlags = [self imageFlags];
+   if( options->flags.repeat != CGRepeatAsIs)
+   {
+      imageFlags  &= ~(NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
+      if( options->flags.repeat & CGRepeatHorizontally)
+         imageFlags |= NVG_IMAGE_REPEATX;
+      if( options->flags.repeat & CGRepeatVertically)
+         imageFlags |= NVG_IMAGE_REPEATY;
+   }
 
    image = [self cgImageWithContext:context
                          imageFlags:imageFlags];
@@ -534,7 +544,7 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
    CGPoint             texturePoint;
 
    if( ! options)
-      options = &CGDrawableOptionsDefault;
+      options = &CGDrawableOptionsScaleToFit;
 
    size        = [self size];
    xform       = CGRectReverseImageMapperTransform( rect, options->rotation, rect.size, size);
@@ -579,6 +589,13 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
 - (NSUInteger) imageFlags 
 {
    return( 0);
-
 }
+
+
+- (BOOL) isRepeating   
+{
+   return( [self imageFlags] & (NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY) ? YES : NO);
+}
+
+
 PROTOCOLCLASS_END()

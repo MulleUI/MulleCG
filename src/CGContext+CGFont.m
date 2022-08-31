@@ -7,27 +7,48 @@
 
 #import "CGFont.h"
 
-// #define USE_ANONYMOUS_PRO
-
-
-#ifdef USE_ANONYMOUS_PRO
-# include "anonymous-pro.inc"
-# define FONT_DATA   Anonymous_Pro_ttf
-#else
-# include "_Roboto-Regular.inc"
-# define FONT_DATA   Roboto_Regular_ttf
-#endif
-#include "_entypo.inc"
-#include "_emoji.inc"   // NotoEmoji_Regular_ttf
-
 #include <assert.h>
 
 
-#define fallback_font_ttf   NotoEmoji_Regular_ttf
+unsigned char   NotoSans_Regular_ttf[] =
+#include "NotoSans-Regular.ttf.inc"
+;
+#define s_NotoSans_Regular_ttf   (sizeof( NotoSans_Regular_ttf) - 1)
+
+
+unsigned char   NotoSans_Bold_ttf[] =
+#include "NotoSans-Bold.ttf.inc"
+;
+#define s_NotoSans_Bold_ttf  (sizeof( NotoSans_Bold_ttf) - 1)
+
+
+unsigned char   Noto_Emoji_ttf[] =
+#include "NotoEmoji-VariableFont_wght.ttf.inc"
+;
+#define s_Noto_Emoji_ttf   (sizeof( Noto_Emoji_ttf) - 1)
+
+
+unsigned char   entypo_ttf[] =
+#include "entypo.ttf.inc"
+;
+#define s_entypo_ttf   (sizeof( entypo_ttf) - 1)
+
+
+#define sans_font_ttf         NotoSans_Regular_ttf
+#define s_sans_font_ttf       s_NotoSans_Regular_ttf
+
+#define sans_bold_font_ttf    NotoSans_Bold_ttf
+#define s_sans_bold_font_ttf  s_NotoSans_Bold_ttf
+
+#define emoji_font_ttf        Noto_Emoji_ttf
+#define s_emoji_font_ttf      s_Noto_Emoji_ttf
+
+#define icons_font_ttf        entypo_ttf
+#define s_icons_font_ttf      s_entypo_ttf
+
 
 
 @implementation CGContext ( CGFont)
-
 
 //
 // We don't have ValueFoundation here, so copy some stuff over
@@ -144,8 +165,8 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
    fontIndex = nvgCreateFontMem( [self nvgContext],
                                  "fallback",
-                                 fallback_font_ttf,
-                                 (int) sizeof( fallback_font_ttf),
+                                 emoji_font_ttf,
+                                 (int) s_emoji_font_ttf,
                                  0);
    font      = [CGFont fontWithNameUTF8String:"fallback"
                           fontIndex:fontIndex];
@@ -170,19 +191,28 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    {
       fontIndex = nvgCreateFontMem( _vg,
                                     s,
-                                    FONT_DATA,
-                                    (int) sizeof( FONT_DATA),
+                                    sans_font_ttf,
+                                    (int) s_sans_font_ttf,
                                     0);
    }
    else
-      if( ! strcmp( s, "icons"))
+      if( ! strcmp( s, "sans-bold"))
       {
          fontIndex = nvgCreateFontMem( _vg,
                                        s,
-                                       entypo_ttf,
-                                       (int) sizeof( entypo_ttf),
+                                       sans_bold_font_ttf,
+                                       (int) s_sans_bold_font_ttf,
                                        0);
       }
+      else
+         if( ! strcmp( s, "icons"))
+         {
+            fontIndex = nvgCreateFontMem( _vg,
+                                          s,
+                                          icons_font_ttf,
+                                          (int) s_icons_font_ttf,
+                                          0);
+         }
 
    if( fontIndex == -1)
       abort();
