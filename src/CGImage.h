@@ -78,7 +78,7 @@
 
 - (instancetype) initWithGPUTextureRGBA:(void *) gpuTexture
                        sharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
-                             bitmapSize:(struct CGBitmapSize) size
+                             bitmapSize:(struct MulleIntegerSize) size
                              imageFlags:(NSUInteger) imageFlags
                                 context:(CGContext *) context;
 
@@ -96,7 +96,7 @@
 
 // bytes are not retained, you can free them after init
 - (instancetype) initWithRGBABytes:(void *) bytes
-                        bitmapSize:(struct CGBitmapSize) bitmapSize
+                        bitmapSize:(struct MulleIntegerSize) bitmapSize
                         imageFlags:(NSUInteger) imageFlags
                            context:(CGContext *) context;
 
@@ -111,7 +111,7 @@
 //
 - (void) setBytes:(void *) bytes;
 
-- (struct CGBitmapSize)  bitmapSize;
+- (struct MulleIntegerSize)  bitmapSize;
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
 

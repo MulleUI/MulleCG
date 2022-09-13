@@ -47,7 +47,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    canvas.origin = CGPointZero;
    canvas.size   = CGSizeMake( originalCanvas.size.height / 2.0, originalCanvas.size.width / 2.0);
 
-   cgLayer = [CGLayer layerWithBitmapSize:CGSizeGetBitmapSize( canvas.size)
+   cgLayer = [CGLayer layerWithIntegerSize:CGSizeGetIntegerSize( canvas.size)
                                imageFlags:0
                                   context:context];
 
@@ -58,7 +58,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    previous = [context  bindFramebuffer:CGContextFramebufferMakeWithLayer( cgLayer)];
 
    // 5. tell CGContext about the new dimensions
-   frameInfo = CGFrameInfoFBMake( CGSizeGetBitmapSize( canvas.size), 1.0, 1.0);
+   frameInfo = CGFrameInfoFBMake( CGSizeGetIntegerSize( canvas.size), 1.0, 1.0);
    [context changeRender:&frameInfo];
 
    // drawing code as such is unchanged from main-draw-simple.m

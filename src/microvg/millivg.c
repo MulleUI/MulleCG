@@ -158,7 +158,7 @@ void   mvgTextInRect( struct NVGcontext *vg,
       nvgSave( vg);
       {
          nvgTranslate( vg, rect.origin.x, rect.origin.y);
-         mvgFillRect( vg, coverage, CGColorMakeRGBA( 1.0, 0.0, 0.0, 0.25));
+         mvgFillRect( vg, coverage, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.25));
       }
       nvgRestore( vg);
 #endif
@@ -256,7 +256,7 @@ void   mvgTextInRect( struct NVGcontext *vg,
       nvgSave( vg);
       {
          nvgTranslate( vg, rect.origin.x, rect.origin.y);
-         mvgFillRect( vg, coverage, CGColorMakeRGBA( 0.0, 0.0, 1.0, 0.25));
+         mvgFillRect( vg, coverage, CGColorMakeWithRGBA( 0.0, 0.0, 1.0, 0.25));
       }
       nvgRestore( vg);
 #endif
@@ -351,7 +351,7 @@ CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
    nvgSave( vg);
    {
       nvgTranslate( vg, origin.x, origin.y);
-      mvgFillRect( vg, coverage, CGColorMakeRGBA( 0.5, 0.5, 0.5, 0.5));
+      mvgFillRect( vg, coverage, CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 0.5));
    }
    nvgRestore( vg);
 

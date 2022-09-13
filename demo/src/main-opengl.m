@@ -111,7 +111,7 @@ int   main( int argc, char *argv[])
       return( 1);
    }
 
-   [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
+   [window setBackgroundColor:CGColorMakeWithRGBA( 0.0, 0.0, 0.0, 1.0)];
    [app addWindow:window];
 
    setupScene( window);

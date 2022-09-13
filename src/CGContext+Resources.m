@@ -112,7 +112,7 @@
 
 
 - (NSInteger) textureIDWithBytes:(void *) bytes
-                      bitmapSize:(struct CGBitmapSize) size
+                      bitmapSize:(struct MulleIntegerSize) size
                       imageFlags:(NSUInteger) imageFlags
 {
    NSInteger   imageID;
@@ -150,7 +150,7 @@
 
 
 - (NSInteger) textureIDWithGPUTextureRGBA:(void *) gpuTexture
-                               bitmapSize:(struct CGBitmapSize) size
+                               bitmapSize:(struct MulleIntegerSize) size
                                imageFlags:(NSUInteger) imageFlags
 {
    NSInteger   imageID;

@@ -42,7 +42,7 @@
 
 - (CGImage *) imageWithGPUTextureRGBA:(void *) gpuTexture
                      sharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
-                           bitmapSize:(struct CGBitmapSize) size
+                           bitmapSize:(struct MulleIntegerSize) size
                            imageFlags:(NSUInteger) imageFlags
 {
    CGImage   *image;
@@ -115,7 +115,7 @@
 
 - (instancetype) initWithGPUTextureRGBA:(void *) gpuTexture
                        sharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
-                             bitmapSize:(struct CGBitmapSize) size
+                             bitmapSize:(struct MulleIntegerSize) size
                              imageFlags:(NSUInteger) imageFlags
                                 context:(CGContext *) context
 {
@@ -215,7 +215,7 @@
                                        context:(CGContext *) context
 {
    NSInteger             imageID;
-   struct CGBitmapSize   bitmapSize;
+   struct MulleIntegerSize   bitmapSize;
 
    assert( [context isActive]);
 
@@ -250,7 +250,7 @@
 
 
 - (instancetype) initWithRGBABytes:(void *) bytes
-                        bitmapSize:(struct CGBitmapSize) bitmapSize
+                        bitmapSize:(struct MulleIntegerSize) bitmapSize
                         imageFlags:(NSUInteger) imageFlags
                            context:(CGContext *) context
 {
@@ -287,8 +287,8 @@
    struct CGBitmap         convertedBitmap;
    struct CGBitmapInfo     convertedBitmapInfo;
    BOOL                    isFlipped;
-   enum CGBitmapEncoding   encoding;
-   enum CGBitmapEncoding   convertedEncoding;
+   CGBitmapEncoding   encoding;
+   CGBitmapEncoding   convertedEncoding;
 
    if( ! bitmap)
    {
@@ -383,12 +383,12 @@
 //
 // can change behind our backs, when shared for sure!
 //
-- (struct CGBitmapSize) bitmapSize
+- (struct MulleIntegerSize) bitmapSize
 {
    int   w, h;
 
    nvgImageSize( CGContextGetNVGContext( _context), _imageID, &w, &h);
-   return( CGBitmapSizeMake( w, h));
+   return( MulleIntegerSizeMake( w, h));
 }
 
 
@@ -470,7 +470,7 @@
    //
    image = [otherContext imageWithGPUTextureRGBA:gpuTexture
                                 sharedGPUTexture:_sharedGPUTexture
-                                      bitmapSize:CGBitmapSizeMake( w, h)
+                                      bitmapSize:MulleIntegerSizeMake( w, h)
                                       imageFlags:imageFlags];
 
    // We now share a OpenGL texture with a different context

@@ -540,7 +540,7 @@ int   main( int argc, char *argv[])
                                styleMask:styleMask];
 
       assert( window);
-      [window setBackgroundColor:CGColorMakeRGBA( 1.0, 1.0, 1.0, 1.0)];
+      [window setBackgroundColor:CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 1.0)];
       setupScene( window);
 
       [window setSwapInterval:swapInterval];

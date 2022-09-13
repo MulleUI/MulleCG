@@ -76,7 +76,7 @@
 
 @class CGContext;
 
-enum CGFlip
+typedef NS_ENUM( NSUInteger, CGFlip)
 {
    CGFlipNone         = 0x0,
    CGFlipHorizontally = 0x1,
@@ -84,7 +84,7 @@ enum CGFlip
    CGFlipBoth         = 0x3
 };
 
-enum CGRepeat
+typedef NS_ENUM( NSUInteger, CGRepeat)
 {
    CGRepeatNone         = 0x0,
    CGRepeatHorizontally = 0x1,
@@ -123,9 +123,9 @@ static inline CGDrawableOptions   CGDrawableOptionsMake( CGFloat alpha,
                                                          CGFloat cornerRadius,
                                                          CGFloat rotation,
                                                          CGFloat scale,
-                                                         enum CGFlip flip,
-                                                         enum CGRepeat repeat,
-                                                         enum CGContentMode contentMode)
+                                                         CGFlip flip,
+                                                         CGRepeat repeat,
+                                                         CGContentMode contentMode)
 {
    return( (CGDrawableOptions) {
                                  .alpha             = alpha,
@@ -216,7 +216,7 @@ PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
 - (struct CGBitmapInfo) bitmapInfo;
 
 @optional
-- (struct CGBitmapSize) bitmapSize;  // just integer value of size
+- (struct MulleIntegerSize) bitmapSize;  // just integer value of size
 
 //
 // this calls drawRect:options:context:drawableBitmapImage: after calling

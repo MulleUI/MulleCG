@@ -159,7 +159,7 @@ static int  has_version_header( char *s)
 }
 
 
-+ (enum CGContextNanoVGBackend) nanoVGBackend
++ (CGContextNanoVGBackend) nanoVGBackend
 {
 #ifdef NANOVG_GL3_IMPLEMENTATION
    return( CG_GL3);
@@ -323,7 +323,7 @@ static int  has_version_header( char *s)
 
    if( bits & GL_COLOR_BUFFER_BIT)
    {
-      CGColorGetComponents( color, rgba);
+      CGColorGetRGBAComponents( color, rgba);
       glClearColor( rgba[ 0], rgba[ 1], rgba[ 2], rgba[ 3]);
    }
 
@@ -417,7 +417,7 @@ static int  has_version_header( char *s)
 //
 // void   glDrawTexiOES( int, int, int, int, int);
 //
-// - (void) blitRect:(struct CGBitmapRect) rect
+// - (void) blitRect:(struct MulleIntegerRect) rect
 //             image:(CGImage *) image
 // {
 //    void   *gpuTexture;
@@ -480,7 +480,7 @@ static int  has_version_header( char *s)
    struct CGBitmap               bitmap;
    struct CGContextFramebuffer   next;
    struct CGContextFramebuffer   previous;
-   struct CGBitmapSize           bitmapSize;
+   struct MulleIntegerSize           bitmapSize;
    size_t                        size;
 
    assert( _isActive);
@@ -541,8 +541,8 @@ static int  has_version_header( char *s)
                                  allocator:(struct mulle_allocator *) allocator
 {
    struct CGBitmap         bitmap;
-   struct CGBitmapSize     bitmapSize;
-   enum CGBitmapEncoding   encoding;
+   struct MulleIntegerSize     bitmapSize;
+   CGBitmapEncoding   encoding;
    GLenum                  format;
    GLenum                  type;
    size_t                  size;
@@ -596,12 +596,12 @@ static int  has_version_header( char *s)
 /*
  * Read framebuffer information from GPU to CPU
  */
-- (struct CGBitmap) readFramebufferBitmap:(struct CGBitmapRect) rect
-                    framebufferBitmapType:(enum CGFramebufferBitmapType) fType
+- (struct CGBitmap) readFramebufferBitmap:(struct MulleIntegerRect) rect
+                    framebufferBitmapType:(CGFramebufferBitmapType) fType
                                 allocator:(struct mulle_allocator *) allocator
 {
    struct CGBitmap         bitmap;
-   enum CGBitmapEncoding   encoding;
+   CGBitmapEncoding        encoding;
    GLenum                  format;
    GLenum                  type;
    size_t                  size;

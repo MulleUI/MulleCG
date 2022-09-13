@@ -154,7 +154,7 @@ static void   drawFancyButtonHighlight( struct NVGcontext *vg, CGRect rect)
                               CGRectGetMinY( rect),
                               CGRectGetMinX( rect),
                               CGRectGetMinY( rect) + corner,
-                              CGColorMakeRGBA( 1.0, 1.0, 1.0, 0.8),
+                              CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.8),
                               CGColorMakeTransparent());
 //   nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
    nvgFillPaint( vg, paint);
@@ -233,7 +233,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
       float    ih = 0;
       int      preicon = 0xE740;
       float    x, y, w, h;
-      char     *text = "auxo";
+      char     *text = "Start";
       char     *iconText;
       CGRect   iconRect;
       CGRect   textRect;
@@ -277,20 +277,20 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
                                        CGRectGetMinY( iconRect),
                                        CGRectGetMinX( iconRect),
                                        CGRectGetMaxY( iconRect),
-                                       CGColorMakeRGBA( 0.6, 0.6, 0.6, 0.6),
-                                       CGColorMakeRGBA( 0.2, 0.2, 0.2, 0.2));
+                                       CGColorMakeWithRGBA( 0.6, 0.6, 0.6, 0.6),
+                                       CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.2));
 #else
             paint = nvgRadialGradient( vg,
                                        CGRectGetMidX( iconRect) - iconRect.size.width / 8.0,
                                        CGRectGetMidY( iconRect) - iconRect.size.width / 8.0,
                                        iconRect.size.width / 8.0,
                                        iconRect.size.width / 2.0,
-                                       CGColorMakeRGBA( 1.0, 1.0, 1.0, 0.7),
-                                       CGColorMakeRGBA( 0.2, 0.2, 0.2, 0.2)),
+                                       CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.6),
+                                       CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.2)),
 #endif
             nvgFillPaint( vg, paint);
             nvgFill( vg);
-            nvgStrokeColor( vg, CGColorMakeRGBA( 0.8, 0.8, 0.8, 0.8));
+            nvgStrokeColor( vg, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 0.8));
             nvgStroke( vg);
 
             iconRect = CGRectInset( iconRect, iconRect.size.width / 8.0, iconRect.size.width / 8.0);
@@ -318,7 +318,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
 
          nvgFontFace(vg, "sans");
          nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
-         nvgTextColor( vg, CGColorMakeWhite(),
+         nvgTextColor( vg, CGColorByMultiplyingAlpha( colors[ 3], 0.9),
                            CGColorByMultiplyingAlpha( colors[ 1], 1.0));
          mvgTextInRect( vg, text,
                             NULL,
@@ -329,38 +329,6 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
       MulleLayoutDone( &layout);
    }
    nvgRestore( vg);
-}
-
-
-static inline CGRect   CGRectBeforeRect( CGRect rect, CGFloat width)
-{
-   rect.origin.x   = CGRectGetMinX( rect) - width;
-   rect.size.width = width;
-   return( rect);
-}
-
-
-static inline CGRect   CGRectAfterRect( CGRect rect, CGFloat width)
-{
-   rect.origin.x   = CGRectGetMaxX( rect);
-   rect.size.width = width;
-   return( rect);
-}
-
-
-static inline CGRect   CGRectAboveRect( CGRect rect, CGFloat height)
-{
-   rect.origin.y    = CGRectGetMinY( rect) - height;
-   rect.size.height = height;
-   return( rect);
-}
-
-
-static inline CGRect   CGRectBelowRect( CGRect rect, CGFloat height)
-{
-   rect.origin.y    = CGRectGetMaxY( rect);
-   rect.size.height = height;
-   return( rect);
 }
 
 
@@ -381,10 +349,10 @@ static void   drawButton( CALayer *layer, CGContext *context)
    for( y = 0; y < 3; y++)
       for( x = 0; x < 3; x++)
       {
-         colors[ 0] = CGColorMakeHSV( 1.0 / 8.0 * (x + y * 3), 1.0, 1.0);
-         colors[ 1] = CGColorMakeHSV( 1.0 / 8.0 * (x + y * 3), 1.0, 0.5);
+         colors[ 0] = CGColorMakeWithHSV( 1.0 / 8.0 * (x + y * 3), 1.0, 1.0);
+         colors[ 1] = CGColorMakeWithHSV( 1.0 / 8.0 * (x + y * 3), 1.0, 0.5);
          colors[ 2] = CGColorMakeTransparent();
-         colors[ 3] = CGColorMakeRGB( 1.0, 1.0, 1.0);
+         colors[ 3] = CGColorMakeWithRGB( 1.0, 1.0, 1.0);
 
          rect = CGRectIntegral( rects[ y][ x]);
          drawFancyButton( context, rect, colors);
@@ -392,7 +360,7 @@ static void   drawButton( CALayer *layer, CGContext *context)
          vg = CGContextGetNVGContext( context);
          nvgFontSize( vg, 14.0f);
          nvgFontFace( vg, "sans");
-         nvgTextColor( vg, CGColorMakeWhite(), CGColorMakeRGBA( 0.8, 0.8, 0.8, 1.0));
+         nvgTextColor( vg, CGColorMakeWhite(), CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 1.0));
          mvgTextInRect( vg,
                         CGRectUTF8String( rect),
                         NULL,
@@ -428,7 +396,7 @@ int   main( int argc, char *argv[])
                                       styleMask:UIWindowStyleMaskDefault & ~UIWindowStyleRetained] autorelease];
 
       assert( window);
-      [window setBackgroundColor:CGColorMakeRGBA( 0.8, 0.8, 0.8, 1.0)];
+      [window setBackgroundColor:CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 1.0)];
       setupScene( window);
       [app addWindow:window];
    }

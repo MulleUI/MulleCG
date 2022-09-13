@@ -9,17 +9,17 @@
 
 @implementation CGLayer
 
-+ (instancetype) layerWithBitmapSize:(struct CGBitmapSize) bitmapSize
++ (instancetype) layerWithIntegerSize:(struct MulleIntegerSize) bitmapSize
                           imageFlags:(NSUInteger) imageFlags
                              context:(CGContext *) context
 {
-   return( [[[self alloc] initWithBitmapSize:bitmapSize
+   return( [[[self alloc] initWithIntegerSize:bitmapSize
                                   imageFlags:imageFlags
                                      context:context] autorelease]);
 }
 
 
-- (instancetype) initWithBitmapSize:(struct CGBitmapSize) bitmapSize
+- (instancetype) initWithIntegerSize:(struct MulleIntegerSize) bitmapSize
                          imageFlags:(NSUInteger) imageFlags
                             context:(CGContext *) context
 {
@@ -61,7 +61,7 @@
                     imageFlags:(NSUInteger) imageFlags
                        context:(CGContext *) context
 {
-   struct CGBitmapSize           bitmapSize;
+   struct MulleIntegerSize           bitmapSize;
    struct CGContextFramebuffer   old;
    struct CGFrameInfo            frameInfo;
    struct CGFrameInfo            oldFrameInfo;
@@ -69,7 +69,7 @@
    assert( [image context] == context);
 
    bitmapSize = [image bitmapSize];
-   self = [self initWithBitmapSize:bitmapSize
+   self = [self initWithIntegerSize:bitmapSize
                         imageFlags:imageFlags
                            context:context];
    if( ! self)
@@ -124,7 +124,7 @@
 
 
 - (instancetype) initWithRGBABytes:(void *) bytes
-                        bitmapSize:(struct CGBitmapSize) bitmapSize
+                        bitmapSize:(struct MulleIntegerSize) bitmapSize
                         imageFlags:(NSUInteger) imageFlags
                            context:(CGContext *) context
 {

@@ -89,7 +89,7 @@
    }
    while( (r + g + b) < 0.4);
 
-   self->color       = CGColorMakeRGB( r, g, b);
+   self->color       = CGColorMakeWithRGB( r, g, b);
    return( self);
 }
 
@@ -204,7 +204,7 @@ int   main()
                             styleMask:EDGE_ANTIALIAS ? UIWindowStyleEdgeAntialias : UIWindowStyleNop];
    [app addWindow:window];
 
-   [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
+   [window setBackgroundColor:CGColorMakeWithRGBA( 0.0, 0.0, 0.0, 1.0)];
    [window setFrameRate:UIWindowFrameRateSynced];
 
    setupSceneInView( [window contentPlane]);

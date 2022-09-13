@@ -24,6 +24,8 @@ src/main-cglayer.m
 src/main-draw.m
 src/main-draw-simple.m
 src/main-fancy-button.m
+src/main-fancy-stepper.m
+src/main-fonts.m
 src/main-glfw-cglayer.m
 src/main-glfw-draw-offscreen.m
 src/main-glfw-draw-simple.m
@@ -31,7 +33,10 @@ src/main-glfw-two-windows.m
 src/main-opengl.m
 src/main-particlelayers.m
 src/main-particles.m
+src/main-particles-sorted.m
+src/main-segments.m
 src/main-suspend-resume.m
+src/main-tableview.m
 src/main-text-alignment.m
 src/main-text-bounds.m
 src/main-text-contentmode.m

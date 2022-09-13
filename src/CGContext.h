@@ -9,7 +9,7 @@ struct NVGcontext;
 @class CGImage;
 
 
-enum CGContextNanoVGBackend
+typedef NS_ENUM( NSUInteger, CGContextNanoVGBackend)
 {
    CG_GL3,
    CG_GL3_2,
@@ -29,7 +29,7 @@ enum CGContextNanoVGBackend
 
 
 
-enum CGContextFramebufferType
+typedef NS_ENUM( NSUInteger, CGContextFramebufferType)
 {
    CGContextDefaultFramebuffer,
    CGContextLayerFramebuffer,

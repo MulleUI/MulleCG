@@ -357,17 +357,17 @@ l_Position, normal);\n"
 }
 
 
-- (CGLayer *) layerWithSize:(struct CGBitmapSize) size
+- (CGLayer *) layerWithSize:(struct MulleIntegerSize) size
 {
    CGLayer               *layer;
-   struct CGBitmapSize   oldSize;
+   struct MulleIntegerSize   oldSize;
 
    layer   = acquire_ivar_object( &_scratchLayer);
    oldSize = [layer bitmapSize];
 
-   if( ! CGBitmapSizeEqualToBitmapSize( oldSize, size))
+   if( ! MulleIntegerSizeEqualToIntegerSize( oldSize, size))
    {
-      layer = [CGLayer layerWithBitmapSize:size
+      layer = [CGLayer layerWithIntegerSize:size
                                 imageFlags:0
                                    context:self];
 #ifdef DEBUG
@@ -384,7 +384,7 @@ l_Position, normal);\n"
                                  (char *) __PRETTY_FUNCTION__,
                                  "created new layer %#@ with size %s",
                                  layer,
-                                 CGBitmapSizeUTF8String( size));
+                                 MulleIntegerSizeUTF8String( size));
 #endif
    }
    else
@@ -394,7 +394,7 @@ l_Position, normal);\n"
                                  (char *) __PRETTY_FUNCTION__,
                                  "reused layer %#@ with size %s",
                                  layer,
-                                 CGBitmapSizeUTF8String( size));
+                                 MulleIntegerSizeUTF8String( size));
 #endif
    }
    return( layer);
@@ -416,8 +416,8 @@ l_Position, normal);\n"
    mulleui_log_object_method( self,
                               (char *) __PRETTY_FUNCTION__,
                               "Viewport: %s, FB: %s, Window: %s",
-                              CGBitmapRectUTF8String( info->viewportFrame),
-                              CGBitmapSizeUTF8String( info->window.framebufferSize),
+                              MulleIntegerRectUTF8String( info->viewportFrame),
+                              MulleIntegerSizeUTF8String( info->window.framebufferSize),
                               CGSizeUTF8String( info->window.frame.size));
 #endif
 
@@ -675,7 +675,7 @@ static struct CGFrameInfo   emptyInfo;
 }
 
 
-// - (MulleTextureImage *) framebufferImageWithBitmapSize:(struct CGBitmapInfo) size
+// - (MulleTextureImage *) framebufferImageWithIntegerSize:(struct CGBitmapInfo) size
 //                                                options:(NSUInteger) options
 // {
 //    MulleTextureImage   *image;

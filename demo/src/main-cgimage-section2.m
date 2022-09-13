@@ -54,7 +54,7 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon
    image = [[[CGImage alloc] initWithRGBABytes:bitmap3
-                                    bitmapSize:CGBitmapSizeMake( 5, 5)
+                                    bitmapSize:MulleIntegerSizeMake( 5, 5)
                                     imageFlags:NVG_IMAGE_NEAREST  // NVG_IMAGE_REPEATX
                                        context:context] autorelease];
    assert( image);
@@ -111,7 +111,7 @@ int   main( int argc, char *argv[])
                                       styleMask:UIWindowStyleMaskDefault & ~UIWindowStyleRetained] autorelease];
 
       assert( window);
-      [window setBackgroundColor:CGColorMakeRGBA( 0.5, 0.5, 0.5, 1.0)];
+      [window setBackgroundColor:CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0)];
       setupScene( window);
       [app addWindow:window];
    }

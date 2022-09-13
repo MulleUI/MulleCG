@@ -30,11 +30,11 @@ struct CGFrameInfo;
 @property( readonly, assign) void   *framebuffer;
 @property char                      *debugNameUTF8String;  // useful for debugging
 
-+ (instancetype) layerWithBitmapSize:(struct CGBitmapSize) size
++ (instancetype) layerWithIntegerSize:(struct MulleIntegerSize) size
                           imageFlags:(NSUInteger) imageFlags
                              context:(CGContext *) context;
 
-- (instancetype) initWithBitmapSize:(struct CGBitmapSize) size
+- (instancetype) initWithIntegerSize:(struct MulleIntegerSize) size
                          imageFlags:(NSUInteger) imageFlags
                             context:(CGContext *) context;
 
