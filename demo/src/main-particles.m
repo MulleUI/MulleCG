@@ -81,7 +81,7 @@ static inline void   ParticleInit( struct Particle *p, CGSize canvasSize)
    }
    while( (r + g + b) < 0.4);
 
-   p->color       = CGColorMakeRGB( r, g, b);
+   p->color       = CGColorMakeWithRGB( r, g, b);
 }
 
 static inline void   ParticleDraw( struct Particle *p, NVGcontext *vg)
@@ -172,7 +172,7 @@ static inline void   ParticleUpdate( struct Particle *p, CGSize canvasSize)
    CGRect       canvas;
    NSUInteger   i;
 
-   mulle_fprintf( stderr, "%#@: %#@ drawInContext\n", [NSThread currentThread], self);
+//   MulleUICLog( stderr, "%#@: %#@ drawInContext\n", [NSThread currentThread], self);
 
    [super drawInContext:context];
 
@@ -239,9 +239,11 @@ int   main()
                                 styleMask:styleMask];
    [app addWindow:window];
 
-   [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
+   [window setBackgroundColor:CGColorMakeWithRGBA( 0.0, 0.0, 0.0, 1.0)];
    [window setFrameRate:UIWindowFrameRateSynced];
    setupSceneInView( [window contentPlane]);
+
+   [window setFrameDelegate:[MulleUIPerf object]];
 
    return( [app run]);
 }

@@ -42,14 +42,14 @@
 - (void) addImageToResources:(CGImage *) image;
 
 - (NSInteger) textureIDWithBytes:(void *) bytes
-                      bitmapSize:(struct CGBitmapSize) size
+                      bitmapSize:(struct MulleIntegerSize) size
                       imageFlags:(NSUInteger) imageFlags;
 - (NSInteger) textureIDWithFileCData:(struct mulle_data) fileCData
                           imageFlags:(NSUInteger) imageFlags;
 - (NSInteger) textureIDWithContentsOfFileCString:(char *) filename
                                       imageFlags:(NSUInteger) imageFlags;
 - (NSInteger) textureIDWithGPUTextureRGBA:(void *) gpuTexture
-                               bitmapSize:(struct CGBitmapSize) size
+                               bitmapSize:(struct MulleIntegerSize) size
                                imageFlags:(NSUInteger) imageFlags;
 
 - (void) deleteTextureID:(NSInteger) imageID;

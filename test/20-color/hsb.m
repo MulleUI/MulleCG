@@ -37,7 +37,7 @@ int   main( int argc, char *argv[])
       for( s = 0; s <= 3; s++)
          for( b = 0; b <= 3; b++)
          {
-            print_color( CGColorMakeHSB( h / 3.0, s / 3.0, b / 3.0));
+            print_color( CGColorMakeWithHSB( h / 3.0, s / 3.0, b / 3.0));
          }
    return( 0);
 }

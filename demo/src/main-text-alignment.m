@@ -92,7 +92,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
             nvgBeginPath(vg);
             nvgRect( vg, bounds[0], bounds[1], bounds[2] - bounds[0], bounds[3] - bounds[1]);
-            nvgStrokeColor( vg, CGColorMakeRGBA( 1, 0, 0, 0.333));
+            nvgStrokeColor( vg, CGColorMakeWithRGBA( 1, 0, 0, 0.333));
             nvgStrokeWidth( vg, 1.0);
             nvgStroke( vg);
 
@@ -100,7 +100,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
             nvgBeginPath(vg);
             nvgRect( vg, bounds[0], bounds[1], bounds[2] - bounds[0], bounds[3] - bounds[1]);
-            nvgStrokeColor( vg, CGColorMakeRGBA( 0, 1, 0, 0.333));
+            nvgStrokeColor( vg, CGColorMakeWithRGBA( 0, 1, 0, 0.333));
             nvgStrokeWidth( vg, 1.0);
             nvgStroke( vg);
 
@@ -120,11 +120,11 @@ static void   drawStuff( CALayer *layer, CGContext *context)
             }
             nvgBeginPath(vg);
             nvgRect( vg, bounds[0], bounds[1], bounds[2] - bounds[0], bounds[3] - bounds[1]);
-            nvgStrokeColor( vg, CGColorMakeRGBA( 0, 0, 1, 0.333));
+            nvgStrokeColor( vg, CGColorMakeWithRGBA( 0, 0, 1, 0.333));
             nvgStrokeWidth( vg, 1.0);
             nvgStroke( vg);
 
-            nvgTextColor( vg, CGColorMakeHSVA( x / (CGFloat) N_ALIGNMENTS, 1.0, 1.0, 1.0),
+            nvgTextColor( vg, CGColorMakeWithHSVA( x / (CGFloat) N_ALIGNMENTS, 1.0, 1.0, 1.0),
                               CGColorMakeWhite()); // TODO: use textColor
             nvgText( vg, origin.x, origin.y, s, NULL);
          }
@@ -167,7 +167,7 @@ int   main( int argc, char *argv[])
                                styleMask:styleMask];
 
       assert( window);
-      [window setBackgroundColor:CGColorMakeRGBA( 1.0, 1.0, 1.0, 1.0)];
+      [window setBackgroundColor:CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 1.0)];
       setupScene( window);
 
       [app addWindow:window];

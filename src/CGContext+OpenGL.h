@@ -14,7 +14,7 @@
 
 @interface CGContext( OpenGL)
 
-+ (enum CGContextNanoVGBackend) nanoVGBackend;
++ (CGContextNanoVGBackend) nanoVGBackend;
 + (char *) nanoVGBackendUTF8String;
 
 - (char *) shaderHeaderUTF8String;
@@ -34,8 +34,8 @@
 // framebuffer needs to be bound here, and context must be active
 // you need to free the returned bitmap bytes
 //
-- (struct CGBitmap) readFramebufferBitmap:(struct CGBitmapRect) rect
-                    framebufferBitmapType:(enum CGFramebufferBitmapType) type
+- (struct CGBitmap) readFramebufferBitmap:(struct MulleIntegerRect) rect
+                    framebufferBitmapType:(CGFramebufferBitmapType) type
                                 allocator:(struct mulle_allocator *) allocator;
 
 //

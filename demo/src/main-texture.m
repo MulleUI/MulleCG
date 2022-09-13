@@ -58,12 +58,12 @@ static void  createTexture( CGContext *context,
 
    // we create small 32x32 texture
 
-   texture = [CGLayer layerWithBitmapSize:CGBitmapSizeMake( 32, 32)
+   texture = [CGLayer layerWithIntegerSize:MulleIntegerSizeMake( 32, 32)
                                imageFlags:imageFlags
                                   context:context];
    assert( texture);
 
-   frameInfo      = CGFrameInfoFBMake( CGBitmapSizeMake( 32, 32), pixelRatio, 1.0);
+   frameInfo      = CGFrameInfoFBMake( MulleIntegerSizeMake( 32, 32), pixelRatio, 1.0);
 
    //
    // with the push functionality, we should be able to run this also inside
@@ -149,7 +149,7 @@ void   setupScene( UIWindow *window)
    createTexture( context,
                   [window pixelRatio],
                   NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
-   [window deactivateContext:context];
+   [window deactivateGraphicsContext:context];
 #endif
 }
 
@@ -173,7 +173,7 @@ int   main( int argc, char *argv[])
                              titleUTF8String:"Demo"
                                    styleMask:styleMask] autorelease];
 
-   [window setBackgroundColor:CGColorMakeRGBA( 0.0, 0.0, 0.0, 1.0)];
+   [window setBackgroundColor:CGColorMakeWithRGBA( 0.0, 0.0, 0.0, 1.0)];
    [window setFrameRateHz:60.0f];
    setupScene( window);
 

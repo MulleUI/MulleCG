@@ -39,7 +39,7 @@ int   main( int argc, char *argv[])
       for( g = 0; g <= 3; g++)
          for( b = 0; b <= 3; b++)
          {
-            print_color( CGColorMakeRGB( r / 3.0, g / 3.0, b / 3.0));
+            print_color( CGColorMakeWithRGB( r / 3.0, g / 3.0, b / 3.0));
          }
    return( 0);
 }

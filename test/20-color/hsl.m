@@ -40,7 +40,7 @@ int   main( int argc, char *argv[])
       for( s = 0; s <= 3; s++)
          for( l = 0; l <= 3; l++)
          {
-            print_color( CGColorMakeHSL( h / 3.0, s / 3.0, l / 3.0));
+            print_color( CGColorMakeWithHSL( h / 3.0, s / 3.0, l / 3.0));
          }
    return( 0);
 }

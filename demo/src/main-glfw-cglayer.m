@@ -49,7 +49,7 @@ static void   draw( struct NVGcontext *vg)
       nvgBeginPath( vg);
       {
          nvgCircle( vg, W / 2.0 ,H / 2.0, W / 2.0 - S / 2.0);
-         nvgStrokeColor( vg, CGColorMakeRGB( 0.85f, 0.85f, 0.85f));
+         nvgStrokeColor( vg, CGColorMakeWithRGB( 0.85f, 0.85f, 0.85f));
          nvgStrokeWidth( vg, S);
       }
       nvgStroke( vg);
@@ -115,7 +115,7 @@ int   main( int argc, char *argv[])
          // GPU, where we can draw into (a framebuffer). A CGLayer is a CGImage
          // so it can act as a texture
          //
-         cgLayer = [CGLayer layerWithBitmapSize:CGBitmapSizeMake( W, H)
+         cgLayer = [CGLayer layerWithIntegerSize:MulleIntegerSizeMake( W, H)
                                     imageFlags:0
                                        context:context];
          if( ! cgLayer)

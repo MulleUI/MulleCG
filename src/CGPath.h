@@ -7,6 +7,7 @@
 #include "include.h"
 
 
+// pure C file, can't use NS_ENUM
 enum CGPathCommand
 {
    CGPathMoveToPointCommand,
@@ -15,6 +16,7 @@ enum CGPathCommand
    CGPathCloseSubpathCommand
 };
 
+typedef uintptr_t  CGPathCommand;
 
 //
 // this is always mutable, but CGMutablePathRef is kept in the API for

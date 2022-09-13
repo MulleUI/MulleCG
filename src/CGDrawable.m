@@ -4,6 +4,9 @@
 #import "CGImage.h"
 
 
+// #define DRAWABLE_DEBUG
+
+
 CGDrawableOptions   CGDrawableOptionsDefault =
 {
    .alpha             = 1.0f,
@@ -53,7 +56,7 @@ PROTOCOLCLASS_END()
 
 PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 
-- (struct CGBitmapSize) bitmapSize
+- (struct MulleIntegerSize) bitmapSize
 {
    return( [self bitmapInfo].size);
 }
@@ -61,7 +64,7 @@ PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 
 - (CGSize) size
 {
-   struct CGBitmapSize   size;
+   struct MulleIntegerSize   size;
 
    size = [self bitmapSize];
 
@@ -267,8 +270,10 @@ CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
    CGPoint             patternPoint;
    CGRect              centeredRect;
 
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "rect=%s angle=%.3f extent=%s\n",
          CGRectUTF8String( rect), CAAngleRadiansToDegrees( angle), CGSizeUTF8String( extent));
+#endif
 
    // xform should place texture at center so
    //rect.origin        = CGRectGetCenterPoint( rect);
@@ -278,10 +283,14 @@ CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
    // of the drawing.
    // So we first have to fake the rect to be in the center of the drawing.
    centeredRect      = rect;
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "centeredRect     : %s\n", CGRectUTF8String( centeredRect));
+#endif   
 
    centerPoint        = CGRectGetCenterPoint( centeredRect);
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "centerPoint      : %s\n", CGPointUTF8String( centerPoint));
+#endif   
 
    xform              = textureMapperTransform( centeredRect, angle, extent);
    xform              = CGAffineTransformInvert( xform);
@@ -289,7 +298,9 @@ CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
    // now when we apply the transform to the center point of the texture
    // we get a rotated point, which can lie outside of centered rect (no problem)
    rotatedPoint       = CGPointApplyAffineTransform( texturePoint, xform);
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "rotatedPoint     : %s\n", CGPointUTF8String( rotatedPoint));
+#endif   
 
    // rotatedPoint is the center of the texture, which we want to place in the
    // middle of the pattern. The extent is the size of the texture in  the
@@ -312,12 +323,16 @@ CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
    // }
    rotatedOrigin.x = (rotatedPoint.x - (extent.width / 2.0));
    rotatedOrigin.y = (rotatedPoint.y - (extent.height / 2.0));
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "rotatedOrigin    : %s\n", CGPointUTF8String( rotatedOrigin));
+#endif   
 
    patternPoint = CGPointMake( centeredRect.origin.x - (extent.width / 2.0) + (centerPoint.x - rotatedOrigin.x),
                                centeredRect.origin.y - (extent.height / 2.0) + (centerPoint.y - rotatedOrigin.y)); // + rotatedOrigin.y);/*
 
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "patternPoint     : %s\n\n", CGPointUTF8String( patternPoint));
+#endif   
    return( patternPoint);
 }
 
@@ -335,9 +350,10 @@ static CGPoint  CGRectGetOriginToCenterForAngleAndExtent( CGRect rect,
    CGPoint             patternPoint;
    CGRect              centeredRect;
 
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "rect=%s angle=%.3f extent=%s\n",
          CGRectUTF8String( rect), CAAngleRadiansToDegrees( angle), CGSizeUTF8String( extent));
-
+#endif
    // xform should place texture at center so
    //rect.origin        = CGRectGetCenterPoint( rect);
 
@@ -346,19 +362,22 @@ static CGPoint  CGRectGetOriginToCenterForAngleAndExtent( CGRect rect,
    // of the drawing.
    // So we first have to fake the rect to be in the center of the drawing.
    centeredRect      = rect;
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "centeredRect     : %s\n", CGRectUTF8String( centeredRect));
-
+#endif
    centerPoint        = CGRectGetCenterPoint( centeredRect);
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "centerPoint      : %s\n", CGPointUTF8String( centerPoint));
-
+#endif
    xform              = textureMapperTransform( centeredRect, angle, extent);
    xform              = CGAffineTransformInvert( xform);
 
    // now when we apply the transform to the center point of the texture
    // we get a rotated point, which can lie outside of centered rect (no problem)
    rotatedPoint       = CGPointApplyAffineTransform( CGPointMake( 0.5, 0.5), xform);
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "rotatedPoint     : %s\n", CGPointUTF8String( rotatedPoint));
-
+#endif
    // rotatedPoint is the center of the texture, which we want to place in the
    // middle of the pattern. The extent is the size of the texture in  the
    // shader. Within "extent" texture coordinates are valid outside of the
@@ -380,12 +399,15 @@ static CGPoint  CGRectGetOriginToCenterForAngleAndExtent( CGRect rect,
    // }
    rotatedOrigin.x = (rotatedPoint.x - (extent.width / 2.0));
    rotatedOrigin.y = (rotatedPoint.y - (extent.height / 2.0));
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "rotatedOrigin    : %s\n", CGPointUTF8String( rotatedOrigin));
-
+#endif
    patternPoint = CGPointMake( centeredRect.origin.x - (extent.width / 2.0) + (centerPoint.x - rotatedOrigin.x),
                                centeredRect.origin.y - (extent.height / 2.0) + (centerPoint.y - rotatedOrigin.y)); // + rotatedOrigin.y);/*
 
+#ifdef DRAWABLE_DEBUG
    fprintf( stderr, "patternPoint     : %s\n\n", CGPointUTF8String( patternPoint));
+#endif   
    return( patternPoint);
 }
 

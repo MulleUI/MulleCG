@@ -195,13 +195,13 @@ static void   drawStuff( CALayer *layer, CGContext *context)
          nvgFontSize( vg, 80.0);
 
 
-//         nvgTextColor( vg, CGColorMakeRGB( 0.5, 0.5, 0.5), CGColorMakeWhite()); // TODO: use textColor
+//         nvgTextColor( vg, CGColorMakeWithRGB( 0.5, 0.5, 0.5), CGColorMakeWhite()); // TODO: use textColor
 //         nvgText( vg, origin.x, origin.y, s, NULL);
 
          mvgStrokeLineH( vg, CGRectGetMinX( rect), CGRectGetMaxX( rect), CGRectGetMidY( rect), CGColorMakeGray());
          mvgStrokeLineV( vg, CGRectGetMidX( rect), CGRectGetMinY( rect), CGRectGetMaxY( rect), CGColorMakeGray());
 
-         strokeBoundsInRect( vg, textBounds, rect, CGColorMakeRGBA( 1, 0, 0, 0.666));
+         strokeBoundsInRect( vg, textBounds, rect, CGColorMakeWithRGBA( 1, 0, 0, 0.666));
          strokeBounds( vg, visualBounds, CGColorMakeGreen());
 
          // to draw little rectangles around each glyph, we need more detailed
@@ -265,7 +265,7 @@ int   main( int argc, char *argv[])
                          titleUTF8String:"Demo"
                                styleMask:styleMask];
       assert( window);
-      [window setBackgroundColor:CGColorMakeRGBA( 1.0, 1.0, 1.0, 1.0)];
+      [window setBackgroundColor:CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 1.0)];
       setupScene( window);
       [window setFrameRate:2.0];
 

@@ -51,7 +51,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    nvgStroke( vg);
 
 
-   info  = CGBitmapInfoMake( CGBitmapSizeMake( 8, 8), 0, CGBitmapEncodingRGBABytes);
+   info  = CGBitmapInfoMake( MulleIntegerSizeMake( 8, 8), 0, CGBitmapEncodingRGBABytes);
    image = [UIBitmapImage imageWithBytes:bitmap
                               bitmapInfo:info
                                allocator:NULL];
@@ -139,7 +139,7 @@ int   main( int argc, char *argv[])
                                          styleMask:UIWindowStyleMaskDefault & ~UIWindowStyleRetained] autorelease];
 
       assert( window);
-      [window setBackgroundColor:CGColorMakeRGBA( 0.5, 0.5, 0.5, 1.0)];
+      [window setBackgroundColor:CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0)];
       setupScene( window);
       [app addWindow:window];
    }

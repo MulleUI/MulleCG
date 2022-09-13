@@ -151,7 +151,7 @@ int   main( int argc, char *argv[])
    UIApplication            *app;
    MyWindow                 *window;
    CGContext                *context;
-   enum GLFWGraphicsHints   hints;
+   GLFWGraphicsHints   hints;
 
    app = [UIApplication sharedInstance];
    @autoreleasepool
