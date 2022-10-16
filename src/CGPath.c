@@ -21,7 +21,7 @@ void   _CGPathInit( struct CGPath *path, struct mulle_allocator *allocator)
 }
 
 
-struct CGPath   *CGPathCreate(struct mulle_allocator *allocator)
+struct CGPath   *CGPathCreate( struct mulle_allocator *allocator)
 {
    CGMutablePathRef   path;
 
@@ -31,14 +31,14 @@ struct CGPath   *CGPathCreate(struct mulle_allocator *allocator)
 }
 
 
-void   _CGPathDone(struct CGPath *path)
+void   _CGPathDone( struct CGPath *path)
 {
    mulle_buffer_done(&path->_commands);
    _mulle_structarray_done(&path->_floats);
 }
 
 
-void CGPathDestroy(struct CGPath *path)
+void CGPathDestroy( struct CGPath *path)
 {
    struct mulle_allocator *allocator;
 

@@ -2,50 +2,12 @@
 
 #import "import-private.h"
 
-
+#include "draw-flag.inc"
 //
 // This demo shows how to tie MulleCG and MulleGLFW together without
-// MulleUICore. But what's the point ? MulleUICore is that much more
+// MulleUIWindow. But what's the point ? MulleUIWindow is that much more
 // convenient...
 //
-static void   drawStuff( CGRect canvas, CGContext *context)
-{
-   struct NVGcontext   *vg;
-
-   vg = CGContextGetNVGContext( context);
-
-   canvas.size.height  /= 3.0;
-
-   // red stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.95, 0.0, 0.0, 1.0));
-   nvgFill( vg);
-
-   // white stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 1,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 1.0, 1.0, 1.0, 1.0));
-   nvgFill( vg);
-
-   // blue stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 2,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.0, 0.0, 1.0, 1.0));
-   nvgFill( vg);
-}
-
-
-
 
 @interface MyWindow : GLFWOSWindow
 
@@ -76,8 +38,9 @@ static void   drawStuff( CGRect canvas, CGContext *context)
 
 
 
-static void   display( GLFWOSWindow *window_in)
+static int   display( GLFWOSWindow *window_in)
 {
+#if 0
    MyWindow      *window = (MyWindow *) window_in;
    CGRect        canvas;
    CGContext     *context;
@@ -94,6 +57,9 @@ static void   display( GLFWOSWindow *window_in)
       drawStuff( canvas, context);
    }
    [context endRender];
+#endif
+   [UIApp requestTerminate];
+   return( 0);
 }
 
 
@@ -139,10 +105,9 @@ int   main( int argc, char *argv[])
       assert( window);
 
       [window os_activateGraphicsContext];
-      context = [[[CGContext alloc] initWithEdgeAntialiasing:YES
-                                           useStencilStrokes:YES
-                                                     shareID:[window shareID]
-                                                     backend:[window backend]] autorelease];        // have to do this manually, because the context is created manually
+      context = [[[CGContext alloc] initWithBackend:[window backend]
+                                            shareID:[window shareID]
+                                            options:UIGraphicsDefaultOptions] autorelease];       // have to do this manually, because the context is created manually
       [context setActive:YES];
       [window os_deactivateGraphicsContext];
 

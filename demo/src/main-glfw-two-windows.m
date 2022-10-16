@@ -222,10 +222,9 @@ static MyWindow   *create_window( unsigned int i,
 
    [window os_activateGraphicsContext];
    {
-      context = [[[CGContext alloc] initWithEdgeAntialiasing:YES
-                                           useStencilStrokes:YES
-                                                     shareID:[window shareID]
-                                                     backend:[window backend]] autorelease];
+      context = [[[CGContext alloc] initWithBackend:[window backend]
+                                            shareID:[window shareID]
+                                            options:UIGraphicsDefaultOptions] autorelease];
       [context setActive:YES];
       // have to do this manually
 

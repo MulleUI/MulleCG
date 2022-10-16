@@ -34,20 +34,23 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                     bounds[ 1],
                     bounds[ 2],
                     bounds[ 3]);
+   fprintf( stderr, "App exits intentionally now\n");
    exit( 0);
 }
 
 
 int   main( int argc, char *argv[])
 {
-   // convenience to the max...
-   return( [UIApplication runWindowForDrawCallback:(CALayerDrawCallback_t *) drawStuff
-                                        canvasSize:CGSizeMake( 200, 200)
-                                        windowSize:CGSizeZero   // CGSizeMake( 200, 400)
-                                   titleUTF8String:NULL
-                                       frameRateHz:1.0f]);
-}
+   UIWindow   *window;
 
+   window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 200, 200)
+                      titleUTF8String:"Demo"
+                            styleMask:UIWindowStyleMaskDefault];
+   assert( window);
+
+   [window setDrawCallback:drawStuff];
+   return( UIApplicationRunWindow( window));
+}
 
 
 

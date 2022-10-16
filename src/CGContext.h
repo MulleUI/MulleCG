@@ -63,6 +63,7 @@ CGContextFramebufferMakeDefault( void)
 static inline struct CGContextFramebuffer
 CGContextFramebufferMakeWithLayer( CGLayer *layer)
 {
+   assert( layer);
    return( (struct CGContextFramebuffer) { .handle = layer, .type = CGContextLayerFramebuffer });
 }
 
@@ -70,6 +71,7 @@ CGContextFramebufferMakeWithLayer( CGLayer *layer)
 static inline struct CGContextFramebuffer
 CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 {
+   assert( handle);
    return( (struct CGContextFramebuffer) { .handle = handle, .type = CGContextOpenGLFramebuffer });
 }
 
@@ -104,6 +106,7 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
    NSUInteger                   _numberOfFrames;  // counts endRenders...
    BOOL                         _isRendering;
    BOOL                         _isActive;
+   BOOL                         _isFreshLayer;
    int                          _nvgFlags; // used for nvgCreate
 
    mulle_absolutetime_t         _firstRenderTimeStamp;
@@ -113,15 +116,26 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
    // context is tied to an offscreen window, it will/should use this
    // offScreenFramebuffer instead.
 
-   mulle_atomic_pointer_t       _drawnLayer;    // CGLayer
-   mulle_atomic_pointer_t       _scratchLayer;  // CGLayer
+   mulle_atomic_pointer_t       _drawnLayer;       // CGLayer
+   mulle_atomic_pointer_t       _scratchLayer;     // CGLayer
 
-   CGLayer                      *_renderLayer;  // ephemeral(!)
+   CGLayer                      *_renderLayer;     // ephemeral(!)
 }
 
 @property( assign, readonly) BOOL   shareID;
 
 @property( assign) BOOL             rendersOffScreen;
+
+// to create "accumlate" effects, you don't clear the framebuffer but instead
+// overwrite the old contents. This is hampered by double buffering and that
+// the old framebuffer is likely to be destroyed at any time by the GPU/OS.
+// So to achieve this use another CGImage is as an intermediate render layer, 
+// which is then blitted into the onscreen or offscreen
+// buffer. This is necessary, because singlebuffer or persistent double
+// buffer is not working with wayland (and maybe not elswhere)
+//
+// So render into [CGImage] - blit -> [offscreen] - blit -> [framebuffer]
+//
 
 @property( assign) BOOL             debugEnabled;
 @property( assign) char             *debugNameUTF8String;  // useful for debugging
@@ -131,12 +145,17 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 
 @property( assign, readonly) UIGraphicsBackend    backend;
 
+// used in so many demos..
+// Can't use UIInputState, because we don't have UIEvent here
+@property( assign) CGPoint          mouseLocation;
+@property( assign) NSUInteger       mouseButtonStates;
+@property( assign) NSUInteger       keyModifiers;
+
 
 // the context needs to be told, what backend is being used
-- (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
-              useStencilStrokes:(BOOL) useStencilStrokes
-                        shareID:(NSUInteger) shareID
-                        backend:(UIGraphicsBackend) backend;
+- (id) initWithBackend:(UIGraphicsBackend) backend
+               shareID:(NSUInteger) shareID
+               options:(UIGraphicsOptions) options;
 
 - (struct NVGcontext *) nvgContext;
 
@@ -197,6 +216,9 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 // back. For reuse ot discarding
 //
 - (void) recycleFramebuffer:(id) layer;
+
+// get recycled framebuffer back 
+- (id) acquireRecycledFramebuffer;
 
 @end
 

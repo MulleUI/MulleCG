@@ -63,7 +63,6 @@
 }
 
 
-
 //
 // the paint is valid for the NVGcontext only, but the nvg context is
 // not kept by the paint, and the nvgContext doesnt keep the paint
@@ -136,7 +135,6 @@
                                           outerColor:outerColor
                                              context:context] autorelease]);
 }
-
 
 
 - (instancetype) initPatternWithImage:(CGImage *) image

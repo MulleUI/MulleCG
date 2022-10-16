@@ -16,13 +16,13 @@
 
 // You can tweak the following #include with these commands.
 // (Use D3F9ED56-BEDF-445E-87DA-47DA5B4CA91A instead of mulle-layout if there are duplicate entries)
-//    remove:             `mulle-sde dependency mark mulle-layout no-header`
-//    rename:             `mulle-sde dependency|library set mulle-layout include whatever.h`
-//    reorder:            `mulle-sde dependency move mulle-layout <up|down>`
+//    remove #include:: `mulle-sde dependency mark mulle-layout no-header`
+//    rename:              `mulle-sde dependency|library set mulle-layout include whatever.h`
+//    reorder:             `mulle-sde dependency move mulle-layout <up|down>`
 //    toggle #include:    `mulle-sde dependency mark mulle-layout [no-]import`
-//    toggle public:      `mulle-sde dependency mark mulle-layout [no-]public`
-//    toggle optional:    `mulle-sde dependency mark mulle-layout [no-]require`
-//    remove for platform:`mulle-sde dependency mark mulle-layout no-platform-<uname>`
+//    toggle public:       `mulle-sde dependency mark mulle-layout [no-]public`
+//    toggle optional:     `mulle-sde dependency mark mulle-layout [no-]require`
+//    remove for platform: `mulle-sde dependency mark mulle-layout no-platform-<uname>`
 //        (use `mulle-sourcetree-to-c --unames` to list known values)
 #include <mulle-layout/mulle-layout.h>   // mulle-layout
 

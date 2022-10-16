@@ -58,7 +58,7 @@ static void  createTexture( CGContext *context,
 
    // we create small 32x32 texture
 
-   texture = [CGLayer layerWithIntegerSize:MulleIntegerSizeMake( 32, 32)
+   texture = [CGLayer layerWithBitmapSize:MulleIntegerSizeMake( 32, 32)
                                imageFlags:imageFlags
                                   context:context];
    assert( texture);

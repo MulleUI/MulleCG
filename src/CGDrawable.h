@@ -172,10 +172,9 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeScaleToFit( void)
 // You can not copy it to another context.
 //
 
-PROTOCOLCLASS_INTERFACE0( CGDrawable)
+@protocol CGDrawable
 
 - (CGSize) size;
-
 
 //
 // rect is the canvas to draw to.
@@ -184,16 +183,10 @@ PROTOCOLCLASS_INTERFACE0( CGDrawable)
           options:(CGDrawableOptions *) options
           context:(CGContext *) context;
 
-@optional
 - (CGRect) canvas;      // always 0,0, size
 - (CGRect) bounds;      // usually same as canvas for bitmaps
 - (BOOL) isRepeating;   // ususally NO, used by repeating bitmaps
 
-PROTOCOLCLASS_END()
-
-
-// somewhat superflous
-@protocol CGVectorDrawable <CGDrawable>
 @end
 
 
@@ -240,3 +233,16 @@ PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
 - (NSUInteger) imageFlags;
 
 PROTOCOLCLASS_END()
+
+
+
+PROTOCOLCLASS_INTERFACE( CGVectorDrawable, CGDrawable)
+
+@optional
+
+- (CGRect) canvas;      // always 0,0, size
+- (CGRect) bounds;      // usually same as canvas for bitmaps
+- (BOOL) isRepeating;   // ususally NO, used by repeating bitmaps
+
+PROTOCOLCLASS_END()
+

@@ -5,6 +5,7 @@
 #import "CGContext+CGFont.h"
 #import "CGContext+OpenGL.h"
 #import "CGContext+Resources.h"
+#import "CGContext+Drawing.h"
 #import "CGImage.h"
 #import "CGLayer.h"
 
@@ -13,9 +14,11 @@
 #include <stdlib.h>
 
 
+#define CGCONTEXT_DEBUG_ENABLED 3
+
 //#define IVAR_DEBUG
 //#define SWAP_DEBUG
-//#define RESIZE_DEBUG
+#define RESIZE_DEBUG
 //#define RENDER_DEBUG
 // this writes out a PNG for each frame
 //#define RENDER_LAYER_DEBUG
@@ -27,7 +30,7 @@ static void   *acquire_ivar_pointer( mulle_atomic_pointer_t *p)
 
    value = _mulle_atomic_pointer_read( p);
    if( ! value)
-      return( value);
+      return( NULL);
 
    for(;;)
    {
@@ -35,8 +38,8 @@ static void   *acquire_ivar_pointer( mulle_atomic_pointer_t *p)
       // don't zero on mismatch
       // return the actual contents of _drawnLayer (before zeroing)
       actual = __mulle_atomic_pointer_cas( p, NULL, value);
-      if( actual == NULL)
-         return( value);
+      if( ! actual || actual == value)
+         return( actual);
       value = actual;
    }
 }
@@ -108,7 +111,14 @@ static struct
 
    s = getenv( "CGContextDebugEnabled");
    if( s)
-      Self._debugEnabled = (char) strtol( s, NULL, 0);}
+      Self._debugEnabled = (char) strtol( s, NULL, 0);
+   else 
+   {
+#ifdef CGCONTEXT_DEBUG_ENABLED
+      Self._debugEnabled = CGCONTEXT_DEBUG_ENABLED;
+#endif
+   }
+}
 
 
 + (void) deinitialize
@@ -182,28 +192,30 @@ l_Position, normal);\n"
 // need to run locked so only one thread can create a NVG context at the
 // same time. The same probably has to be done for every font load  ?
 //
-- (id) initWithEdgeAntialiasing:(BOOL) edgeAntialiasing
-              useStencilStrokes:(BOOL) useStencilStrokes
-                        shareID:(NSUInteger) shareID
-                        backend:(UIGraphicsBackend) backend
+- (id) initWithBackend:(UIGraphicsBackend) backend
+               shareID:(NSUInteger) shareID
+               options:(UIGraphicsOptions) options
 {
    struct mulle_allocator   *allocator;
 
-   _backend = backend;
-   _shareID = shareID;
+   _backend  = backend;
+   _shareID  = shareID;
 
-   mulle_thread_mutex_lock( &Self._freeTypeLock);
+   if( backend != UIGraphicsBackendNone)
    {
-      [self _initNanoVGWithEdgeAntialiasing:edgeAntialiasing
-                          useStencilStrokes:useStencilStrokes];
-   }
-   mulle_thread_mutex_unlock( &Self._freeTypeLock);
+      mulle_thread_mutex_lock( &Self._freeTypeLock);
+      {
+         [self _initNanoVGWithEdgeAntialiasing:options & UIGraphicsEdgeAntialiasing
+                           useStencilStrokes:options & UIGraphicsUseStencilStrokes];
+      }
+      mulle_thread_mutex_unlock( &Self._freeTypeLock);
 
-   if( ! _vg)
-   {
-      fprintf( stderr, "Could not create nanovg context\n");
-      [self release];
-      return( nil);
+      if( ! _vg)
+      {
+         fprintf( stderr, "Could not create nanovg context\n");
+         [self release];
+         return( nil);
+      }
    }
 
    [self _initFontCache];
@@ -232,13 +244,17 @@ l_Position, normal);\n"
 {
    CGLayer   *layer;
 
-   if( ! _vg)  // we died super early, so nothing to do
-   {
-      [super finalize];
-      return;
+   if( _backend != UIGraphicsBackendNone)
+   { 
+      if( ! _vg)  // we died super early, so nothing to do
+      {
+         [super finalize];
+         return;
+      }
+
+      assert( _isActive);
+      assert( ! _isRendering);
    }
-   assert( _isActive);
-   assert( ! _isRendering);
 
    if( _debugEnabled)
       MulleUILogThisMethod();
@@ -255,11 +271,14 @@ l_Position, normal);\n"
    acquire_ivar_object( &_drawnLayer);
    acquire_ivar_object( &_scratchLayer);
 
-   mulle_thread_mutex_lock( &Self._freeTypeLock);
+   if( _backend != UIGraphicsBackendNone)
    {
-      [self _finalizeNanoVG];
+      mulle_thread_mutex_lock( &Self._freeTypeLock);
+      {
+         [self _finalizeNanoVG];
+      }
+      mulle_thread_mutex_unlock( &Self._freeTypeLock);
    }
-   mulle_thread_mutex_unlock( &Self._freeTypeLock);
 
    [super finalize];
 }
@@ -359,7 +378,7 @@ l_Position, normal);\n"
 
 - (CGLayer *) layerWithSize:(struct MulleIntegerSize) size
 {
-   CGLayer               *layer;
+   CGLayer                   *layer;
    struct MulleIntegerSize   oldSize;
 
    layer   = acquire_ivar_object( &_scratchLayer);
@@ -367,17 +386,17 @@ l_Position, normal);\n"
 
    if( ! MulleIntegerSizeEqualToIntegerSize( oldSize, size))
    {
-      layer = [CGLayer layerWithIntegerSize:size
+      layer = [CGLayer layerWithBitmapSize:size
                                 imageFlags:0
                                    context:self];
 #ifdef DEBUG
-   {
-      static NSUInteger   count;
-      char                *s;
+      {
+         static NSUInteger   count;
+         char                *s;
 
-      s = MulleObjC_asprintf( "CGLayer-%tu", count++);
-      [layer setDebugNameUTF8String:s];
-   }
+         s = MulleObjC_asprintf( "CGLayer-%tu", count++);
+         [layer setDebugNameUTF8String:s];
+      }
 #endif
 #ifdef RESIZE_DEBUG
       mulleui_log_object_method( self,
@@ -421,7 +440,7 @@ l_Position, normal);\n"
                               CGSizeUTF8String( info->window.frame.size));
 #endif
 
-   // not 100% sure why anymore this written this way
+   // not 100% sure why this is written this way
 
    _currentFrameInfo = *info;
 
@@ -437,12 +456,12 @@ l_Position, normal);\n"
    [self deleteTextureIDs];
    CGContextCheckBackendError( self, "delete textureIDs");
 
+   // create or reuse existing offscreen framebuffer
    if( _rendersOffScreen)
    {
-      // will acuire hopefully a preexisting layer for reuse
+      // will acquire hopefully a preexisting layer for reuse
       assert( ! _renderLayer);
       _renderLayer = [[self layerWithSize:info->window.framebufferSize] retain];
-      // create or reuse existing offscreen framebuffer
 
       [self bindFramebuffer:CGContextFramebufferMakeWithLayer( _renderLayer)];
    }
@@ -515,6 +534,9 @@ static struct CGFrameInfo   emptyInfo;
    _isRendering = 0;
    _numberOfFrames++;
 
+   /*
+    * return to default 
+    */
    [self bindFramebuffer:CGContextFramebufferMakeDefault()];
    CGContextCheckBackendError( self, "unbind buffer");
 
@@ -651,8 +673,8 @@ static struct CGFrameInfo   emptyInfo;
  * generated. If there was a _scratchLayer it is now set to nil.
  * The layer once finished is moved to _drawnLayer. If there was a
  * previous _drawnLayer it is attempted to place it into
- * _scratchLayer. If that doesn't succeed it gets releases. If it does
- * the fine. The drawing part is done.
+ * _scratchLayer. If that doesn't succeed it gets released. If it does,
+ * then fine. The drawing part is done.
  *
  * ## Display
  *
@@ -672,6 +694,12 @@ static struct CGFrameInfo   emptyInfo;
 - (void) recycleFramebuffer:(id) layer
 {
    recycle_ivar_object( &_scratchLayer, layer);
+}
+
+
+- (id) acquireRecycledFramebuffer
+{
+   return( acquire_ivar_object( &_scratchLayer));
 }
 
 

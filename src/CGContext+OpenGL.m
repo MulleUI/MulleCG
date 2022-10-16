@@ -319,7 +319,6 @@ static int  has_version_header( char *s)
 {
    CGFloat   rgba[ 4];
    CGColor   color;
-   GLuint    bits;
 
    if( bits & GL_COLOR_BUFFER_BIT)
    {
@@ -637,7 +636,7 @@ static int  has_version_header( char *s)
 
    default :
 #ifdef DEBUG
-      fprintf( stderr, "CGFramebufferBitmapType %d is not supported\n", fType);
+      fprintf( stderr, "CGFramebufferBitmapType %td is not supported\n", fType);
 #endif
       memset( &bitmap, 0, sizeof( bitmap));
       return( bitmap);
@@ -660,5 +659,26 @@ static int  has_version_header( char *s)
 
    return( bitmap);
 }
+
+
+- (struct CGBitmap) framebufferBitmap
+{
+   struct CGBitmap          bitmap;
+   struct CGFrameInfo       frameInfo;
+   struct MulleIntegerRect  rect;
+
+   [self getCurrentFrameInfo:&frameInfo];
+
+   rect  = MulleIntegerRectMake( 0,
+                                 0,
+                                 frameInfo.window.framebufferSize.width,
+                                 frameInfo.window.framebufferSize.height);
+   bitmap = [self readFramebufferBitmap:rect
+                  framebufferBitmapType:CGFramebufferRGBABytes
+                              allocator:NULL];
+
+   return( bitmap);
+}
+
 
 @end

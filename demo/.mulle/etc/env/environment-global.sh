@@ -22,3 +22,9 @@ export MULLE_SDE_CLEAN_DEFAULT="MulleCG"
 
 
 
+#
+#
+#
+export MULLE_SOURCETREE_CONFIG_NAMES_MULLE_GLFW="wayland"
+
+

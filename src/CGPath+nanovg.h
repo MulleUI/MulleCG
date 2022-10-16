@@ -8,7 +8,6 @@
 
 #include "CGPath.h"
 
-// set append to YES, if you don't want to begin a new path
 void nvgAddCGPath( NVGcontext *nvg, CGPathRef path);
 
 #endif

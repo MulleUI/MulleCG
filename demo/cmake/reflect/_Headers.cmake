@@ -54,6 +54,7 @@ src/include.h
 #
 set( PUBLIC_HEADERS
 src/demos-version.h
+src/draw-flag.inc
 src/reflect/_demos-include-public.h
 )
 

@@ -90,7 +90,6 @@
 @end
 
 
-
 @implementation CGImage
 
 - (instancetype) initWithNVGImage:(NSInteger) imageID
@@ -277,7 +276,7 @@
 }
 
 
-- (instancetype) initWithBitmap:(struct CGBitmap *) bitmap
+- (instancetype) initWithBitmap:(struct CGBitmap) bitmap
                      imageFlags:(NSUInteger) imageFlags
                         context:(CGContext *) context
 {
@@ -287,10 +286,10 @@
    struct CGBitmap         convertedBitmap;
    struct CGBitmapInfo     convertedBitmapInfo;
    BOOL                    isFlipped;
-   CGBitmapEncoding   encoding;
-   CGBitmapEncoding   convertedEncoding;
+   CGBitmapEncoding        encoding;
+   CGBitmapEncoding        convertedEncoding;
 
-   if( ! bitmap)
+   if( ! bitmap.bytes)
    {
       [self release];
       return( nil);
@@ -301,7 +300,7 @@
    // we flip imageFlags on encoding, it allows more control for the
    // user, who will usually set this to 0
 
-   encoding          = _CGBitmapGetEncoding( bitmap);
+   encoding          = CGBitmapGetEncoding( bitmap);
    isFlipped         = CGBitmapEncodingIsFlipped( encoding);
    convertedEncoding = CGBitmapEncodingRGBABytes;
    if( isFlipped)
@@ -310,23 +309,25 @@
       imageFlags       ^= NVG_IMAGE_FLIPY;
    }
 
-   convertedBitmapInfo = CGBitmapInfoMake( bitmap->info.size, 0, convertedEncoding);
-
-   if( CGBitmapInitWithBitmapConversion( &convertedBitmap,
-                                         convertedBitmapInfo,
-                                         *bitmap,
-                                         NULL) < 0)
+   convertedBitmapInfo = CGBitmapInfoMake( bitmap.info.size, 0, convertedEncoding);
+   if( CGBitmapNeedsConversion( bitmap, convertedBitmapInfo))
    {
-      fprintf( stderr, "unsupported CGImage format\n");
-      [self release];
-      return( nil);
-   }
-
-   // bounce for debugging output of CGContext
-   imageID = [context textureIDWithBytes:convertedBitmap.bytes
-                              bitmapSize:convertedBitmap.info.size
-                              imageFlags:imageFlags];
-   CGBitmapDone( &convertedBitmap); // will not free fb, if no conversion
+      convertedBitmap = CGBitmapConvert( bitmap, convertedBitmapInfo, NULL);
+      if( CGBitmapIsNull( convertedBitmap))
+      {
+         fprintf( stderr, "unsupported CGImage format\n");
+         [self release];
+         return( nil);
+      }
+      imageID = [context textureIDWithBytes:convertedBitmap.bytes
+                                 bitmapSize:convertedBitmap.info.size
+                                 imageFlags:imageFlags];
+      CGBitmapDone( convertedBitmap);
+   }  
+   else
+      imageID = [context textureIDWithBytes:bitmap.bytes
+                                 bitmapSize:bitmap.info.size
+                                 imageFlags:imageFlags];
 
    return( [self initWithNVGImage:imageID
                        imageFlags:imageFlags
@@ -484,7 +485,7 @@
       _sharedGPUTexture = [[image sharedGPUTexture] retain];
 
       if( [_context debugEnabled])
-         MulleUILog( "shared gpuTexture=%p in context %#@ with %#@ of %#@\n",
+         MulleUILog( "shared gpuTexture=%p in context %#@ with %#@ of %#@",
                      [_sharedGPUTexture gpuTexture], _context, image, otherContext);
    }
 
