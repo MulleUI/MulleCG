@@ -41,58 +41,49 @@ void   _CGPathDone( struct CGPath *path);
 void   CGPathDestroy( struct CGPath *path);
 
 
-// standard API...
-static void inline  CGPathMoveToPoint( CGMutablePathRef path,
-                                       const CGAffineTransform *m,
-                                       CGFloat x,
-                                       CGFloat y)
+//
+// standard API was to weird...
+//
+static void inline  CGPathMoveToPoint( CGPath *path,
+                                       CGPoint point)
 {
    if( ! path)
       return;
-   assert( ! m);
 
    mulle_buffer_add_byte( &path->_commands, CGPathMoveToPointCommand);
-   _mulle_structarray_add( &path->_floats, &x);
-   _mulle_structarray_add( &path->_floats, &y);
+   _mulle_structarray_add( &path->_floats, &point.x);
+   _mulle_structarray_add( &path->_floats, &point.y);
 }
 
 
 static void inline  CGPathAddLineToPoint( CGMutablePathRef path,
-                                          const CGAffineTransform *m,
-                                          CGFloat x,
-                                          CGFloat y)
+                                          CGPoint point)
 {
    if( ! path)
       return;
-   assert( ! m);
 
    mulle_buffer_add_byte( &path->_commands, CGPathAddLineCommand);
-   _mulle_structarray_add( &path->_floats, &x);
-   _mulle_structarray_add( &path->_floats, &y);
+   _mulle_structarray_add( &path->_floats, &point.x);
+   _mulle_structarray_add( &path->_floats, &point.y);
 }
 
 
 
-static void inline  CGPathBezierToPoint( CGMutablePathRef path,
-                                         const CGAffineTransform *m,
-                                         CGFloat x1,
-                                         CGFloat y1,
-                                         CGFloat x2,
-                                         CGFloat y2,                                                                                  
-                                         CGFloat x,
-                                         CGFloat y)
+static void inline  CGPathAddCurveToPoint( CGMutablePathRef path,
+                                           CGPoint control1,
+                                           CGPoint control2,                                                                                  
+                                           CGPoint point)
 {
    if( ! path)
       return;
-   assert( ! m);
 
    mulle_buffer_add_byte( &path->_commands, CGPathBezierCommand);
-   _mulle_structarray_add( &path->_floats, &x1);
-   _mulle_structarray_add( &path->_floats, &y1);
-   _mulle_structarray_add( &path->_floats, &x2);
-   _mulle_structarray_add( &path->_floats, &y2);
-   _mulle_structarray_add( &path->_floats, &x);
-   _mulle_structarray_add( &path->_floats, &y);
+   _mulle_structarray_add( &path->_floats, &control1.x);
+   _mulle_structarray_add( &path->_floats, &control1.y);
+   _mulle_structarray_add( &path->_floats, &control2.x);
+   _mulle_structarray_add( &path->_floats, &control2.y);
+   _mulle_structarray_add( &path->_floats, &point.x);
+   _mulle_structarray_add( &path->_floats, &point.y);
 }
 
 

@@ -2,48 +2,14 @@
 
 #import "import-private.h"
 
+#include "draw-flag.inc"
+
 
 //
 // This demo shows how CGContext draws into a offscreen buffer first and
 // then uses this to draw into the window buffer. The offscreen buffer is
 // just a regular CGLayer.
 //
-static void   drawStuff( CGRect canvas, CGContext *context)
-{
-   struct NVGcontext   *vg;
-
-   vg = CGContextGetNVGContext( context);
-
-   canvas.size.height  /= 3.0;
-
-   // red stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, CGColorMakeWithHexColor( 0x000000ff));
-   nvgFill( vg);
-
-   // white stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 1,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, CGColorMakeWithHexColor( 0xdd0000ff));
-   nvgFill( vg);
-
-   // blue stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 2,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, CGColorMakeWithHexColor( 0xffce00ff));
-   nvgFill( vg);
-}
-
 
 @interface MyWindow : GLFWOSWindow
 
@@ -65,6 +31,7 @@ static void   drawStuff( CGRect canvas, CGContext *context)
 
    [super finalize];
 }
+
 
 + (UIGraphicsBackend) defaultBackend
 {
@@ -109,7 +76,7 @@ static void   display( GLFWOSWindow *window_in)
    [context setRendersOffScreen:YES];
    [context beginRender:&frameInfo];
    {
-      drawStuff( canvas, context);
+      drawRedWhiteBlueFlag( CGContextGetNVGContext( context), canvas);
    }
    [context endRender];
 
@@ -171,10 +138,9 @@ int   main( int argc, char *argv[])
                                   graphicsHints:hints] autorelease];
       [window os_activateGraphicsContext];
       {
-         context = [[[CGContext alloc] initWithEdgeAntialiasing:YES
-                                              useStencilStrokes:YES
-                                                        shareID:[window shareID]
-                                                        backend:[window backend]] autorelease];         // have to do this manually
+         context = [[[CGContext alloc] initWithBackend:[window backend]
+                                               shareID:[window shareID]
+                                               options:UIGraphicsDefaultOptions] autorelease];    // have to do this manually
          [context setActive:YES];
 
          // remember context for "display" callback

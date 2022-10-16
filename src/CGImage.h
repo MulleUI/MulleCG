@@ -101,7 +101,7 @@
                            context:(CGContext *) context;
 
 // bitmap bytes are not retained, you can free them after init
-- (instancetype) initWithBitmap:(struct CGBitmap *) bitmap
+- (instancetype) initWithBitmap:(struct CGBitmap) bitmap
                      imageFlags:(NSUInteger) imageFlags
                         context:(CGContext *) context;
 

@@ -68,6 +68,9 @@
 
 - (void) barrier;
 
+// drawings should have completed...
+- (struct CGBitmap) framebufferBitmap;
+
 //
 // TODO: remember under name as resource somehow
 //

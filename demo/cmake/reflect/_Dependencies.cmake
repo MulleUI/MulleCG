@@ -12,7 +12,7 @@ if( MULLE_TRACE_INCLUDE)
 endif()
 
 #
-# Generated from sourcetree: 9DE64E60-A557-4396-9528-D82C1F45D23C;mulle-testallocator;no-all-load,no-cmake-loader,no-cmake-searchpath,no-import;
+# Generated from sourcetree: 9DE64E60-A557-4396-9528-D82C1F45D23C;mulle-testallocator;no-cmake-loader,no-cmake-searchpath,no-import;
 # Disable with : `mulle-sourcetree mark mulle-testallocator no-link`
 # Disable for this platform: `mulle-sourcetree mark mulle-testallocator no-cmake-platform-${MULLE_UNAME}`
 #
@@ -25,11 +25,11 @@ if( NOT MULLE_TESTALLOCATOR_LIBRARY)
    #
    if( MULLE_TESTALLOCATOR_LIBRARY)
       #
-      # Add MULLE_TESTALLOCATOR_LIBRARY to DEPENDENCY_LIBRARIES list.
+      # Add MULLE_TESTALLOCATOR_LIBRARY to ALL_LOAD_DEPENDENCY_LIBRARIES list.
       # Disable with: `mulle-sourcetree mark mulle-testallocator no-cmake-add`
       #
-      set( DEPENDENCY_LIBRARIES
-         ${DEPENDENCY_LIBRARIES}
+      set( ALL_LOAD_DEPENDENCY_LIBRARIES
+         ${ALL_LOAD_DEPENDENCY_LIBRARIES}
          ${MULLE_TESTALLOCATOR_LIBRARY}
          CACHE INTERNAL "need to cache this"
       )

@@ -54,9 +54,9 @@ static void  drawRotated( struct NVGcontext *vg, CGImage *image, CGRect rect, NS
    // calculate position independent the amout of rotation for the
    // center point
    centerPoint       = CGPointMake( rect.size.width / 2.0 / scale,  rect.size.height / 2.0 / scale);
-   centerPolarPoint  = CGPointAsPolarPoint( centerPoint);
+   centerPolarPoint  = CAPolarPointMakeWithPoint( centerPoint);
    rotatedPolarPoint = CAPolarPointAddAngle( centerPolarPoint, angle);
-   rotatedPoint      = CAPolarPointGetPoint( rotatedPolarPoint);
+   rotatedPoint      = CGPointMakeWithPolarPoint( rotatedPolarPoint);
    diffPoint         = CGPointMake( (rotatedPoint.x - centerPoint.x),
                                     (rotatedPoint.y - centerPoint.y));
    diffPoint.x      -= rect.size.width / scale;

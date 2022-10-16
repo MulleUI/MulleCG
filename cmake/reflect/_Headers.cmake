@@ -79,9 +79,13 @@ src/_MulleCGBackend.h
 src/MulleCG.h
 src/MulleObjCLoader+MulleCG.h
 src/MullePaint.h
+src/_NotoEmoji-VariableFont_wght.ttf.inc
+src/_NotoSans-Bold.ttf.inc
+src/_NotoSans-Regular.ttf.inc
 src/_Roboto-Regular.inc
 src/_emoji.inc
 src/_entypo.inc
+src/_entypo.ttf.inc
 src/microvg/microvg.h
 src/microvg/millivg.h
 src/nanovg+UTF8String.h

@@ -10,15 +10,12 @@
 
 - (void) drawObjects:(struct mulle_pointerarray *) objects
 {
-   struct mulle_pointerarrayenumerator   rover;
-   id <CGRenderObject>                   obj;
+   id <CGRenderObject>   obj;
 
-   rover = mulle_pointerarray_enumerate( objects);
-   while( _mulle_pointerarrayenumerator_next( &rover, (void **) &obj))
+   mulle_pointerarray_for( objects, obj)
    {
       [obj renderInContext:self];
    }
-   mulle_pointerarrayenumerator_done( &rover);
 }
 
 @end

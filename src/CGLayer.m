@@ -6,20 +6,21 @@
 
 #import "import-private.h"
 
+#define CGLAYER_DEBUG
 
 @implementation CGLayer
 
-+ (instancetype) layerWithIntegerSize:(struct MulleIntegerSize) bitmapSize
++ (instancetype) layerWithBitmapSize:(struct MulleIntegerSize) bitmapSize
                           imageFlags:(NSUInteger) imageFlags
                              context:(CGContext *) context
 {
-   return( [[[self alloc] initWithIntegerSize:bitmapSize
+   return( [[[self alloc] initWithBitmapSize:bitmapSize
                                   imageFlags:imageFlags
                                      context:context] autorelease]);
 }
 
 
-- (instancetype) initWithIntegerSize:(struct MulleIntegerSize) bitmapSize
+- (instancetype) initWithBitmapSize:(struct MulleIntegerSize) bitmapSize
                          imageFlags:(NSUInteger) imageFlags
                             context:(CGContext *) context
 {
@@ -45,6 +46,9 @@
       return( nil);
    }
 
+#ifdef CGLAYER_DEBUG
+   MulleUILog( "create framebuffer %p", _framebuffer);
+#endif   
    //
    // Image is dependent on the graphics context, and can't live without it
    // TextureImage is threfore retained by the context and not the other way
@@ -69,7 +73,7 @@
    assert( [image context] == context);
 
    bitmapSize = [image bitmapSize];
-   self = [self initWithIntegerSize:bitmapSize
+   self = [self initWithBitmapSize:bitmapSize
                         imageFlags:imageFlags
                            context:context];
    if( ! self)
@@ -99,11 +103,24 @@
 
    if( _framebuffer)
    {
+#ifdef CGLAYER_DEBUG
+      MulleUILog( "delete framebuffer %p", _framebuffer);
+#endif   
    	nvgluDeleteFramebuffer((NVGLUframebuffer *) _framebuffer);
       _framebuffer = NULL;
    }
 }
 
+
+#ifdef CGLAYER_DEBUG
+- (void) dealloc
+{
+   assert( ! _framebuffer);
+   MulleUILog( "layer deallocs");
+   [super dealloc];
+}
+#endif   
+   //
 
 - (instancetype) initWithContentsOfFileCString:(char *) filename
                                     imageFlags:(NSUInteger) imageFlags
@@ -189,8 +206,6 @@
 
    return( MulleObjCAutoreleaseAllocation( result, NULL));
 }
-
-
 
 @end
 

@@ -31,29 +31,6 @@ CGDrawableOptions   CGDrawableOptionsScaleToFit =
 };
 
 
-PROTOCOLCLASS_IMPLEMENTATION( CGDrawable)
-
-- (CGRect) canvas
-{
-   return( (CGRect){ .origin = CGPointZero, .size = [self size]});
-}
-
-
-- (CGRect) bounds
-{
-   return( [self canvas]);
-}
-
-- (BOOL) isRepeating
-{
-   return( NO);
-}
-
-
-PROTOCOLCLASS_END()
-
-
-
 PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 
 - (struct MulleIntegerSize) bitmapSize
@@ -86,9 +63,9 @@ static CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians 
    // calculate position independent the amout of rotation for the
    // center point
    centerPoint       = CGPointMake( patternRect.size.width / 2.0, patternRect.size.height / 2.0);
-   centerPolarPoint  = CGPointAsPolarPoint( centerPoint);
+   centerPolarPoint  = CAPolarPointMakeWithPoint( centerPoint);
    rotatedPolarPoint = CAPolarPointAddAngle( centerPolarPoint, angle);
-   rotatedPoint      = CAPolarPointGetPoint( rotatedPolarPoint);
+   rotatedPoint      = CGPointMakeWithPolarPoint( rotatedPolarPoint);
    diffPoint         = CGPointMake( rotatedPoint.x - centerPoint.x,
                                     rotatedPoint.y - centerPoint.y);
    patternRect.origin.x -= diffPoint.x;
@@ -111,9 +88,9 @@ static CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
    // calculate position independent the amout of rotation for the
    // center point
    centerPoint       = CGPointMake( patternRect.size.width / 2.0, patternRect.size.height / 2.0);
-   centerPolarPoint  = CGPointAsPolarPoint( centerPoint);
+   centerPolarPoint  = CAPolarPointMakeWithPoint( centerPoint);
    rotatedPolarPoint = CAPolarPointAddAngle( centerPolarPoint, angle);
-   rotatedPoint      = CAPolarPointGetPoint( rotatedPolarPoint);
+   rotatedPoint      = CGPointMakeWithPolarPoint( rotatedPolarPoint);
    diffPoint         = CGPointMake( rotatedPoint.x - centerPoint.x,
                                     rotatedPoint.y - centerPoint.y);
    patternRect.origin.x -= diffPoint.x * scaleFactor.dx;
@@ -497,7 +474,12 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
 
    imageID = CGBitmapDrawableGetImageID( self, options, context);
    if( imageID == -1)
+   {
+#ifdef DEBUG
+      abort();      
+#endif      
       return;  
+   }
 
    // what this does is:
    // origin is subtracted from rect.origin.x to get an initial value
@@ -619,5 +601,26 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
    return( [self imageFlags] & (NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY) ? YES : NO);
 }
 
+
+PROTOCOLCLASS_END()
+
+
+PROTOCOLCLASS_IMPLEMENTATION( CGVectorDrawable)
+
+- (CGRect) canvas
+{
+   return( (CGRect){ .origin = CGPointZero, .size = [self size]});
+}
+
+
+- (CGRect) bounds
+{
+   return( [self canvas]);
+}
+
+- (BOOL) isRepeating
+{
+   return( NO);
+}
 
 PROTOCOLCLASS_END()

@@ -9,27 +9,28 @@
 
 #include <assert.h>
 
+// prefixed with '_' so they don't show up as public headers
 
 unsigned char   NotoSans_Regular_ttf[] =
-#include "NotoSans-Regular.ttf.inc"
+#include "_NotoSans-Regular.ttf.inc"
 ;
 #define s_NotoSans_Regular_ttf   (sizeof( NotoSans_Regular_ttf) - 1)
 
 
 unsigned char   NotoSans_Bold_ttf[] =
-#include "NotoSans-Bold.ttf.inc"
+#include "_NotoSans-Bold.ttf.inc"
 ;
 #define s_NotoSans_Bold_ttf  (sizeof( NotoSans_Bold_ttf) - 1)
 
 
 unsigned char   Noto_Emoji_ttf[] =
-#include "NotoEmoji-VariableFont_wght.ttf.inc"
+#include "_NotoEmoji-VariableFont_wght.ttf.inc"
 ;
 #define s_Noto_Emoji_ttf   (sizeof( Noto_Emoji_ttf) - 1)
 
 
 unsigned char   entypo_ttf[] =
-#include "entypo.ttf.inc"
+#include "_entypo.ttf.inc"
 ;
 #define s_entypo_ttf   (sizeof( entypo_ttf) - 1)
 
@@ -50,38 +51,6 @@ unsigned char   entypo_ttf[] =
 
 @implementation CGContext ( CGFont)
 
-//
-// We don't have ValueFoundation here, so copy some stuff over
-//
-static void   *retain( struct mulle_container_valuecallback *callback,
-                       void *obj,
-                       struct mulle_allocator *allocator)
-{
-   return( [(id) obj retain]);
-}
-
-
-
-static void  autorelease( struct mulle_container_valuecallback *callback,
-                          void *obj,
-                          struct mulle_allocator *allocator)
-{
-   [(id) obj autorelease];
-}
-
-
-//
-// description is a bet on the future
-//
-static char   *describe( struct mulle_container_valuecallback *callback,
-                         void *obj,
-                         struct mulle_allocator **p_allocator)
-{
-   *p_allocator = NULL;
-   return( mulle_objc_object_call( obj, @selector( UTF8String), obj));
-}
-
-
 static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
 + (void) load
@@ -89,7 +58,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    c_string_to_object_callback = (struct mulle_container_keyvaluecallback)
    {
       .keycallback   = mulle_container_keycallback_copied_cstring,
-      .valuecallback = { retain, autorelease, describe }
+      .valuecallback = *MulleObjCContainerValueRetainCallback
    };
 }
 
@@ -108,6 +77,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
                     MulleObjCInstanceGetAllocator( self));
 }
 
+
 - (void) _doneFontCache
 {
    _mulle_map_done( &_fontMap);
@@ -118,6 +88,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 {
    mulle_map_reset( &_fontMap);
 }
+
 
 - (void) addFontWithCData:(struct mulle_data) data
        fontNameUTF8String:(char *) name
@@ -149,6 +120,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
    mulle_map_insert( &_fontMap, name, font);
 }
+
 
 //
 // TODO: use hash table to keep track of names and avoid duplicate loads of

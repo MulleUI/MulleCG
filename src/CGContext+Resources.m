@@ -85,6 +85,7 @@
 
    if( _debugEnabled)
       MulleUILog( "releaseAllLoanedResources");
+
    tmp = _loanedResources;
    mulle_set_init( &_loanedResources,
                    0,

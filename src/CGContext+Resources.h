@@ -39,6 +39,8 @@
 //
 // these are queued and deleted on the next render
 // the imageID is the nanovg texture not the GPU texture
+// Resources are not retained! If you want them retained, use
+// loanResource after adding.
 - (void) addImageToResources:(CGImage *) image;
 
 - (NSInteger) textureIDWithBytes:(void *) bytes

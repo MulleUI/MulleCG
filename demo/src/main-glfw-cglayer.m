@@ -99,10 +99,9 @@ int   main( int argc, char *argv[])
          [window os_activateGraphicsContext];
 
          // CGContext can now use the "OS" context
-         context = [[[CGContext alloc] initWithEdgeAntialiasing:YES
-                                              useStencilStrokes:YES
-                                                        shareID:[window shareID]
-                                                        backend:[window backend]] autorelease];
+         context = [[[CGContext alloc] initWithBackend:[window backend]
+                                               shareID:[window shareID]
+                                               options:UIGraphicsDefaultOptions] autorelease];
          if( ! context)
          {
             fprintf( stderr, "No CGContext for you\n");
@@ -115,7 +114,7 @@ int   main( int argc, char *argv[])
          // GPU, where we can draw into (a framebuffer). A CGLayer is a CGImage
          // so it can act as a texture
          //
-         cgLayer = [CGLayer layerWithIntegerSize:MulleIntegerSizeMake( W, H)
+         cgLayer = [CGLayer layerWithBitmapSize:MulleIntegerSizeMake( W, H)
                                     imageFlags:0
                                        context:context];
          if( ! cgLayer)
@@ -140,7 +139,7 @@ int   main( int argc, char *argv[])
          [cgLayer unbindFramebuffer];
       }
 
-      [UIApplication os_terminate];
+      [UIApplication os_deinitialize];
    }
    mulle_testallocator_reset();
 

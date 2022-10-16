@@ -2,54 +2,34 @@
 
 #import "import-private.h"
 
+#include "draw-flag.inc"
 
+
+/* To check for leaks uncoment the requestTerminate and run with:
+
+   MULLE_OBJC_PEDANTIC_EXIT=YES \
+   MULLE_OBJC_EPHEMERAL_SINGLEON=YES \
+   MULLE_TESTALLOCATOR=YES \
+   MULLE_TESTALLOCATOR_TRACE=3 \
+   MULLE_OBJC_TRACE_INSTANCE=YES \
+   MULLE_OBJC_TRACE_METHOD_CALL=YES ./kitchen/Debug/draw-simple
+ */
 static void   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
-   CGRect              canvas;
 
    vg = CGContextGetNVGContext( context);
-
-   canvas               = [layer canvas];
-   canvas.size.height  /= 3.0;
-
-   // red stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.95, 0.0, 0.0, 1.0));
-   nvgFill( vg);
-
-   // white stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 1,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 1.0, 1.0, 1.0, 1.0));
-   nvgFill( vg);
-
-   // blue stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 2,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.0, 0.0, 1.0, 1.0));
-   nvgFill( vg);
+   drawRedWhiteBlueFlag( vg, [layer canvas]);
+   [UIApp requestTerminate];
 }
 
 
 int   main( int argc, char *argv[])
 {
-   // convenience to the max...
-   return( [UIApplication runWindowForDrawCallback:(CALayerDrawCallback_t *) drawStuff
-                                        canvasSize:CGSizeMake( 200, 200)
-                                        windowSize:CGSizeZero   // CGSizeMake( 200, 400)
-                                   titleUTF8String:NULL
-                                       frameRateHz:100.0f]);
+   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+                                           CGSizeMake( 200, 200),
+                                           NULL,
+                                           0.0f));
 }
 
 
