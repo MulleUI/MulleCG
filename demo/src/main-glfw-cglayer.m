@@ -124,7 +124,7 @@ int   main( int argc, char *argv[])
          }
 
          // bind the buffer as the drawing destination
-         [cgLayer bindFramebuffer];
+         [cgLayer _bindToContext];
 
          // some OpenGL and NanoVG code to draw something
          draw( CGContextGetNVGContext( context));
@@ -133,10 +133,10 @@ int   main( int argc, char *argv[])
          // mulle_rgba_dump into a BMP file named dump-0000.bmp
 
          bitmap = [cgLayer RGBABytesBitmap:NULL];
-         mulle_bitmap_rgba_dump( &bitmap);
-         CGBitmapDone( &bitmap);
+         mulle_bitmap_rgba_dump( bitmap);
+         CGBitmapDone( bitmap);
          fprintf( stderr, "Check \"dump-????.bmp\" file for resultant drawing\n");
-         [cgLayer unbindFramebuffer];
+         [cgLayer _unbindFromContext];
       }
 
       [UIApplication os_deinitialize];

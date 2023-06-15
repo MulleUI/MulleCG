@@ -11,6 +11,8 @@
 // we want "import.h" always anyway
 #import "import.h"
 
+#import "CGFont.h"
+
 
 @interface CGContext( CGFont)
 
@@ -19,12 +21,14 @@
 - (CGFont *) fallbackFont;
 - (CGFont *) fontWithNameUTF8String:(char *) s;
 - (CGFloat) fontScale;
+- (CGFont *) defaultFont;
 
 - (void) _initFontCache;
 - (void) _doneFontCache;
 - (void) _resetFontCache;
 
 - (void) useFontWithNameUTF8String:(char *) name;
+- (void) useDefaultFont;
 
 /*
  * Fill fontCache with fonts, don't use during draws as it does I/O
@@ -33,6 +37,14 @@
                                             fontNameUTF8String:(char *) name;
 - (void) addFontWithCData:(struct mulle_data) data
        fontNameUTF8String:(char *) name;
+
+
+//
+// these will return either a FT_Face as a void * or a pointer to stbtt_fontinfo
+//
+- (void *) internalFontHandle;  // current font if set
+- (void *) internalFontHandleOfFont:(CGFont *) font;
+
 @end
 
 

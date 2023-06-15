@@ -8,6 +8,6 @@
 
 #include "CGPath.h"
 
-void nvgAddCGPath( NVGcontext *nvg, CGPathRef path);
+void mvgAddCGPath( NVGcontext *nvg, CGPathRef path);
 
 #endif

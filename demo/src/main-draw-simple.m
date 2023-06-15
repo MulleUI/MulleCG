@@ -20,7 +20,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
    vg = CGContextGetNVGContext( context);
    drawRedWhiteBlueFlag( vg, [layer canvas]);
-   [UIApp requestTerminate];
+//   [UIApp requestTerminate];
 }
 
 

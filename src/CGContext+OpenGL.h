@@ -12,17 +12,14 @@
 #import "import.h"
 
 
+
 @interface CGContext( OpenGL)
 
 + (CGContextNanoVGBackend) nanoVGBackend;
 + (char *) nanoVGBackendUTF8String;
 
-- (char *) shaderHeaderUTF8String;
-- (void *) gpuTextureForImageID:(NSInteger) imageID;
+- (void *) gpuTextureForImageID:(NSInteger) textureID;
 
-- (NSUInteger) compileVertexShader:(char *) vertexShaderCode
-                    fragmentShader:(char *) fragmentShaderCode
-                    nameUTF8String:(char *) name;
 
 
 // context must be active
@@ -51,6 +48,7 @@
 - (NSUInteger) framebufferBitsWithColorBit:(BOOL) flag;
 
 
+
 - (void) changeRender:(struct CGFrameInfo *) info;
 - (void) resumeRender;
 
@@ -59,26 +57,25 @@
                        useStencilStrokes:(BOOL) useStencilStrokes;
 - (void) _finalizeNanoVG;
 
-- (void) useShader:(NSUInteger) shaderID;
+
 
 // retrieve openGLError if any, print and abort
 - (void) assertNoBackendError:(char *) str;
 
 - (void) bindOpenGLFramebuffer:(void *) framebuffer;
-
+- (void) bindImage:(CGImage *) image
+     toTextureUnit:(NSUInteger) index;
 - (void) barrier;
 
 // drawings should have completed...
 - (struct CGBitmap) framebufferBitmap;
 
-//
-// TODO: remember under name as resource somehow
-//
-- (NSUInteger) compileVertexShader:(char *) vertexShaderCode
-                    fragmentShader:(char *) fragmentShaderCode
-                    nameUTF8String:(char *) name;
-
 @end
+
+void   CGShaderUTF8SourcesParseUniforms( struct CGShaderUTF8Sources *sources,
+                                         struct mulle_assoc *assoc);
+
+
 
 char   *CGNVGBackendErrorUTF8String( void);
 char   *_CGNVGBackendErrorShortUTF8String( void *error);

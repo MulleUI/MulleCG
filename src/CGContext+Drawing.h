@@ -14,57 +14,96 @@
 struct CGPath;
 
 
-@interface CGContext( Drawing)
+typedef NS_ENUM( NSUInteger, CGRelation)
+{
+   CGInside,
+   CGCover,
+   CGOutside,
+   CGOverlap
+};
 
-// only useable until the offscreen renderer hits again (?=)
-- (void) drawBitmap:(struct CGBitmap) fb;
 
-- (void) setCompositionMode:(UIGraphicsCompositionMode) mode;
+static inline CGRect
+   CGRectMakeFillRect( CGRect rect, CGFloat strokeWidth, CGRelation relation)
+{
+   switch( relation)
+   {
+   case CGInside  :
+      rect.origin.x    += strokeWidth / 2.0;
+      rect.origin.y    += strokeWidth / 2.0;
+      rect.size.width  -= strokeWidth;
+      rect.size.height -= strokeWidth;
+      break;
 
-// some very simple draw commands 
-- (void) fillRect:(CGRect) rect
-            color:(CGColor) color;
+   case CGCover   :
+      rect.origin.x    -= strokeWidth / 2.0;
+      rect.origin.y    -= strokeWidth / 2.0;
+      rect.size.width  += strokeWidth;
+      rect.size.height += strokeWidth;
+      break;
 
-- (void) strokeRect:(CGRect) rect
-              color:(CGColor) color
-              width:(CGFloat) width;
+   // useless
+   case CGOutside :
+      rect.origin.x    -= strokeWidth;
+      rect.origin.y    -= strokeWidth;
+      rect.size.width  += strokeWidth * 2.0;
+      rect.size.height += strokeWidth * 2.0;
+   }
+   return( rect);
+}
 
-// used by UIWindow to blit...
-- (void) drawRect:(CGRect) rect
-            image:(id) image
-            scale:(BOOL) scale;
 
-- (void) fillCircleAtPoint:(CGPoint) point
-                    radius:(CGFloat) radius
-                      color:(CGColor) color;
+static inline CGRect
+   CGRectMakeStrokeRect( CGRect rect, CGFloat strokeWidth, CGRelation relation)
+{
+   switch( relation)
+   {
+   case CGInside  :
+   case CGCover   :
+      rect.origin.x    += strokeWidth / 2.0;
+      rect.origin.y    += strokeWidth / 2.0;
+      rect.size.width  -= strokeWidth;
+      rect.size.height -= strokeWidth;
+      break;
 
-- (void) strokeCircleAtPoint:(CGPoint) point
-                      radius:(CGFloat) radius
-                       width:(CGFloat) width
-                       color:(CGColor) color;
+   case CGOutside   :
+      rect.origin.x    -= strokeWidth / 2.0;
+      rect.origin.y    -= strokeWidth / 2.0;
+      rect.size.width  += strokeWidth;
+      rect.size.height += strokeWidth;
+      break;
+   }
+   return( rect);
+}
 
-- (void) fillPoint:(CGPoint) point 
-             width:(CGFloat) width
-             color:(CGColor) color;
 
-- (void) strokeLineFromPoint:(CGPoint) from 
-                     toPoint:(CGPoint) to
-                       width:(CGFloat) strokeWidth
-                       color:(CGColor) color;
+static inline CGFloat  CGRectGetStrokeMinX( CGRect rect, CGFloat strokeWidth)
+{
+   return( CGRectGetMinX( rect) + strokeWidth / 2.0);
+}
 
-- (void) fillPath:(struct CGPath *) path 
-            color:(CGColor) color;
 
-- (void) strokePath:(struct CGPath *) path 
-              width:(CGFloat) strokeWidth
-              color:(CGColor) color;
+static inline CGFloat  CGRectGetStrokeMaxX( CGRect rect, CGFloat strokeWidth)
+{
+   return( CGRectGetMaxX( rect) - strokeWidth / 2.0);
+}
 
-- (void) drawAtPoint:(CGPoint) position
-      textUTF8String:(char *) s
-  fontNameUTF8String:(char *) fontNameUTF8String
-            fontSize:(CGFloat) fontSize
-               color:(CGColor) color;
 
+static inline CGFloat  CGRectGetStrokeMinY( CGRect rect, CGFloat strokeWidth)
+{
+   return( CGRectGetMinY( rect) + strokeWidth / 2.0);
+}
+
+
+static inline CGFloat  CGRectGetStrokeMaxY( CGRect rect, CGFloat strokeWidth)
+{
+   return( CGRectGetMaxY( rect) - strokeWidth / 2.0);
+}
+
+
+
+
+@interface CGContext( Drawing) <UIGraphicsDrawing>
 @end
 
 
@@ -79,6 +118,6 @@ static inline void  CGContextDrawText( CGContext *self,
       textUTF8String:s
   fontNameUTF8String:NULL
             fontSize:fontSize
-               color:color];
+            hexColor:CGHexColorMakeWithColor( color)];
 }
 

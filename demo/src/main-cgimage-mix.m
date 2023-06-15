@@ -73,7 +73,7 @@ static void  drawRotated( struct NVGcontext *vg, CGImage *image, CGRect rect, NS
                                    rect.size.width / scale, // * (x / 10.0), // - (rect.size.width  / 4 * (y - 1)),
                                    rect.size.height / scale, // * (y / 10.0), // - (rect.size.height / 4 * (y - 1)),
                                    angle,
-                                   [image imageID],
+                                   [image textureID],
                                    1.0);
    nvgBeginPath( vg);
    nvgRect( vg, rect.origin.x,
@@ -109,7 +109,7 @@ static void  drawUnscaled( struct NVGcontext *vg, CGImage *image, CGRect rect, N
                                     size.width * 4, // * (x / 10.0), // - (rect.size.width  / 4 * (y - 1)),
                                     size.height * 4, // * (y / 10.0), // - (rect.size.height / 4 * (y - 1)),
                                     0.0,
-                                    [image imageID],
+                                    [image textureID],
                                     1.0);
    nvgBeginPath( vg);
    nvgRect( vg, rect.origin.x,
@@ -150,7 +150,7 @@ static void  drawShifted( struct NVGcontext *vg, CGImage *image, CGRect rect, NS
                                     rect.size.width / scale.width, // * (x / 10.0), // - (rect.size.width  / 4 * (y - 1)),
                                     rect.size.height / scale.height, // * (y / 10.0), // - (rect.size.height / 4 * (y - 1)),
                                     0.0,
-                                    [image imageID],
+                                    [image textureID],
                                     1.0);
    nvgBeginPath( vg);
    nvgRect( vg, rect.origin.x,
@@ -227,7 +227,7 @@ void   setupScene( UIWindow *window)
 
    frame  = [[window contentPlane] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:drawStuff];
+   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [[window contentPlane] addSubview:view];
 }
 

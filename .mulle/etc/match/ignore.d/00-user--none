@@ -1,0 +1,5 @@
+src/mulle-color/include.h
+src/mulle-color/_mulle-color-include.h
+src/mulle-color/_mulle-color-provide.h
+src/mulle-color/_mulle-color-include-private.h
+src/mulle-color/include-private.h

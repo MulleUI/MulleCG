@@ -266,7 +266,7 @@ static CGPoint  CGRectGetPointForAngleAndImageSize( CGRect rect,
           options:(CGDrawableOptions *) options
           context:(CGContext *) context
 {
-   NSInteger    imageID;
+   NSInteger    textureID;
    NSInteger    imageFlags;
    NVGcontext   *vg;
    NVGpaint     imgPaint;
@@ -291,9 +291,9 @@ static CGPoint  CGRectGetPointForAngleAndImageSize( CGRect rect,
    if( ! image)
       return;
 
-   imageID = [image imageID];
-   assert( imageID != -1);
-   if( imageID == -1)
+   textureID = [image textureID];
+   assert( textureID != -1);
+   if( textureID == -1)
       return;
 
    vg   = CGContextGetNVGContext( context);
@@ -333,7 +333,7 @@ static CGPoint  CGRectGetPointForAngleAndImageSize( CGRect rect,
                                     extent.width,
                                     extent.height,
                                     options->rotation,
-                                    imageID,
+                                    textureID,
                                     options->alpha);
 
    nvgBeginPath( vg);
@@ -352,7 +352,7 @@ static CGPoint  CGRectGetPointForAngleAndImageSize( CGRect rect,
           options:(CGDrawableOptions *) options
           context:(CGContext *) context
 {
-   NSInteger           imageID;
+   NSInteger           textureID;
    NSInteger           imageFlags;
    NVGcontext          *vg;
    NVGpaint            imgPaint;
@@ -374,9 +374,9 @@ static CGPoint  CGRectGetPointForAngleAndImageSize( CGRect rect,
    if( ! image)
       return;
 
-   imageID = [image imageID];
-   assert( imageID != -1);
-   if( imageID == -1)
+   textureID = [image textureID];
+   assert( textureID != -1);
+   if( textureID == -1)
       return;
 
    vg   = CGContextGetNVGContext( context);
@@ -408,7 +408,7 @@ static CGPoint  CGRectGetPointForAngleAndImageSize( CGRect rect,
                                       rect.size.width * size.width / patternRect.size.width,
                                       rect.size.height * size.height / patternRect.size.height,
                                       options->rotation,
-                                      imageID,
+                                      textureID,
                                       options->alpha);
 
    nvgBeginPath( vg);

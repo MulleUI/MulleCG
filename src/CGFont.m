@@ -11,25 +11,25 @@
 @implementation CGFont
 
 - (instancetype) initWithNameUTF8String:(char *) name
-                             fontIndex:(NSInteger) fontIndex
+                              fontID:(CGFontID) fontID
 {
-	if( _fontIndex == -1)
+	if( _fontID == -1)
    {
       [self release];
       return( nil);
 	}
 
    [self setNameUTF8String:name];
-	_fontIndex = fontIndex;
+	_fontID = fontID;
    return( self);
 }
 
 
 + (instancetype) fontWithNameUTF8String:(char *) name
-                              fontIndex:(NSInteger) fontIndex
+                                 fontID:(CGFontID) fontID
 {
    return( [[[self alloc] initWithNameUTF8String:name
-                                   fontIndex:fontIndex] autorelease]);
+                                          fontID:fontID] autorelease]);
 }
 
 

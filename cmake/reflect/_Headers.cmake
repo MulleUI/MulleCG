@@ -15,6 +15,7 @@ nanovg/src
 src
 src/generic
 src/microvg
+src/mulle-color
 src/reflect
 )
 
@@ -67,7 +68,8 @@ src/CGContext+CGFont.h
 src/CGContext+Drawing.h
 src/CGContext+OpenGL.h
 src/CGContext+Render.h
-src/CGContext+Resources.h
+src/CGContext+Shader.h
+src/CGContext+Texture.h
 src/CGContext.h
 src/CGDrawable.h
 src/CGFont.h
@@ -88,6 +90,9 @@ src/_entypo.inc
 src/_entypo.ttf.inc
 src/microvg/microvg.h
 src/microvg/millivg.h
+src/microvg/millivg-nanowrap.h
+src/mulle-color/CGColor.h
+src/mulle-color/mulle-color.h
 src/nanovg+UTF8String.h
 src/reflect/_MulleCG-import-public.h
 )

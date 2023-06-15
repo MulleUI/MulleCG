@@ -3,6 +3,10 @@
 #import "CGContext.h" // needed for protocol
 
 
+#import "CGContext+Texture.h" // needed for protocol
+
+#include "millivg.h"
+
 //
 //                             .------------.
 //                             | CGDrawable |
@@ -26,7 +30,7 @@
 
 
 //
-// Container for the OpenGL imageID, it's merely used for retain
+// Container for the OpenGL textureID, it's merely used for retain
 // counting. Therefore it must never be autoreleased!
 //
 @interface CGSharedGPUTexture : NSObject
@@ -52,9 +56,9 @@
 // different context!
 //
 // Textures (images) in NVG can be created with different flags, for example
-// REPEAT_X and REPEAT_Y. When we are asking the CGContext for a imageID
+// REPEAT_X and REPEAT_Y. When we are asking the CGContext for a textureID
 // for an image this will create such a NVG texture. As the context cashes the
-// imageID for each MulleImage it's simplest to store the imageFlags here
+// textureID for each MulleImage it's simplest to store the imageFlags here
 // (readonly) and to clone MulleImages for different flags. The actual image
 // data can be shared w/o a problem. The default is 0:
 //
@@ -63,8 +67,8 @@
 //
 @interface CGImage : NSObject <CGBitmapDrawable, CGContextResource>
 
-// usually don't use imageID, use nvgImageWithContext:imageFlags:
-@property( readonly, assign) NSUInteger           imageID;
+// usually don't use textureID, use nvgImageWithContext:imageFlags:
+@property( readonly, assign) CGTextureID          textureID;
 @property( readonly, assign) NSUInteger           imageFlags;       // rename sometime
 @property( readonly, assign) CGContext            *context;
 @property( readonly, retain) CGSharedGPUTexture   *sharedGPUTexture;
@@ -72,9 +76,9 @@
 
 // imageFlags in this call is "informative", it will not affect the image
 // as it has been created already
-- (instancetype) initWithNVGImage:(NSInteger) imageID
-                       imageFlags:(NSUInteger) imageFlags
-                          context:(CGContext *) context;
+- (instancetype) initWithTextureID:(CGTextureID) textureID
+                        imageFlags:(NSUInteger) imageFlags
+                           context:(CGContext *) context;
 
 - (instancetype) initWithGPUTextureRGBA:(void *) gpuTexture
                        sharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture

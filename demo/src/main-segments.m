@@ -58,7 +58,7 @@ struct CornerAndLinearGradientInfo
 static void   CornerAndLinearGradientInfoInit( struct CornerAndLinearGradientInfo *p,
                                                CGRect rect,
                                                CGFloat cornerFactor,
-                                               CGDirection direction)
+                                               CADirection direction)
 {
    CGFloat   corner;
 
@@ -77,21 +77,21 @@ static void   CornerAndLinearGradientInfoInit( struct CornerAndLinearGradientInf
    p->gradientEndPoint   = CGPointMake( CGRectGetMinX( rect),
                                         CGRectGetMaxY( rect));
 
-   if( direction & (CGDirectionLeft|CGDirectionRight))
+   if( direction & (CADirectionLeft|CADirectionRight))
    {
-      if( direction & CGDirectionLeft)
+      if( direction & CADirectionLeft)
          p->cornerInfo.cornerTL = p->cornerInfo.cornerBL = corner;
-      if( direction & CGDirectionRight)
+      if( direction & CADirectionRight)
          p->cornerInfo.cornerBR = p->cornerInfo.cornerTR = corner;
    }
 
-   if( direction & (CGDirectionTop|CGDirectionBottom))
+   if( direction & (CADirectionTop|CADirectionBottom))
    {
       p->gradientEndPoint = CGPointMake( CGRectGetMaxX( rect),
                                          CGRectGetMinY( rect));
-      if( direction & CGDirectionTop)
+      if( direction & CADirectionTop)
          p->cornerInfo.cornerTL = p->cornerInfo.cornerTR = corner;
-      if( direction & CGDirectionBottom)
+      if( direction & CADirectionBottom)
          p->cornerInfo.cornerBL = p->cornerInfo.cornerBR = corner;
    }
 }
@@ -327,15 +327,15 @@ struct MulleUISegmentedButton
 };
 
 
-static CGDirection   MulleUISegmentedButtonDirectionForSegmentIndex( struct MulleUISegmentedButton *p,
+static CADirection   MulleUISegmentedButtonDirectionForSegmentIndex( struct MulleUISegmentedButton *p,
                                                                      NSUInteger i)
 {
-   CGDirection   direction = 0;
+   CADirection   direction = 0;
 
    if( i == 0)
-      direction = CGDirectionLeft;
+      direction = CADirectionLeft;
    if( i == p->nSegments - 1)
-      direction |= CGDirectionRight;
+      direction |= CADirectionRight;
 
    MulleUICLog( "%td of %td -> %tx", i, p->nSegments, direction);
    return( direction);
@@ -389,81 +389,83 @@ static void   CGDrawSegmentedButton( CGContext *context, struct MulleUISegmented
    NSInteger                            i;
    struct MulleUISegmentedButtonLayout  layout;
    struct CornerAndLinearGradientInfo   info;
-   CGDirection                          direction;
+   CADirection                          direction;
    NVGcontext                           *vg;
-   mulle_flexarray_define( rects, CGRect, 16, p->nSegments);
 
-   vg = CGContextGetNVGContext( context);
-
-//   nvgSave( vg);
+   mulle_flexarray_do( rects, CGRect, 16, p->nSegments)
    {
-      /*
-       * outer
-       */
-      MulleUISegmentedButtonLayoutInit( &layout, p->frame);
+      vg = CGContextGetNVGContext( context);
 
-      CornerAndLinearGradientInfoInit( &info, layout.outerRect, p->cornerFactor, CGDirectionLeft|CGDirectionRight);
+   //   nvgSave( vg);
+      {
+         /*
+          * outer
+          */
+         MulleUISegmentedButtonLayoutInit( &layout, p->frame);
 
-      fillRectWithLinearGradientBorder( vg,
-                                        layout.outerRect,
-                                        layout.innerThickness,
-                                        p->color0,
-                                        p->color1,
+         CornerAndLinearGradientInfoInit( &info, layout.outerRect, p->cornerFactor, CADirectionLeft|CADirectionRight);
+
+         fillRectWithLinearGradientBorder( vg,
+                                           layout.outerRect,
+                                           layout.innerThickness,
+                                           p->color0,
+                                           p->color1,
+                                           &info);
+
+         CGRectPartitionIntoColumns( layout.innerRect, p->spacing, p->nSegments, rects);
+         for( i = 0; i < p->nSegments; i++)
+         {
+            rect = MulleEdgeInsetsInsetRect( p->segments[ i].insets, rects[ i]);
+
+            direction = MulleUISegmentedButtonDirectionForSegmentIndex( p, i);
+            CornerAndLinearGradientInfoInit( &info, rect, p->cornerFactor, direction);
+            fillRectWithLinearGradient( vg,
+                                        rect,
+                                        p->segments[ i].color1,
+                                        p->segments[ i].color0,
                                         &info);
 
-      CGRectPartitionIntoColumns( layout.innerRect, p->spacing, p->nSegments, rects);
-      for( i = 0; i < p->nSegments; i++)
-      {
-         rect = MulleEdgeInsetsInsetRect( p->segments[ i].insets, rects[ i]);
-
-         direction = MulleUISegmentedButtonDirectionForSegmentIndex( p, i);
-         CornerAndLinearGradientInfoInit( &info, rect, p->cornerFactor, direction);
-         fillRectWithLinearGradient( vg,
-                                     rect,
-                                     p->segments[ i].color1,
-                                     p->segments[ i].color0,
-                                     &info);
-
-         fillRectWithHighlight( vg,
-                                rect,
-                                layout.innerThickness,
-                                p->segments[ i].brightness,
-                                &info);
-      }
+            fillRectWithHighlight( vg,
+                                   rect,
+                                   layout.innerThickness,
+                                   p->segments[ i].brightness,
+                                   &info);
+         }
 
 #if 0
-      /*
-       * inner
-       */
+         /*
+          * inner
+          */
 
-      CGRectDivide( innerRect, &leftRect, &rightRect, innerRect.size.width / 2.0, CGDirectionLeft);
-      fillRectWithLinearGradient( vg, leftRect, colors[ 1], colors[ 0], CGDirectionLeft);
-      fillRectWithLinearGradient( vg, rightRect, colors[ 3], colors[ 2], CGDirectionRight);
+         CGRectDivide( innerRect, &leftRect, &rightRect, innerRect.size.width / 2.0, CADirectionLeft);
+         fillRectWithLinearGradient( vg, leftRect, colors[ 1], colors[ 0], CADirectionLeft);
+         fillRectWithLinearGradient( vg, rightRect, colors[ 3], colors[ 2], CADirectionRight);
 
-      contentRect = innerRect;
+         contentRect = innerRect;
 
-      /*
-       * highlight
-       */
-      thickness = roundf( horw / 5.0);
-      fillRectWithHighlight( vg, leftRect, thickness, 0.3, CGDirectionLeft);
-      fillRectWithHighlight( vg, rightRect, thickness, 0.6, CGDirectionRight);
+         /*
+          * highlight
+          */
+         thickness = roundf( horw / 5.0);
+         fillRectWithHighlight( vg, leftRect, thickness, 0.3, CADirectionLeft);
+         fillRectWithHighlight( vg, rightRect, thickness, 0.6, CADirectionRight);
 
-      if( innerRect.size.height >= 60.0 && innerRect.size.width >= 60.0)
-      {
-         lineRect = CGRectInset( innerRect, 12, 12);
-         strokeRectWithHairline( vg, lineRect, 1.5, colors[ 5]);
-      }
+         if( innerRect.size.height >= 60.0 && innerRect.size.width >= 60.0)
+         {
+            lineRect = CGRectInset( innerRect, 12, 12);
+            strokeRectWithHairline( vg, lineRect, 1.5, colors[ 5]);
+         }
 
-      iconRect = CGRectInset( contentRect, 2, 2);
+         iconRect = CGRectInset( contentRect, 2, 2);
 
-      CGRectDivide( iconRect, &leftRect, &rightRect, iconRect.size.width / 2.0, CGDirectionLeft);
-      drawEmote( context, leftRect, 0x2796, NO);  // -
-      drawEmote( context, rightRect, 0x2795, NO); // +
-      /*
-       * line
-       */
+         CGRectDivide( iconRect, &leftRect, &rightRect, iconRect.size.width / 2.0, CADirectionLeft);
+         drawEmote( context, leftRect, 0x2796, NO);  // -
+         drawEmote( context, rightRect, 0x2795, NO); // +
+         /*
+          * line
+          */
 #endif
+      }
    }
 //   nvgRestore( vg);
 }
@@ -581,11 +583,11 @@ void   setupScene( UIWindow *window)
    UIView   *view;
 
    view  = [UIView viewWithFrame:CGRectMake( 20, 20, 300, 100)];
-   [view setDrawCallback:drawStuff2];
+   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff2];
    [[window contentPlane] addSubview:view];
 
    view  = [UIView viewWithFrame:CGRectMake( 340, 20, 300, 100)];
-   [view setDrawCallback:drawStuff1];
+   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff1];
    [[window contentPlane] addSubview:view];
 }
 

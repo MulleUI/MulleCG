@@ -55,7 +55,7 @@ static void   drawFancyStepperBackground( struct NVGcontext *vg,
                                           CGRect rect,
                                           CGColor color1,
                                           CGColor color2,
-                                          CGDirection direction)
+                                          CADirection direction)
 {
    NVGpaint   paint;
    CGFloat    corner;
@@ -70,7 +70,7 @@ static void   drawFancyStepperBackground( struct NVGcontext *vg,
 
    corner = CGRectGetCornerRadiusValue( rect, 0.5);
 
-   if( direction == CGDirectionLeft)
+   if( direction == CADirectionLeft)
    {
       cornerTL = cornerBL = corner;
       cornerBR = cornerTR = 0.0f;
@@ -108,7 +108,7 @@ static void   drawFancyStepperHighlight( struct NVGcontext *vg,
                                          CGRect rect,
                                          CGFloat thickness,
                                          CGFloat brightness,
-                                         CGDirection direction)
+                                         CADirection direction)
 {
    NVGpaint   paint;
    CGFloat    corner;
@@ -121,8 +121,8 @@ static void   drawFancyStepperHighlight( struct NVGcontext *vg,
 
    corner = CGRectGetCornerRadiusValue( rect, 0.5);
 
-   cornerTL = (direction == CGDirectionLeft) ? corner : 0.0f;
-   cornerTR = (direction == CGDirectionRight) ? corner : 0.0f;
+   cornerTL = (direction == CADirectionLeft) ? corner : 0.0f;
+   cornerTR = (direction == CADirectionRight) ? corner : 0.0f;
 
    nvgBeginPath( vg);
    nvgRoundedRectVarying( vg, rect.origin.x,
@@ -274,9 +274,9 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
       outerRect   = rect;
       contentRect = outerRect;
 
-      CGRectDivide( outerRect, &leftRect, &rightRect, outerRect.size.width / 2.0, CGDirectionLeft);
-      drawFancyStepperBackground( vg, leftRect, colors[ 0], colors[ 1], CGDirectionLeft);
-      drawFancyStepperBackground( vg, rightRect, colors[ 2], colors[ 3], CGDirectionRight);
+      CGRectDivide( outerRect, &leftRect, &rightRect, outerRect.size.width / 2.0, CADirectionLeft);
+      drawFancyStepperBackground( vg, leftRect, colors[ 0], colors[ 1], CADirectionLeft);
+      drawFancyStepperBackground( vg, rightRect, colors[ 2], colors[ 3], CADirectionRight);
 
       /*
        * inner
@@ -286,9 +286,9 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
       thickness = roundf( horw / 15.0);
       innerRect = CGRectInset( contentRect, thickness, thickness);
 
-      CGRectDivide( innerRect, &leftRect, &rightRect, innerRect.size.width / 2.0, CGDirectionLeft);
-      drawFancyStepperBackground( vg, leftRect, colors[ 1], colors[ 0], CGDirectionLeft);
-      drawFancyStepperBackground( vg, rightRect, colors[ 3], colors[ 2], CGDirectionRight);
+      CGRectDivide( innerRect, &leftRect, &rightRect, innerRect.size.width / 2.0, CADirectionLeft);
+      drawFancyStepperBackground( vg, leftRect, colors[ 1], colors[ 0], CADirectionLeft);
+      drawFancyStepperBackground( vg, rightRect, colors[ 3], colors[ 2], CADirectionRight);
 
       contentRect = innerRect;
 
@@ -296,8 +296,8 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
        * highlight
        */
       thickness = roundf( horw / 5.0);
-      drawFancyStepperHighlight( vg, leftRect, thickness, 0.3, CGDirectionLeft);
-      drawFancyStepperHighlight( vg, rightRect, thickness, 0.6, CGDirectionRight);
+      drawFancyStepperHighlight( vg, leftRect, thickness, 0.3, CADirectionLeft);
+      drawFancyStepperHighlight( vg, rightRect, thickness, 0.6, CADirectionRight);
 
       if( innerRect.size.height >= 60.0 && innerRect.size.width >= 60.0)
       {
@@ -307,7 +307,7 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
 
       iconRect = CGRectInset( contentRect, 2, 2);
 
-      CGRectDivide( iconRect, &leftRect, &rightRect, iconRect.size.width / 2.0, CGDirectionLeft);
+      CGRectDivide( iconRect, &leftRect, &rightRect, iconRect.size.width / 2.0, CADirectionLeft);
       drawEmote( context, leftRect, 0x2796, NO);  // -
       drawEmote( context, rightRect, 0x2795, NO); // +
       /*
@@ -361,7 +361,7 @@ void   setupScene( UIWindow *window)
 
    frame  = [[window contentPlane] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:drawStepper];
+   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawStepper];
    [[window contentPlane] addSubview:view];
 }
 

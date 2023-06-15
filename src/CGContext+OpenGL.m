@@ -9,6 +9,7 @@
 
 #import "CGImage.h"
 #import "CGLayer.h"
+#import "CGColor.h"
 #include <ctype.h>
 
 
@@ -91,54 +92,6 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
 }
 
 
-static void   checkCompileErrors( GLuint shader, char *type, char *name)
-{
-   GLint   success;
-   GLchar   infoLog[ 1024];
-
-   glGetShaderiv( shader, GL_COMPILE_STATUS, &success);
-   if( ! success)
-   {
-       glGetShaderInfoLog( shader, 1024, NULL, infoLog);
-       fprintf( stderr, "%s %s compile error: %s\n", name, type, infoLog);
-   }
-}
-
-
-static void   checkLinkErrors( GLuint shader, char *name)
-{
-   GLint   success;
-   GLchar  infoLog[ 1024];
-
-   glGetProgramiv( shader, GL_LINK_STATUS, &success);
-   if( ! success)
-   {
-       glGetShaderInfoLog( shader, 1024, NULL, infoLog);
-       fprintf( stderr, "%s link error: %s\n", name, infoLog);
-   }
-}
-
-
-static int  has_version_header( char *s)
-{
-   while( isblank( *s))
-      ++s;
-   if( *s != '#')
-      return( 0);
-   ++s;
-
-   while( isblank( *s))
-      ++s;
-   if( ! strncmp( s, "version", 7))
-   {
-      s += 7;
-      if( isblank( *s))
-         return( 1);
-   }
-   return( 0);
-}
-
-
 //
 // MEMO: we can't do NANOVG_GL2_IMPLEMENTATION because we need
 //       for example secondary framebuffers, which nanovg would not
@@ -214,54 +167,6 @@ static int  has_version_header( char *s)
 }
 
 
-//
-// TODO: remember under name as resource somehow
-//
-- (NSUInteger) compileVertexShader:(char *) vertexShaderCode
-                    fragmentShader:(char *) fragmentShaderCode
-                    nameUTF8String:(char *) name
-{
-   GLuint   vertex;
-   GLuint   fragment;
-   GLuint   shaderID;
-   char     *sources[ 2];
-
-   vertex = glCreateShader( GL_VERTEX_SHADER);
-
-   // put a "proper" version header on top of the shader, if there is none
-   // will be like nanovg shader version
-   sources[ 0] = has_version_header( vertexShaderCode) ? "" : [self shaderHeaderUTF8String];
-   sources[ 1] = vertexShaderCode;
-   glShaderSource( vertex, 2, (const GLchar *const *) sources, NULL);
-   glCompileShader( vertex);
-   checkCompileErrors( vertex, "vertex", name);
-
-   // put a "proper" version header on top of the shader, if there is none
-   // will be like nanovg shader version
-   sources[ 0] = has_version_header( fragmentShaderCode) ? "" : [self shaderHeaderUTF8String];
-   sources[ 1] = fragmentShaderCode;
-
-   fragment = glCreateShader( GL_FRAGMENT_SHADER);
-   glShaderSource( fragment, 2, (const GLchar *const *) sources, NULL);
-   glCompileShader( fragment);
-   checkCompileErrors( fragment, "fragment", name);
-
-   shaderID = glCreateProgram();
-   glAttachShader( shaderID, vertex);
-   glAttachShader( shaderID, fragment);
-   glLinkProgram( shaderID);
-   checkLinkErrors( shaderID, name);
-
-   return( shaderID);
-}
-
-
-- (void) useShader:(NSUInteger) shaderID
-{
-   glUseProgram( (GLuint) shaderID);
-}
-
-
 - (void) assertNoBackendError:(char *) str
 {
 #ifdef NANOVG_GL3_IMPLEMENTATION
@@ -276,31 +181,16 @@ static int  has_version_header( char *s)
 }
 
 
-- (char *) shaderHeaderUTF8String
+- (void *) gpuTextureForImageID:(NSInteger) textureID
 {
 #ifdef NANOVG_GL3_IMPLEMENTATION
-   return( "#version 150 core\n");
+   return( (void *) (uintptr_t) nvglImageHandleGL3( _vg, textureID));
 #endif
 #ifdef NANOVG_GLES2_IMPLEMENTATION
-   return( "#version 100\n");
+   return( (void *) (uintptr_t) nvglImageHandleGLES2( _vg, textureID));
 #endif
 #ifdef NANOVG_GLES3_IMPLEMENTATION
-   return( "#version 300 es\n");
-#endif
-   return( "");
-}
-
-
-- (void *) gpuTextureForImageID:(NSInteger) imageID
-{
-#ifdef NANOVG_GL3_IMPLEMENTATION
-   return( (void *) (uintptr_t) nvglImageHandleGL3( _vg, imageID));
-#endif
-#ifdef NANOVG_GLES2_IMPLEMENTATION
-   return( (void *) (uintptr_t) nvglImageHandleGLES2( _vg, imageID));
-#endif
-#ifdef NANOVG_GLES3_IMPLEMENTATION
-   return( (void *) (uintptr_t) nvglImageHandleGLES3( _vg, imageID));
+   return( (void *) (uintptr_t) nvglImageHandleGLES3( _vg, textureID));
 #endif
    abort();
 }
@@ -317,14 +207,8 @@ static int  has_version_header( char *s)
 - (void) clearFramebufferBits:(NSUInteger) bits
                         color:(CGColor) color
 {
-   CGFloat   rgba[ 4];
-   CGColor   color;
-
    if( bits & GL_COLOR_BUFFER_BIT)
-   {
-      CGColorGetRGBAComponents( color, rgba);
-      glClearColor( rgba[ 0], rgba[ 1], rgba[ 2], rgba[ 3]);
-   }
+      glClearColor( color.r, color.b, color.g, color.a);
 
    glClear( bits);
    CGContextCheckBackendError( self, "clear framebuffer");
@@ -334,14 +218,12 @@ static int  has_version_header( char *s)
 - (void) clearFramebufferNoColor
 {
    [self clearFramebufferBits:_framebufferBits & ~GL_COLOR_BUFFER_BIT
-                        color:CGColorMakeWithHexColor( 0x00000000)];
+                        color:CGColorMakeWithHexColor(0x00000000)];
 }
 
 
 //#define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX   0x9048
 //#define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
-
-
 - (void) changeRender:(struct CGFrameInfo *) info
 {
    assert( _isActive);
@@ -400,6 +282,7 @@ static int  has_version_header( char *s)
 //
 - (void) barrier
 {
+   // 15.6.2023: if i comment glFinish out, the display flickers slightly
    glFinish();
    CGContextCheckBackendError( self, "glFinish");
 }
@@ -479,13 +362,13 @@ static int  has_version_header( char *s)
    struct CGBitmap               bitmap;
    struct CGContextFramebuffer   next;
    struct CGContextFramebuffer   previous;
-   struct MulleIntegerSize           bitmapSize;
+   struct MulleIntegerSize       bitmapSize;
    size_t                        size;
 
    assert( _isActive);
 
-   bitmapSize  = [image bitmapSize];
-   size        = bitmapSize.width * bitmapSize.height * 4;
+   bitmapSize       = [image bitmapSize];
+   size             = bitmapSize.width * bitmapSize.height * 4;
    assert( size);
 
    // circumvent nvidia bug
@@ -539,28 +422,28 @@ static int  has_version_header( char *s)
 - (struct CGBitmap) RGBABytesBitmapOfImage:(CGImage *) image
                                  allocator:(struct mulle_allocator *) allocator
 {
-   struct CGBitmap         bitmap;
-   struct MulleIntegerSize     bitmapSize;
-   CGBitmapEncoding   encoding;
-   GLenum                  format;
-   GLenum                  type;
-   size_t                  size;
-   NSUInteger              imageID;
-   void                    *gpuTexture;
-   struct NVGcontext       *vg;
+   struct CGBitmap           bitmap;
+   struct MulleIntegerSize   bitmapSize;
+   CGBitmapEncoding          encoding;
+   GLenum                    format;
+   GLenum                    type;
+   size_t                    size;
+   NSUInteger                textureID;
+   void                      *gpuTexture;
+   struct NVGcontext         *vg;
 
    assert( _isActive);
 
    encoding = CGBitmapEncodingFlipYRGBABytes;
    format   = GL_RGBA;
    type     = GL_UNSIGNED_BYTE;
-   // imageID is OK here, because we don't care about repeats and stuff
+   // textureID is OK here, because we don't care about repeats and stuff
 
    assert( [image context] == self);
 
-   vg      = CGContextGetNVGContext( self);
-   imageID = [image imageID];
-   nvgImageTextureInfo( vg, imageID, NULL, NULL, &gpuTexture);
+   vg        = CGContextGetNVGContext( self);
+   textureID = [image textureID];
+   nvgImageTextureInfo( vg, textureID, NULL, NULL, &gpuTexture);
 
    bitmapSize        = [image bitmapSize];
    size              = bitmapSize.width * bitmapSize.height * 4;
@@ -599,11 +482,11 @@ static int  has_version_header( char *s)
                     framebufferBitmapType:(CGFramebufferBitmapType) fType
                                 allocator:(struct mulle_allocator *) allocator
 {
-   struct CGBitmap         bitmap;
-   CGBitmapEncoding        encoding;
-   GLenum                  format;
-   GLenum                  type;
-   size_t                  size;
+   struct CGBitmap    bitmap;
+   CGBitmapEncoding   encoding;
+   GLenum             format;
+   GLenum             type;
+   size_t             size;
 
    switch( fType)
    {
@@ -678,6 +561,21 @@ static int  has_version_header( char *s)
                               allocator:NULL];
 
    return( bitmap);
+}
+
+
+- (void) bindImage:(CGImage *) image
+     toTextureUnit:(NSUInteger) index
+{
+   void   *gpuTexture;
+
+   gpuTexture = [self gpuTextureForImageID:[image textureID]];
+
+   assert( GL_TEXTURE15 == GL_TEXTURE0 + 15);
+   glActiveTexture( GL_TEXTURE0 + index);
+   CGContextCheckBackendError( self, "glActiveTexture");
+   glBindTexture( GL_TEXTURE_2D, (GLuint) (uintptr_t) gpuTexture);
+   CGContextCheckBackendError( self, "glBindTexture");
 }
 
 

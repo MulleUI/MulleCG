@@ -19,7 +19,9 @@
 // In this demo, there are no "real" nanovg calls, so it doesn't matter
 //
 
-BOOL  drawOpenGL1( UIWindow *window, id <UIGraphicsContext> context, struct CGFrameInfo *info)
+void   drawOpenGL1( UIWindow *window,
+                    id <UIGraphicsContext> context,
+                    struct CGFrameInfo *info)
 {
    glColor3f( 0.0f, 0.0f, 1.0f ); // blue color
 
@@ -31,11 +33,12 @@ BOOL  drawOpenGL1( UIWindow *window, id <UIGraphicsContext> context, struct CGFr
    glEnd();
 
    glFlush();
-   return( YES);
 }
 
 
-void  drawOpenGL2( UIWindow *window, id <UIGraphicsContext> context, struct CGFrameInfo *info)
+void  drawOpenGL2( UIWindow *window,
+                   id <UIGraphicsContext> context,
+                   struct CGFrameInfo *info)
 {
    glColor3f( 1.0f, 1.0f, 0.0f ); // yellow color
 
@@ -50,7 +53,9 @@ void  drawOpenGL2( UIWindow *window, id <UIGraphicsContext> context, struct CGFr
 }
 
 
-void  drawOpenGL3( UIWindow *window, id <UIGraphicsContext> context, struct CGFrameInfo *info)
+void  drawOpenGL3( UIWindow *window,
+                   id <UIGraphicsContext> context,
+                   struct CGFrameInfo *info)
 {
    glColor3f( 1.0f, 0.0f, 1.0f ); // magenta color
 

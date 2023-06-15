@@ -1,5 +1,7 @@
 #import "import.h"
 
+#import "CGColor.h"
+#include "millivg.h"
 
 struct NVGcontext;
 
@@ -18,15 +20,22 @@ typedef NS_ENUM( NSUInteger, CGContextNanoVGBackend)
 };
 
 
+struct CGShaderUTF8Sources
+{
+   char                *name;
+   char                *vertexSource;
+   char                *fragmentSource;
+   char                *geometrySource;
+   UIGraphicsBackend   *backends;          // NULL is UIGraphicsBackendDefault
+};                                         // terminate with UIGraphicsBackendNone
 
+
+// just a rename
 @protocol CGContextResource
 
-// tricky, but context may not be activated! it's not a good idea to
-// activate the context. See how CGImage does it
 - (void) contextDidRemoveObject:(CGContext *) context;
 
 @end
-
 
 
 typedef NS_ENUM( NSUInteger, CGContextFramebufferType)
@@ -76,6 +85,14 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 }
 
 
+struct CGContextItem
+{
+   void   *key;
+   void   *value;
+   void   (*release)( struct CGContextItem *item, CGContext *context);
+};
+
+
 //
 // for OpenGL we have one context per OpenGL, to keep fonts and
 // other textures around. Each frame is encloded in a
@@ -92,34 +109,37 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 // no accidental switching. If the context is tied to an OpenGL (or Vulcan
 // whatever) context -isActive will say YES.
 //
-@interface CGContext : NSObject
+@interface CGContext : NSObject < MulleUIResourceMap>
 {
-   struct NVGcontext            *_vg;
-   struct CGFrameInfo           _currentFrameInfo;
-   struct CGContextFramebuffer  _currentFramebuffer;
+   struct NVGcontext                *_vg;
+   struct CGFrameInfo               _currentFrameInfo;
+   struct CGContextFramebuffer      _currentFramebuffer;
 
-   struct mulle__pointerset     _resources;
-   struct mulle_set             _loanedResources;
-   struct mulle_map             _fontMap;
-   struct mulle_map             _gpuTextureMap;
-   struct mulle__pointerarray   _deletedTexturedIDs;
-   NSUInteger                   _numberOfFrames;  // counts endRenders...
-   BOOL                         _isRendering;
-   BOOL                         _isActive;
-   BOOL                         _isFreshLayer;
-   int                          _nvgFlags; // used for nvgCreate
+   struct MulleUIResourceStorage    _resourceStorage;
+   struct mulle_map                 _fontMap;
+   struct mulle_map                 _gpuTextureMap;
+   struct mulle_map                 _shaderMap;
+   struct mulle__pointerarray       _deletedTextureIDs;
+   struct mulle__pointerarray       _deletedFramebuffers;
+   NSUInteger                       _numberOfFrames;  // counts endRenders...
+   BOOL                             _isRendering;
+   BOOL                             _isActive;
+   BOOL                             _isFreshLayer;
+   int                              _nvgFlags; // used for nvgCreate
+   CGShaderID                       _activeShader;
 
-   mulle_absolutetime_t         _firstRenderTimeStamp;
+   mulle_absolutetime_t             _firstRenderTimeStamp;
 
    // its more convenient to use a private framebuffer for offscreen rendering
    // than the default framebuffer of a offscreen window. So even if this
    // context is tied to an offscreen window, it will/should use this
    // offScreenFramebuffer instead.
 
-   mulle_atomic_pointer_t       _drawnLayer;       // CGLayer
-   mulle_atomic_pointer_t       _scratchLayer;     // CGLayer
+   mulle_atomic_pointer_t           _drawnLayer;       // CGLayer
+   mulle_atomic_pointer_t           _scratchLayer;     // CGLayer
 
-   CGLayer                      *_renderLayer;     // ephemeral(!)
+   CGLayer                          *_renderLayer;     // ephemeral(!)
+   BOOL                             _hasLoadedFont;
 }
 
 @property( assign, readonly) BOOL   shareID;
@@ -143,13 +163,19 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 @property( assign) NSUInteger       framebufferBits;
 @property( assign) id               OSWindow;
 
-@property( assign, readonly) UIGraphicsBackend    backend;
+@property( assign, readonly) UIGraphicsBackend             backend;
 
-// used in so many demos..
-// Can't use UIInputState, because we don't have UIEvent here
-@property( assign) CGPoint          mouseLocation;
-@property( assign) NSUInteger       mouseButtonStates;
-@property( assign) NSUInteger       keyModifiers;
+@property( assign) struct UIInputState                     inputState;
+@property( assign, getter=isInitializedFramebuffer) BOOL   initializedFramebuffer;
+
+
++ (void) setDebugEnabled:(BOOL) flag;
+
+
++ (void) registerShaderSources:(struct CGShaderUTF8Sources *) source
+             forNameUTF8String:(char *) nameUTF8String;
++ (void) registerShaderSources:(struct CGShaderUTF8Sources *) source;
+- (struct CGShaderUTF8Sources *) registeredShaderSourcesForNameUTF8String:(char *) nameUTF8String;
 
 
 // the context needs to be told, what backend is being used
@@ -172,14 +198,13 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 - (void) suspendRender;  // flushes and resets
 - (void) flushRender;    // suspends and resumes
 
-
 // default is NULL until MulleUIOS comes into play
 - (char *) backendUTF8String;
-
 
 // to return to the "default" framebuffer, either the offscreen or the window
 // one, if no offscreen exists
 - (void) clearFramebuffer;
+- (void) clearFramebufferWithHexColor:(NSUInteger) color;
 - (void) clearFramebufferWithColor:(CGColor) color;
 
 - (struct CGContextFramebuffer) bindFramebuffer:(struct CGContextFramebuffer) framebuffer;
@@ -197,11 +222,14 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 // to the window. If isActive is no, you can/must not do any graphics
 // calls for example.
 - (BOOL) isActive;
+- (BOOL) hasLoadedFont;
 
 - (NSUInteger) numberOfFrames;
 - (mulle_relativetime_t) secondsSinceFirstRender;
 
 - (CGFloat) alpha;
+
+- (CGShaderID) activeShader;
 
 
 // Once acquired its yours and its gone from CGContext. Now the window has
@@ -220,6 +248,14 @@ CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 // get recycled framebuffer back 
 - (id) acquireRecycledFramebuffer;
 
+// support for some demos
+- (CGPoint) mouseLocation;
+- (NSUInteger) keyModifiers;
+- (NSUInteger) buttonStates;
+
+- (struct MulleUIResourceStorage *) _resourceStorage;
+
+
 @end
 
 typedef CGContext   *CGContextRef;
@@ -236,5 +272,3 @@ static inline struct NVGcontext   *_CGContextGetNVGContext( CGContextRef self)
 {
    return( ((struct{ @defs( CGContext); } *) self)->_vg);
 }
-
-

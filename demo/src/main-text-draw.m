@@ -19,15 +19,15 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
    mvgStrokeRect( vg, rect, CGColorMakeGray());
    mvgStrokeLineH( vg, CGRectGetMinX( rect), CGRectGetMaxX( rect), CGRectGetMidY( rect), CGColorMakeGray());
-   nvgFontSize( vg, 80.0);
-   nvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
-   mvgText( vg,
-            " uo xu", // Vya Con",
-            NULL,
-            CGPointMake( CGRectGetMinX( rect),
-            CGRectGetMaxY( rect)),
-            NVG_ALIGN_RIGHT|NVG_ALIGN_BOTTOM,
-            MVGTextAlignVisually);
+   mvgFontSize( vg, 80.0);
+   mvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
+   mvgExtendedAlignedText( vg,
+                          " uo xu", // Vya Con",
+                          NULL,
+                          CGPointMake( CGRectGetMinX( rect),
+                          CGRectGetMaxY( rect)),
+                          NVG_ALIGN_RIGHT|NVG_ALIGN_BOTTOM,
+                          MVGTextAlignVisually);
 }
 
 
@@ -40,7 +40,7 @@ void   setupScene( UIWindow *window)
 
    view  = [UIView viewWithFrame:frame];
    [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
-   [view setDrawCallback:drawStuff];
+   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [[window contentPlane] addSubview:view];
 }
 

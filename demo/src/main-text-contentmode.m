@@ -245,7 +245,7 @@ void   setupScene( UIWindow *window)
 
    view  = [UIView viewWithFrame:frame];
    [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
-   [view setDrawCallback:drawStuff2]; // drawStuff1];
+   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff2]; // drawStuff1];
    [[window contentPlane] addSubview:view];
 }
 

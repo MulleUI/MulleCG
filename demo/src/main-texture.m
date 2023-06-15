@@ -43,9 +43,9 @@ static void   drawTexture( CGContext *context, CGSize size)
 }
 
 
-static void  createTexture( CGContext *context,
-                            CGFloat pixelRatio,
-                            NSUInteger imageFlags)
+static CGLayer  *createTexture( CGContext *context,
+                                CGFloat pixelRatio,
+                                NSUInteger imageFlags)
 {
    CGFrameInfo                   *info;
    CGFloat                       radius;
@@ -53,14 +53,15 @@ static void  createTexture( CGContext *context,
    struct CGFrameInfo            frameInfo;
    struct CGFrameInfo            oldFrameInfo;
    struct CGContextFramebuffer   oldFramebuffer;
+   CGLayer                       *texture;
 
    assert( pixelRatio > 0.0);
 
-   // we create small 32x32 texture
+   // we create a small 32x32 texture
 
-   texture = [CGLayer layerWithBitmapSize:MulleIntegerSizeMake( 32, 32)
-                               imageFlags:imageFlags
-                                  context:context];
+   texture = [[CGLayer layerWithBitmapSize:MulleIntegerSizeMake( 32, 32)
+                                imageFlags:imageFlags
+                                   context:context] retain];
    assert( texture);
 
    frameInfo      = CGFrameInfoFBMake( MulleIntegerSizeMake( 32, 32), pixelRatio, 1.0);
@@ -76,6 +77,7 @@ static void  createTexture( CGContext *context,
    }
    [context bindRender:&oldFrameInfo];
    [context bindFramebuffer:oldFramebuffer];
+   return( texture);
 }
 
 #endif
@@ -104,7 +106,7 @@ static void  drawStuff( CALayer *layer, CGContext *context)
 
    nvgBeginPath( vg);
    {
-      nvgRect( vg, shape.origin.x, shape.origin.y, shape.size.width, shape.size.height);
+      mvgRect( vg, shape);
       // ugliness fix this, this need not be an object
 
 #ifdef HAVE_TEXTURE
@@ -137,7 +139,7 @@ void   setupScene( UIWindow *window)
    [view setBackgroundColor:[UIColor darkGrayColor]];
    [view setBorderColor:[UIColor whiteColor]];
    [view setBorderWidth:4.0];
-   [view setDrawCallback:drawStuff];
+   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [contentPlane addSubview:view];
 
 #ifdef HAVE_TEXTURE
@@ -145,10 +147,14 @@ void   setupScene( UIWindow *window)
    // We want to do drawing outside of the render, so we
    // need to get an activated context from the window.
    //
-   context = [window activateWindowGraphicsContext];
-   createTexture( context,
-                  [window pixelRatio],
-                  NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
+   context = (CGContext *) [window activateWindowGraphicsContext];
+   @autoreleasepool
+   {
+      texture = createTexture( context,
+                               [window pixelRatio],
+                               NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
+      [[texture bitmapImage] writeToPNGUTF8String:"debug.png"];
+   }
    [window deactivateGraphicsContext:context];
 #endif
 }
@@ -168,6 +174,8 @@ int   main( int argc, char *argv[])
    styleMask = UIWindowStyleMaskDefault;
    styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
    styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+
+   [CGContext setDebugEnabled:YES];
 
    window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 600.0f)
                              titleUTF8String:"Demo"

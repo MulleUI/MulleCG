@@ -1,0 +1,40 @@
+digraph G 
+{ 
+   node [shape=box, style=rounded];
+
+   subgraph cluster_top 
+   {
+      rank=same; 
+      style=invis; 
+      vertex_shader [label="Vertex Shader"]; 
+      fragment_shader [label="Fragment Shader"];
+   } 
+
+   subgraph cluster_mid 
+   { 
+      rank=same; 
+      style=invis; 
+      vbo [label="Vertex Buffer Object"];
+   } 
+
+   subgraph cluster_bot 
+   { 
+      rank=same; 
+      style=invis; 
+      attribute [label="attribute"]; 
+      uniform   [label="uniform"];
+      varying1  [label="varying"];
+      varying2  [label="varying"];
+   } 
+
+   vertex_shader   -> varying1  [ xlabel="out" ];
+   vertex_shader   -> uniform   
+   vertex_shader   -> attribute [ style="dotted", xlabel="in" ];
+   vertex_shader   -> vbo;
+
+   fragment_shader -> uniform 
+   fragment_shader -> varying1  [ xlabel="in" ];
+   fragment_shader -> varying2  [ xlabel="out" ];
+
+   vbo             -> attribute;
+}  

@@ -51,7 +51,7 @@ PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 
 // if you want to do more, do your own layer
 
-static CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians angle)
+CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians angle)
 {
    CAPolarPoint   rotatedPolarPoint;
    CAPolarPoint   centerPolarPoint;
@@ -74,9 +74,9 @@ static CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians 
 }
 
 
-static CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
-                                                        CAAngleRadians angle,
-                                                        CGVector scaleFactor)
+CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
+                                                 CAAngleRadians angle,
+                                                 CGVector scaleFactor)
 {
    CAPolarPoint   rotatedPolarPoint;
    CAPolarPoint   centerPolarPoint;
@@ -109,9 +109,6 @@ static CGAffineTransform   textureMapperTransform( CGRect rect,
    CGAffineTransform   shader;
    CGAffineTransform   textureScale;
    CGAffineTransform   fragment;
-   CGAffineTransform   bitmapScale;
-   CGAffineTransform   combined;
-   CGAffineTransform   reverse;
 
    // stand in for current transformation
    //   current  = CGAffineTransformMakeIdentity();
@@ -238,11 +235,9 @@ CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
                                                          CAAngleRadians angle,
                                                          CGSize extent)
 {
-   CGPoint             imageCenterPoint;
    CGPoint             rotatedPoint;
    CGPoint             rotatedOrigin;
    CGPoint             centerPoint;
-   CGSize              diff;
    CGAffineTransform   xform;
    CGPoint             patternPoint;
    CGRect              centeredRect;
@@ -318,11 +313,9 @@ static CGPoint  CGRectGetOriginToCenterForAngleAndExtent( CGRect rect,
                                                           CAAngleRadians angle,
                                                           CGSize extent)
 {
-   CGPoint             imageCenterPoint;
    CGPoint             rotatedPoint;
    CGPoint             rotatedOrigin;
    CGPoint             centerPoint;
-   CGSize              diff;
    CGAffineTransform   xform;
    CGPoint             patternPoint;
    CGRect              centeredRect;
@@ -394,7 +387,7 @@ static NSInteger   CGBitmapDrawableGetImageID( id <CGBitmapDrawable> self,
                                                CGContext *context)
 {
    NSInteger    imageFlags;
-   NSInteger    imageID;
+   NSInteger    textureID;
    CGImage      *image;
 
    // if we are a CGImage we can't really change, but a UIBitmapImage can
@@ -414,10 +407,10 @@ static NSInteger   CGBitmapDrawableGetImageID( id <CGBitmapDrawable> self,
    if( ! image)
       return( -1);
 
-   imageID = [image imageID];
+   textureID = [image textureID];
 
-   assert( imageID != -1);
-   return( imageID); 
+   assert( textureID != -1);
+   return( textureID);
 }
 
 
@@ -452,7 +445,7 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
 {
    NVGpaint     imgPaint;
    NVGcontext   *vg;
-   NSInteger    imageID;
+   NSInteger    textureID;
 
    vg = CGContextGetNVGContext( context);
 
@@ -472,8 +465,8 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
       extent.height    *= -1.0;
    }
 
-   imageID = CGBitmapDrawableGetImageID( self, options, context);
-   if( imageID == -1)
+   textureID = CGBitmapDrawableGetImageID( self, options, context);
+   if( textureID == -1)
    {
 #ifdef DEBUG
       abort();      
@@ -491,7 +484,7 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
                                     extent.width,
                                     extent.height,
                                     options->rotation,
-                                    imageID,
+                                    textureID,
                                     options->alpha);
 
    nvgBeginPath( vg);

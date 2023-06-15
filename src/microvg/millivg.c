@@ -4,31 +4,166 @@
 
 
 
+void   mvgFillRoundedRect( NVGcontext *vg,
+                           CGRect rect,
+                           CGFloat cornerRadius,
+                           CGColor color)
+{
+   mvgBeginPath( vg);
+   {
+      mvgRoundedRect( vg, rect, cornerRadius);
+      mvgFillColor( vg, color);
+   }
+   mvgFill( vg);
+}
+
+
+void   mvgPaintRoundedRect( NVGcontext *vg,
+                            CGRect rect,
+                            CGFloat cornerRadius,
+                            NVGpaint paint)
+{
+   mvgBeginPath( vg);
+   {
+      mvgRoundedRect( vg, rect, cornerRadius);
+      mvgFillPaint( vg, paint);
+   }
+   mvgFill( vg);
+}
+
+
+
 void   mvgFillRect( NVGcontext *vg, CGRect rect, CGColor color)
 {
-   nvgBeginPath( vg);
+   mvgBeginPath( vg);
    {
-      nvgRect( vg, rect.origin.x,
-                   rect.origin.y,
-                   rect.size.width,
-                   rect.size.height);
-      nvgFillColor( vg, color);
+      mvgRect( vg, rect);
+      mvgFillColor( vg, color);
    }
-   nvgFill( vg);
+   mvgFill( vg);
+}
+
+
+void   mvgPaintRect( NVGcontext *vg, CGRect rect, NVGpaint paint)
+{
+   mvgBeginPath( vg);
+   {
+      mvgRect( vg, rect);
+      mvgFillPaint( vg, paint);
+   }
+   mvgFill( vg);
+}
+
+
+void   mvgFillCircle( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color)
+{
+   mvgBeginPath( vg);
+   {
+      mvgCircle( vg, center, radius);
+      mvgFillColor( vg, color);
+   }
+   mvgFill( vg);
+}
+
+
+void   mvgPaintCircle( NVGcontext *vg, CGPoint center, CGFloat radius, NVGpaint paint)
+{
+   mvgBeginPath( vg);
+   {
+      mvgCircle( vg, center, radius);
+      mvgFillPaint( vg, paint);
+   }
+   mvgFill( vg);
+}
+
+
+
+void   mvgStrokeRoundedRect( NVGcontext *vg,
+                             CGRect rect,
+                             CGFloat cornerRadius,
+                             CGColor color)
+{
+   mvgBeginPath( vg);
+   {
+      mvgRoundedRect( vg, rect, cornerRadius);
+      mvgStrokeColor( vg, color);
+   }
+   mvgStroke( vg);
 }
 
 
 void   mvgStrokeRect( NVGcontext *vg, CGRect rect, CGColor color)
 {
-   nvgBeginPath( vg);
+   mvgBeginPath( vg);
    {
-      nvgRect( vg, rect.origin.x,
-                   rect.origin.y,
-                   rect.size.width,
-                   rect.size.height);
-      nvgStrokeColor( vg, color);
+      mvgRect( vg, rect);
+      mvgStrokeColor( vg, color);
    }
-   nvgStroke( vg);
+   mvgStroke( vg);
+}
+
+
+void   mvgStrokeCircle( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color)
+{
+   mvgBeginPath( vg);
+   {
+      mvgCircle( vg, center, radius);
+      mvgStrokeColor( vg, color);
+   }
+   mvgStroke( vg);
+}
+
+
+void   mvgStrokeLine( NVGcontext *vg, CGPoint start, CGPoint end, CGColor color)
+{
+   mvgBeginPath( vg);
+   {
+      mvgMoveTo( vg, start);
+      mvgLineTo( vg, end);
+      mvgStrokeColor( vg, color);
+   }
+   mvgStroke( vg);
+}
+
+
+static struct MulleShadow   defaultShadow = MulleShadowDefaultValues;
+
+
+
+void   mvgFillRoundedShadow( struct NVGcontext *vg,
+                             CGRect rect,
+                             CGFloat cornerRadius,
+                             struct MulleShadow *shadow)
+{
+   CGRect     shadowRect;
+   CGRect     gradientRect;
+   NVGpaint   shadowPaint;
+   CGFloat    feather;
+
+   shadow         = shadow ? shadow : &defaultShadow;
+   // calculate feather from blur value
+   feather        = shadow->blur;
+   gradientRect   = CGRectExtrude( rect, feather / 2.0, feather / 2.0);
+   shadowPaint    = nvgBoxGradient( vg, gradientRect.origin.x,
+                                        gradientRect.origin.y,
+                                        gradientRect.size.width,
+                                        gradientRect.size.height,
+                                        cornerRadius,
+                                        feather,
+                                        shadow->innerColor,
+                                        shadow->outerColor);
+  // Draw the drop shadow
+   shadowRect = CGRectExtrude( rect, feather * 2, feather * 2);
+//   shadowRect = CGRectExtrudeUsingEdgeInsets( extendedRect, shadow->extrudes);
+   mvgBeginPath(vg);
+   mvgRoundedRect( vg, shadowRect, cornerRadius);
+   if( shadow->hole)
+   {
+      mvgRoundedRect( vg, rect, cornerRadius);
+      mvgPathWinding( vg, NVG_HOLE);
+   }
+   mvgFillPaint(vg, shadowPaint);
+   mvgFill(vg);
 }
 
 
@@ -88,6 +223,8 @@ static inline float  round_to_one_tenth( float v)
 
 #define REFERENCE_FONTSIZE 100.0f
 
+
+
 // why is that not a CGContext function ?
 // Because we are taking part in the implicit states of nvg, like textColor,
 // fontID etc.
@@ -98,23 +235,19 @@ void   mvgTextInRect( struct NVGcontext *vg,
                       char *end,
                       CGRect rect,
                       CGContentMode contentMode,
-                      MVGTextOptions options)
+                      MulleTextOptions options)
 {
-   float           bounds[ 6];
-   int             halign;
-   int             valign;
-   CGPoint         origin;
-   CGRect          coverage;
-   float           ascender;
-   float           descender;
-   float           lineh;
-   CGFloat         hfactor;
-   CGFloat         vfactor;
-   CGFloat         factor;
-   CGFloat         maxFactor;
-   CGFloat         fontSize;
-   int             binSearch;
-   CGContentMode   fillContentMode;
+   float                     bounds[ 6];
+   CGPoint                   origin;
+   CGRect                    coverage;
+   CGFloat                   hfactor;
+   CGFloat                   vfactor;
+   CGFloat                   factor;
+   CGFloat                   maxFactor;
+   CGFloat                   fontSize;
+   int                       binSearch;
+   CGContentMode             fillContentMode;
+   struct MulleTextMetrics   metrics;
 
    if( ! s)
       return;
@@ -125,6 +258,8 @@ void   mvgTextInRect( struct NVGcontext *vg,
       if( end == s)
          return;
    }
+
+   mvgAssertFont( vg);
 
    nvgSave( vg);
    do
@@ -145,7 +280,7 @@ void   mvgTextInRect( struct NVGcontext *vg,
       case CGContentModeScaleToFill     :
       case CGContentModeScaleAspectFill :
       case CGContentModeScaleAspectFit  :
-         nvgFontSize( vg, REFERENCE_FONTSIZE); // need large font for precsion
+         nvgFontSize( vg, REFERENCE_FONTSIZE); // need large font for precision
       }
       nvgTextVisualBounds( vg, 0, 0, s, end, bounds);
 
@@ -253,12 +388,12 @@ void   mvgTextInRect( struct NVGcontext *vg,
       }
 
 #ifdef RENDER_DEBUG
-      nvgSave( vg);
+      mvgSave( vg);
       {
-         nvgTranslate( vg, rect.origin.x, rect.origin.y);
+         mvgTranslate( vg, rect.origin.x, rect.origin.y);
          mvgFillRect( vg, coverage, CGColorMakeWithRGBA( 0.0, 0.0, 1.0, 0.25));
       }
-      nvgRestore( vg);
+      mvgRestore( vg);
 #endif
 
       origin    = CGSizePlaceInRect( coverage.size, rect, contentMode).origin;
@@ -267,31 +402,31 @@ void   mvgTextInRect( struct NVGcontext *vg,
 
       if( options & MVGTextAlignBaseline)
       {
-         nvgTextMetrics( vg, &ascender, &descender, &lineh);
+         metrics = mvgTextMetrics( vg);
          switch( contentMode)
          {
          case CGContentModeTopLeft     :
          case CGContentModeTop         :
-         case CGContentModeTopRight    : origin.y -= ascender; break;
+         case CGContentModeTopRight    : origin.y -= metrics.ascender; break;
 
          case CGContentModeLeft        :
          case CGContentModeCenterPoint :
-         case CGContentModeRight       : origin.y = CGRectGetMidY( rect) - ascender; break;
+         case CGContentModeRight       : origin.y = CGRectGetMidY( rect) - metrics.ascender; break;
 
          case CGContentModeBottomLeft  :
          case CGContentModeBottom      :
-         case CGContentModeBottomRight : origin.y -= descender; break;
+         case CGContentModeBottomRight : origin.y -= metrics.descender; break;
          }
       }
 
       if( options & MVGTextNoClip)
       {
-         nvgText( vg, origin.x, origin.y, s, end);
+         mvgText( vg, origin, s, end);
       }
       else
       {
-         nvgScissor( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-         nvgText( vg, origin.x, origin.y, s, end);
+         mvgScissor( vg, rect);
+         mvgText( vg, origin, s, end);
       }
    }
    while( 0);
@@ -301,15 +436,14 @@ void   mvgTextInRect( struct NVGcontext *vg,
 
 
 CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
-                                         char *s,
-                                         char *end,
-                                         int alignment,
-                                         MVGTextOptions options)
+                                           char *s,
+                                           char *end,
+                                           int alignment,
+                                           MulleTextOptions options)
 {
    int      halign;
    int      valign;
    float    ascender;
-   float    descender;
    float    lineh;
    float    bounds[ 6];
    CGRect   coverage;
@@ -399,14 +533,16 @@ CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
 }
 
 
-void   _mvgText( struct NVGcontext *vg,
-                 char *s,
-                 char *end,
-                 CGPoint origin,
-                 int alignment,
-                 MVGTextOptions options)
+void   _mvgExtendedAlignedText( struct NVGcontext *vg,
+                                char *s,
+                                char *end,
+                                CGPoint origin,
+                                int alignment,
+                                MulleTextOptions options)
 {          
    CGPoint   adjust;
+
+   mvgAssertFont( vg);
 
    adjust = _mvgTLAdjustmentForVisualBounds( vg, s, end, alignment, options);
 

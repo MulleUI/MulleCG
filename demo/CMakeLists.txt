@@ -19,9 +19,52 @@ list( INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake/share")
 list( INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake/reflect")
 list( INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake")
 
+
 include( Environment)
 
 include( Files)
+
+# Find mulle-c-string-escape
+find_program(MULLE_C_STRING_ESCAPE mulle-c-string-escape
+             PATHS "~/bin")
+
+# apt install glslang-tools
+find_program( GLSLANG_VALIDATOR glslangValidator
+             PATHS "~/bin")
+
+# Create a custom command to generate the *.inc files
+foreach( SHADER ${SHADERS})
+   set( INC_FILE "${SHADER}.inc")
+   if( GLSLANG_VALIDATOR)
+      add_custom_command(
+         OUTPUT "${INC_FILE}"
+         COMMAND "${GLSLANG_VALIDATOR}" "${SHADER}" &&
+                 "${MULLE_C_STRING_ESCAPE}" -0 -q "${SHADER}" > "${INC_FILE}"
+         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+         DEPENDS "${SHADER}"
+         COMMENT "Generating ${INC_FILE} from ${SHADER}"
+      )
+   else()
+      add_custom_command(
+         OUTPUT "${INC_FILE}"
+         COMMAND "${MULLE_C_STRING_ESCAPE}" -0 -q "${SHADER}" > "${INC_FILE}"
+         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+         DEPENDS "${SHADER}"
+         COMMENT "Generating ${INC_FILE} from ${SHADER}"
+      )
+   endif()
+   list( APPEND INC_FILES ${INC_FILE})
+endforeach()
+
+
+add_custom_target( "shaders"
+   DEPENDS ${INC_FILES}
+   COMMENT "Target to build shaders"
+)
+
+set_source_files_properties( "src/main-shader.m"
+                              PROPERTIES OBJECT_DEPENDS "${INC_FILES}")
+
 
 include( Dependencies OPTIONAL)
 
@@ -32,13 +75,17 @@ foreach( MAIN_SOURCE ${SOURCES})
    math( EXPR MAIN_SOURCE_LENGTH "${MAIN_SOURCE_LENGTH} - 11")
    string( SUBSTRING "${MAIN_SOURCE}" 9 ${MAIN_SOURCE_LENGTH} EXECUTABLE_NAME)
 
-   set( SOURCES ${MAIN_SOURCE})
 #   set( OTHER_EXECUTABLE_OBJECT_FILES $<TARGET_OBJECTS:MulleUI>)
 
+   set( SOURCES "${MAIN_SOURCE}")
    include( Executable)
+   if( "${EXECUTABLE_NAME}" STREQUAL "shader")
+      add_dependencies( "${EXECUTABLE_COMPILE_TARGET}" "shaders")
+   endif()
+
    include( InstallExecutable)
    include( FinalOutput OPTIONAL)
 # only for Executable
    include( Motd OPTIONAL)
-endforeach()
 
+endforeach()

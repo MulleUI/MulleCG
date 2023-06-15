@@ -1,0 +1,769 @@
+#include "nanovg.h"
+
+// this is the nanovg header wrapped for mulle-geometry types. In order to
+// not have to "think" too much which functions are available in millivg and
+// which in nanovg, all functions that are available in nanovg are wrapped
+// so mvgBeginFrame is just the same as nvgBeginFrame.
+// But mvgRect takes a CGRect instead of four floats.
+// For you convenience all const types have been removed.
+//
+typedef NSInteger    CGTextureID;
+typedef NSUInteger   CGShaderID;    // 0 is invalid
+typedef NSInteger    CGFontID;      // -1 == invalid
+typedef NSInteger    CGImageID;
+
+
+// Begin drawing a new frame
+// Calls to nanovg drawing API should be wrapped in nvgBeginFrame() & nvgEndFrame()
+// nvgBeginFrame() defines the size of the window to render to in relation currently
+// set viewport (i.e. glViewport on GL backends). Device pixel ration allows to
+// control the rendering on Hi-DPI devices.
+// For example, GLFW returns two dimension for an opened window: window size and
+// frame buffer size. In that case you would set windowWidth/Height to the window size
+// devicePixelRatio to: frameBufferWidth / windowWidth.
+static inline void   mvgBeginFrame( NVGcontext *vg, CGSize windowSize, CGFloat devicePixelRatio)
+{
+   nvgBeginFrame( vg, windowSize.width, windowSize.height, devicePixelRatio);
+}
+
+// Cancels drawing the current frame.
+static inline void   mvgCancelFrame( NVGcontext *vg)
+{
+   nvgCancelFrame( vg);
+}
+
+// Ends drawing flushing remaining render state.
+static inline void   mvgEndFrame( NVGcontext *vg)
+{
+   nvgEndFrame( vg);
+}
+
+//
+// Composite operation
+//
+// The composite operations in NanoVG are modeled after HTML Canvas API, and
+// the blend func is based on OpenGL (see corresponding manuals for more info).
+// The colors in the blending state have premultiplied alpha.
+
+// Sets the composite operation. The op parameter should be one of NVGcompositeOperation.
+// Composite operation.
+static inline void   mvgGlobalCompositeOperation( NVGcontext *vg, NSInteger op)
+{
+   nvgGlobalCompositeOperation( vg, op);
+}
+
+// Composite operation with custom pixel arithmetic.
+static inline void   mvgGlobalCompositeBlendFunc( NVGcontext *vg, 
+                                                  NSUInteger sfactor,
+                                                  NSUInteger dfactor)
+{
+   nvgGlobalCompositeBlendFunc( vg, sfactor, dfactor);
+}
+
+// Composite operation with custom pixel arithmetic for RGB and alpha components separately.
+static inline void   mvgGlobalCompositeBlendFuncSeparate( NVGcontext *vg, 
+                                                          NSUInteger srcRGB,
+                                                          NSUInteger dstRGB,
+                                                          NSUInteger srcAlpha,
+                                                          NSUInteger dstAlpha)
+{
+   nvgGlobalCompositeBlendFuncSeparate( vg, srcRGB, dstRGB, srcAlpha, dstAlpha);
+}
+
+
+
+//
+// State Handling
+//
+// NanoVG contains state which represents how paths will be rendered.
+// The state contains transform, fill and stroke styles, text and font styles,
+// and scissor clipping.
+
+// Pushes and saves the current render state NSIntegero a state stack.
+// A matching nvgRestore() must be used to restore the state.
+
+// Sets the transparency applied to all rendered shapes.
+// Pushes and saves the current render state NSIntegero a state stack.
+static inline void   mvgSave( NVGcontext *vg)
+{
+   nvgSave( vg);
+}
+
+
+// Pops and restores the current render state from the state stack.
+static inline void   mvgRestore( NVGcontext *vg)
+{
+   nvgRestore( vg);
+}
+
+
+// Pops and restores the current render state from the state stack.
+static inline void  mvgReset( NVGcontext *vg)
+{
+   nvgReset( vg);
+}
+
+//
+// Render styles
+//
+// Fill and stroke render style can be either a solid color or a paint which is a gradient or a pattern.
+// Solid color is simply defined as a color value, different kinds of paints can be created
+// using nvgLinearGradient(), nvgBoxGradient(), nvgRadialGradient() and nvgImagePattern().
+//
+// Current render style can be saved and restored using nvgSave() and nvgRestore().
+
+// Sets whether to draw antialias for nvgStroke() and nvgFill(). It's enabled by default.
+static inline void   mvgShapeAntiAlias( NVGcontext *vg, int enabled)
+{
+   nvgShapeAntiAlias( vg, enabled);
+}
+
+// Sets the stroke style.
+static inline void   mvgStrokeColor( NVGcontext *vg, CGColor color)
+{
+   nvgStrokeColor( vg, color);
+}
+
+// Sets the stroke style with a paint.
+static inline void   mvgStrokePaint( NVGcontext *vg, NVGpaint paint)
+{
+   nvgStrokePaint( vg, paint);
+}
+
+// Sets the fill style.
+static inline void   mvgFillColor( NVGcontext *vg, CGColor color)
+{
+   nvgFillColor( vg, color);
+}
+
+// Sets the fill style with a paint.
+static inline void   mvgFillPaint( NVGcontext *vg, NVGpaint paint)
+{
+   nvgFillPaint( vg, paint);
+}
+
+// Sets the miter limit of the stroke style.
+static inline void   mvgMiterLimit( NVGcontext *vg, CGFloat limit)
+{
+   nvgMiterLimit( vg, limit);
+}
+
+// Sets the stroke width of the stroke style.
+static inline void   mvgStrokeWidth( NVGcontext *vg, CGFloat size)
+{
+   nvgStrokeWidth( vg, size);
+}
+
+// Sets the line cap of the stroke style.
+static inline void   mvgLineCap( NVGcontext *vg, NSInteger cap)
+{
+   nvgLineCap( vg, cap);
+}
+
+// Sets the line join of the stroke style.
+static inline void   mvgLineJoin( NVGcontext *vg, NSInteger join)
+{
+   nvgLineJoin( vg, join);
+}
+
+// Sets the transparency applied to all rendered shapes.
+// Already transparent paths will get proportionally more transparent as well.
+static inline void   mvgGlobalAlpha( NVGcontext *vg, CGFloat alpha)
+{
+   nvgGlobalAlpha( vg, alpha);
+}
+
+
+
+//
+// Transforms
+//
+// The paths, gradients, patterns and scissor region are transformed by an transformation
+// matrix at the time when they are passed to the API.
+// The current transformation matrix is a affine matrix:
+//   [sx kx tx]
+//   [ky sy ty]
+//   [ 0  0  1]
+// Where: sx,sy define scaling, kx,ky skewing, and tx,ty translation.
+// The last row is assumed to be 0,0,1 and is not stored.
+//
+// Apart from nvgResetTransform(), each transformation function first creates
+// specific transformation matrix and pre-multiplies the current transformation by it.
+//
+// Current coordinate system (transformation) can be saved and restored using nvgSave() and nvgRestore().
+
+
+// Sets the global transform matrix to the result of current render target.
+static inline void   mvgResetTransform( NVGcontext *vg)
+{
+   nvgResetTransform( vg);
+}
+
+// Premultiplies current coordinate system by specified matrix.
+static inline void   mvgTransform( NVGcontext *vg, CGFloat a, CGFloat b, CGFloat c, CGFloat d, CGFloat e, CGFloat f)
+{
+   nvgTransform( vg, a, b, c, d, e, f);
+}
+
+// Translates current coordinate system.
+static inline void   mvgTranslate( NVGcontext *vg, CGFloat x, CGFloat y)
+{
+   nvgTranslate( vg, x, y);
+}
+
+// Rotates current coordinate system.
+static inline void   mvgRotate( NVGcontext *vg, CGFloat angle)
+{
+   nvgRotate( vg, angle);
+}
+
+// Skews the current coordinate system along X axis.
+static inline void   mvgSkewX( NVGcontext *vg, CGFloat angle)
+{
+   nvgSkewX( vg, angle);
+}
+
+// Skews the current coordinate system along Y axis.
+static inline void   mvgSkewY( NVGcontext *vg, CGFloat angle)
+{
+   nvgSkewY( vg, angle);
+}
+
+// Scales the current coordinate system.
+static inline void   mvgScale( NVGcontext *vg, CGFloat x, CGFloat y)
+{
+   nvgScale( vg, x, y);
+}
+
+
+typedef float   *mvgTransform_t;
+
+
+// Stores the top part (a-f) of the current transformation matrix in to the specified buffer.
+//   [a c e]
+//   [b d f]
+//   [0 0 1]
+// There should be space for 6 CGFloats in the return buffer for the values a-f.
+// Sets the current transform to identity matrix.
+// Retrieves the current transform matrix.
+static inline void   mvgCurrentTransform( NVGcontext *vg, float xform[6])
+{
+   nvgCurrentTransform( vg, xform);
+}
+
+// Sets the transform to identity matrix.
+static inline void   mvgTransformIdentity( float dst[6])
+{
+   nvgTransformIdentity(dst);
+}
+
+// Sets the transform to translation matrix.
+static inline void   mvgTransformTranslate( float dst[6], CGFloat tx, CGFloat ty)
+{
+   nvgTransformTranslate( dst, tx, ty);
+}
+
+// Sets the transform to scale matrix.
+static inline void   mvgTransformScale( float dst[6], CGFloat sx, CGFloat sy)
+{
+   nvgTransformScale( dst, sx, sy);
+}
+
+// Sets the transform to rotate matrix. Angle is specified in radians.
+static inline void   mvgTransformRotate( float dst[6], CGFloat a)
+{
+   nvgTransformRotate( dst, a);
+}
+
+// Sets the transform to skew-x matrix. Angle is specified in radians.
+static inline void   mvgTransformSkewX( float dst[6], CGFloat a)
+{
+   nvgTransformSkewX( dst, a);
+}
+
+// Sets the transform to skew-y matrix. Angle is specified in radians.
+static inline void   mvgTransformSkewY( float dst[6], CGFloat a)
+{
+   nvgTransformSkewY( dst, a);
+}
+
+// Sets the transform to the result of multiplication of two transforms, of A = A*B.
+static inline void   mvgTransformMultiply( float dst[6], float src[6])
+{
+   nvgTransformMultiply( dst, src);
+}
+
+// Sets the transform to the result of multiplication of two transforms, of A = B*A.
+static inline void   mvgTransformPremultiply( float dst[6], float src[6])
+{
+   nvgTransformPremultiply( dst, src);
+}
+
+// Sets the destination to inverse of specified transform.
+// Returns 1 if the inverse could be calculated, else 0.
+static inline NSInteger mvgTransformInverse( float dst[6], float src[6])
+{
+   return nvgTransformInverse( dst, src);
+}
+
+
+// Sets the current transform to the result of A * B.
+static inline CGPoint   mvgTransformPoint( float xform[ 6], CGPoint point)
+{
+   float   dstx, dsty;
+
+   nvgTransformPoint( &dstx, &dsty, xform, point.x, point.y);
+   return( CGPointMake( dstx, dsty));
+}
+
+//
+// Images
+//
+// NanoVG allows you to load jpg, png, psd, tga, pic and gif files to be used for rendering.
+// In addition you can upload your own image. The image loading is provided by stb_image.
+// The parameter imageFlags is combination of flags defined in NVGimageFlags.
+
+// Creates image by loading it from the disk from specified file name.
+// Returns handle to the image
+// Creates image by loading it from the disk from specified file name.
+static inline CGImageID   mvgCreateImage( NVGcontext *vg,
+                                          char *filename,
+                                          NSUInteger imageFlags)
+{
+   return( nvgCreateImage( vg, filename, imageFlags));
+}
+
+// Creates image by loading it from the specified chunk of memory.
+static inline CGImageID   mvgCreateImageMem( NVGcontext *vg, NSInteger imageFlags, void *data, size_t ndata)
+{
+   return( nvgCreateImageMem( vg, imageFlags, data, ndata));
+}
+
+// Creates image from specified image data.
+static inline CGImageID   mvgCreateImageRGBA( NVGcontext *vg, NSInteger w, NSInteger h, NSUInteger imageFlags, void *data)
+{
+   return( nvgCreateImageRGBA( vg, w, h, imageFlags, data));
+}
+
+// Updates image data specified by image handle.
+static inline void   mvgUpdateImage( NVGcontext *vg, CGImageID image, void *data)
+{
+   nvgUpdateImage( vg, image, (const unsigned char *) data);
+}
+
+// Returns the dimensions of a created image.
+static inline struct MulleIntegerSize  mvgImageSize( NVGcontext *vg, CGImageID image)
+{
+   int   w, h;
+
+   nvgImageSize( vg, image, &w, &h);
+   return( MulleIntegerSizeMake( w, h));
+}
+
+// Deletes created image.
+static inline void   mvgDeleteImage( NVGcontext *vg, CGImageID image)
+{
+   nvgDeleteImage( vg, image);
+}
+
+
+//
+// Paints
+//
+// NanoVG supports four types of paints: linear gradient, box gradient, radial gradient and image pattern.
+// These can be used as paints for strokes and fills.
+
+// Creates and returns a linear gradient. Parameters (sx,sy)-(ex,ey) specify the start and end coordinates
+// of the linear gradient, icol specifies the start color and ocol the end color.
+// The gradient is transformed by the current transform when it is passed to nvgFillPaint() or nvgStrokePaint().
+// Paints
+
+static inline NVGpaint
+   mvgLinearGradient( NVGcontext* vg, CGRect rect, CGColor icol, CGColor ocol)
+{
+   return( nvgLinearGradient( vg, CGRectGetMinX( rect),
+                                  CGRectGetMinY( rect),
+                                  CGRectGetMaxX( rect),
+                                  CGRectGetMaxY( rect),
+                                  icol,
+                                  ocol));
+}
+
+//
+// Creates and returns a box gradient. Box gradient is a feathered rounded rectangle, it is useful for rendering
+// drop shadows or highlights for boxes. Parameters (x,y) define the top-left corner of the rectangle,
+// (w,h) define the size of the rectangle, r defines the corner radius, and f feather. Feather defines how blurry
+// the border of the rectangle is. Parameter icol specifies the inner color and ocol the outer color of the gradient.
+// The gradient is transformed by the current transform when it is passed to nvgFillPaint() or nvgStrokePaint().
+// This function "fixes" the behaviour of the original box gradient, where you
+// had to manually correct "rect" for the feather value.
+//
+static inline NVGpaint
+   mvgBoxGradient( NVGcontext* vg, CGRect rect, float r, float f, CGColor icol, CGColor ocol)
+{
+   CGRect   gradientRect;
+
+   gradientRect = CGRectInset( rect, f / 4.0, f / 4.0);
+   return( nvgBoxGradient( vg, gradientRect.origin.x,
+                               gradientRect.origin.y,
+                               gradientRect.size.width,
+                               gradientRect.size.height,
+                               r,
+                               f,
+                               icol,
+                               ocol));
+}
+
+// Creates and returns a radial gradient. Parameters (cx,cy) specify the center, inr and outr specify
+// the inner and outer radius of the gradient, icol specifies the start color and ocol the end color.
+// The gradient is transformed by the current transform when it is passed to nvgFillPaint() or nvgStrokePaint().
+static inline NVGpaint
+   mvgRadialGradient( NVGcontext *vg,
+                      CGPoint center,
+                      float inr,
+                      float outr,
+                      CGColor icol,
+                      CGColor ocol)
+{
+   return( nvgRadialGradient( vg, center.x, center.y, inr, outr, icol, ocol));
+}
+
+// Creates and returns an image pattern. Parameters (ox,oy) specify the left-top location of the image pattern,
+// (ex,ey) the size of one image, angle rotation around the top-left corner, image is handle to the image to render.
+// The gradient is transformed by the current transform when it is passed to nvgFillPaint() or nvgStrokePaint().
+static inline NVGpaint mvgImagePattern( NVGcontext* vg,
+                                        CGRect rect,
+                                        CAAngleRadians angle,
+                                        CGImageID image,
+                                        float alpha)
+{
+   return( nvgImagePattern( vg, CGRectGetMinX( rect),
+                                CGRectGetMinY( rect),
+                                CGRectGetMaxX( rect),
+                                CGRectGetMaxY( rect),
+                                angle,
+                                image,
+                                alpha));
+}
+
+
+
+//
+// Scissoring
+//
+// Scissoring allows you to clip the rendering NSIntegero a rectangle. This is useful for various
+// user NSIntegererface cases like rendering a text edit or a timeline.
+
+
+
+// Sets the current scissor rectangle.
+// The scissor rectangle is transformed by the current transform.
+static inline void   mvgScissor( NVGcontext* vg, CGRect rect)
+{
+   nvgScissor( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+}
+
+// Intersects current scissor rectangle with the specified rectangle.
+// The scissor rectangle is transformed by the current transform.
+// Note: in case the rotation of previous scissor rect differs from
+// the current one, the NSIntegerersection will be done between the specified
+// rectangle and the previous scissor rectangle transformed in the current
+// transform space. The resulting shape is always rectangle.
+static inline void   mvgIntersectScissor( NVGcontext* vg, CGRect rect)
+{
+   nvgIntersectScissor( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+}
+
+
+// Reset and disables scissoring.
+static inline void   mvgResetScissor( NVGcontext* vg)
+{
+   nvgResetScissor( vg);
+}
+
+
+//
+// Paths
+//
+// Drawing a new shape starts with nvgBeginPath(), it clears all the currently defined paths.
+// Then you define one or more paths and sub-paths which describe the shape. The are functions
+// to draw common shapes like rectangles and circles, and lower level step-by-step functions,
+// which allow to define a path curve by curve.
+//
+// NanoVG uses even-odd fill rule to draw the shapes. Solid shapes should have counter clockwise
+// winding and holes should have counter clockwise order. To specify winding of a path you can
+// call nvgPathWinding(). This is useful especially for the common shapes, which are drawn CCW.
+//
+// Finally you can fill the path using current fill style by calling nvgFill(), and stroke it
+// with current stroke style by calling nvgStroke().
+//
+// The curve segments and sub-paths are transformed by the current transform.
+
+// Clears the current path and sub-path
+static inline void   mvgBeginPath( NVGcontext *vg)
+{
+   nvgBeginPath( vg);
+}
+
+// Starts new sub-path with specified point as first point.
+static inline void   mvgMoveTo( NVGcontext *vg, CGPoint point)
+{
+   nvgMoveTo( vg, point.x, point.y);
+}
+
+// Adds line segment from the last point in the path to the specified point.
+static inline void   mvgLineTo( NVGcontext *vg, CGPoint point)
+{
+   nvgLineTo( vg, point.x, point.y);
+}
+
+// Adds cubic bezier segment from last point in the path via two control points to the specified point.
+static inline void   mvgBezierTo( NVGcontext *vg, CGPoint control1, CGPoint control2, CGPoint point)
+{
+   nvgBezierTo( vg, control1.x, control1.y, control2.x, control2.y, point.x, point.y);
+}
+
+// Adds quadratic bezier segment from last point in the path via a control point to the specified point.
+static inline void   mvgQuadTo( NVGcontext *vg, CGPoint control, CGPoint point)
+{
+   nvgQuadTo( vg, control.x, control.y, point.x, point.y);
+}
+
+// Adds an arc segment at the corner defined by the last path point, and two specified points.
+static inline void   mvgArcTo( NVGcontext *vg, CGPoint middle, CGPoint point, CGFloat radius)
+{
+   nvgArcTo( vg, middle.x, middle.y, point.x, point.y, radius);
+}
+
+// Closes current sub-path with a line segment.
+static inline void   mvgClosePath( NVGcontext *vg)
+{
+   nvgClosePath( vg);
+}
+
+// Sets the current sub-path winding, see NVGwinding and NVGsolidity.
+static inline void   mvgPathWinding( NVGcontext *vg, NSInteger dir)
+{
+   nvgPathWinding( vg, dir);
+}
+
+// Creates new circle arc shaped sub-path
+static inline void   mvgArc( NVGcontext *vg, 
+                             CGPoint center, 
+                             CGFloat radius, 
+                             CAAngleRadians a0, 
+                             CAAngleRadians a1, 
+                             NSInteger dir)
+{
+   nvgArc( vg, center.x, center.y, radius, a0, a1, dir);
+}
+
+// Creates new rectangle shaped sub-path.
+static inline void   mvgRect( NVGcontext *vg, CGRect rect)
+{
+   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+}
+
+// Creates new rounded rectangle shaped sub-path.
+static inline void   mvgRoundedRect( NVGcontext *vg, CGRect rect, CGFloat r)
+{
+   nvgRoundedRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height, r);
+}
+
+
+// Creates new ellipse shaped sub-path.
+static inline void   mvgEllipse( NVGcontext *vg, CGPoint center, CGFloat rx, CGFloat ry)
+{
+   nvgEllipse( vg, center.x, center.y, rx, ry);
+}
+
+// Creates new circle shaped sub-path.
+static inline void   mvgCircle( NVGcontext *vg, CGPoint center, CGFloat r)
+{
+   nvgCircle( vg, center.x, center.y, r);
+}
+
+// Fills the current path with current fill style.
+static inline void   mvgFill( NVGcontext *vg)
+{
+   nvgFill( vg);
+}
+
+// Fills the current path with current stroke style.
+static inline void   mvgStroke( NVGcontext *vg)
+{
+   nvgStroke( vg);
+}
+
+// Creates font by loading it from the disk from specified file name.
+static inline CGFontID   mvgCreateFont( NVGcontext *vg, char *name, char *filename)
+{
+   return nvgCreateFont( vg, name, filename);
+}
+
+// Creates font by loading it from the specified memory chunk.
+static inline CGFontID   mvgCreateFontMem( NVGcontext *vg, 
+                                           char *name,
+                                           void * data, 
+                                           size_t length,
+                                           int freeData)
+{
+   return nvgCreateFontMem( vg, name, data, length, freeData);
+}
+
+// Finds a loaded font of specified name, and returns handle to it, or -1 if the font is not found.
+static inline NSInteger   mvgFindFont( NVGcontext *vg, char *name)
+{
+   return nvgFindFont( vg, name);
+}
+
+
+// Adds a fallback font by handle.
+static inline int   mvgAddFallbackFontId( NVGcontext* ctx, int baseFont, int fallbackFont)
+{
+   return nvgAddFallbackFontId( ctx, baseFont, fallbackFont);
+}
+
+
+// Adds a fallback font by name.
+static inline int   mvgAddFallbackFont( NVGcontext *ctx, char *baseFont, char *fallbackFont)
+{
+   return nvgAddFallbackFont( ctx, (const char *) baseFont, (const char *) fallbackFont);
+}
+
+
+// Resets fallback fonts by handle.
+static inline void   mvgResetFallbackFontsId( NVGcontext *ctx, int baseFont)
+{
+   nvgResetFallbackFontsId( ctx, baseFont);
+}
+
+
+// Resets fallback fonts by name.
+static inline void   mvgResetFallbackFonts( NVGcontext *ctx, char *baseFont)
+{
+   nvgResetFallbackFonts( ctx, baseFont);
+}
+
+
+// Sets the font size of current text style.
+static inline void   mvgFontSize( NVGcontext *vg, CGFloat size)
+{
+   nvgFontSize( vg, size);
+}
+
+// Sets the blur of current text style.
+static inline void   mvgFontBlur( NVGcontext *vg, CGFloat blur)
+{
+   nvgFontBlur( vg, blur);
+}
+
+// Sets the letter spacing of current text style.
+static inline void   mvgTextLetterSpacing( NVGcontext *vg, CGFloat spacing)
+{
+   nvgTextLetterSpacing( vg, spacing);
+}
+
+// Sets the line height of current text style.
+static inline void   mvgTextLineHeight( NVGcontext *vg, CGFloat lineHeight)
+{
+   nvgTextLineHeight( vg, lineHeight);
+}
+
+// Sets the text align of current text style.
+static inline void   mvgTextAlign( NVGcontext *vg, NSUInteger align)
+{
+   nvgTextAlign( vg, align);
+}
+
+// Sets the font face based on specified id(font handle).
+static inline void   mvgFontFaceId( NVGcontext *vg, CGFontID fontID)
+{
+   nvgFontFaceId( vg, fontID);
+}
+
+// Sets the font face based on specified name.
+static inline void   mvgFontFace( NVGcontext *vg, char *fontname)
+{
+   nvgFontFace( vg, fontname);
+}
+
+// Draws text string at specified location.
+static inline CGFloat mvgText( NVGcontext *vg, CGPoint point, char *string, char *end)
+{
+   return( nvgText( vg, point.x, point.y, string, end));
+}
+
+
+// Draws text string at specified location.
+static inline void   mvgTextColor( NVGcontext *vg, CGColor foreGround, CGColor background)
+{
+   nvgTextColor( vg, foreGround, background);
+}
+
+// Measures the specified text string. Parameter bounds should be a pointer to float[4],
+// if the bounding box of the text should be returned. The bounds value are [xmin,ymin, xmax,ymax]
+// Returns the horizontal advance of the measured text (i.e. where the next character should drawn).
+// Measured values are returned in local coordinate space.
+static inline void   mvgTextBounds( NVGcontext *vg, 
+                                    CGPoint point, 
+                                    char *string, 
+                                    char *end, 
+                                    CGFloat bounds[ 4])
+{
+   nvgTextBounds( vg, point.x, point.y, string, end, bounds);
+}
+
+// Measures the specified multi-text string. Parameter bounds should be a pointer to float[4],
+// if the bounding box of the text should be returned. The bounds value are [xmin,ymin, xmax,ymax]
+// Measured values are returned in local coordinate space.
+// Measures the specified multi-text string.
+static inline void   
+   mvgTextBoxBounds( NVGcontext *vg, 
+                     CGPoint point, 
+                     CGFloat breakRowWidth, 
+                     char *string,
+                     char *end,
+                     CGFloat bounds[ 4])
+{
+   nvgTextBoxBounds( vg, point.x, point.y, breakRowWidth, string, end, bounds);
+}
+
+// Calculates the glyph x positions of the specified text. If end is specified only the sub-string will be used.
+static inline void   
+   mvgTextGlyphPositions( NVGcontext *vg,
+                          CGPoint point, 
+                          char *string,
+                          char *end,
+                          NVGglyphPosition* positions, 
+                          NSInteger maxPositions)
+{
+   nvgTextGlyphPositions( vg, point.x, point.y, string, end, positions, maxPositions);
+}
+
+
+
+// Breaks the specified text NSIntegero lines.
+static inline NSInteger   mvgTextBreakLines( NVGcontext *vg, 
+                                             char *string,
+                                             char *end,
+                                             CGFloat breakRowWidth, 
+                                             NVGtextRow* rows, 
+                                             NSInteger maxRows)
+{
+   return( nvgTextBreakLines( vg, string, end, breakRowWidth, rows, maxRows));
+}
+
+
+// Creates a NanoVG context with specified flags.
+static inline NVGcontext * mvgCreateInternal( NVGparams *params)
+{
+   return( nvgCreateInternal(params));
+}
+
+// Deletes a NanoVG context created with nvgCreateInternal.
+static inline void   mvgDeleteInternal( NVGcontext *vg)
+{
+   nvgDeleteInternal( vg);
+}
+

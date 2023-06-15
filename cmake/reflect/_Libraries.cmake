@@ -15,10 +15,13 @@ endif()
 # Generated from sourcetree: 4edeaf88-96fa-49de-a075-3e49d3d939b3;GL;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-platform-darwin,no-update;
 # Disable with : `mulle-sourcetree mark GL `
 # Disable for this platform: `mulle-sourcetree mark GL no-cmake-platform-${MULLE_UNAME}`
+# Disable for a sdk: `mulle-sourcetree mark GL no-cmake-sdk-<name>`
 #
 if( NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    if( NOT GL_LIBRARY)
-      find_library( GL_LIBRARY NAMES GL)
+      find_library( GL_LIBRARY NAMES
+         GL
+      )
       message( STATUS "GL_LIBRARY is ${GL_LIBRARY}")
       #
       # The order looks ascending, but due to the way this file is read
@@ -29,11 +32,7 @@ if( NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
          # Add GL_LIBRARY to OS_SPECIFIC_LIBRARIES list.
          # Disable with: `mulle-sourcetree mark GL no-cmake-add`
          #
-         set( OS_SPECIFIC_LIBRARIES
-            ${OS_SPECIFIC_LIBRARIES}
-            ${GL_LIBRARY}
-            CACHE INTERNAL "need to cache this"
-         )
+         list( APPEND OS_SPECIFIC_LIBRARIES ${GL_LIBRARY})
          #
          # Inherit information from dependency.
          # Encompasses: no-cmake-searchpath,no-cmake-dependency,no-cmake-loader
@@ -44,14 +43,13 @@ if( NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
          get_filename_component( _TMP_GL_ROOT "${_TMP_GL_ROOT}" DIRECTORY)
          #
          #
-         # Search for "DependenciesAndLibraries.cmake" to include.
+         # Search for "Definitions.cmake" and "DependenciesAndLibraries.cmake" to include.
          # Disable with: `mulle-sourcetree mark GL no-cmake-dependency`
          #
          foreach( _TMP_GL_NAME "GL")
             set( _TMP_GL_DIR "${_TMP_GL_ROOT}/include/${_TMP_GL_NAME}/cmake")
             # use explicit path to avoid "surprises"
-            if( EXISTS "${_TMP_GL_DIR}/DependenciesAndLibraries.cmake")
-               unset( GL_DEFINITIONS)
+            if( IS_DIRECTORY "${_TMP_GL_DIR}")
                list( INSERT CMAKE_MODULE_PATH 0 "${_TMP_GL_DIR}")
                # we only want top level INHERIT_OBJC_LOADERS, so disable them
                if( NOT NO_INHERIT_OBJC_LOADERS)
@@ -60,20 +58,18 @@ if( NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
                list( APPEND _TMP_INHERIT_OBJC_LOADERS ${NO_INHERIT_OBJC_LOADERS})
                set( NO_INHERIT_OBJC_LOADERS ON)
                #
-               include( "${_TMP_GL_DIR}/DependenciesAndLibraries.cmake")
+               include( "${_TMP_GL_DIR}/DependenciesAndLibraries.cmake" OPTIONAL)
                #
                list( GET _TMP_INHERIT_OBJC_LOADERS -1 NO_INHERIT_OBJC_LOADERS)
                list( REMOVE_AT _TMP_INHERIT_OBJC_LOADERS -1)
-               #
                list( REMOVE_ITEM CMAKE_MODULE_PATH "${_TMP_GL_DIR}")
-               set( INHERITED_DEFINITIONS
-                  ${INHERITED_DEFINITIONS}
-                  ${GL_DEFINITIONS}
-                  CACHE INTERNAL "need to cache this"
-               )
+               #
+               unset( GL_DEFINITIONS)
+               include( "${_TMP_GL_DIR}/Definitions.cmake" OPTIONAL)
+               list( APPEND INHERITED_DEFINITIONS ${GL_DEFINITIONS})
                break()
             else()
-               message( STATUS "${_TMP_GL_DIR}/DependenciesAndLibraries.cmake not found")
+               message( STATUS "${_TMP_GL_DIR} not found")
             endif()
          endforeach()
       else()
@@ -81,16 +77,19 @@ if( NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
          message( FATAL_ERROR "GL_LIBRARY was not found")
       endif()
    endif()
-endif()
+   endif()
 
 
 #
 # Generated from sourcetree: 4f8c9930-b601-4bed-9ef6-59002def0b11;m;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-update;
 # Disable with : `mulle-sourcetree mark m `
 # Disable for this platform: `mulle-sourcetree mark m no-cmake-platform-${MULLE_UNAME}`
+# Disable for a sdk: `mulle-sourcetree mark m no-cmake-sdk-<name>`
 #
 if( NOT M_LIBRARY)
-   find_library( M_LIBRARY NAMES m)
+   find_library( M_LIBRARY NAMES
+      m
+   )
    message( STATUS "M_LIBRARY is ${M_LIBRARY}")
    #
    # The order looks ascending, but due to the way this file is read
@@ -101,11 +100,7 @@ if( NOT M_LIBRARY)
       # Add M_LIBRARY to OS_SPECIFIC_LIBRARIES list.
       # Disable with: `mulle-sourcetree mark m no-cmake-add`
       #
-      set( OS_SPECIFIC_LIBRARIES
-         ${OS_SPECIFIC_LIBRARIES}
-         ${M_LIBRARY}
-         CACHE INTERNAL "need to cache this"
-      )
+      list( APPEND OS_SPECIFIC_LIBRARIES ${M_LIBRARY})
       #
       # Inherit information from dependency.
       # Encompasses: no-cmake-searchpath,no-cmake-dependency,no-cmake-loader
@@ -116,14 +111,13 @@ if( NOT M_LIBRARY)
       get_filename_component( _TMP_M_ROOT "${_TMP_M_ROOT}" DIRECTORY)
       #
       #
-      # Search for "DependenciesAndLibraries.cmake" to include.
+      # Search for "Definitions.cmake" and "DependenciesAndLibraries.cmake" to include.
       # Disable with: `mulle-sourcetree mark m no-cmake-dependency`
       #
       foreach( _TMP_M_NAME "m")
          set( _TMP_M_DIR "${_TMP_M_ROOT}/include/${_TMP_M_NAME}/cmake")
          # use explicit path to avoid "surprises"
-         if( EXISTS "${_TMP_M_DIR}/DependenciesAndLibraries.cmake")
-            unset( M_DEFINITIONS)
+         if( IS_DIRECTORY "${_TMP_M_DIR}")
             list( INSERT CMAKE_MODULE_PATH 0 "${_TMP_M_DIR}")
             # we only want top level INHERIT_OBJC_LOADERS, so disable them
             if( NOT NO_INHERIT_OBJC_LOADERS)
@@ -132,20 +126,18 @@ if( NOT M_LIBRARY)
             list( APPEND _TMP_INHERIT_OBJC_LOADERS ${NO_INHERIT_OBJC_LOADERS})
             set( NO_INHERIT_OBJC_LOADERS ON)
             #
-            include( "${_TMP_M_DIR}/DependenciesAndLibraries.cmake")
+            include( "${_TMP_M_DIR}/DependenciesAndLibraries.cmake" OPTIONAL)
             #
             list( GET _TMP_INHERIT_OBJC_LOADERS -1 NO_INHERIT_OBJC_LOADERS)
             list( REMOVE_AT _TMP_INHERIT_OBJC_LOADERS -1)
-            #
             list( REMOVE_ITEM CMAKE_MODULE_PATH "${_TMP_M_DIR}")
-            set( INHERITED_DEFINITIONS
-               ${INHERITED_DEFINITIONS}
-               ${M_DEFINITIONS}
-               CACHE INTERNAL "need to cache this"
-            )
+            #
+            unset( M_DEFINITIONS)
+            include( "${_TMP_M_DIR}/Definitions.cmake" OPTIONAL)
+            list( APPEND INHERITED_DEFINITIONS ${M_DEFINITIONS})
             break()
          else()
-            message( STATUS "${_TMP_M_DIR}/DependenciesAndLibraries.cmake not found")
+            message( STATUS "${_TMP_M_DIR} not found")
          endif()
       endforeach()
    else()
@@ -159,9 +151,12 @@ endif()
 # Generated from sourcetree: 8be56cd3-eb2f-4805-ae2a-bb7b14522a8b;harfbuzz;no-all-load,no-build,no-cmake-inherit,no-delete,no-dependency,no-fs,no-header,no-import,no-share,no-update;
 # Disable with : `mulle-sourcetree mark harfbuzz `
 # Disable for this platform: `mulle-sourcetree mark harfbuzz no-cmake-platform-${MULLE_UNAME}`
+# Disable for a sdk: `mulle-sourcetree mark harfbuzz no-cmake-sdk-<name>`
 #
 if( NOT HARFBUZZ_LIBRARY)
-   find_library( HARFBUZZ_LIBRARY NAMES harfbuzz)
+   find_library( HARFBUZZ_LIBRARY NAMES
+      harfbuzz
+   )
    message( STATUS "HARFBUZZ_LIBRARY is ${HARFBUZZ_LIBRARY}")
    #
    # The order looks ascending, but due to the way this file is read
@@ -172,11 +167,7 @@ if( NOT HARFBUZZ_LIBRARY)
       # Add HARFBUZZ_LIBRARY to OS_SPECIFIC_LIBRARIES list.
       # Disable with: `mulle-sourcetree mark harfbuzz no-cmake-add`
       #
-      set( OS_SPECIFIC_LIBRARIES
-         ${OS_SPECIFIC_LIBRARIES}
-         ${HARFBUZZ_LIBRARY}
-         CACHE INTERNAL "need to cache this"
-      )
+      list( APPEND OS_SPECIFIC_LIBRARIES ${HARFBUZZ_LIBRARY})
       # intentionally left blank
    else()
       # Disable with: `mulle-sourcetree mark harfbuzz no-require-link`

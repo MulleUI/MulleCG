@@ -45,7 +45,6 @@ mulle-sde craftinfo set MulleCG OTHER_CFLAGS "-DMULLE_CG_GLVERSION=2" # choose O
 ![Overview](overview.dot.svg)
 
 
-
 ## Dependencies
 
 ### Debian
@@ -60,7 +59,6 @@ apt-get install libxi-dev
 apt-get install libglu-dev # ??? conflict with freeglut possible
 sudo apt-get install libxxf86vm-dev
 ```
-
 
 
 ## Harfbuzz
