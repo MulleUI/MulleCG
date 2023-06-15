@@ -143,12 +143,12 @@
                                 alpha:(CGFloat) alpha
                               context:(CGContext *) context
 {
-   int   imageID;
+   int   textureID;
 
    image = [image cgImageWithContext:context
                           imageFlags:[image imageFlags]];
 
-   if( image)
+   if( ! image)
    {
       [self release];
       return( nil);
@@ -156,23 +156,24 @@
 //   CGSize    size;
 //
 //   size = [image size];
-   imageID = [image imageID];
-   if( imageID == -1)
+   textureID = [image textureID];
+   if( textureID == -1)
    {
       assert( 0);
       [self release];
       return( nil);
    }
-   _paint  = nvgImagePattern( CGContextGetNVGContext( context),
-                             CGRectGetMinX( rect),
-                             CGRectGetMinY( rect),
-                             CGRectGetMaxX( rect),
-                             CGRectGetMaxY( rect),
-       	                    angle,
-                             imageID,
-                             alpha);
 
-   assert( _paint.image == imageID);
+   _paint  = nvgImagePattern( CGContextGetNVGContext( context),
+                              CGRectGetMinX( rect),
+                              CGRectGetMinY( rect),
+                              CGRectGetMaxX( rect),
+                              CGRectGetMaxY( rect),
+       	                     angle,
+                              textureID,
+                              alpha);
+
+   assert( _paint.image == textureID);
    _context = context;
    _image   = [image retain]; // retain for _paint.image
    return( self);

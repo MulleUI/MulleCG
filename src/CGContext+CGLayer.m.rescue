@@ -105,7 +105,7 @@
 // TODO: move to category
 - (CGImage *) framebufferImage
 {
-   int   imageID;
+   int   textureID;
 
    if( ! _offScreenFramebuffer)
       return( nil);
@@ -114,14 +114,14 @@
 
    if( ! _offScreenFramebufferImage)
    {
-      imageID = ((NVGLUframebuffer *) _offScreenFramebuffer)->image;
-      _offScreenFramebufferImage = [[CGImage alloc] initWithNVGImage:imageID
+      textureID = ((NVGLUframebuffer *) _offScreenFramebuffer)->image;
+      _offScreenFramebufferImage = [[CGImage alloc] initWithTextureID:textureID
                                                           imageFlags:NVG_IMAGE_FLIPY
                                                              context:self];
       if( _debugEnabled)
          fprintf( stderr, "*** context %p: created offScreenFramebufferImage "
                           "CGImage %p (nvgImage %d)\n",
-                          self, _offScreenFramebufferImage, imageID);
+                          self, _offScreenFramebufferImage, textureID);
    }
 
    return( _offScreenFramebufferImage);

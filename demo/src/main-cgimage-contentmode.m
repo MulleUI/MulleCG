@@ -133,7 +133,7 @@ void   setupScene( UIWindow *window)
 
    frame  = [[window contentPlane] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:drawStuff];
+   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [[window contentPlane] addSubview:view];
 }
 

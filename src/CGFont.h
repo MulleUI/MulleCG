@@ -3,6 +3,7 @@
 
 @class CGContext;
 
+#include "millivg.h"
 
 //
 // CGFont is created and maintained by CGContext, you should not keep a
@@ -11,12 +12,12 @@
 @interface CGFont : NSObject
 
 @property( assign) char       *nameUTF8String;   // NVG fontNameUTF8String
-@property( assign) NSInteger   fontIndex;        // NVG index
+@property( assign) CGFontID   fontID;         // NVG index
 
 + (instancetype) fontWithNameUTF8String:(char *) name
-                              fontIndex:(NSInteger) fontIndex;
+                              fontID:(CGFontID) fontID;
 
 - (instancetype) initWithNameUTF8String:(char *) name
-                              fontIndex:(NSInteger) fontIndex;
+                              fontID:(CGFontID) fontID;
 
 @end

@@ -246,3 +246,9 @@ PROTOCOLCLASS_INTERFACE( CGVectorDrawable, CGDrawable)
 
 PROTOCOLCLASS_END()
 
+
+CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians angle);
+CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
+                                                 CAAngleRadians angle,
+                                                 CGVector scaleFactor);
+

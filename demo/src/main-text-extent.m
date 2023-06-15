@@ -5,8 +5,9 @@
 #include <stdio.h>
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static void   drawStuff( CALayer *layer, void *_context)
 {
+   CGContext           *context = _context;
    struct NVGcontext   *vg;
    CGRect              canvas;
    float               bounds[ 4];
@@ -41,8 +42,10 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
 int   main( int argc, char *argv[])
 {
-   UIWindow   *window;
-
+   UIWindow        *window;
+   UIApplication   *app;
+   
+   app    = [UIApplication sharedInstance];
    window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 200, 200)
                       titleUTF8String:"Demo"
                             styleMask:UIWindowStyleMaskDefault];

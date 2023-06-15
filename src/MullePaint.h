@@ -10,7 +10,7 @@
 // Paint is either a gradient or a texture. Actually behind the scenes
 // its a texture anyway :)
 //
-// The image handle (imageID) is managed by nanovg though.
+// The image handle (textureID) is managed by nanovg though.
 // It will not be available via the context. Therefore a paint can only
 // exist in one context currently. TODO: make this more like UIImage so
 // we can use it in multiple contexts. (otherwise its fairly useless)

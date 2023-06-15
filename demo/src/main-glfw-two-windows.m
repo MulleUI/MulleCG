@@ -130,7 +130,7 @@ static void   drawStuff( CGRect canvas,
 //
 // window will already have activated the os_activateGraphicsContext
 //
-static void   display( GLFWOSWindow *window_in)
+static int   display( GLFWOSWindow *window_in)
 {
    MyWindow      *window = (MyWindow *) window_in;
    CGRect        canvas;
@@ -194,6 +194,8 @@ static void   display( GLFWOSWindow *window_in)
 #endif
    }
    [context setActive:NO];
+
+   return( 0);
 }
 
 

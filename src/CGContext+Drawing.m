@@ -12,7 +12,6 @@
 
 @implementation CGContext ( Drawing)
 
-
 - (void) setCompositionMode:(UIGraphicsCompositionMode) mode
 {
    assert( UIGraphicsSourceOver == NVG_SOURCE_OVER);
@@ -22,27 +21,28 @@
    nvgGlobalCompositeOperation( _vg, mode);
 }
 
+
 - (void) fillRect:(CGRect) rect
-            color:(CGColor) color
+         hexColor:(NSUInteger) color
 {
    nvgBeginPath( _vg);
    {
       nvgRect( _vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgFillColor( _vg, color);
+      nvgFillColor( _vg, CGColorMakeWithHexColor( color));
    }
    nvgFill( _vg);
 }
 
 
 - (void) strokeRect:(CGRect) rect
-              color:(CGColor) color
               width:(CGFloat) width
+           hexColor:(NSUInteger) color
 {
    nvgBeginPath( _vg);
    {
       nvgRect( _vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
       nvgStrokeWidth( _vg, width);
-      nvgStrokeColor( _vg, color);
+      nvgStrokeColor( _vg, CGColorMakeWithHexColor( color));
    }
    nvgStroke( _vg);
 }
@@ -68,13 +68,12 @@
    CGDrawableOptions        options;
    CGRect                   rect;
    struct CGBitmapInfo      convertedBitmapInfo;
-   void                     *bytes;
    struct CGBitmap          convertedFb;
-   struct CGBitmapInfo      info;
 
    if( CGBitmapIsNull( fb))
       return;
 
+   convertedBitmapInfo = CGBitmapInfoMakeWHRGBABytes( fb.info.size.width, fb.info.size.height);
    if( CGBitmapNeedsConversion( fb, convertedBitmapInfo))
    {
       convertedFb = CGBitmapConvert( fb, convertedBitmapInfo, NULL);
@@ -128,7 +127,7 @@
       textUTF8String:(char *) s
   fontNameUTF8String:(char *) fontNameUTF8String
             fontSize:(CGFloat) fontSize
-               color:(CGColor) color
+            hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
 
@@ -137,7 +136,7 @@
    nvgFontFace( vg, fontNameUTF8String ? fontNameUTF8String : "sans");
    nvgFontSize( vg, fontSize != 0.0 ? fontSize : 10.0);
    nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-   nvgFillColor( vg, color);
+   nvgFillColor( vg, CGColorMakeWithHexColor( color));
 
    nvgTextBox( vg, position.x, position.y, INFINITY, s, NULL);
 }
@@ -145,7 +144,7 @@
 
 - (void) fillCircleAtPoint:(CGPoint) point
                     radius:(CGFloat) radius
-                     color:(CGColor) color
+                  hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
 
@@ -154,17 +153,16 @@
    nvgBeginPath( vg);
    {
       nvgCircle( vg, point.x, point.y, radius);
-      nvgFillColor( vg, color);
+      nvgFillColor( vg, CGColorMakeWithHexColor( color));
    }
    nvgFill( vg);
 }
 
 
-
 - (void) strokeCircleAtPoint:(CGPoint) point
                       radius:(CGFloat) radius
                        width:(CGFloat) width
-                       color:(CGColor) color
+                    hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
 
@@ -174,16 +172,15 @@
    {
       nvgCircle( vg, point.x, point.y, radius);
       nvgStrokeWidth( vg, width);
-      nvgStrokeColor( vg, color);
+      nvgStrokeColor( vg, CGColorMakeWithHexColor( color));
    }
    nvgStroke( vg);
 }
 
 
-
 - (void) fillPoint:(CGPoint) point 
              width:(CGFloat) width
-             color:(CGColor) color
+          hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
 
@@ -192,16 +189,16 @@
    nvgBeginPath( vg);
    {
       nvgRect( vg, point.x - width / 2.0, point.y - width / 2.0, width, width);
-      nvgFillColor( vg, color);
+      nvgFillColor( vg, CGColorMakeWithHexColor( color));
    }
    nvgFill( vg);
 }
 
 
 - (void) strokeLineFromPoint:(CGPoint) from 
-                   toPoint:(CGPoint) to
-                     width:(CGFloat) strokeWidth
-                     color:(CGColor) color
+                     toPoint:(CGPoint) to
+                       width:(CGFloat) strokeWidth
+                    hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
 
@@ -212,7 +209,7 @@
       nvgMoveTo( vg, from.x, from.y);
       nvgLineTo( vg, to.x, to.y);
       nvgStrokeWidth( vg, strokeWidth);
-      nvgStrokeColor( vg, color);
+      nvgStrokeColor( vg, CGColorMakeWithHexColor( color));
    }
    nvgStroke( vg);
 }
@@ -220,7 +217,7 @@
 
 
 - (void) fillPath:(CGPath *) path 
-            color:(CGColor) color
+         hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
 
@@ -228,8 +225,8 @@
 
    nvgBeginPath( vg);
    {
-      nvgAddCGPath( vg, path);
-      nvgFillColor( vg, color);
+      mvgAddCGPath( vg, path);
+      nvgFillColor( vg, CGColorMakeWithHexColor( color));
    }
    nvgFill( vg);
 }
@@ -237,7 +234,7 @@
 
 - (void) strokePath:(CGPath *) path 
               width:(CGFloat) strokeWidth
-              color:(CGColor) color
+           hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
 
@@ -245,9 +242,9 @@
 
    nvgBeginPath( vg);
    {
-      nvgAddCGPath( vg, path);
+      mvgAddCGPath( vg, path);
       nvgStrokeWidth( vg, strokeWidth);
-      nvgStrokeColor( vg, color);
+      nvgStrokeColor( vg, CGColorMakeWithHexColor( color));
    }
    nvgStroke( vg);
 }

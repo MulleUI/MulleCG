@@ -5,8 +5,13 @@
 
 #include <stdint.h>
 
+// almost all nanovg functions are wrapped here for use with mulle-gfx
+// geometry. Some functions with pointer parameter return values are changed
+// to return structs now..
 
-enum MVGTextOption
+#include "millivg-nanowrap.h"
+
+enum MulleTextOption
 {
    MVGTextDefault       = 0x0,
    MVGTextAlignVisually = 0x1,
@@ -15,16 +20,164 @@ enum MVGTextOption
    MVGTextFill          = 0x8
 };
 
-typedef uintptr_t     MVGTextOptions;
+typedef uintptr_t     MulleTextOptions;
 
 // #define RENDER_DEBUG
+
+
+struct MulleTextMetrics
+{
+   CGFloat   ascender;
+   CGFloat   descender;
+   CGFloat   lineHeight;
+};
+
+
+static inline struct MulleTextMetrics
+    MulleTextMetricsMake( CGFloat ascender, CGFloat descender, CGFloat lineHeight)
+{
+   return( (struct MulleTextMetrics) { .ascender = ascender,
+                                       .descender = descender,
+                                       .lineHeight = lineHeight});
+}
+
+
+
+// Returns the vertical metrics based on the current text style.
+// Measured values are returned in local coordinate space.
+static inline struct MulleTextMetrics   mvgTextMetrics( NVGcontext *vg)
+{
+   float   ascender;
+   float   descender;
+   float   lineh;
+
+   ascender = descender = lineh = NAN;
+   nvgTextMetrics( vg, &ascender, &descender, &lineh);
+   return( MulleTextMetricsMake( ascender, descender, lineh));
+}
+
+
+struct MulleCornerInsets
+{
+   float   tl;
+   float   tr;
+   float   br;
+   float   bl;
+};
+
+#define MulleCornerInsetsData( tl, tr, br, bl)  { (tl), (tr), (br), (bl) }
+
+
+
+static inline struct MulleCornerInsets
+   MulleCornerInsetsMakeLRTD( float topLeft, float topRight, float bottomLeft, float bottomRight)
+{
+   return( (struct MulleCornerInsets) { .tl = topLeft, .tr = topRight, .br = bottomRight, .bl = bottomLeft });
+}
+
+
+static inline struct MulleCornerInsets
+   MulleCornerInsetsMake( float topLeft, float topRight, float bottomRight, float bottomLeft)
+{
+   return( (struct MulleCornerInsets) { .tl = topLeft, .tr = topRight, .br = bottomRight, .bl = bottomLeft });
+}
+
+
+static inline void   mvgRoundedRectVarying( NVGcontext *vg, CGRect rect, struct MulleCornerInsets corners)
+{
+   nvgRoundedRectVarying( vg, rect.origin.x,
+                              rect.origin.y,
+                              rect.size.width,
+                              rect.size.height,
+                              corners.tl,
+                              corners.tr,
+                              corners.br,
+                              corners.bl);
+}
+
+
+/*
+ * Conveniences
+ */
+
+// Creates a new rectangle path and fills it with the given color.
+void   mvgFillRoundedRect( NVGcontext *vg, CGRect rect, CGFloat cornerRadius, CGColor color);
+
+void   mvgPaintRoundedRect( NVGcontext *vg, CGRect rect, CGFloat cornerRadius, NVGpaint paint);
 
 // Creates a new rectangle path and fills it with the given color.
 void   mvgFillRect( NVGcontext *vg, CGRect rect, CGColor color);
 
+void   mvgPaintRect( NVGcontext *vg, CGRect rect, NVGpaint paint);
+
+
+void   mvgFillCircle( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color);
+
+void   mvgPaintCircle( NVGcontext *vg, CGPoint center, CGFloat radius, NVGpaint paint);
+
+
+// Creates a new rectangle path and strokes it with the given color.
+void   mvgStrokeRoundedRect( NVGcontext *vg, CGRect rect, CGFloat cornerRadius, CGColor color);
+
 // Creates a new rectangle path and strokes it with the given color.
 void   mvgStrokeRect( NVGcontext *vg, CGRect rect, CGColor color);
 
+// Creates a line and strokes it with the color.
+void   mvgStrokeLine( NVGcontext *vg, CGPoint start, CGPoint end, CGColor color);
+
+void   mvgStrokeCircle( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color);
+
+
+
+struct MulleShadow
+{
+   struct MulleEdgeInsets   extrudes;
+   CGColor                  innerColor;
+   CGColor                  outerColor;
+   CGFloat                  blur;
+   char                     hole;
+};
+
+
+#define MulleShadowDefaultValues  (struct MulleShadow)                     \
+{                                                                          \
+   .extrudes   = { .top = 0.5, .left = 0.5, .bottom = 4.0, .right = 2.0 }, \
+   .innerColor = CGColorDataWithRGBA( 0, 0, 0, 0.5),                       \
+   .outerColor = CGColorDataWithRGBA( 0, 0, 0, 0),                         \
+   8.0,                                                                    \
+   1                                                                       \
+}
+
+
+static inline struct MulleShadow
+   MulleShadowMake( CGPoint offset, CGFloat blur, CGColor color)
+{
+   struct MulleShadow   shadow;
+
+  // the blur / 4.0 value is experimentally determined
+   shadow.extrudes = (struct MulleEdgeInsets)
+                     {
+                       .top    = offset.y,
+                       .bottom = offset.y,
+                       .left   = offset.x,
+                       .right  = offset.x
+                     };
+   shadow.innerColor = color;
+   shadow.outerColor = CGColorMakeTransparent();
+   shadow.blur       = blur;   // guesstimate
+   shadow.hole       = 1;
+   return( shadow);
+}
+
+
+//
+// this a drop shadow for a "rect", the space covered by the shadow is
+// usually larger (insets/blur)
+//
+void   mvgFillRoundedShadow( struct NVGcontext *vg,
+                             CGRect rect,
+                             CGFloat cornerRadius,
+                             struct MulleShadow *shadow);
 //
 // Draws text inside a rect. The text is clipped to the rect unless,
 // the option MVGTextNoClip is given. The position within in the rect is
@@ -42,41 +195,41 @@ void   mvgTextInRect( NVGcontext *vg,
                       char *end,
                       CGRect rect,
                       CGContentMode contentMode,
-                      MVGTextOptions options);
+                      MulleTextOptions options);
 
 
 //
 // Calculate change to origin needed to properly place the string.
-// The only recognized MVGTextOptions is MVGTextAlignVisually. 
+// The only recognized MulleTextOptions is MVGTextAlignVisually.
 //
 CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
                                            char *s,
                                            char *end,
                                            int alignment,
-                                           MVGTextOptions options);
+                                           MulleTextOptions options);
 
 //
 // workhorse function for mvgText, will set state to alignment
 //
-void   _mvgText( struct NVGcontext *vg,
-                 char *s,
-                 char *end,
-                 CGPoint origin,
-                 int alignment,
-                 MVGTextOptions options);
+void   _mvgExtendedAlignedText( struct NVGcontext *vg,
+                                char *s,
+                                char *end,
+                                CGPoint origin,
+                                int alignment,
+                                MulleTextOptions options);
 
 //
 // Draws text string at specified location. If end is specified only the
-// sub-string up to the end is drawn. The only recognized MVGTextOptions
+// sub-string up to the end is drawn. The only recognized MulleTextOptions
 // is MVGTextAlignVisually. This will layout the text visually more pleasing,
-// if the text contains no asencders or descenders or lacks both.
+// if the text contains no ascenders or descenders or lacks both.
 //
-static inline void   mvgText( struct NVGcontext *vg,
-                              char *s,
-                              char *end,
-                              CGPoint origin,
-                              int alignment,
-                              MVGTextOptions options)
+static inline void   mvgExtendedAlignedText( struct NVGcontext *vg,
+                                             char *s,
+                                             char *end,
+                                             CGPoint origin,
+                                             int alignment,
+                                             MulleTextOptions options)
 {
    int   halign;
 
@@ -85,13 +238,30 @@ static inline void   mvgText( struct NVGcontext *vg,
    {
       // general idea: often the alignment and options are given
       // as a constant and the compiler can simplify the if away
-      nvgTextAlign( vg, alignment);
-      nvgText( vg, origin.x, origin.y, s, end);
+      mvgTextAlign( vg, alignment);
+      mvgText( vg, origin, s, end);
    }
    else
    {
-      _mvgText( vg, s, end, origin, alignment, options);
+      _mvgExtendedAlignedText( vg, s, end, origin, alignment, options);
    }
+}
+
+
+static inline void   mvgAssertFont( struct NVGcontext *vg)
+{
+#ifndef NDEBUG
+   float   lineh;
+
+   // in error case nvg, does not clear lineh!
+   lineh = INFINITY;
+   nvgTextMetrics( vg, NULL, NULL, &lineh);
+   if( isinf( lineh))
+   {
+      fprintf( stderr, "No font has been loaded yet!\n");
+      abort();
+   }
+#endif
 }
 
 #endif 

@@ -17,8 +17,8 @@
 
 @end
 
-@implementation MyWindow
 
+@implementation MyWindow
 
 - (void) finalize
 {
@@ -56,7 +56,7 @@
 @end
 
 
-static void   display( GLFWOSWindow *window_in)
+static int   display( GLFWOSWindow *window_in)
 {
    MyWindow         *window = (MyWindow *) window_in;
    CGRect           canvas;
@@ -110,6 +110,8 @@ static void   display( GLFWOSWindow *window_in)
 
    // remember it, and check next time that it's been reused
    previous = layer;
+
+   return( 0);
 }
 
 

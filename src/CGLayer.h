@@ -28,6 +28,7 @@ struct CGFrameInfo;
 @interface CGLayer : CGImage
 
 @property( readonly, assign) void   *framebuffer;
+@property( assign, getter=isInitializedFramebuffer) BOOL   initializedFramebuffer;
 @property char                      *debugNameUTF8String;  // useful for debugging
 
 + (instancetype) layerWithBitmapSize:(struct MulleIntegerSize) size
@@ -44,17 +45,39 @@ struct CGFrameInfo;
                        context:(CGContext *) context;
 
 
+
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
 
 @end
 
 
-@interface CGLayer( CGContext)
+//
+// "conveniently" draw stuff into a CGLayer. Rendering to a bitmap is the core
+// caching mechanism for more complex drawings.
+//
+@interface CGLayer( CGLayerRender)
+
+struct CGLayerRenderInfo
+{
+   struct CGContextFramebuffer   framebuffer;
+   struct CGFrameInfo            frameInfo;
+};
 
 // Use CGContext bindFramebuffer: to bind/unbind a layer, don't call directly
-- (void) bindFramebuffer;
-- (void) unbindFramebuffer;
+- (void) _bindToContext;
+- (void) _unbindFromContext;
+
+// these functions don't setup the view port or clear the CGLayer
+- (void) _beginLayerRender:(struct CGLayerRenderInfo *) memo;
+- (void) _endLayerRender:(struct CGLayerRenderInfo *) memo;
+
+// Convenience routine clears and sets up the viewport and starts nvg frame.
+// Feed the memo to endLayerRender when done
+- (void) beginLayerRenderWithBackgroundColor:(CGColor) color
+                            devicePixelRatio:(CGFloat) ratio
+                             layerRenderInfo:(struct CGLayerRenderInfo *) memo;
+
+- (void) endLayerRender:(struct CGLayerRenderInfo *) memo;
 
 @end
-
 

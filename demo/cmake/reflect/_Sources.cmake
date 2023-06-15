@@ -8,35 +8,61 @@ if( MULLE_TRACE_INCLUDE)
 endif()
 
 #
+# contents selected with patternfile ??-source--shaders
+#
+set( SHADERS
+src/blur.frag
+src/rect.vert
+src/simple.frag
+src/texture.frag
+)
+
+#
 # contents selected with patternfile ??-source--sources
 #
 set( SOURCES
+src/main-arc.m
+src/main-bezier.m
+src/main-canvas.m
 src/main-cgimage-contentmode.m
 src/main-cgimage-flip.m
 src/main-cgimage.m
+src/main-cgimage-many.m
 src/main-cgimage-mix.m
 src/main-cgimage-repeat.m
 src/main-cgimage-rotate.m
 src/main-cgimage-section2.m
 src/main-cgimage-section.m
 src/main-cgimage-write.m
+src/main-cglayer-convenient.m
 src/main-cglayer.m
 src/main-draw.m
+src/main-draw-simple2.m
 src/main-draw-simple.m
+src/main-dropshadow.m
 src/main-fancy-button.m
 src/main-fancy-stepper.m
+src/main-feather.m
 src/main-fonts.m
 src/main-glfw-cglayer.m
 src/main-glfw-draw-offscreen.m
 src/main-glfw-draw-simple.m
 src/main-glfw-two-windows.m
+src/main-gradient.m
+src/main-grid.m
+src/main-huge-font.m
 src/main-opengl.m
+src/main-outline-glyph.m
 src/main-particlelayers.m
 src/main-particles.m
 src/main-particles-sorted.m
+src/main-rect.m
+src/main-rect-pain.m
 src/main-segments.m
+src/main-shader.m
+src/main-stroke-fill.m
+src/main-stroke-rect.m
 src/main-suspend-resume.m
-src/main-tableview.m
 src/main-text-alignment.m
 src/main-text-bounds.m
 src/main-text-contentmode.m
@@ -44,4 +70,5 @@ src/main-text-draw.m
 src/main-text-extent.m
 src/main-text.m
 src/main-texture.m
+src/parse_uniform.c
 )

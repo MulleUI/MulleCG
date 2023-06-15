@@ -93,14 +93,14 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 - (void) addFontWithCData:(struct mulle_data) data
        fontNameUTF8String:(char *) name
 {
-   CGFont   *font;
-   int      fontIndex;
+   CGFont    *font;
+   CGFontID  fontID;
 
    assert( ! mulle_map_get( &_fontMap, name));
 
-   fontIndex = nvgCreateFontMem( _vg, name, data.bytes, (int) data.length, 0);
+   fontID = mvgCreateFontMem( _vg, name, data.bytes, (int) data.length, 0);
    font      = [CGFont fontWithNameUTF8String:name
-                                 fontIndex:fontIndex];
+                                       fontID:fontID];
 
    mulle_map_insert( &_fontMap, name, font);
 }
@@ -109,14 +109,14 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 - (void) addFontWithContentsOfFileWithFileRepresentationString:(char *) filename
                                             fontNameUTF8String:(char *) name
 {
-   CGFont   *font;
-   int      fontIndex;
+   CGFont     *font;
+   CGFontID   fontID;
 
    assert( ! mulle_map_get( &_fontMap, name));
 
-   fontIndex = nvgCreateFont( _vg, name, filename);
+   fontID = mvgCreateFont( _vg, name, filename);
    font      = [CGFont fontWithNameUTF8String:name
-                                 fontIndex:fontIndex];
+                                       fontID:fontID];
 
    mulle_map_insert( &_fontMap, name, font);
 }
@@ -129,76 +129,86 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 - (CGFont *) fallbackFont
 {
    CGFont   *font;
-   int      fontIndex;
+   CGFontID fontID;
 
    font = mulle_map_get( &_fontMap, "fallback");
    if( font)
       return( font);
 
-   fontIndex = nvgCreateFontMem( [self nvgContext],
+   fontID = mvgCreateFontMem( [self nvgContext],
                                  "fallback",
                                  emoji_font_ttf,
                                  (int) s_emoji_font_ttf,
                                  0);
    font      = [CGFont fontWithNameUTF8String:"fallback"
-                          fontIndex:fontIndex];
+                                       fontID:fontID];
 
    mulle_map_insert( &_fontMap, "fallback", font);
    return( font);
 }
 
 
+
 - (CGFont *) fontWithNameUTF8String:(char *) s
 {
    CGFont   *font;
    CGFont   *fallbackFont;
-   int       fontIndex;
+   CGFontID fontID;
+
+   if( ! s)
+      s = "sans";
 
    font = mulle_map_get( &_fontMap, s);
    if( font)
       return( font);
 
-   fontIndex = -1;
+   fontID = -1;
    if( ! strcmp( s, "sans"))
    {
-      fontIndex = nvgCreateFontMem( _vg,
-                                    s,
-                                    sans_font_ttf,
-                                    (int) s_sans_font_ttf,
-                                    0);
+      fontID = mvgCreateFontMem( _vg,
+                                 s,
+                                 sans_font_ttf,
+                                 (int) s_sans_font_ttf,
+                                 0);
    }
    else
       if( ! strcmp( s, "sans-bold"))
       {
-         fontIndex = nvgCreateFontMem( _vg,
-                                       s,
-                                       sans_bold_font_ttf,
-                                       (int) s_sans_bold_font_ttf,
-                                       0);
+         fontID = mvgCreateFontMem( _vg,
+                                    s,
+                                    sans_bold_font_ttf,
+                                    (int) s_sans_bold_font_ttf,
+                                    0);
       }
       else
          if( ! strcmp( s, "icons"))
          {
-            fontIndex = nvgCreateFontMem( _vg,
-                                          s,
-                                          icons_font_ttf,
-                                          (int) s_icons_font_ttf,
-                                          0);
+            fontID = mvgCreateFontMem( _vg,
+                                       s,
+                                       icons_font_ttf,
+                                       (int) s_icons_font_ttf,
+                                       0);
          }
 
-   if( fontIndex == -1)
+   if( fontID == -1)
       abort();
 
    fallbackFont = [self fallbackFont];
    if( fallbackFont)
-      nvgAddFallbackFontId( _vg, fontIndex, [fallbackFont fontIndex]);
+      mvgAddFallbackFontId( _vg, fontID, [fallbackFont fontID]);
 
    font = [CGFont fontWithNameUTF8String:s
-                            fontIndex:fontIndex];
+                                  fontID:fontID];
    assert( font);
    mulle_map_insert( &_fontMap, s, font);
 
    return( font);
+}
+
+
+- (CGFont *) defaultFont
+{
+   return( [self fontWithNameUTF8String:NULL]);
 }
 
 
@@ -207,9 +217,11 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    assert( [self isActive]);
 
    if( font)
-      nvgFontFace( _vg, [font nameUTF8String]);
+      mvgFontFace( _vg, [font nameUTF8String]);
    else
-      nvgFontFace( _vg, "sans");
+      mvgFontFace( _vg, "sans");
+
+   _hasLoadedFont = YES;
 }
 
 
@@ -221,7 +233,34 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
    font = [self fontWithNameUTF8String:name];
    if( font)
-      nvgFontFace( _vg, name);
+      [self setFont:font];
 }
+
+
+- (void) useDefaultFont
+{
+   CGFont   *font;
+
+   assert( [self isActive]);
+
+   font = [self defaultFont];
+   assert( font);
+   [self setFont:font];
+}
+
+
+- (void *) internalFontHandleOfFont:(CGFont *) font
+{
+   if( ! font)
+      return( NULL);
+   return( nvgGetFontHandle( _vg, [font fontID]));
+}
+
+
+- (void *) internalFontHandle
+{
+   return( nvgGetFontHandle( _vg, -1));
+}
+
 
 @end

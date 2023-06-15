@@ -4,8 +4,9 @@
 
 #import "CGContext+CGFont.h"
 #import "CGContext+OpenGL.h"
-#import "CGContext+Resources.h"
 #import "CGContext+Drawing.h"
+#import "CGContext+Shader.h"
+#import "CGContext+Texture.h"
 #import "CGImage.h"
 #import "CGLayer.h"
 
@@ -14,11 +15,19 @@
 #include <stdlib.h>
 
 
-#define CGCONTEXT_DEBUG_ENABLED 3
+@interface CGContext( Private)
+
+- (void) deleteTextureIDs;
+- (void) deleteFramebuffers;
+
+@end
+
+
+//#define CGCONTEXT_DEBUG_ENABLED 3
 
 //#define IVAR_DEBUG
 //#define SWAP_DEBUG
-#define RESIZE_DEBUG
+//#define RESIZE_DEBUG
 //#define RENDER_DEBUG
 // this writes out a PNG for each frame
 //#define RENDER_LAYER_DEBUG
@@ -86,7 +95,6 @@ static void   recycle_ivar_object( mulle_atomic_pointer_t *p, id obj)
 }
 
 
-
 //
 // there shall be no OpenGL calls or constants here. Just nanovg stuff
 //
@@ -95,19 +103,32 @@ static void   recycle_ivar_object( mulle_atomic_pointer_t *p, id obj)
 static struct
 {
    mulle_thread_mutex_t                      _freeTypeLock;
-   struct mulle_container_keyvaluecallback   _callback;
+   struct mulle_container_keyvaluecallback   _gpuTextureMapCallback;
+   struct mulle_container_keyvaluecallback   _shaderMapCallback;
+   struct mulle_container_keyvaluecallback   _shaderSourcesCallback;
+   struct mulle_map                          _registeredSources;
    char                                      _debugEnabled;
 } Self;
 
 
 + (void) initialize
 {
-   char   *s;
+   struct mulle_allocator   *allocator;
+   char                     *s;
 
    mulle_thread_mutex_init( &Self._freeTypeLock);
 
-   Self._callback.keycallback   = mulle_container_keycallback_nonowned_pointer;
-   Self._callback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
+   Self._gpuTextureMapCallback.keycallback   = mulle_container_keycallback_nonowned_pointer;
+   Self._gpuTextureMapCallback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
+
+   Self._shaderMapCallback.keycallback       = mulle_container_keycallback_copied_cstring;
+   Self._shaderMapCallback.valuecallback     = mulle_container_valuecallback_intptr;
+
+   Self._shaderSourcesCallback.keycallback   = mulle_container_keycallback_copied_cstring;
+   Self._shaderSourcesCallback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
+
+   allocator = MulleObjCClassGetAllocator( self);
+   mulle_map_init( &Self._registeredSources, 0, &Self._shaderSourcesCallback, allocator);
 
    s = getenv( "CGContextDebugEnabled");
    if( s)
@@ -124,6 +145,7 @@ static struct
 + (void) deinitialize
 {
    mulle_thread_mutex_done( &Self._freeTypeLock);
+   mulle_map_done( &Self._registeredSources);
 }
 
 
@@ -133,61 +155,86 @@ static struct
 }
 
 
-/*
-static void   assert_shader_compiler_errors( GLuint shader)
+static UIGraphicsBackend   defaultBackends[] =
 {
-   GLint    success;
-   GLchar   infoLog[1024];
+   UIGraphicsBackendDefault,
+   UIGraphicsBackendNone
+};
 
-   glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-   if( ! success)
+
++ (void) registerShaderSources:(struct CGShaderUTF8Sources *) sources
+             forNameUTF8String:(char *) nameUTF8String
+{
+   UIGraphicsBackend   *backends;
+   char                *key;
+   char                *prefix;
+
+   if( ! nameUTF8String)
+      nameUTF8String = sources->name;
+
+   assert( nameUTF8String);
+
+   backends = sources->backends ? sources->backends : defaultBackends;
+
+   mulle_buffer_do( buffer)
    {
-      glGetShaderInfoLog( shader, 1024, NULL, infoLog);
-      fprintf( stderr, "ERROR::SHADER_COMPILATION_ERROR: %s\n", infoLog);
-      abort();
+      while( *backends != UIGraphicsBackendNone)
+      {
+         mulle_buffer_reset( buffer);
+         prefix = UIGraphicsBackendUTF8String( *backends);
+         assert( ! strcmp( prefix, "???"));
+
+         mulle_buffer_sprintf( buffer, "%s__%s", prefix, nameUTF8String);
+         key = mulle_buffer_get_string( buffer);
+         mulle_thread_mutex_do( Self._freeTypeLock)
+         {
+            mulle_map_insert( &Self._registeredSources, key, sources);
+         }
+         ++backends;
+      }
    }
 }
 
-// stolen from : https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/9.2.geometry_shader_exploding/9.2.geometry_shader.gs
-static char  geometryShaderSource[] =
-"#version 330 core\n"
-"layout (triangles) in;\n"
-"layout (triangle_strip, max_vertices = 3) out;\n"
-"\n"
-"in VS_OUT {\n"
-"    vec2 texCoords;\n"
-"} gs_in[];\n"
-"\n"
-"out vec2 TexCoords;\n"
-"\n"
-"uniform float time;\n"
-"\n"
-"vec4 explode(vec4 position, vec3 normal)\n"
-"{\n"
-"    float magnitude = 2.0;\n"
-"    vec3 direction = normal * ((sin(time) + 1.0) / 2.0) * magnitude;\n"
-"    return position + vec4(direction, 0.0);\n"
-"}\n"
-"\n"
-"vec3 GetNormal()\n"
-"{\n"
-"    vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);\n"
-"    vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);\n"
-"    return normalize(cross(a, b));\n"
-"}\n"
-"\n"
-"void main() {\n"   _context = nil;
-l_Position, normal);\n"
-"    TexCoords = gs_in[1].texCoords;\n"
-"    EmitVertex();\n"
-"    gl_Position = explode(gl_in[2].gl_Position, normal);\n"
-"    TexCoords = gs_in[2].texCoords;\n"
-"    EmitVertex();\n"
-"    EndPrimitive();\n"
-"}\n"
-;
-*/
 
++ (void) registerShaderSources:(struct CGShaderUTF8Sources *) sources
+{
+   [self registerShaderSources:sources
+             forNameUTF8String:NULL];
+}
+
+
+- (struct CGShaderUTF8Sources *) registeredShaderSourcesForNameUTF8String:(char *) nameUTF8String
+{
+   struct CGShaderUTF8Sources   *sources;
+   char                         *prefix;
+   UIGraphicsBackend            *backends;
+   auto UIGraphicsBackend       targetBackends[ 3] =
+                                {
+                                   [self backend],
+                                   UIGraphicsBackendDefault,
+                                   UIGraphicsBackendNone
+                                };
+
+   backends = targetBackends;
+   mulle_buffer_do( buffer)
+   {
+      do
+      {
+         prefix = UIGraphicsBackendUTF8String( *backends);
+         mulle_buffer_sprintf( buffer, "%s__%s", prefix, nameUTF8String);
+
+         mulle_thread_mutex_do( Self._freeTypeLock)
+         {
+            sources = mulle_map_get( &Self._registeredSources, nameUTF8String);
+         }
+      }
+      while( ! sources && *++backends != UIGraphicsBackendNone);
+   }
+   return( sources);
+}
+
+
+//
 // due to freetype being singlethreaded (mostly ?) the nvgCreate routines
 // need to run locked so only one thread can create a NVG context at the
 // same time. The same probably has to be done for every font load  ?
@@ -197,18 +244,21 @@ l_Position, normal);\n"
                options:(UIGraphicsOptions) options
 {
    struct mulle_allocator   *allocator;
+   static SEL                selectors[ 2] = {
+                                                @selector( contextDidAddObject:),
+                                                @selector( contextDidRemoveObject:)
+                                             };
 
    _backend  = backend;
    _shareID  = shareID;
 
    if( backend != UIGraphicsBackendNone)
    {
-      mulle_thread_mutex_lock( &Self._freeTypeLock);
+      mulle_thread_mutex_do( Self._freeTypeLock)
       {
          [self _initNanoVGWithEdgeAntialiasing:options & UIGraphicsEdgeAntialiasing
-                           useStencilStrokes:options & UIGraphicsUseStencilStrokes];
+                             useStencilStrokes:options & UIGraphicsUseStencilStrokes];
       }
-      mulle_thread_mutex_unlock( &Self._freeTypeLock);
 
       if( ! _vg)
       {
@@ -219,18 +269,17 @@ l_Position, normal);\n"
    }
 
    [self _initFontCache];
+   [self _initResourceStorage:&_resourceStorage
+            callbackSelectors:selectors];
 
    allocator = MulleObjCInstanceGetAllocator( self);
-   _mulle__pointerset_init( &_resources, 0, allocator);
-   _mulle__pointerarray_init( &_deletedTexturedIDs, 0, allocator);
-
-   mulle_set_init( &_loanedResources,
-                   0,
-                   &mulle_container_keycallback_nonowned_pointer,
-                   allocator);
-
+   _mulle__pointerarray_init( &_deletedTextureIDs, 0, allocator);
+   _mulle__pointerarray_init( &_deletedFramebuffers, 0, allocator);
    // this is merely there to provide a mapping, it doesn't own the CGImage
-   _mulle_map_init( &_gpuTextureMap, 0, &Self._callback, allocator);
+   _mulle_map_init( &_gpuTextureMap, 0, &Self._gpuTextureMapCallback, allocator);
+
+   // this is a way to rendezvous to exisiting shaders by name
+   _mulle_map_init( &_shaderMap, 0, &Self._shaderMapCallback, allocator);
 
    _debugEnabled = Self._debugEnabled;
    if( _debugEnabled)
@@ -242,8 +291,6 @@ l_Position, normal);\n"
 
 - (void) finalize
 {
-   CGLayer   *layer;
-
    if( _backend != UIGraphicsBackendNone)
    { 
       if( ! _vg)  // we died super early, so nothing to do
@@ -260,9 +307,10 @@ l_Position, normal);\n"
       MulleUILogThisMethod();
 
    [self _resetFontCache];
-   [self releaseAllLoanedResources];
-   [self removeAllResources];
+   [self _finalizeResourceStorage:&_resourceStorage];
    [self deleteTextureIDs];
+   [self deleteFramebuffers];
+   [self deleteShaders];
 
    if( _debugEnabled)
       MulleUILog( "autorelease offScreenFramebuffer");
@@ -273,11 +321,10 @@ l_Position, normal);\n"
 
    if( _backend != UIGraphicsBackendNone)
    {
-      mulle_thread_mutex_lock( &Self._freeTypeLock);
+      mulle_thread_mutex_do( Self._freeTypeLock)
       {
          [self _finalizeNanoVG];
       }
-      mulle_thread_mutex_unlock( &Self._freeTypeLock);
    }
 
    [super finalize];
@@ -295,12 +342,13 @@ l_Position, normal);\n"
 
    // images in _gpuTextureMap aren't retained just blow map away
    mulle_map_done( &_gpuTextureMap);
-   mulle_set_done( &_loanedResources);
+   mulle_map_done( &_shaderMap);
+
+   [self _doneResourceStorage:&_resourceStorage];
 
    allocator = MulleObjCInstanceGetAllocator( self);
-
-   _mulle__pointerset_done( &_resources, allocator);
-   _mulle__pointerarray_done( &_deletedTexturedIDs, allocator);
+   _mulle__pointerarray_done( &_deletedFramebuffers, allocator);
+   _mulle__pointerarray_done( &_deletedTextureIDs, allocator);
 
    [super dealloc];
 }
@@ -309,6 +357,12 @@ l_Position, normal);\n"
 - (struct NVGcontext *) nvgContext
 {
    return( CGContextGetNVGContext( self));
+}
+
+
+- (struct MulleUIResourceStorage *) _resourceStorage
+{
+   return( &_resourceStorage);
 }
 
 
@@ -325,6 +379,11 @@ l_Position, normal);\n"
 - (BOOL) isActive
 {
    return( _isActive);
+}
+
+- (BOOL) hasLoadedFont
+{
+   return( _hasLoadedFont);
 }
 
 
@@ -348,6 +407,12 @@ l_Position, normal);\n"
 - (CGFloat) alpha
 {
    return( _currentFrameInfo.alpha);
+}
+
+
+- (CGShaderID) activeShader
+{
+   return( _activeShader);
 }
 
 
@@ -452,7 +517,8 @@ l_Position, normal);\n"
 
    // now vg calls can happen
 
-   // delete all queued for deletion textureIDs
+   // delete all queued for deletion framebuffers and textureIDs
+   [self deleteFramebuffers];
    [self deleteTextureIDs];
    CGContextCheckBackendError( self, "delete textureIDs");
 
@@ -521,7 +587,6 @@ static struct CGFrameInfo   emptyInfo;
 - (void) _endRender
 {
    CGLayer   *old;
-   char      *s;
 
    assert( _isRendering);
 
@@ -570,6 +635,10 @@ static struct CGFrameInfo   emptyInfo;
       [_renderLayer autorelease];
       _renderLayer = nil;
    }
+
+   // so if we rendered to the "window" framebuffer mark it as initialized
+   if( _currentFramebuffer.type == CGContextDefaultFramebuffer)
+      _initializedFramebuffer = YES;
 }
 
 
@@ -610,10 +679,16 @@ static struct CGFrameInfo   emptyInfo;
 /*
  * manage framebuffers
  */
+- (void) clearFramebufferWithHexColor:(NSUInteger) hexColor
+{
+   [self clearFramebufferBits:_framebufferBits
+                        color:CGColorMakeWithHexColor( hexColor)];
+}
+
 - (void) clearFramebufferWithColor:(CGColor) color
 {
    [self clearFramebufferBits:_framebufferBits
-                        color:color];
+                         color:color];
 }
 
 
@@ -637,6 +712,11 @@ static struct CGFrameInfo   emptyInfo;
    assert( _isActive);
 
    old = _currentFramebuffer;
+   // the old layer should notice that its unbound to set its
+   // initialized flag
+   if( old.type == CGContextLayerFramebuffer)
+      [(CGLayer *) old.handle _unbindFromContext];  // nvg will restore
+
    switch( fb.type)
    {
    case CGContextDefaultFramebuffer :
@@ -645,7 +725,7 @@ static struct CGFrameInfo   emptyInfo;
       break;
 
    case CGContextLayerFramebuffer :
-      [(CGLayer *) fb.handle bindFramebuffer];  // nvg will restore
+      [(CGLayer *) fb.handle _bindToContext];  // nvg will restore
       break;
 
    case CGContextOpenGLFramebuffer  :
@@ -662,6 +742,21 @@ static struct CGFrameInfo   emptyInfo;
    return( old);
 }
 
+
+- (BOOL) isInitializedFramebuffer
+{
+   switch( _currentFramebuffer.type)
+   {
+   default                         :
+      return( _initializedFramebuffer);
+
+   case CGContextLayerFramebuffer  :
+      return( [(CGLayer *) _currentFramebuffer.handle isInitializedFramebuffer]);
+
+   case CGContextOpenGLFramebuffer :
+      return( NO);
+   }
+}
 
 /*
  * Offscreenbuffer cycle.
@@ -721,5 +816,24 @@ static struct CGFrameInfo   emptyInfo;
 //
 //    return( image);
 // }
+
+
+// support for some demos
+- (CGPoint) mouseLocation
+{
+   return( _inputState.locationInWindow);
+}
+
+
+- (NSUInteger) keyModifiers
+{
+   return( _inputState.keyModifiers);
+}
+
+
+- (NSUInteger) buttonStates
+{
+   return( _inputState.buttonStates);
+}
 
 @end

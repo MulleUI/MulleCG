@@ -12,8 +12,9 @@
 // layer. Technically that makes little sense, but it shows
 // CGLayer working...
 //
-static void   drawStuff( CALayer *layer, CGContext *context)
+static void   drawStuff( CALayer *layer, void *_context)
 {
+   CGContext                     *context = _context;
    CGLayer                       *cgLayer;
    CGRect                        canvas;
    CGRect                        originalCanvas;
@@ -25,6 +26,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    struct NVGcontext             *vg;
    CGRect                        rects[ 2][ 2];
    NSUInteger                    i, j;
+   NVGpaint                      paint;
 
    @autoreleasepool
    {
@@ -53,9 +55,9 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       //
       canvas.origin = CGPointZero;
       canvas.size   = CGSizeMake( originalCanvas.size.height / 2.0, originalCanvas.size.width / 2.0);
-      cgLayer = [CGLayer layerWithBitmapSize:MulleIntegerSizeMakeWithSize( canvas.size)
-                                   imageFlags:0
-                                      context:context];
+      cgLayer        = [CGLayer layerWithBitmapSize:MulleIntegerSizeMakeWithSize( canvas.size)
+                                         imageFlags:0
+                                            context:context];
       // 3. flush drawings so they don't appear in our framebuffer
       [context flushRender];
 
@@ -96,7 +98,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       // CGLayer must remain until actual render end or flush
       [context flushRender];
    }
-   [UIApp requestTerminate];
+//   [UIApp requestTerminate];
 }
 
 
@@ -107,6 +109,8 @@ int   main( int argc, char *argv[])
    UIWindow        *window;
 
    fprintf( stderr, "%s\n", [CGContext nanoVGBackendUTF8String]);
+
+   app = [UIApplication sharedInstance];
 
    styleMask  = UIWindowStyleMaskDefault;
    styleMask &= ~UIWindowStyleRetained;

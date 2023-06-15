@@ -1,0 +1,17 @@
+
+# 💫 MulleCG
+
+💫 MulleCG Coregraphics for MulleUI
+
+
+```
+TODO: dFdx not supported by OpenGLES2 (steal from shader compiler or
+wherever)
+```
+
+Provides CGContext which uses a nanoVG context to do drawing.
+Manages textures, fonts and shaders.
+
+Does not do any animation or layouting. Does not do windowing. Does not
+handle events.
+

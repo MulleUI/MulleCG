@@ -5,26 +5,7 @@
 #include <string.h>
 #include <time.h>
 
-
-#define R   0xFF, 0x00, 0x00, 0xFF
-#define G   0x00, 0xFF, 0x00, 0xFF
-#define B   0x00, 0x00, 0xFF, 0xFF
-#define Y   0xFF, 0xFF, 0x00, 0xFF
-#define W   0xFF, 0xFF, 0xFF, 0xFF
-#define _   0x00, 0x00, 0x00, 0xFF
-
-
-
-static unsigned char    bitmap3[ 4 * 5 * 5] =
-{
-   W, _, B, G,  R,   
-   _, _, B, G,  R,   
-   B, B, B, G,  R,   
-   G, G, G, G,  R, 
-
-   R, R, R, R,  R
-};
-
+#include "bitmap.inc"
 
 
 static void   drawBitmap3( CALayer *layer, CGContext *context)
@@ -53,7 +34,7 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
 
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon
-   image = [[[CGImage alloc] initWithRGBABytes:bitmap3
+   image = [[[CGImage alloc] initWithRGBABytes:bitmap
                                     bitmapSize:MulleIntegerSizeMake( 5, 5)
                                     imageFlags:NVG_IMAGE_NEAREST  // NVG_IMAGE_REPEATX
                                        context:context] autorelease];
@@ -93,7 +74,7 @@ void   setupScene( UIWindow *window)
 
    frame  = [[window contentPlane] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:drawBitmap3];
+   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawBitmap3];
    [[window contentPlane] addSubview:view];
 }
 

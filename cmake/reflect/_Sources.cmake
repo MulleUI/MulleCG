@@ -16,7 +16,8 @@ src/CGContext+CGFont.m
 src/CGContext+Drawing.m
 src/CGContext+OpenGL.m
 src/CGContext+Render.m
-src/CGContext+Resources.m
+src/CGContext+Shader.m
+src/CGContext+Texture.m
 src/CGContext.m
 src/CGDrawable.m
 src/CGFont.m
@@ -27,6 +28,8 @@ src/CGPath+nanovg.c
 src/MullePaint.m
 src/microvg/microvg.c
 src/microvg/millivg.c
+src/mulle-color/CGColor.c
+src/mulle-color/mulle-color.c
 src/nanovg+UTF8String.m
 )
 
