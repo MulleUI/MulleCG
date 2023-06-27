@@ -4,7 +4,7 @@
 
 
 
-void   mvgFillRoundedRect( NVGcontext *vg,
+void   mvgFillRoundedRectWithColor( NVGcontext *vg,
                            CGRect rect,
                            CGFloat cornerRadius,
                            CGColor color)
@@ -18,7 +18,7 @@ void   mvgFillRoundedRect( NVGcontext *vg,
 }
 
 
-void   mvgPaintRoundedRect( NVGcontext *vg,
+void   mvgFillRoundedRectWithNVGpaint( NVGcontext *vg,
                             CGRect rect,
                             CGFloat cornerRadius,
                             NVGpaint paint)
@@ -32,8 +32,9 @@ void   mvgPaintRoundedRect( NVGcontext *vg,
 }
 
 
+/***/
 
-void   mvgFillRect( NVGcontext *vg, CGRect rect, CGColor color)
+void   mvgFillRectWithColor( NVGcontext *vg, CGRect rect, CGColor color)
 {
    mvgBeginPath( vg);
    {
@@ -44,7 +45,7 @@ void   mvgFillRect( NVGcontext *vg, CGRect rect, CGColor color)
 }
 
 
-void   mvgPaintRect( NVGcontext *vg, CGRect rect, NVGpaint paint)
+void   mvgFillRectWithNVGpaint( NVGcontext *vg, CGRect rect, NVGpaint paint)
 {
    mvgBeginPath( vg);
    {
@@ -55,7 +56,8 @@ void   mvgPaintRect( NVGcontext *vg, CGRect rect, NVGpaint paint)
 }
 
 
-void   mvgFillCircle( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color)
+/***/
+void   mvgFillCircleWithColor( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color)
 {
    mvgBeginPath( vg);
    {
@@ -66,7 +68,7 @@ void   mvgFillCircle( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor co
 }
 
 
-void   mvgPaintCircle( NVGcontext *vg, CGPoint center, CGFloat radius, NVGpaint paint)
+void   mvgFillCircleWithNVGpaint( NVGcontext *vg, CGPoint center, CGFloat radius, NVGpaint paint)
 {
    mvgBeginPath( vg);
    {
@@ -77,63 +79,78 @@ void   mvgPaintCircle( NVGcontext *vg, CGPoint center, CGFloat radius, NVGpaint 
 }
 
 
-
-void   mvgStrokeRoundedRect( NVGcontext *vg,
-                             CGRect rect,
-                             CGFloat cornerRadius,
-                             CGColor color)
+/***/
+void   mvgStrokeRoundedRectWithColor( NVGcontext *vg,
+                                      CGRect rect,
+                                      CGFloat cornerRadius,
+                                      CGFloat strokeWidth,
+                                      CGColor color)
 {
    mvgBeginPath( vg);
    {
       mvgRoundedRect( vg, rect, cornerRadius);
       mvgStrokeColor( vg, color);
+      mvgStrokeWidth( vg, strokeWidth);
    }
    mvgStroke( vg);
 }
 
 
-void   mvgStrokeRect( NVGcontext *vg, CGRect rect, CGColor color)
+void   mvgStrokeRectWithColor( NVGcontext *vg, 
+                               CGRect rect, 
+                               CGFloat strokeWidth,
+                               CGColor color)
 {
    mvgBeginPath( vg);
    {
       mvgRect( vg, rect);
       mvgStrokeColor( vg, color);
+      mvgStrokeWidth( vg, strokeWidth);
    }
    mvgStroke( vg);
 }
 
 
-void   mvgStrokeCircle( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color)
+void   mvgStrokeCircleWithColor( NVGcontext *vg, 
+                                 CGPoint center, 
+                                 CGFloat radius, 
+                                 CGFloat strokeWidth,
+                                 CGColor color)
 {
    mvgBeginPath( vg);
    {
       mvgCircle( vg, center, radius);
       mvgStrokeColor( vg, color);
+      mvgStrokeWidth( vg, strokeWidth);
    }
    mvgStroke( vg);
 }
 
 
-void   mvgStrokeLine( NVGcontext *vg, CGPoint start, CGPoint end, CGColor color)
+void   mvgStrokeLineWithColor( NVGcontext *vg, 
+                               CGPoint start, 
+                               CGPoint end, 
+                               CGFloat strokeWidth,
+                               CGColor color)
 {
    mvgBeginPath( vg);
    {
       mvgMoveTo( vg, start);
       mvgLineTo( vg, end);
       mvgStrokeColor( vg, color);
+      mvgStrokeWidth( vg, strokeWidth);
    }
    mvgStroke( vg);
 }
 
-
-static struct MulleShadow   defaultShadow = MulleShadowDefaultValues;
+static struct CGShadow   defaultShadow = CGShadowDefaultValues;
 
 
 
 void   mvgFillRoundedShadow( struct NVGcontext *vg,
                              CGRect rect,
                              CGFloat cornerRadius,
-                             struct MulleShadow *shadow)
+                             struct CGShadow *shadow)
 {
    CGRect     shadowRect;
    CGRect     gradientRect;
@@ -293,7 +310,7 @@ void   mvgTextInRect( struct NVGcontext *vg,
       nvgSave( vg);
       {
          nvgTranslate( vg, rect.origin.x, rect.origin.y);
-         mvgFillRect( vg, coverage, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.25));
+         mvgFillRectWithColor( vg, coverage, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.25));
       }
       nvgRestore( vg);
 #endif
@@ -391,7 +408,7 @@ void   mvgTextInRect( struct NVGcontext *vg,
       mvgSave( vg);
       {
          mvgTranslate( vg, rect.origin.x, rect.origin.y);
-         mvgFillRect( vg, coverage, CGColorMakeWithRGBA( 0.0, 0.0, 1.0, 0.25));
+         mvgFillRectWithColor( vg, coverage, CGColorMakeWithRGBA( 0.0, 0.0, 1.0, 0.25));
       }
       mvgRestore( vg);
 #endif
@@ -485,7 +502,7 @@ CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
    nvgSave( vg);
    {
       nvgTranslate( vg, origin.x, origin.y);
-      mvgFillRect( vg, coverage, CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 0.5));
+      mvgFillRectWithColor( vg, coverage, CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 0.5));
    }
    nvgRestore( vg);
 

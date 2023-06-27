@@ -203,7 +203,8 @@ static UIGraphicsBackend   defaultBackends[] =
 }
 
 
-- (struct CGShaderUTF8Sources *) registeredShaderSourcesForNameUTF8String:(char *) nameUTF8String
+- (struct CGShaderUTF8Sources *)
+   registeredShaderSourcesForNameUTF8String:(char *) nameUTF8String
 {
    struct CGShaderUTF8Sources   *sources;
    char                         *prefix;
@@ -393,14 +394,21 @@ static UIGraphicsBackend   defaultBackends[] =
 }
 
 
-// not really used
+//
+// used by CGLayer. This can hit us if no frame has been rendered, as
+// we might be drawing CGLayers before hand
+//
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info
 {
    assert( info);
-   assert( _currentFrameInfo.window.pixelRatio);  // not yet initialized!!
-   assert( _isRendering);
 
-   *info = _currentFrameInfo;
+   if( _isRendering)
+   {
+      assert( _currentFrameInfo.window.pixelRatio);  // not yet initialized!!
+      *info = _currentFrameInfo;
+   }
+   else
+      memset( info, 0, sizeof( *info));
 }
 
 
@@ -656,23 +664,16 @@ static struct CGFrameInfo   emptyInfo;
 // flushes drawings doesn't reset glViewport or reset internal caches
 - (void) flushRender
 {
+   // if there are no draw commands, this does nothing
    nvgFlushFrame( _vg);
 }
 
 
-- (void) resetTransform
+- (void) reset
 {
    assert( _isRendering);
 
-   nvgResetTransform( _vg);
-}
-
-
-- (void) resetScissor
-{
-   assert( _isRendering);
-
-   nvgResetScissor( _vg);
+   nvgReset( _vg);
 }
 
 

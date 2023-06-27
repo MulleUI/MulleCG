@@ -45,7 +45,6 @@ struct CGFrameInfo;
                        context:(CGContext *) context;
 
 
-
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
 
 @end
@@ -62,6 +61,21 @@ struct CGLayerRenderInfo
    struct CGContextFramebuffer   framebuffer;
    struct CGFrameInfo            frameInfo;
 };
+
+typedef void   CGLayerDrawFunction_t( CGContext *context,
+                                      CGSize size,
+                                      void *userinfo);
+//
+// the ultimate convenience renderer, give it a background and a draw
+// function and paint into a freshly created layer. The context must be
+// active for this function to work
+//
++ (instancetype) layerWithBitmapSize:(struct MulleIntegerSize) size
+                     backgroundColor:(CGColor) color
+                        drawFunction:(CGLayerDrawFunction_t *) drawFunction
+                            userInfo:(void *) userInfo
+                             context:(CGContext *) context;
+
 
 // Use CGContext bindFramebuffer: to bind/unbind a layer, don't call directly
 - (void) _bindToContext;

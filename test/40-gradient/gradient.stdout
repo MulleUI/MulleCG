@@ -1,0 +1,19 @@
+none (1):
+	0: 0 = 0x000000FF
+one (1):
+	0: 0 = 0x8A2BE2FF
+two (2):
+	0: 0 = 0x808080FF
+	1: 1 = 0xFFFFFFFF
+multi-null (5):
+	0: 0 = 0x000000FF
+	1: 0.25 = 0x32CD32FF
+	2: 0.5 = 0xFFE4C4FF
+	3: 0.75 = 0xDC143CFF
+	4: 1 = 0x8A2BE2FF
+multi-list (5):
+	0: 0 = 0x000000FF
+	1: 0.1 = 0x32CD32FF
+	2: 0.3 = 0xFFE4C4FF
+	3: 0.5 = 0xDC143CFF
+	4: 1 = 0x8A2BE2FF

@@ -227,10 +227,14 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
 - (void) changeRender:(struct CGFrameInfo *) info
 {
    assert( _isActive);
-   assert( _isRendering);
    assert( info);
 
    _currentFrameInfo = *info;
+   // wasn't initialized before so ignore
+   if( _currentFrameInfo.window.pixelRatio == 0.0)
+      return;
+
+   assert( _isRendering);
 
    CGContextCheckBackendError( self, "before nvgChangeFrame");
 

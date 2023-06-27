@@ -88,7 +88,7 @@ static void  drawStuff( CALayer *layer, CGContext *context)
    CGFloat      angle;
    CGRect       rect;
    CGRect       shape;
-   MullePaint   *paint;
+   NVGpaint     paint;
    NSUInteger   frameNumber;
    NVGcontext   *vg;
 
@@ -110,12 +110,8 @@ static void  drawStuff( CALayer *layer, CGContext *context)
       // ugliness fix this, this need not be an object
 
 #ifdef HAVE_TEXTURE
-      paint = [[[MullePaint alloc] initPatternWithImage:texture
-                                                   rect:CGRectMake( 0, 0, 32, 32)
-                                                  angle:angle
-                                                  alpha:1.0
-                                                context:context] autorelease];
-      nvgFillPaint( vg, [paint nvgPaint]);
+      paint = mvgImagePattern( vg, CGRectMake( 0, 0, 32, 32), angle, [texture textureID], 1.0);
+      nvgFillPaint( vg, paint);
 #else
       nvgFillColor( vg, CGColorMakeWithHexColor( 0xFFFF00FF));
 #endif

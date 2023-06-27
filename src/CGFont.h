@@ -15,9 +15,9 @@
 @property( assign) CGFontID   fontID;         // NVG index
 
 + (instancetype) fontWithNameUTF8String:(char *) name
-                              fontID:(CGFontID) fontID;
+                                 fontID:(CGFontID) fontID;
 
 - (instancetype) initWithNameUTF8String:(char *) name
-                              fontID:(CGFontID) fontID;
+                                 fontID:(CGFontID) fontID;
 
 @end

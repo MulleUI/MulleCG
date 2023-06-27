@@ -18,7 +18,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    NSUInteger           i;
    CGRect               rects[ ROWS * COLS];
    CGFloat              cornerRadius;
-   struct MulleShadow   shadow;
+   struct CGShadow   shadow;
    NSUInteger           frameNr;
    struct NVGcontext    *vg;
 
@@ -37,7 +37,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    for( y = 0; y < ROWS; y++)
       for( x = 0; x < COLS; x++)
       {
-         shadow          = MulleShadowMake( CGPointZero, (x + y * COLS) * 8.0, CGColorMakeGray());
+         shadow          = CGShadowMake( CGPointZero, (x + y * COLS) * 8.0, CGColorMakeGray());
          shadow.hole     = (frameNr & 0x2) ? 1 : 0;
          rect            = CGRectIntegral( rects[ i]);
          if( (frameNr & 0x4))
@@ -47,9 +47,9 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
          if( frameNr & 0x1)
          {
-            mvgStrokeRoundedRect( vg, CGRectExtrude( rect, shadow.blur, shadow.blur), cornerRadius, CGColorMakeRed());
-            mvgStrokeRoundedRect( vg, rect, cornerRadius, CGColorMakeOrange());
-//            mvgStrokeRoundedRect( vg, CGRectInset( rect, shadow.blur, shadow.blur), cornerRadius, CGColorMakeYellow());
+            mvgStrokeRoundedRectWithColor( vg, CGRectExtrude( rect, shadow.blur, shadow.blur), cornerRadius, 1.0f, CGColorMakeRed());
+            mvgStrokeRoundedRectWithColor( vg, rect, cornerRadius, 1.0f, CGColorMakeOrange());
+//            mvgStrokeRoundedRectWithColor( vg, CGRectInset( rect, shadow.blur, shadow.blur), cornerRadius, CGColorMakeYellow());
          }
          ++i;
       }

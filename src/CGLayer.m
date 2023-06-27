@@ -255,6 +255,35 @@
 
 @implementation CGLayer( CGContentRendering)
 
+
++ (instancetype) layerWithBitmapSize:(struct MulleIntegerSize) size
+                     backgroundColor:(CGColor) color
+                        drawFunction:(void (*)( CGContext *context, CGSize size, void *userinfo)) drawFunction
+                            userInfo:(void *) userInfo
+                             context:(CGContext *) context
+{
+   CGLayer                    *cgLayer;
+   struct CGLayerRenderInfo   memo;
+
+   assert( [context isActive]);
+
+   if( size.width == 0 || size.height == 0)
+      return( nil);
+
+   cgLayer = [self layerWithBitmapSize:size
+                            imageFlags:0
+                               context:context];
+   [cgLayer beginLayerRenderWithBackgroundColor:color
+                               devicePixelRatio:1.0
+                                layerRenderInfo:&memo];
+   if( drawFunction)
+      (*drawFunction)( context, CGSizeMakeWithIntegerSize( size), userInfo);
+   [cgLayer endLayerRender:&memo];
+
+   return( cgLayer);
+}
+
+
 - (void) _bindToContext
 {
    assert( [_context isActive]);

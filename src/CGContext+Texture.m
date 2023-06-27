@@ -19,10 +19,10 @@
    CGTextureID   textureID;
 
    textureID = nvgCreateImageRGBA( _vg,
-                                 (int) size.width,
-                                 (int) size.height,
-                                 (int) imageFlags,
-                                 bytes);
+                                   (int) size.width,
+                                   (int) size.height,
+                                   (int) imageFlags,
+                                   bytes);
    return( textureID);
 }
 
@@ -33,9 +33,9 @@
    CGTextureID   textureID;
 
    textureID = nvgCreateImageMem( _vg,
-                                imageFlags,
-                                fileCData.bytes,
-                                (int) fileCData.length);
+                                  imageFlags,
+                                  fileCData.bytes,
+                                  (int) fileCData.length);
    return( textureID);
 }
 
@@ -57,11 +57,11 @@
    CGTextureID   textureID;
 
    textureID = nvgCreateImageTexture( _vg,
-                                    size.width,
-                                    size.height,
-                                    imageFlags,
-                                    NVG_TEXTURE_RGBA,
-                                    gpuTexture);
+                                      size.width,
+                                      size.height,
+                                      imageFlags,
+                                      NVG_TEXTURE_RGBA,
+                                      gpuTexture);
    return( textureID);
 }
 

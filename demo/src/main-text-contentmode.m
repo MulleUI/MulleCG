@@ -121,7 +121,7 @@ static void   drawStuff1( CALayer *layer, CGContext *context)
    font = [context fontWithNameUTF8String:"sans"];
    rect = CGSizeCenterInRect( CGSizeMake( 300, 80), [layer canvas]);
 
-   mvgStrokeRect( vg, rect, CGColorMakeGray());
+   mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
 
    mvgStrokeLineH( vg, CGRectGetMinX( rect),
                     CGRectGetMaxX( rect),
@@ -165,7 +165,7 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
 #if 1
    for( i = 0; i < N_ALIGN_MODES; i++)
    {
-      mvgStrokeRect( vg, rects[ i][ 0], CGColorMakeGray());
+      mvgStrokeRectWithColor( vg, rects[ i][ 0], 1.0, CGColorMakeGray());
       drawLabelBelowRect( vg, 14, alignMode_text[ i], rects[ i][ 0]);
 
       mvgStrokeLineH( vg, CGRectGetMinX( rects[ i][ 0]),
@@ -191,7 +191,7 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
    {
       for( k = 0; k < N_ALIGN_MODES; k++)
       {
-         mvgStrokeRect( vg, small_rects[ j][ k], CGColorMakeGray());
+         mvgStrokeRectWithColor( vg, small_rects[ j][ k], 1.0, CGColorMakeGray());
          sprintf( buf, "%s/%s", alignMode_text[ k], contentMode2_text[ j]);
          drawLabelBelowRect( vg, 9, buf, small_rects[ j][ k]);
 
@@ -219,7 +219,7 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
       for( k = 0; k < N_ALIGN_MODES; k++)
       {
          i = j * 3 + k;
-         mvgStrokeRect( vg, small_rects[ j][ k], CGColorMakeGray());
+         mvgStrokeRectWithColor( vg, small_rects[ j][ k], 1.0, CGColorMakeGray());
          rect = drawLabelBelowRect( vg, 9, contentMode_text[ i], small_rects[ j][ k]);
          if( j == 2 && k == 1)
             drawLabelBelowRect( vg, 12, "ALIGN_VISUAL/FILL", rect);

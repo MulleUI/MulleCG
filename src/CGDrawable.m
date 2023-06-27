@@ -414,10 +414,10 @@ static NSInteger   CGBitmapDrawableGetImageID( id <CGBitmapDrawable> self,
 }
 
 
-static CGSize   CGBitmapDrawableGetBitmapExtent( id <CGBitmapDrawable> self, 
-                                                 CGSize size, 
-                                                 CGSize bitmapSize, 
-                                                 CGDrawableOptions *options)
+CGSize   CGBitmapDrawableGetBitmapExtent( id <CGBitmapDrawable> self,
+                                          CGSize size,
+                                          CGSize bitmapSize,
+                                          CGDrawableOptions *options)
 {
    CGSize       extent;
 
@@ -436,10 +436,10 @@ static CGSize   CGBitmapDrawableGetBitmapExtent( id <CGBitmapDrawable> self,
 }
 
 
+// maybe move to CGDrawable+nanovg ?
 void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
                                 CGRect rect,
-                                CGPoint origin,
-                                CGSize extent,
+                                CGRect patternRect,
                                 CGDrawableOptions *options,
                                 CGContext *context)
 {
@@ -451,18 +451,18 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
 
    if( options->flags.flip & CGFlipHorizontally)
    {
-      origin.x         += rect.size.width;
-      rect.origin.x    += rect.size.width;
-      rect.size.width  *= -1.0;
-      extent.width     *= -1.0;
+      patternRect.origin.x    += rect.size.width;
+      rect.origin.x           += rect.size.width;
+      rect.size.width         *= -1.0;
+      patternRect.size.width  *= -1.0;
    }
 
    if( options->flags.flip & CGFlipVertically)
    {
-      origin.y         += rect.size.height;
-      rect.origin.y    += rect.size.height;
-      rect.size.height *= -1.0;
-      extent.height    *= -1.0;
+      patternRect.origin.y    += rect.size.height;
+      rect.origin.y           += rect.size.height;
+      rect.size.height        *= -1.0;
+      patternRect.size.height *= -1.0;
    }
 
    textureID = CGBitmapDrawableGetImageID( self, options, context);
@@ -479,22 +479,15 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
    // extent divides the resultant value, if we get a value between 0.0 and 1.0
    // it's a valid texture.
    //
-   imgPaint  = nvgImagePattern( vg, origin.x,
-                                    origin.y,
-                                    extent.width,
-                                    extent.height,
+   imgPaint  = mvgImagePattern( vg, patternRect,
                                     options->rotation,
                                     textureID,
                                     options->alpha);
 
-   nvgBeginPath( vg);
-   nvgRoundedRect( vg, rect.origin.x,
-                       rect.origin.y,
-                       rect.size.width,
-                       rect.size.height,
-                       options->cornerRadius);
-   nvgFillPaint( vg, imgPaint);
-   nvgFill( vg);   
+   mvgBeginPath( vg);
+   mvgRoundedRect( vg, rect, options->cornerRadius);
+   mvgFillPaint( vg, imgPaint);
+   mvgFill( vg);
 }
 
 
@@ -502,14 +495,13 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
           options:(CGDrawableOptions *) options
           context:(CGContext *) context
 {
-   CGSize   extent;
-   CGPoint  origin;
+   CGRect   patternRect;
    CGRect   placedRect;
 
    if( ! options)
       options = &CGDrawableOptionsDefault;
 
-   extent = CGBitmapDrawableGetBitmapExtent( self, rect.size, [self size], options);
+   patternRect.size = CGBitmapDrawableGetBitmapExtent( self, rect.size, [self size], options);
 
    //
    // the nvg texture rotation is around the top left corner, but that's
@@ -518,13 +510,51 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
    // 
    if( options->rotation != 0.0 || options->scale != CGScaleToFit)
    {
-      placedRect = CGSizePlaceInRect( extent, rect, options->flags.contentMode);
-      origin     = CGRectGetOriginToCenterForAngleAndExtent( placedRect, options->rotation, extent);
+      placedRect         = CGSizePlaceInRect( patternRect.size, rect, options->flags.contentMode);
+      patternRect.origin = CGRectGetOriginToCenterForAngleAndExtent( placedRect, options->rotation, patternRect.size);
    }
    else
-      origin = rect.origin;
+      patternRect.origin = rect.origin;
 
-   CGBitmapDrawableDrawRect( self, rect, origin, extent, options, context);
+   CGBitmapDrawableDrawRect( self, rect, patternRect, options, context);
+}
+
+
+CGRect   CGDrawablePatternRect( id <CGDrawable> self, CGRect rect, CGRect fromRect, CGFloat rotation)
+{
+   CGSize              size;
+   CGRect              sectionRect;
+   CGRect              r;
+   CGAffineTransform   xform;
+   CGPoint             texturePoint;
+
+   size        = [self size];
+   xform       = CGRectReverseImageMapperTransform( rect, rotation, rect.size, size);
+   // if fromRect is { CGPointZero, [self size] }, then sectionRect should be
+   // exactly rect, otherwise we get a subsection of rect
+   sectionRect = CGRectApplyAffineTransform( fromRect, xform);
+
+//
+//  +----------+
+//  |          |
+//  |  +       |
+//  |          |
+//  |          |
+//  +----------+
+//
+   // reduce extent to fromRect.size
+   r.size.width  = rect.size.width  * (rect.size.width / sectionRect.size.width);
+   r.size.height = rect.size.height * (rect.size.height / sectionRect.size.height);
+
+   // get fromOrigin texture coordinate
+   texturePoint.x = (CGRectGetMidX( sectionRect) - rect.origin.x) / rect.size.width;
+   texturePoint.y = (CGRectGetMidY( sectionRect) - rect.origin.y) / rect.size.height;
+
+   r.origin = CGRectGetOriginToTexturePointForAngleAndExtent( rect,
+                                                              texturePoint,
+                                                              rotation,
+                                                              r.size);
+   return( r);
 }
 
 
@@ -533,47 +563,20 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
           options:(CGDrawableOptions *) options
           context:(CGContext *) context
 {
-   CGPoint             origin;
-   CGSize              size;
-   CGSize              extent;
-   CGRect              sectionRect;
-   CGAffineTransform   xform;
-   CGPoint             texturePoint;
+   CGRect   r;
 
    if( ! options)
       options = &CGDrawableOptionsScaleToFit;
-
-   size        = [self size];
-   xform       = CGRectReverseImageMapperTransform( rect, options->rotation, rect.size, size);
-   // if fromRect is { CGPointZero, [self size] }, then sectionRect should be
-   // exactly rect, otherwise we get a subsection of rect
-   sectionRect = CGRectApplyAffineTransform( fromRect, xform);
-
-//
-//  +----------+
-//  |          |  
-//  |  +       |
-//  |          |
-//  |          | 
-//  +----------+
-//
-   // reduce extent to fromRect.size
-   extent.width  = rect.size.width  * (rect.size.width / sectionRect.size.width);
-   extent.height = rect.size.height * (rect.size.height / sectionRect.size.height);
 
    assert( options->scale == CGScaleToFit);
    assert( options->flags.repeat      == CGRepeatNone);
    assert( options->flags.contentMode == CGContentModeCenterPoint);
 
-   // get fromOrigin texture coordinate
-   texturePoint.x = (CGRectGetMidX( sectionRect) - rect.origin.x) / rect.size.width;
-   texturePoint.y = (CGRectGetMidY( sectionRect) - rect.origin.y) / rect.size.height;
-
-   origin = CGRectGetOriginToTexturePointForAngleAndExtent( rect, texturePoint, options->rotation, extent);
+   r = CGDrawablePatternRect( self, rect, fromRect, options->rotation);
 
    // punkt: 
 
-   CGBitmapDrawableDrawRect( self, rect, origin, extent, options, context);
+   CGBitmapDrawableDrawRect( self, rect, r, options, context);
 }
 
 

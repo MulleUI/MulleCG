@@ -82,7 +82,6 @@ static inline void   MulleGlyphPathCallbacksInitNVG( struct MulleGlyphPathCallba
    callbacks->line    = (void (*)(void *, float, float)) nvgLineTo;
    callbacks->quad    = (void (*)(void *, float, float, float, float)) nvgQuadTo;
    callbacks->bezier  = (void (*)(void *, float, float, float, float, float, float)) nvgBezierTo;
-   callbacks->begin   = (void (*)(void *)) nvgBeginPath;
    callbacks->close   = (void (*)(void *)) nvgClosePath;
    callbacks->winding = (void (*)(void *, int)) nvgPathWinding;
 }
@@ -98,7 +97,6 @@ static inline void   MulleGlyphPathCallbacksInitPath( struct MulleGlyphPathCallb
    callbacks->line    = (void (*)(void *, float, float)) CGPathAddLineTo;
    callbacks->quad    = (void (*)(void *, float, float, float, float)) CGPathAddQuadTo;
    callbacks->bezier  = (void (*)(void *, float, float, float, float, float, float)) CGPathAddCurveTo;
-   callbacks->begin   = (void (*)(void *)) CGPathBeginSubpath;
    callbacks->close   = (void (*)(void *)) CGPathCloseSubpath;
    callbacks->winding = (void (*)(void *, int )) CGPathAddWinding;
 }
@@ -435,7 +433,7 @@ static void   _mvgPathAddGlyph( CGPath *path,
                                       &callbacks,
                                       path,
                                       options);
-   _CGPathSetBoundingBox( path, rect);
+   _CGPathSetBounds( path, rect);
 }
 
 
@@ -485,7 +483,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       _mvgPathAddGlyph( &paths[ i], vg, codePoints[ i], fontSizes[ i], MVG_COMPUTE_WINDINGS | MVG_TRANSLATE_X_TO_ZERO);
    }
 
-   mvgTranslate( vg, X_OFFSET, Y_OFFSET);
+   nvgTranslate( vg, X_OFFSET, Y_OFFSET);
 
 // just a little marker to see placement of baseline left
    if( drawHelpers)
@@ -518,16 +516,15 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       mvgFillColor( vg, colors[ i]);
       mvgFill( vg);
 
-      bbox = CGPathGetBoundingBox( &paths[ i]);
+      bbox = CGPathGetBounds( &paths[ i]);
       // draw helper lines for bbox
       if( drawHelpers)
       {
-         mvgStrokeWidth( vg, 0.5f);
-         mvgStrokeRect( vg, bbox, CGColorMakeWhite());
+         mvgStrokeRectWithColor( vg, bbox,  0.5f, CGColorMakeWhite());
       }
 
       // move to next char
-      mvgTranslate( vg, CGRectGetMaxX( bbox) + SPACING, 0);
+      nvgTranslate( vg, CGRectGetMaxX( bbox) + SPACING, 0);
 
       // draw vertical helper line
       if( drawHelpers)
@@ -537,7 +534,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       }
    }
 
-   mvgTranslate( vg, X_OFFSET * 2.0, 0);
+   nvgTranslate( vg, X_OFFSET * 2.0, 0);
 
    if( drawHelpers)
    {
@@ -555,19 +552,18 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       mvgStrokeWidth( vg, strokeWidths[ i]);
       mvgStroke( vg);
 
-      bbox = CGPathGetBoundingBox( &paths[ i]);
+      bbox = CGPathGetBounds( &paths[ i]);
       if( drawHelpers)
       {
-         mvgStrokeWidth( vg, 0.5f);
-         mvgStrokeRect( vg, bbox, CGColorMakeWhite());
+         mvgStrokeRectWithColor( vg, bbox,  0.5f, CGColorMakeWhite());
       }
 
-      mvgTranslate( vg, CGRectGetMaxX( bbox) + SPACING, 0);
+      nvgTranslate( vg, CGRectGetMaxX( bbox) + SPACING, 0);
 
       if( drawHelpers)
       {
          mvgStrokeWidth( vg, 0.5f);
-         mvgStrokeLineV( vg, 0, -Y_OFFSET, [layer canvas].size.height, CGColorMakeWhite());
+         mvgStrokeLineV( vg, 0, -Y_OFFSET, [layer canvas].size.height,  CGColorMakeWhite());
       }
    }
 

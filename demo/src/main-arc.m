@@ -76,22 +76,22 @@ int   main( int argc, char *argv[])
 {
    auto CAAngleRadians  tmp[ 16] =
    {
-      CGWindDirectionNNE,
-      CGWindDirectionNE ,
-      CGWindDirectionENE,
-      CGWindDirectionE  ,
-      CGWindDirectionESE,
-      CGWindDirectionSE ,
-      CGWindDirectionSSE,
-      CGWindDirectionS  ,
-      CGWindDirectionSSW,
-      CGWindDirectionSW ,
-      CGWindDirectionWSW,
-      CGWindDirectionW  ,
-      CGWindDirectionWNW,
-      CGWindDirectionNW ,
-      CGWindDirectionNNW,
-      CGWindDirectionN
+      CAAngleRadiansNNE,
+      CAAngleRadiansNE ,
+      CAAngleRadiansENE,
+      CAAngleRadiansE  ,
+      CAAngleRadiansESE,
+      CAAngleRadiansSE ,
+      CAAngleRadiansSSE,
+      CAAngleRadiansS  ,
+      CAAngleRadiansSSW,
+      CAAngleRadiansSW ,
+      CAAngleRadiansWSW,
+      CAAngleRadiansW  ,
+      CAAngleRadiansWNW,
+      CAAngleRadiansNW ,
+      CAAngleRadiansNNW,
+      CAAngleRadiansN
    };
    memcpy( directions, tmp, sizeof( directions));
    return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,

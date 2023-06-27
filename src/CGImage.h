@@ -1,7 +1,8 @@
+#import "CGPaint.h"
+
 #import "CGDrawable.h"
 
 #import "CGContext.h" // needed for protocol
-
 
 #import "CGContext+Texture.h" // needed for protocol
 
@@ -57,15 +58,15 @@
 //
 // Textures (images) in NVG can be created with different flags, for example
 // REPEAT_X and REPEAT_Y. When we are asking the CGContext for a textureID
-// for an image this will create such a NVG texture. As the context cashes the
+// for an image this will create such a NVG texture. As the context caches the
 // textureID for each MulleImage it's simplest to store the imageFlags here
-// (readonly) and to clone MulleImages for different flags. The actual image
+// (readonly) and to clone CGImages for different flags. The actual image
 // data can be shared w/o a problem. The default is 0:
 //
 // textureIDs are strictly ascending, create() -> 1; close(1); create() -> 2
 // and aren't reused.
 //
-@interface CGImage : NSObject <CGBitmapDrawable, CGContextResource>
+@interface CGImage : CGPaint <CGBitmapDrawable, CGContextResource>
 
 // usually don't use textureID, use nvgImageWithContext:imageFlags:
 @property( readonly, assign) CGTextureID          textureID;
@@ -109,9 +110,11 @@
                      imageFlags:(NSUInteger) imageFlags
                         context:(CGContext *) context;
 
+//
 // CGImage size is not mutable, if the bitmap size changes
 // you need to create a new CGImage. The bytes can be freed by the
 // caller afterwards. The bytes are pushed to the GPU immediately.
+// This will affect all copies(!) of this CGImage!
 //
 - (void) setBytes:(void *) bytes;
 

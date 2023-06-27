@@ -247,8 +247,23 @@ PROTOCOLCLASS_INTERFACE( CGVectorDrawable, CGDrawable)
 PROTOCOLCLASS_END()
 
 
+MULLE_CG_EXTERN_GLOBAL
 CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians angle);
+
+MULLE_CG_EXTERN_GLOBAL
 CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
                                                  CAAngleRadians angle,
                                                  CGVector scaleFactor);
 
+MULLE_CG_EXTERN_GLOBAL
+CGSize   CGBitmapDrawableGetBitmapExtent( id <CGBitmapDrawable> self,
+                                          CGSize size,
+                                          CGSize bitmapSize,
+                                          CGDrawableOptions *options);
+
+
+MULLE_CG_EXTERN_GLOBAL
+CGRect   CGImagePatternRect( CGImage *self,
+                             CGRect rect,
+                             CGRect fromRect,
+                             CGFloat rotation);

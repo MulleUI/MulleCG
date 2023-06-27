@@ -190,7 +190,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       rect = rects[ y];
       nvgSave( vg);
       {
-         mvgStrokeRect( vg, rect, CGColorMakeGray());
+         mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
 
          nvgFontSize( vg, 80.0);
 

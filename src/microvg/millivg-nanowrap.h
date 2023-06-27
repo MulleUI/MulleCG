@@ -206,9 +206,9 @@ static inline void   mvgTransform( NVGcontext *vg, CGFloat a, CGFloat b, CGFloat
 }
 
 // Translates current coordinate system.
-static inline void   mvgTranslate( NVGcontext *vg, CGFloat x, CGFloat y)
+static inline void   mvgTranslate( NVGcontext *vg, CGPoint p)
 {
-   nvgTranslate( vg, x, y);
+   nvgTranslate( vg, p.x, p.y);
 }
 
 // Rotates current coordinate system.
@@ -230,9 +230,9 @@ static inline void   mvgSkewY( NVGcontext *vg, CGFloat angle)
 }
 
 // Scales the current coordinate system.
-static inline void   mvgScale( NVGcontext *vg, CGFloat x, CGFloat y)
+static inline void   mvgScale( NVGcontext *vg, CGVector v)
 {
-   nvgScale( vg, x, y);
+   nvgScale( vg, v.dx, v.dy);
 }
 
 
@@ -258,15 +258,15 @@ static inline void   mvgTransformIdentity( float dst[6])
 }
 
 // Sets the transform to translation matrix.
-static inline void   mvgTransformTranslate( float dst[6], CGFloat tx, CGFloat ty)
+static inline void   mvgTransformTranslate( float dst[6], CGPoint t)
 {
-   nvgTransformTranslate( dst, tx, ty);
+   nvgTransformTranslate( dst, t.x, t.y);
 }
 
 // Sets the transform to scale matrix.
-static inline void   mvgTransformScale( float dst[6], CGFloat sx, CGFloat sy)
+static inline void   mvgTransformScale( float dst[6], CGVector s)
 {
-   nvgTransformScale( dst, sx, sy);
+   nvgTransformScale( dst, s.dx, s.dy);
 }
 
 // Sets the transform to rotate matrix. Angle is specified in radians.
@@ -334,13 +334,20 @@ static inline CGImageID   mvgCreateImage( NVGcontext *vg,
 }
 
 // Creates image by loading it from the specified chunk of memory.
-static inline CGImageID   mvgCreateImageMem( NVGcontext *vg, NSInteger imageFlags, void *data, size_t ndata)
+static inline CGImageID   mvgCreateImageMem( NVGcontext *vg,
+                                             NSInteger imageFlags,
+                                             void *data,
+                                             size_t ndata)
 {
    return( nvgCreateImageMem( vg, imageFlags, data, ndata));
 }
 
 // Creates image from specified image data.
-static inline CGImageID   mvgCreateImageRGBA( NVGcontext *vg, NSInteger w, NSInteger h, NSUInteger imageFlags, void *data)
+static inline CGImageID   mvgCreateImageRGBA( NVGcontext *vg,
+                                              NSInteger w,
+                                              NSInteger h,
+                                              NSUInteger imageFlags,
+                                              void *data)
 {
    return( nvgCreateImageRGBA( vg, w, h, imageFlags, data));
 }
@@ -379,12 +386,12 @@ static inline void   mvgDeleteImage( NVGcontext *vg, CGImageID image)
 // Paints
 
 static inline NVGpaint
-   mvgLinearGradient( NVGcontext* vg, CGRect rect, CGColor icol, CGColor ocol)
+   mvgLinearGradient( NVGcontext* vg, CGPoint start, CGPoint end, CGColor icol, CGColor ocol)
 {
-   return( nvgLinearGradient( vg, CGRectGetMinX( rect),
-                                  CGRectGetMinY( rect),
-                                  CGRectGetMaxX( rect),
-                                  CGRectGetMaxY( rect),
+   return( nvgLinearGradient( vg, start.x,
+                                  start.y,   // must be two points and not a rect
+                                  end.x,
+                                  end.y,
                                   icol,
                                   ocol));
 }
@@ -431,16 +438,16 @@ static inline NVGpaint
 // Creates and returns an image pattern. Parameters (ox,oy) specify the left-top location of the image pattern,
 // (ex,ey) the size of one image, angle rotation around the top-left corner, image is handle to the image to render.
 // The gradient is transformed by the current transform when it is passed to nvgFillPaint() or nvgStrokePaint().
-static inline NVGpaint mvgImagePattern( NVGcontext* vg,
-                                        CGRect rect,
-                                        CAAngleRadians angle,
-                                        CGImageID image,
-                                        float alpha)
+static inline NVGpaint   mvgImagePattern( NVGcontext* vg,
+                                          CGRect rect,
+                                          CAAngleRadians angle,
+                                          CGImageID image,
+                                          float alpha)
 {
-   return( nvgImagePattern( vg, CGRectGetMinX( rect),
-                                CGRectGetMinY( rect),
-                                CGRectGetMaxX( rect),
-                                CGRectGetMaxY( rect),
+   return( nvgImagePattern( vg, rect.origin.x,
+                                rect.origin.y,
+                                rect.size.width,
+                                rect.size.height,
                                 angle,
                                 image,
                                 alpha));

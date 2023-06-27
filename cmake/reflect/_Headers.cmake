@@ -36,6 +36,13 @@ src/generic/include-private.h
 )
 
 #
+# contents selected with patternfile ??-header--private-headers
+#
+set( PRIVATE_HEADERS
+src/CGGradient+Private.h
+)
+
+#
 # contents selected with patternfile ??-header--public-generated-headers
 #
 set( PUBLIC_GENERATED_HEADERS
@@ -73,14 +80,20 @@ src/CGContext+Texture.h
 src/CGContext.h
 src/CGDrawable.h
 src/CGFont.h
+src/CGGradient.h
+src/CGGradient+nanovg.h
+src/CGImagePaint.h
+src/CGImagePaint+nanovg.h
 src/CGImage.h
+src/CGImage+nanovg.h
 src/CGLayer.h
+src/CGPaint.h
+src/CGPaint+nanovg.h
 src/CGPath.h
 src/CGPath+nanovg.h
 src/_MulleCGBackend.h
 src/MulleCG.h
 src/MulleObjCLoader+MulleCG.h
-src/MullePaint.h
 src/_NotoEmoji-VariableFont_wght.ttf.inc
 src/_NotoSans-Bold.ttf.inc
 src/_NotoSans-Regular.ttf.inc
@@ -91,6 +104,7 @@ src/_entypo.ttf.inc
 src/microvg/microvg.h
 src/microvg/millivg.h
 src/microvg/millivg-nanowrap.h
+src/mulle-color/CGColorDiff.h
 src/mulle-color/CGColor.h
 src/mulle-color/mulle-color.h
 src/nanovg+UTF8String.h

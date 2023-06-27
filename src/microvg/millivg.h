@@ -57,31 +57,6 @@ static inline struct MulleTextMetrics   mvgTextMetrics( NVGcontext *vg)
 }
 
 
-struct MulleCornerInsets
-{
-   float   tl;
-   float   tr;
-   float   br;
-   float   bl;
-};
-
-#define MulleCornerInsetsData( tl, tr, br, bl)  { (tl), (tr), (br), (bl) }
-
-
-
-static inline struct MulleCornerInsets
-   MulleCornerInsetsMakeLRTD( float topLeft, float topRight, float bottomLeft, float bottomRight)
-{
-   return( (struct MulleCornerInsets) { .tl = topLeft, .tr = topRight, .br = bottomRight, .bl = bottomLeft });
-}
-
-
-static inline struct MulleCornerInsets
-   MulleCornerInsetsMake( float topLeft, float topRight, float bottomRight, float bottomLeft)
-{
-   return( (struct MulleCornerInsets) { .tl = topLeft, .tr = topRight, .br = bottomRight, .bl = bottomLeft });
-}
-
 
 static inline void   mvgRoundedRectVarying( NVGcontext *vg, CGRect rect, struct MulleCornerInsets corners)
 {
@@ -101,35 +76,49 @@ static inline void   mvgRoundedRectVarying( NVGcontext *vg, CGRect rect, struct 
  */
 
 // Creates a new rectangle path and fills it with the given color.
-void   mvgFillRoundedRect( NVGcontext *vg, CGRect rect, CGFloat cornerRadius, CGColor color);
+void   mvgFillRoundedRectWithColor( NVGcontext *vg, CGRect rect, CGFloat cornerRadius, CGColor color);
 
-void   mvgPaintRoundedRect( NVGcontext *vg, CGRect rect, CGFloat cornerRadius, NVGpaint paint);
+void   mvgFillRoundedRectWithNVGpaint( NVGcontext *vg, CGRect rect, CGFloat cornerRadius, NVGpaint paint);
 
 // Creates a new rectangle path and fills it with the given color.
-void   mvgFillRect( NVGcontext *vg, CGRect rect, CGColor color);
+void   mvgFillRectWithColor( NVGcontext *vg, CGRect rect, CGColor color);
 
-void   mvgPaintRect( NVGcontext *vg, CGRect rect, NVGpaint paint);
-
-
-void   mvgFillCircle( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color);
-
-void   mvgPaintCircle( NVGcontext *vg, CGPoint center, CGFloat radius, NVGpaint paint);
+void   mvgFillRectWithNVGpaint( NVGcontext *vg, CGRect rect, NVGpaint paint);
 
 
-// Creates a new rectangle path and strokes it with the given color.
-void   mvgStrokeRoundedRect( NVGcontext *vg, CGRect rect, CGFloat cornerRadius, CGColor color);
+void   mvgFillCircleWithColor( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color);
+
+void   mvgFillCircleWithNVGpaint( NVGcontext *vg, CGPoint center, CGFloat radius, NVGpaint paint);
+
 
 // Creates a new rectangle path and strokes it with the given color.
-void   mvgStrokeRect( NVGcontext *vg, CGRect rect, CGColor color);
+void   mvgStrokeRoundedRectWithColor( NVGcontext *vg, 
+                                      CGRect rect, 
+                                      CGFloat cornerRadius, 
+                                      CGFloat strokeWidth,
+                                      CGColor color);
+
+// Creates a new rectangle path and strokes it with the given color.
+void   mvgStrokeRectWithColor( NVGcontext *vg, 
+                               CGRect rect, 
+                               CGFloat strokeWidth,
+                               CGColor color);
 
 // Creates a line and strokes it with the color.
-void   mvgStrokeLine( NVGcontext *vg, CGPoint start, CGPoint end, CGColor color);
+void   mvgStrokeLineWithColor( NVGcontext *vg, 
+                               CGPoint start, 
+                               CGPoint end, 
+                               CGFloat strokeWidth,
+                               CGColor color);
 
-void   mvgStrokeCircle( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color);
+void   mvgStrokeCircleWithColor( NVGcontext *vg, 
+                                 CGPoint center, 
+                                 CGFloat radius, 
+                                 CGFloat strokeWidth,
+                                 CGColor color);
 
 
-
-struct MulleShadow
+struct CGShadow
 {
    struct MulleEdgeInsets   extrudes;
    CGColor                  innerColor;
@@ -139,7 +128,7 @@ struct MulleShadow
 };
 
 
-#define MulleShadowDefaultValues  (struct MulleShadow)                     \
+#define CGShadowDefaultValues  (struct CGShadow)                           \
 {                                                                          \
    .extrudes   = { .top = 0.5, .left = 0.5, .bottom = 4.0, .right = 2.0 }, \
    .innerColor = CGColorDataWithRGBA( 0, 0, 0, 0.5),                       \
@@ -149,10 +138,10 @@ struct MulleShadow
 }
 
 
-static inline struct MulleShadow
-   MulleShadowMake( CGPoint offset, CGFloat blur, CGColor color)
+static inline struct CGShadow
+   CGShadowMake( CGPoint offset, CGFloat blur, CGColor color)
 {
-   struct MulleShadow   shadow;
+   struct CGShadow   shadow;
 
   // the blur / 4.0 value is experimentally determined
    shadow.extrudes = (struct MulleEdgeInsets)
@@ -177,7 +166,7 @@ static inline struct MulleShadow
 void   mvgFillRoundedShadow( struct NVGcontext *vg,
                              CGRect rect,
                              CGFloat cornerRadius,
-                             struct MulleShadow *shadow);
+                             struct CGShadow *shadow);
 //
 // Draws text inside a rect. The text is clipped to the rect unless,
 // the option MVGTextNoClip is given. The position within in the rect is

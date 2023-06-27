@@ -58,7 +58,7 @@ void CGPathDestroy( struct CGPath *path)
 
 
 
-CGRect   CGPathComputeBoundingBox( CGPathRef path)
+CGRect   CGPathComputeBounds( CGPathRef path)
 {
    abort();
 }
