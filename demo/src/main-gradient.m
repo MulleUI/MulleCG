@@ -46,17 +46,17 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                                        feather,
                                        CGColorMakeYellow(),
                                        CGColorMakeBlue());
-   mvgPaintRect( vg, rect, paint);
+   mvgFillRectWithNVGpaint( vg, rect, paint);
 
    if( drawHelpers)
    {
-      mvgFillCircle( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
-      mvgStrokeWidth( vg, 1.0);
-      mvgStrokeRect( vg, gradientRect, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.66));
-      mvgStrokeRect( vg, CGRectExtrude( gradientRect,
+      mvgFillCircleWithColor( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
+      mvgStrokeRectWithColor( vg, gradientRect, 1.0, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.66));
+      mvgStrokeRectWithColor( vg, CGRectExtrude( gradientRect,
                                         feather / 2.0,
                                         feather / 2.0),
-                         CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 0.5));
+                                  1.0,
+                                  CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 0.5));
    }
 
    rect  = rects[ 0][ 1];
@@ -65,28 +65,32 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                                feather,
                                CGColorMakeBlue(),
                                CGColorMakeYellow());
-   mvgPaintRect( vg, rect, paint);
+   mvgFillRectWithNVGpaint( vg, rect, paint);
 
    if( drawHelpers)
    {
-      mvgFillCircle( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
+      mvgFillCircleWithColor( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
 
       mvgStrokeWidth( vg, 1.0);
-      mvgStrokeRect( vg, gradientRect, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.66));
-      mvgStrokeRect( vg, CGRectExtrude( gradientRect,
-                                        feather / 2.0,
-                                        feather / 2.0),
-                         CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 0.5));
+      mvgStrokeRectWithColor( vg, gradientRect, 1.0, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.66));
+      mvgStrokeRectWithColor( vg, CGRectExtrude( gradientRect,
+                                                 feather / 2.0,
+                                                 feather / 2.0),
+                                  1.0f,
+                                  CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 0.5));
 
    }
 
    rect  = rects[ 1][ 0];
-   paint = mvgLinearGradient( vg, rect, CGColorMakeYellow(),  CGColorMakeBlue());
-   mvgPaintRect( vg, rect, paint);
+   paint = mvgLinearGradient( vg, CGRectGetTopLeftPoint( rect),
+                                  CGRectGetBottomRightPoint( rect),
+                                  CGColorMakeYellow(),
+                                  CGColorMakeBlue());
+   mvgFillRectWithNVGpaint( vg, rect, paint);
 
    if( drawHelpers)
    {
-      mvgFillCircle( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
+      mvgFillCircleWithColor( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
    }
 
    rect   = rects[ 1][ 1];
@@ -98,11 +102,11 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                                radius,
                                CGColorMakeYellow(),
                                CGColorMakeBlue());
-   mvgPaintRect( vg, rect, paint);
+   mvgFillRectWithNVGpaint( vg, rect, paint);
 
    if( drawHelpers)
    {
-      mvgFillCircle( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
+      mvgFillCircleWithColor( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
    }
 }
 

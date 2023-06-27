@@ -40,9 +40,16 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    assert( image);
 
    rect = CGRectInset( rect, 4, 4);
+#if 1
+   mvgBeginPath( vg);
+   mvgRect( vg, rect);
+   [image fillWithBounds:rect
+              NVGcontext:vg];
+#else
    [image drawRect:rect
            options:&options
            context:context];
+#endif
 }
 
 

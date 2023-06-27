@@ -49,10 +49,12 @@ src/main-glfw-draw-offscreen.m
 src/main-glfw-draw-simple.m
 src/main-glfw-two-windows.m
 src/main-gradient.m
+src/main-gradient-rotate.m
 src/main-grid.m
 src/main-huge-font.m
 src/main-opengl.m
 src/main-outline-glyph.m
+src/main-paint.m
 src/main-particlelayers.m
 src/main-particles.m
 src/main-particles-sorted.m

@@ -17,7 +17,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    canvas = [layer canvas];
    rect   = CGSizeCenterInRect( CGSizeMake( 300, 100), canvas);
 
-   mvgStrokeRect( vg, rect, CGColorMakeGray());
+   mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
    mvgStrokeLineH( vg, CGRectGetMinX( rect), CGRectGetMaxX( rect), CGRectGetMidY( rect), CGColorMakeGray());
    mvgFontSize( vg, 80.0);
    mvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());

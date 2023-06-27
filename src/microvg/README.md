@@ -47,8 +47,8 @@ The prefix use is `mvg` (millivg), which is shared with microvg.
 
 | Function                      | Clobbers  | Description
 |-------------------------------|-----------|---------------------------
-| `mvgFillRect(millivg.h#22)`   |     -     | Draw a horizontal line
-| `mvgStrokeRect(millivg.h#35)` |     -     | Draw a vertical line
+| `mvgFillRectWithColor(millivg.h#22)`   |     -     | Draw a horizontal line
+| `mvgStrokeRectWithColor(millivg.h#35)` |     -     | Draw a vertical line
 | `mvgTextInRect(millivg.h#28)` | alignment | Draw text in rectangle, with multiple contentModes and options
 | `mvgText(millivg.h#56)`       | alignment | Draw text in rectangle, with multiple contentModes and options
 

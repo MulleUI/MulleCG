@@ -11,7 +11,7 @@
 @implementation CGFont
 
 - (instancetype) initWithNameUTF8String:(char *) name
-                              fontID:(CGFontID) fontID
+                                 fontID:(CGFontID) fontID
 {
 	if( _fontID == -1)
    {

@@ -50,7 +50,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    font   = [context fontWithNameUTF8String:"sans"];
    canvas = [layer canvas];
 
-   mvgStrokeRect( vg, canvas, CGColorMakeOrange());
+   mvgStrokeRectWithColor( vg, canvas, 1.0, CGColorMakeOrange());
    nvgFontSize( vg, canvas.size.height);
    nvgTextColor( vg, CGColorMakeWhite(), CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0));
    nvgTextAlign( vg, NVG_ALIGN_CENTER|NVG_ALIGN_BOTTOM);

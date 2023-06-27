@@ -48,7 +48,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                          8,
                          8);
       options.alpha    = i / 100.0;
-      options.rotation = i / 100.0 * 2 * M_PI;
+      options.rotation = i / 100.0 * CA_2xPI;
       [image drawRect:rect
               options:&options
               context:context];

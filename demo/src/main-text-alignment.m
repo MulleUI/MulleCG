@@ -66,7 +66,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
          s       = buf;
 
          rect = rects[ y][ x];
-         mvgStrokeRect( vg, rect, CGColorMakeGray());
+         mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
 
          nvgSave( vg);
          {

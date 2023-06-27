@@ -212,8 +212,7 @@ struct CGContextItem
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info;
 - (struct CGFrameInfo *) currentFrameInfo;
 
-- (void) resetTransform;
-- (void) resetScissor;
+- (void) reset; // resets drawing state (incl. scissor and transform)
 
 // betweenbeginRender: and endRender:
 - (BOOL) isRendering;

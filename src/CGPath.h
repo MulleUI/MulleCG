@@ -50,22 +50,22 @@ void   CGPathDestroy( struct CGPath *path);
 
 
 // should only be set
-static inline void   _CGPathSetBoundingBox( CGPathRef path, CGRect bbox)
+static inline void   _CGPathSetBounds( CGPathRef path, CGRect bbox)
 {
    path->_bbox = bbox;
 }
 
 
-CGRect   CGPathComputeBoundingBox( CGPathRef path);
+CGRect   CGPathComputeBounds( CGPathRef path);
 
 // TODO: compute dynamically if not set
-static inline CGRect   CGPathGetBoundingBox( CGPathRef path)
+static inline CGRect   CGPathGetBounds( CGPathRef path)
 {
    if( ! path)
       return( CGRectNull);
 
    if( CGRectIsNull( path->_bbox))
-      path->_bbox = CGPathComputeBoundingBox( path);
+      path->_bbox = CGPathComputeBounds( path);
    return( path->_bbox);
 }
 
@@ -224,6 +224,5 @@ static inline void  CGPathAddArcTo( CGPathRef path,
                               CGPointMake( x, y),
                               r);
 }
-
 
 #endif

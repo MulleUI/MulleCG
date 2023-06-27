@@ -17,6 +17,7 @@
    return( self);
 }
 
+
 #ifdef DEBUG
 - (id) autorelease
 {
@@ -238,7 +239,7 @@
    assert( [context isActive]);
 
    textureID = [context textureIDWithContentsOfFileCString:filename
-                                              imageFlags:imageFlags & 0x3F];
+                                                imageFlags:imageFlags & 0x3F];
 
    return( [self initWithTextureID:textureID
                        imageFlags:imageFlags
@@ -260,7 +261,7 @@
    // Another theory is to isolate nvgCalls in CGContext, but really why ?
    // They are isolated in this library already
    textureID = [context textureIDWithFileCData:fileCData
-                                  imageFlags:imageFlags & 0x3F];
+                                    imageFlags:imageFlags & 0x3F];
    return( [self initWithTextureID:textureID
                         imageFlags:imageFlags
                            context:context]);
@@ -287,8 +288,8 @@
 
    // bounce to context for debugging output of CGContext
    textureID = [context textureIDWithBytes:bytes
-                              bitmapSize:bitmapSize
-                              imageFlags:imageFlags & 0x3F];
+                                bitmapSize:bitmapSize
+                                imageFlags:imageFlags & 0x3F];
    return( [self initWithTextureID:textureID
                        imageFlags:imageFlags
                           context:context]);
@@ -299,12 +300,12 @@
                      imageFlags:(NSUInteger) imageFlags
                         context:(CGContext *) context
 {
-   NSInteger               textureID;
-   struct CGBitmap         convertedBitmap;
-   struct CGBitmapInfo     convertedBitmapInfo;
-   BOOL                    isFlipped;
-   CGBitmapEncoding        encoding;
-   CGBitmapEncoding        convertedEncoding;
+   NSInteger             textureID;
+   struct CGBitmap       convertedBitmap;
+   struct CGBitmapInfo   convertedBitmapInfo;
+   BOOL                  isFlipped;
+   CGBitmapEncoding      encoding;
+   CGBitmapEncoding      convertedEncoding;
 
    if( ! bitmap.bytes)
    {
@@ -337,24 +338,24 @@
          return( nil);
       }
       textureID = [context textureIDWithBytes:convertedBitmap.bytes
-                                 bitmapSize:convertedBitmap.info.size
-                                 imageFlags:imageFlags];
+                                   bitmapSize:convertedBitmap.info.size
+                                   imageFlags:imageFlags];
       CGBitmapDone( convertedBitmap);
    }  
    else
       textureID = [context textureIDWithBytes:bitmap.bytes
-                                 bitmapSize:bitmap.info.size
-                                 imageFlags:imageFlags];
+                                   bitmapSize:bitmap.info.size
+                                   imageFlags:imageFlags];
 
    return( [self initWithTextureID:textureID
-                       imageFlags:imageFlags
-                          context:context]);
+                        imageFlags:imageFlags
+                           context:context]);
 }
 
 // MEMO: A texture id can be reused. So the referencing image textureID can
 //       eventually deviate between contexts. The sharing of a textureID
 //       happens through the binding.
-//       Example, how textureIDs can be differe
+//       Example, how textureIDs can be different
 //
 //           Context A  | Context B
 //       ---------------|----------------
@@ -459,13 +460,13 @@
    }
 
    //
-   // We wpuld like to put up a barrier here, so that "we" know we are done
+   // We would like to put up a barrier here, so that "we" know we are done
    // drawing the image and the other context doesn't get possibly an empty
    // buffer.
    // We can't be _really_ sure, that we are the active context though,
    // as all these commands don't touch OpenGL, but remain in MulleCG and
    // nanovg.
-   // [context barrier];
+   // [context barrier]; // too expensive to do willy nilly
 
    // context need not be active, as we are just reading some internal
    // info

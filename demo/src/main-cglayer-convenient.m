@@ -19,10 +19,6 @@ static void   drawStuff( CALayer *layer, void *_context)
    CGRect                        canvas;
    CGRect                        originalCanvas;
    CGRect                        rect;
-   struct CGBitmapInfo           bitmapInfo;
-   struct CGContextFramebuffer   previous;
-   struct CGFrameInfo            frameInfo;
-   struct CGFrameInfo            oldFrameInfo;
    struct NVGcontext             *vg;
    CGRect                        rects[ 2][ 2];
    NSUInteger                    i, j;
@@ -47,8 +43,6 @@ static void   drawStuff( CALayer *layer, void *_context)
       // and then draw the CGLayer. This may or may not be better than drawing
       // the flags immediately, but this is just a demo to show how its done.
 
-      // 1. remember current drawing environment
-      [context getCurrentFrameInfo:&oldFrameInfo];
       //
       // 2. create a CGLayer where we want to draw to. Size is fairly arbitrary.
       //    as it will be used as texture.
