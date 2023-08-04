@@ -8,94 +8,23 @@
 #include <assert.h>
 
 
+#import "CGPaint+Private.h"
 #import "CGGradient+Private.h"
 #include "CGColorDiff.h"
-
-@implementation _CGMonoColorGradient
-
-+ (instancetype) newWithColor:(CGColor) color
-{
-   _CGMonoColorGradient   *obj;
-
-   obj = NSAllocateObject( self, 0, NULL);
-   obj->_startColor = color;
-   return( obj);
-}
-
-
-- (CGColor) mainColor
-{
-   return( _startColor);
-}
-
-
-- (CGColor) endColor
-{
-   return( _startColor);
-}
-
-
-- (NSUInteger) numberOfColors
-{
-   return( 1);
-}
-
-
-- (CGFloat) locationAtIndex:(NSUInteger) i
-{
-   assert( i == 0);
-   return( 0.0);
-}
-
-
-- (CGColor) colorAtIndex:(NSUInteger) i
-{
-   assert( i == 0);
-   return( _startColor);
-}
-
-
-- (void) getColors:(CGColor *) colors
-{
-   assert( colors);
-   *colors = _startColor;
-}
-
-
-- (void) getLocations:(CGFloat *) locations
-{
-   assert( locations);
-   *locations = 0.0;
-}
-
-
-- (CGFloat) alpha
-{
-   return( CGColorGetAlpha( _startColor));
-}
-
-
-- (CGGradient *) rotatedGradient:(CAAngleRadians) radians
-{
-   return( self);
-}
-
-@end
-
 
 
 @implementation _CGTwoColorGradient
 
 + (instancetype) newWithStartColor:(CGColor) startColor
                           endColor:(CGColor) endColor
-                             angle:(CAAngleRadians) angle
+                          rotation:(CGFloat) rotation
 {
    _CGTwoColorGradient   *obj;
 
    obj = NSAllocateObject( self, 0, NULL);
    obj->_startColor = startColor;
    obj->_endColor   = endColor;
-   obj->_angle      = angle; //CAAngleRadiansNormalize( angle);
+   obj->_rotation   = rotation;
    return( obj);
 }
 
@@ -142,11 +71,11 @@
 }
 
 
-- (CGGradient *) rotatedGradient:(CAAngleRadians) radians
+- (CGGradient *) rotatedGradient:(CGFloat) rotation
 {
    return( [_CGTwoColorGradient newWithStartColor:_startColor
                                          endColor:_endColor
-                                            angle:CAAngleRadiansNormalize( _angle + radians)]);
+                                         rotation:_rotation + rotation]);
 }
 
 @end
@@ -160,7 +89,7 @@
 + (instancetype) newWithColors:(CGColor *) colors
                      locations:(CGFloat *) locations
                          count:(NSUInteger) count
-                         angle:(CAAngleRadians) angle
+                      rotation:(CGFloat) rotation
 {
    float                    *p_location;
    float                    location;
@@ -170,13 +99,12 @@
    CGColor                  *p_color;
    _CGMultiColorGradient    *obj;
 
-   assert( count > 2);
+   assert( count >= 2);
 
    obj = NSAllocateObject( self, 0, NULL);
 
-   obj->_angle = CAAngleRadiansNormalize( angle);
-
-   allocator = MulleObjCClassGetAllocator( self);
+   obj->_rotation = rotation;
+   allocator      = MulleObjCClassGetAllocator( self);
 
    _mulle__floatarray_init( &obj->_locations, 0, allocator);
    _mulle__structarray_init( &obj->_colors, sizeof( CGColor), alignof( CGColor), 0, allocator);
@@ -295,44 +223,35 @@
    return( alpha);
 }
 
+
 @end
 
 
 @implementation CGGradient
 
-+ (instancetype) gradientWithColor:(CGColor) startColor
-{
-   return( [[_CGMonoColorGradient newWithColor:startColor] autorelease]);
-}
-
 
 + (instancetype) gradientWithStartColor:(CGColor) startColor
                                endColor:(CGColor) endColor
-                                  angle:(CAAngleRadians) angle
+                                  rotation:(CGFloat) rotation
 {
    return( [[_CGTwoColorGradient newWithStartColor:startColor
                                           endColor:endColor
-                                             angle:angle] autorelease]);
+                                          rotation:rotation] autorelease]);
 }
 
 
 + (instancetype) gradientWithColors:(CGColor *) colors
                           locations:(CGFloat *) locations
                               count:(NSUInteger) count
-                              angle:(CAAngleRadians) angle
+                           rotation:(CGFloat) rotation
 {
-   switch( count)
-   {
-   case 0  : return( nil);
-   case 1  : return( [[_CGMonoColorGradient newWithColor:colors[ 0]] autorelease]);
-   case 2  : return( [[_CGTwoColorGradient newWithStartColor:colors[ 0]
-                                                    endColor:colors[ 1]
-                                                       angle:angle] autorelease]);
-   default : return( [[_CGMultiColorGradient newWithColors:colors
-                                                 locations:locations
-                                                     count:count
-                                                     angle:angle] autorelease]);
-   }
+   if( count < 2)
+      return( nil);
+
+   return( [[_CGMultiColorGradient newWithColors:colors
+                                       locations:locations
+                                           count:count
+                                        rotation:rotation] autorelease]);
 }
 
 
@@ -340,9 +259,9 @@
 + (instancetype) gradientWithStartColor:(CGColor) startColor
                                endColor:(CGColor) endColor
 {
-   return( [[_CGTwoColorGradient newWithStartColor:startColor
-                                          endColor:endColor
-                                             angle:0.0] autorelease]);
+   return( [self gradientWithStartColor:startColor
+                               endColor:endColor
+                               rotation:0.0]);
 }
 
 
@@ -353,49 +272,36 @@
    return( [self gradientWithColors:colors
                           locations:locations
                               count:count
-                              angle:0.0]);
-}
-
-
-
-- (instancetype) init
-{
-   return( [_CGMonoColorGradient newWithColor:CGColorMakeBlack()]);
-}
-
-
-- (instancetype) initWithColor:(CGColor) startColor
-{
-   return( [_CGMonoColorGradient newWithColor:startColor]);
+                           rotation:0.0]);
 }
 
 
 - (instancetype) initWithStartColor:(CGColor) startColor
                            endColor:(CGColor) endColor
-                              angle:(CAAngleRadians) angle
+                           rotation:(CGFloat) rotation
 {
    return( [_CGTwoColorGradient newWithStartColor:startColor
                                          endColor:endColor
-                                            angle:angle]);
+                                        rotation:rotation]);
 }
 
 
 - (instancetype) initWithColors:(CGColor *) colors
                       locations:(CGFloat *) locations
                           count:(NSUInteger) count
-                          angle:(CAAngleRadians) angle
+                       rotation:(CGFloat) rotation
 {
    switch( count)
    {
    case 0  : return( nil);
-   case 1  : return( [_CGMonoColorGradient newWithColor:colors[ 0]]);
+   case 1  : return( [_CGMonoColor newWithColor:colors[ 0]]);
    case 2  : return( [_CGTwoColorGradient newWithStartColor:colors[ 0]
                                                    endColor:colors[ 1]
-                                                      angle:angle]);
+                                                   rotation:rotation]);
    default : return( [_CGMultiColorGradient newWithColors:colors
                                                  locations:locations
                                                      count:count
-                                                     angle:angle]);
+                                                  rotation:rotation]);
    }
 }
 
@@ -405,7 +311,7 @@
 {
    return( [_CGTwoColorGradient newWithStartColor:startColor
                                          endColor:endColor
-                                            angle:0.0]);
+                                         rotation:0.0]);
 }
 
 
@@ -417,7 +323,7 @@
    return( [self initWithColors:colors
                       locations:locations
                           count:count
-                          angle:0.0]);
+                       rotation:0.0]);
 }
 
 
@@ -433,16 +339,17 @@
 }
 
 
-- (CAAngleRadians) angle
-{
-   return( 0.0);
-}
-
-
 - (BOOL) isTexture
 {
    return( NO);
 }
+
+
+- (BOOL) isGradient
+{
+   return( YES);
+}  // default: NO (mono color gradient says also NO)
+
 
 
 - (char *) UTF8String
@@ -484,11 +391,10 @@
 
 
 
-- (CGGradient *) rotatedGradient:(CAAngleRadians) radians
+- (CGGradient *) rotatedGradient:(CAAngle) rotation
 {
-   NSUInteger       count;
-   CGGradient       *gradient;
-   CAAngleRadians   angle;
+   NSUInteger   count;
+   CGGradient   *gradient;
 
    count = [self numberOfColors];
    mulle_flexarray_do( tmp_locations, float, 8, count)
@@ -497,20 +403,25 @@
       mulle_flexarray_do( tmp_colors, CGColor, 8, count)
       {
          [self getColors:tmp_colors];
-         angle    = CAAngleRadiansNormalize( [self angle] + radians);
          gradient = [CGGradient gradientWithColors:tmp_colors
                                          locations:tmp_locations
                                              count:count
-                                             angle:angle];
+                                          rotation:_rotation + rotation];
       }
    }
    return( gradient);
 }
 
 
+- (CGPaint *) rotatedPaint:(CGFloat) rotation
+{
+   return( [self rotatedGradient:rotation]);
+}
+
+
 - (CGGradient *) reversedGradient // rotated 180 degrees
 {
-   return( [self rotatedGradient:M_PI_f]);
+   return( [self rotatedGradient:0.5]);
 }
 
 @end

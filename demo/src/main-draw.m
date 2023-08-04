@@ -268,7 +268,7 @@ static void   _drawColoredLines( NVGcontext *vg,
 }
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    CGRect              rows[ 3];
    CGRect              columns[ 8];
@@ -416,6 +416,8 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 #ifdef ARTIFICIAL_LAG
    lag( info->refreshRate);
 #endif
+
+   return( YES);
 }
 
 
@@ -432,7 +434,7 @@ void   setupScene( UIWindow *window)
 
    view  = [UIView viewWithFrame:frame];
    [view setMargins:insets];
-   [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+   [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [[window contentPlane] addSubview:view];
 }

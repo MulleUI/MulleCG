@@ -3,7 +3,7 @@
 #import "import-private.h"
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext    *vg;
 
@@ -39,6 +39,8 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    nvgStrokeWidth(vg, 32);
    nvgMiterLimit( vg, 20);
    nvgStroke(vg);
+
+   return( YES);
 }
 
 

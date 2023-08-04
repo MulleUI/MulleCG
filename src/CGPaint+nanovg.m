@@ -6,11 +6,14 @@
 #import "import-private.h"
 
 #import "CGContext.h"
-#include "millivg.h"
+#include "microvg.h"
+
+
+// why is this good ?
+// #define NIL_PAINT_DRAWS_BLACK
 
 
 @implementation CGPaint( nanovg)
-
 
 - (void) strokeWithBounds:(CGRect) rect
               strokeWidth:(CGFloat) strokeWidth
@@ -45,13 +48,14 @@ static void   fillWithBoundsAndPaint( NVGcontext *vg,
                                       CGRect rect,
                                       CGPaint *paint)
 {
+#ifdef NIL_PAINT_DRAWS_BLACK
    if( ! paint)
    {
       mvgFillColor( vg, CGColorMakeBlack());
       mvgFill( vg);
       return;
    }
-
+#endif
    [paint fillWithBounds:rect
              NVGcontext:vg];
 
@@ -99,6 +103,7 @@ static void   strokeWithBoundsAndPaint( NVGcontext *vg,
                                         CGFloat strokeWidth,
                                         CGPaint *paint)
 {
+#ifdef NIL_PAINT_DRAWS_BLACK
    if( ! paint)
    {
       mvgStrokeWidth( vg, strokeWidth);
@@ -106,6 +111,7 @@ static void   strokeWithBoundsAndPaint( NVGcontext *vg,
       mvgStroke( vg);
       return;
    }
+#endif
 
    [paint strokeWithBounds:rect
                strokeWidth:strokeWidth
@@ -167,3 +173,39 @@ void   mvgStrokeLineWithPaint( NVGcontext *vg,
    strokeWithBoundsAndPaint( vg, rect, strokeWidth, paint);
 }
 
+
+
+void   mvgStrokeLineHWithPaint( NVGcontext *vg,
+                                CGPoint start,
+                                CGFloat width,
+                                CGFloat strokeWidth,
+                                CGPaint *paint)
+{
+   CGRect   rect;
+   CGPoint  end;
+
+   end = CGPointMake( start.x + width, start.y);
+   mvgBeginPath( vg);
+   mvgMoveTo( vg, start);
+   mvgLineTo( vg, end);
+   rect = CGRectMakeWithPoints( start, end);
+   strokeWithBoundsAndPaint( vg, rect, strokeWidth, paint);
+}
+
+
+void   mvgStrokeLineVWithPaint( NVGcontext *vg,
+                                CGPoint start,
+                                CGFloat height,
+                                CGFloat strokeWidth,
+                                CGPaint *paint)
+{
+   CGRect   rect;
+   CGPoint  end;
+
+   end = CGPointMake( start.x, start.y + height);
+   mvgBeginPath( vg);
+   mvgMoveTo( vg, start);
+   mvgLineTo( vg, end);
+   rect = CGRectMakeWithPoints( start, end);
+   strokeWithBoundsAndPaint( vg, rect, strokeWidth, paint);
+}

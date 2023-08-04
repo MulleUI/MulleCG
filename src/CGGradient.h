@@ -15,29 +15,25 @@
 //
 @interface CGGradient : CGPaint < MulleObjCClassCluster, NSCopying>
 
-+ (instancetype) gradientWithColor:(CGColor) color;
-
+@property( readonly) CGFloat   rotation;
 
 + (instancetype) gradientWithStartColor:(CGColor) startColor
                                endColor:(CGColor) endColor
-                                  angle:(CAAngleRadians) angle;
+                               rotation:(CGFloat) rotation;
 
 + (instancetype) gradientWithColors:(CGColor *) colors
                           locations:(CGFloat *) locations
                               count:(NSUInteger) count
-                              angle:(CAAngleRadians) angle;
-
-
-- (instancetype) initWithColor:(CGColor) color;
+                           rotation:(CGFloat) rotation;
 
 - (instancetype) initWithStartColor:(CGColor) startColor
                            endColor:(CGColor) endColor
-                              angle:(CAAngleRadians) angle;
+                           rotation:(CGFloat) rotation;
 
 - (instancetype) initWithColors:(CGColor *) colors
                       locations:(CGFloat *) locations
                           count:(NSUInteger) count
-                          angle:(CAAngleRadians) angle;
+                       rotation:(CGFloat) rotation;
 
 
 // conveniences with angle CAAngleRadiansE (L->R) use CAAngleRadiansN for
@@ -59,7 +55,7 @@
 
 // or reversed ?
 - (CGGradient *) reversedGradient; // rotated 180 degrees
-- (CGGradient *) rotatedGradient:(CAAngleRadians) radians;
+- (CGGradient *) rotatedGradient:(CGFloat) rotation;
 
 @end
 
@@ -69,12 +65,7 @@
 - (CGColor) startColor;
 - (CGColor) endColor;
 
-// angle is in gradient, because the angle direction is important visually
-// in a texture. The assumption is that angle on a CGImage is usually
-// unimportant so it would be kept in a separate property. Maybe there will be
-// CGAngledImage some time ?
-//
-- (CAAngleRadians) angle;
+- (CGFloat) rotation;
 
 - (NSUInteger) numberOfColors;
 // location[ 0] is always 0.0
@@ -83,7 +74,6 @@
 - (CGColor) colorAtIndex:(NSUInteger) i;
 - (void) getColors:(CGColor *) colors;
 - (void) getLocations:(CGFloat *) locations;
-
 
 @end
 

@@ -10,9 +10,9 @@
 @implementation CGImage( nanovg)
 
 - (NVGpaint) NVGpaintWithBounds:(CGRect) rect
-                   NVGcontext:(NVGcontext *) vg
+                     NVGcontext:(NVGcontext *) vg
 {
-   return( mvgImagePattern( vg, rect, [self angle], [self textureID], 1.0));
+   return( mvgImagePattern( vg, rect, [self rotation], [self textureID], 1.0));
 }
 
 
@@ -28,7 +28,6 @@
    mvgStrokePaint( vg, paint);
    mvgStroke( vg);
 }
-
 
 @end
 

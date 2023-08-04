@@ -5,7 +5,7 @@
 #include <string.h>
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext  *vg;
    CGFont             *font;
@@ -18,7 +18,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    rect   = CGSizeCenterInRect( CGSizeMake( 300, 100), canvas);
 
    mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
-   mvgStrokeLineH( vg, CGRectGetMinX( rect), CGRectGetMaxX( rect), CGRectGetMidY( rect), CGColorMakeGray());
+   mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( rect), CGRectGetWidth( rect), 1.0, CGColorMakeGray());
    mvgFontSize( vg, 80.0);
    mvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
    mvgExtendedAlignedText( vg,
@@ -28,6 +28,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                           CGRectGetMaxY( rect)),
                           NVG_ALIGN_RIGHT|NVG_ALIGN_BOTTOM,
                           MVGTextAlignVisually);
+   return( YES);
 }
 
 
@@ -39,7 +40,7 @@ void   setupScene( UIWindow *window)
    frame = [[window contentPlane] contentRect];
 
    view  = [UIView viewWithFrame:frame];
-   [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+   [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [[window contentPlane] addSubview:view];
 }

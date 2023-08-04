@@ -87,13 +87,13 @@
       }
 
       image = [[[CGImage alloc] initWithBitmap:convertedFb
-                                    imageFlags:0
+                                  textureFlags:0
                                        context:self] autorelease];
       CGBitmapDone( convertedFb);
    }
    else
       image = [[[CGImage alloc] initWithBitmap:fb
-                                    imageFlags:0
+                                  textureFlags:0
                                        context:self] autorelease];
 
    rect    = CGRectMakeWithIntegerSize( fb.info.size);
@@ -139,6 +139,24 @@
    nvgFillColor( vg, CGColorMakeWithHexColor( color));
 
    nvgTextBox( vg, position.x, position.y, INFINITY, s, NULL);
+}
+
+
+//
+// TODO: move this to UIControl where its used
+//
+- (void) drawIcon:(mulle_utf32_t) icon
+          atPoint:(CGPoint) point
+{
+   NVGcontext   *vg;
+   char         icon_utf8[ 8];
+   char         *end;
+
+   vg = CGContextGetNVGContext( self);
+
+   nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+   end = (char *) mulle_utf32_as_utf8( icon, (mulle_utf8_t *) icon_utf8);
+   mvgText( vg, point, icon_utf8, end);
 }
 
 

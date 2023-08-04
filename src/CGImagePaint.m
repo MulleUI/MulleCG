@@ -13,30 +13,30 @@
 + (instancetype) imagePaintWithImage:(CGImage *) image
                           otherImage:(CGImage *) otherImage
                                blend:(CGFloat) blend
-                               angle:(CAAngleRadians) angle
+                            rotation:(CGFloat) rotation
 {
    return( [[[CGImagePaint alloc] initWithImage:image
                                      otherImage:otherImage
                                           blend:blend
-                                          angle:angle] autorelease]);
+                                       rotation:rotation] autorelease]);
 }
 
 
 - (instancetype) initWithImage:(CGImage *) image
                     otherImage:(CGImage *) otherImage
                          blend:(CGFloat) blend
-                         angle:(CAAngleRadians) angle
+                      rotation:(CGFloat) rotation
  {
    _image = [image copy];
 
-   // for "angle" only animation, this isn't unlikely
+   // for "rotation" only animation, this isn't unlikely
    if( ! otherImage || [otherImage textureID] == [_image textureID])
       _otherImage = [_image retain];
    else
       _otherImage = [otherImage copy];
 
-   _blend = blend;
-   _angle = angle;
+   _blend    =  blend;
+   _rotation = rotation;
 
    return( self);
 }
@@ -49,5 +49,18 @@
 
    [super dealloc];
 }
+
+
+- (CGPaint *) rotatedPaint:(CGFloat) rotation
+{
+   if( rotation == 0.0)
+      return( self);
+
+   return( [CGImagePaint imagePaintWithImage:_image
+                                  otherImage:_otherImage
+                                       blend:_blend
+                                    rotation:rotation + _rotation]);
+}
+
 
 @end

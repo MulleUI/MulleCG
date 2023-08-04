@@ -8,7 +8,7 @@
 #include "bitmap2.inc"
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              canvas;
@@ -35,7 +35,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    // is too early, and the texture is gone too soon
    image   = [[[CGImage alloc] initWithRGBABytes:bitmap2
                                       bitmapSize:MulleIntegerSizeMake( 32, 32)
-                                      imageFlags:0  // NVG_IMAGE_REPEATX
+                                    textureFlags:0  // NVG_IMAGE_REPEATX
                                          context:context] autorelease];
    assert( image);
 
@@ -57,7 +57,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 #if 1
    options = CGDrawableOptionsMake( 1.0,
                                     0.0,
-                                    CAAngleDegreesToRadians( 0 - OFFSET),
+                                    CADegreesToRotation( 0 - OFFSET),
                                     SCALE,
                                     CGFlipNone,
                                     CGRepeatNone,
@@ -69,7 +69,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 #if 1
    options = CGDrawableOptionsMake( 1.0,
                                     0.0,
-                                    CAAngleDegreesToRadians( 45 - OFFSET),
+                                    CADegreesToRotation( 45 - OFFSET),
                                     SCALE,
                                     CGFlipNone,
                                     CGRepeatNone,
@@ -80,7 +80,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
    options = CGDrawableOptionsMake( 1.0,
                                     0.0,
-                                    CAAngleDegreesToRadians( 90 - OFFSET),
+                                    CADegreesToRotation( 90 - OFFSET),
                                     SCALE,
                                     CGFlipNone,
                                     CGRepeatNone,
@@ -91,7 +91,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
    options = CGDrawableOptionsMake( 1.0,
                                     0.0,
-                                    CAAngleDegreesToRadians( 135 - OFFSET),
+                                    CADegreesToRotation( 135 - OFFSET),
                                     SCALE,
                                     CGFlipNone,
                                     CGRepeatNone,
@@ -103,7 +103,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    // row
    options = CGDrawableOptionsMake( 1.0,
                                     0.0,
-                                    CAAngleDegreesToRadians( 180 - OFFSET),
+                                    CADegreesToRotation( 180 - OFFSET),
                                     SCALE,
                                     CGFlipNone,
                                     CGRepeatNone,
@@ -114,7 +114,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 #if 1
    options = CGDrawableOptionsMake( 1.0,
                                     0.0,
-                                    CAAngleDegreesToRadians( 225 - OFFSET),
+                                    CADegreesToRotation( 225 - OFFSET),
                                     SCALE,
                                     CGFlipNone,
                                     CGRepeatNone,
@@ -125,7 +125,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
    options = CGDrawableOptionsMake( 1.0,
                                     0.0,
-                                    CAAngleDegreesToRadians( 270 - OFFSET),
+                                    CADegreesToRotation( 270 - OFFSET),
                                     SCALE,
                                     CGFlipNone,
                                     CGRepeatNone,
@@ -136,7 +136,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
    options = CGDrawableOptionsMake( 1.0,
                                     0.0,
-                                    CAAngleDegreesToRadians( 315 - OFFSET),
+                                    CADegreesToRotation( 315 - OFFSET),
                                     SCALE,
                                     CGFlipNone,
                                     CGRepeatNone,

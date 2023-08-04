@@ -466,7 +466,7 @@ static CGColor   colors[ 3]       = {
 #define DRAW_HELPERS   YES
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext  *vg;
    CGRect             bbox;
@@ -500,11 +500,9 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    // draw helper baseline
    if( drawHelpers)
    {
-      mvgStrokeWidth( vg, 0.75f);
-      mvgStrokeLineH( vg, 0, [layer canvas].size.width - X_OFFSET * 2.0, 0, CGColorMakeWhite());
+      mvgStrokeLineHWithColor( vg, CGPointMake( 0, 0), [layer canvas].size.width - X_OFFSET * 2.0, 0.75, CGColorMakeWhite());
 
-      mvgStrokeWidth( vg, 0.5f);
-      mvgStrokeLineV( vg, 0, -Y_OFFSET, [layer canvas].size.height, CGColorMakeWhite());
+      mvgStrokeLineVWithColor( vg, CGPointMake( 0, [layer canvas].size.height), -Y_OFFSET, 0.5, CGColorMakeWhite());
    }
 
    // fill 3 glyphs,
@@ -529,8 +527,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       // draw vertical helper line
       if( drawHelpers)
       {
-         mvgStrokeWidth( vg, 0.5f);
-         mvgStrokeLineV( vg, 0, -Y_OFFSET, [layer canvas].size.height, CGColorMakeWhite());
+         mvgStrokeLineVWithColor( vg, CGPointMake( 0, [layer canvas].size.height), -Y_OFFSET, 0.5, CGColorMakeWhite());
       }
    }
 
@@ -538,8 +535,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
    if( drawHelpers)
    {
-      mvgStrokeWidth( vg, 0.5f);
-      mvgStrokeLineV( vg, 0, -Y_OFFSET, [layer canvas].size.height, CGColorMakeWhite());
+      mvgStrokeLineVWithColor( vg, CGPointMake( 0, [layer canvas].size.height), -Y_OFFSET, 0.5, CGColorMakeWhite());
    }
 
    /* stroke, but reuse CGPaths here */
@@ -562,8 +558,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 
       if( drawHelpers)
       {
-         mvgStrokeWidth( vg, 0.5f);
-         mvgStrokeLineV( vg, 0, -Y_OFFSET, [layer canvas].size.height,  CGColorMakeWhite());
+         mvgStrokeLineVWithColor( vg, CGPointMake( 0, -Y_OFFSET), [layer canvas].size.height, 0.5, CGColorMakeWhite());
       }
    }
 
@@ -581,7 +576,7 @@ void   setupScene( UIWindow *window)
    frame = [[window contentPlane] contentRect];
 
    view  = [UIView viewWithFrame:frame];
-   [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+   [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [[window contentPlane] addSubview:view];
 }

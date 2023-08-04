@@ -11,29 +11,37 @@
 // pure C file, can't use NS_ENUM
 enum CGPathCommand
 {
-   CGPathMoveCommand,
-   CGPathLineCommand,
-   CGPathQuadCommand,
-   CGPathArcCommand,
-   CGPathBezierCommand,
-   CGPathWindingCommand,
-   CGPathCloseSubpathCommand
+   CGPathMoveCommand         = 0,
+   CGPathLineCommand         = 1,
+   CGPathBezierCommand       = 2,
+   CGPathCloseSubpathCommand = 3,
+   CGPathWindingCommand      = 4,
+   CGPathQuadCommand         = 5,
+   CGPathArcCommand          = 6
 };
+
 
 typedef uintptr_t  CGPathCommand;
 
+//
 // A CGPath can be useful, if you want to keep path information for multiple
-// frames. It will likely also form the basis for creating and managing VBOs
+// frames. It will likely also form the basis for creating and managing VBOs.
+// A CGPath is not like a SVG, as it doesn't contain color, fill or strokeWidth
+// information, so it's more low level. We probably need something like
+// CGShape, CGVectorDrawing to support more higher level storage.
+//
+
 //
 // This is always mutable, but CGMutablePathRef is kept in the API for
 // slightly better compatibility.
 //
+// TODO: store commands in _floats for simplicity and compatiblilty with
+//       nanovg
+//
 typedef struct CGPath
 {
-  struct mulle_buffer        _commands;
-  struct mulle_floatarray    _floats;
-  CGRect                     _bbox;
-  unsigned char              _initialStorage[ 8];
+  struct mulle_floatarray   _floats;
+  CGRect                    _bbox;
 } CGPath;
 
 
@@ -63,7 +71,6 @@ static inline CGRect   CGPathGetBounds( CGPathRef path)
 {
    if( ! path)
       return( CGRectNull);
-
    if( CGRectIsNull( path->_bbox))
       path->_bbox = CGPathComputeBounds( path);
    return( path->_bbox);
@@ -82,8 +89,8 @@ static inline void  CGPathMoveToPoint( CGPathRef path, CGPoint point)
    if( ! path)
       return;
 
-   mulle_buffer_add_byte( &path->_commands, CGPathMoveCommand);
-   _mulle_floatarray_guarantee( &path->_floats, 2);
+   _mulle_floatarray_guarantee( &path->_floats, 3);
+   _mulle_floatarray_add_guaranteed( &path->_floats, CGPathMoveCommand);
    _mulle_floatarray_add_guaranteed( &path->_floats, point.x);
    _mulle_floatarray_add_guaranteed( &path->_floats, point.y);
 }
@@ -95,8 +102,8 @@ static inline void  CGPathAddLineToPoint( CGPathRef path,
    if( ! path)
       return;
 
-   mulle_buffer_add_byte( &path->_commands, CGPathLineCommand);
-   _mulle_floatarray_guarantee( &path->_floats, 2);
+   _mulle_floatarray_guarantee( &path->_floats, 3);
+   _mulle_floatarray_add_guaranteed( &path->_floats, CGPathLineCommand);
    _mulle_floatarray_add_guaranteed( &path->_floats, point.x);
    _mulle_floatarray_add_guaranteed( &path->_floats, point.y);
 }
@@ -111,8 +118,8 @@ static inline void  CGPathAddCurveToPoint( CGPathRef path,
    if( ! path)
       return;
 
-   mulle_buffer_add_byte( &path->_commands, CGPathBezierCommand);
-   _mulle_floatarray_guarantee( &path->_floats, 6);
+   _mulle_floatarray_guarantee( &path->_floats, 7);
+   _mulle_floatarray_add_guaranteed( &path->_floats, CGPathBezierCommand);
    _mulle_floatarray_add_guaranteed( &path->_floats, control1.x);
    _mulle_floatarray_add_guaranteed( &path->_floats, control1.y);
    _mulle_floatarray_add_guaranteed( &path->_floats, control2.x);
@@ -129,8 +136,8 @@ static inline void  CGPathAddQuadToPoint( CGPathRef path,
    if( ! path)
       return;
 
-   mulle_buffer_add_byte( &path->_commands, CGPathQuadCommand);
-   _mulle_floatarray_guarantee( &path->_floats, 4);
+   _mulle_floatarray_guarantee( &path->_floats, 5);
+   _mulle_floatarray_add_guaranteed( &path->_floats, CGPathQuadCommand);
    _mulle_floatarray_add_guaranteed( &path->_floats, control1.x);
    _mulle_floatarray_add_guaranteed( &path->_floats, control1.y);
    _mulle_floatarray_add_guaranteed( &path->_floats, point.x);
@@ -146,8 +153,8 @@ static inline void  CGPathAddArcToPoint( CGPathRef path,
    if( ! path)
       return;
 
-   mulle_buffer_add_byte( &path->_commands, CGPathArcCommand);
-   _mulle_floatarray_guarantee( &path->_floats, 5);
+   _mulle_floatarray_guarantee( &path->_floats, 6);
+   _mulle_floatarray_add_guaranteed( &path->_floats, CGPathArcCommand);
    _mulle_floatarray_add_guaranteed( &path->_floats, control1.x);
    _mulle_floatarray_add_guaranteed( &path->_floats, control1.y);
    _mulle_floatarray_add_guaranteed( &path->_floats, point.x);
@@ -165,7 +172,8 @@ static inline void  CGPathAddWinding( CGPathRef path, int value)
 
    assert( value == NVG_HOLE || value == NVG_SOLID);
    v = (float) value;
-   mulle_buffer_add_byte( &path->_commands, CGPathWindingCommand);
+   _mulle_floatarray_guarantee( &path->_floats, 2);
+   _mulle_floatarray_add_guaranteed( &path->_floats, CGPathWindingCommand);
    _mulle_floatarray_add( &path->_floats, v);
 }
 
@@ -175,7 +183,7 @@ static inline void  CGPathCloseSubpath( CGMutablePathRef path)
    if( ! path)
       return;
 
-   mulle_buffer_add_byte( &path->_commands, CGPathCloseSubpathCommand);
+   _mulle_floatarray_add( &path->_floats, CGPathCloseSubpathCommand);
 }
 
 

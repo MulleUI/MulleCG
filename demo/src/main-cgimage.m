@@ -9,7 +9,7 @@
 
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              rect;
@@ -35,7 +35,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    // is too early, and the texture is gone too soon
    image   = [[[CGImage alloc] initWithRGBABytes:bitmap
                                       bitmapSize:MulleIntegerSizeMake( 8, 8)
-                                      imageFlags:0  // NVG_IMAGE_REPEATX
+                                    textureFlags:0  // NVG_IMAGE_REPEATX
                                          context:context] autorelease];
    assert( image);
 
@@ -50,6 +50,8 @@ static void   drawStuff( CALayer *layer, CGContext *context)
            options:&options
            context:context];
 #endif
+
+   return( YES);
 }
 
 

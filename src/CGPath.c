@@ -8,21 +8,15 @@
 void   _CGPathInit( struct CGPath *path, struct mulle_allocator *allocator)
 {
    path->_bbox = CGRectNull;
-   mulle_buffer_init_with_static_bytes( &path->_commands,
-                                        path->_initialStorage,
-                                        sizeof( path->_initialStorage),
-                                        allocator);
-   _mulle_floatarray_init( &path->_floats, 8, allocator);
+   _mulle_floatarray_init( &path->_floats, 32, allocator);
 }
 
 
-void   _CGPathInitWithCapacity( struct CGPath *path, unsigned int n, struct mulle_allocator *allocator)
+void   _CGPathInitWithCapacity( struct CGPath *path,
+                                unsigned int n,
+                                struct mulle_allocator *allocator)
 {
    path->_bbox = CGRectNull;
-   mulle_buffer_init_with_static_bytes( &path->_commands,
-                                        path->_initialStorage,
-                                        sizeof( path->_initialStorage),
-                                        allocator);
    _mulle_floatarray_init( &path->_floats, n, allocator);
 }
 
@@ -39,7 +33,6 @@ struct CGPath   *CGPathCreate( struct mulle_allocator *allocator)
 
 void   _CGPathDone( struct CGPath *path)
 {
-   mulle_buffer_done( &path->_commands);
    _mulle_floatarray_done( &path->_floats);
 }
 
@@ -51,14 +44,97 @@ void CGPathDestroy( struct CGPath *path)
    if( ! path)
       return;
 
-   allocator = mulle_buffer_get_allocator( &path->_commands);
+   allocator = _mulle_floatarray_get_allocator( &path->_floats);
    _CGPathDone( path);
    mulle_allocator_free( allocator, path);
 }
 
 
 
+CGRect   CGPathComputeCoarseBounds( CGPathRef path)
+{
+   unsigned int    n;
+   float           *f;
+   float           *sentinel;
+   CGPoint         point;
+   CGRect          bbox;
+
+   bbox     = CGRectNull; // sic!
+   n        = _mulle_floatarray_get_count( &path->_floats);
+   f        = _mulle_floatarray_get_floats( &path->_floats);
+   sentinel = &f[ n];
+
+   while( f < sentinel)
+   {
+      switch( (int) *f++)
+      {
+      case CGPathMoveCommand:
+         point.x = *f++;
+         point.y = *f++;
+         bbox    = CGRectEnclosePoint( bbox, point);
+         break;
+
+      case CGPathLineCommand:
+         point.x = *f++;
+         point.y = *f++;
+         bbox    = CGRectEnclosePoint( bbox, point);
+         break;
+
+         // TODO: this is probably OK for coarse
+         // https://stackoverflow.com/questions/2587751/an-algorithm-to-find-bounding-box-of-closed-bezier-curves/2588205#2588205
+      case CGPathBezierCommand:
+         point.x = *f++;
+         point.y = *f++;
+         bbox    = CGRectEnclosePoint( bbox, point);
+         point.x = *f++;
+         point.y = *f++;
+         bbox    = CGRectEnclosePoint( bbox, point);
+         point.x = *f++;
+         point.y = *f++;
+         bbox    = CGRectEnclosePoint( bbox, point);
+         break;
+
+         // TODO: this is maybe crap, cubic is likely different
+      case CGPathQuadCommand :
+         point.x = *f++;
+         point.y = *f++;
+         bbox    = CGRectEnclosePoint( bbox, point);
+         point.x = *f++;
+         point.y = *f++;
+         bbox    = CGRectEnclosePoint( bbox, point);
+         break;
+
+         // TODO: this is total crap (radius is ignored)
+      case CGPathArcCommand :
+         point.x = *f++;
+         point.y = *f++;
+         bbox    = CGRectEnclosePoint( bbox, point);
+         point.x = *f++;
+         point.y = *f++;
+         bbox    = CGRectEnclosePoint( bbox, point);
+         (void)    *f++;
+         break;
+
+      case CGPathWindingCommand :
+         (void)    *f++;
+         break;
+
+      case CGPathCloseSubpathCommand :
+         break;
+      }
+   }
+   return( bbox);
+}
+
+
 CGRect   CGPathComputeBounds( CGPathRef path)
 {
-   abort();
+   if( ! path)
+      return( CGRectNull);
+
+   if( ! CGRectIsNull( path->_bbox))
+      return( path->_bbox);
+
+   path->_bbox = CGPathComputeCoarseBounds( path);
+   return( path->_bbox);
 }

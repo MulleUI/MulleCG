@@ -64,7 +64,7 @@ static NSInteger   contentMode[ 12] =
 #define ROWS    4
 #define COLUMNS 3
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              canvas;
@@ -93,7 +93,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    // is too early, and the texture is gone too soon
    image   = [[[CGImage alloc] initWithRGBABytes:bitmap2
                                       bitmapSize:MulleIntegerSizeMake( 32, 32)
-                                      imageFlags:0  // NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
+                                    textureFlags:0  // NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
                                          context:context] autorelease];
    assert( image);
 
@@ -114,7 +114,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
          i = (y * COLUMNS + x);
          options = CGDrawableOptionsMake( 1.0,
                                           0.0,
-                                          0, // CAAngleDegreesToRadians( 360.0 / (COLUMNS * ROWS) * i),
+                                          0, // CGFloatToRadians( 360.0 / (COLUMNS * ROWS) * i),
                                           CGScaleNone, // 4.0 - ((4.0 / 9.0) * i),
                                           CGFlipNone,
                                           CGRepeatNone, // CGRepeatBoth,
@@ -123,6 +123,8 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                  options:&options
                  context:context];
       }
+
+   return( YES);
 }
 
 

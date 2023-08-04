@@ -21,6 +21,6 @@
       { @selector( CGPaint), MULLE_OBJC_NO_CATEGORYID },      // df22fbd2;CGPaint;;
       { @selector( CGSharedGPUTexture), MULLE_OBJC_NO_CATEGORYID },      // e7d245f1;CGSharedGPUTexture;;
       { @selector( CGVectorDrawable), MULLE_OBJC_NO_CATEGORYID },      // e5ec3a2e;CGVectorDrawable;;
-      { @selector( _CGMonoColorGradient), MULLE_OBJC_NO_CATEGORYID },      // 68d0442c;_CGMonoColorGradient;;
+      { @selector( _CGMonoColor), MULLE_OBJC_NO_CATEGORYID },      // da7e8e68;_CGMonoColor;;
       { @selector( _CGMultiColorGradient), MULLE_OBJC_NO_CATEGORYID },      // e3593c87;_CGMultiColorGradient;;
       { @selector( _CGTwoColorGradient), MULLE_OBJC_NO_CATEGORYID },      // 193d7bd9;_CGTwoColorGradient;;

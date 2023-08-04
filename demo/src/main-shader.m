@@ -89,7 +89,7 @@ static MulleUIResourceStorageDefineKey( test_image);
    {
       image = [[[CGImage alloc] initWithRGBABytes:bitmap2
                                        bitmapSize:MulleIntegerSizeMake( 32, 32)
-                                       imageFlags:0  // NVG_IMAGE_REPEATX
+                                     textureFlags:0  // NVG_IMAGE_REPEATX
                                           context:context] autorelease];
       // though the image will be already known as a resource by the context
       // we want to conveniently recover it "by name" also, and keep it

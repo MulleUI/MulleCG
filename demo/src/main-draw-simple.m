@@ -14,13 +14,14 @@
    MULLE_OBJC_TRACE_INSTANCE=YES \
    MULLE_OBJC_TRACE_METHOD_CALL=YES ./kitchen/Debug/draw-simple
  */
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
 
    vg = CGContextGetNVGContext( context);
    drawRedWhiteBlueFlag( vg, [layer canvas]);
 //   [UIApp requestTerminate];
+   return( YES);
 }
 
 

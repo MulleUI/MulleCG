@@ -9,7 +9,7 @@
 #include "bitmap.inc"
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              rect;
@@ -39,7 +39,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       // is too early, and the texture is gone too soon
       image = [[[CGImage alloc] initWithRGBABytes:bitmap
                                        bitmapSize:MulleIntegerSizeMake( 8, 8)
-                                       imageFlags:0  // NVG_IMAGE_REPEATX
+                                     textureFlags:0  // NVG_IMAGE_REPEATX
                                           context:context] autorelease];
       assert( image);
 
@@ -48,11 +48,13 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                          8,
                          8);
       options.alpha    = i / 100.0;
-      options.rotation = i / 100.0 * CA_2xPI;
+      options.rotation = i / 100.0;
       [image drawRect:rect
               options:&options
               context:context];
    }
+
+   return( YES);
 }
 
 

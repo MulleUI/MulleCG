@@ -7,7 +7,8 @@ enum
    odd
 };
 
-static void   drawStuff( CALayer *layer, void *context)
+
+static BOOL   drawStuff( CALayer *layer, void *context)
 {
    struct NVGcontext   *vg;
    CGRect              canvas;
@@ -43,6 +44,7 @@ static void   drawStuff( CALayer *layer, void *context)
          nvgFillColor( vg, nvgRGBAf( 1.0, 0.5, 0.0, 1.0));
       nvgFill( vg);
    }
+   return( YES);
 }
 
 

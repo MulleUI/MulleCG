@@ -9,7 +9,7 @@
 #define TEXT         "Der VfL Bochum hat den zweiten Sieg in Folge gefeiert."
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct MulleLayout   layout;
    CGFloat              height;
@@ -64,6 +64,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       if( ! LOOP)
          break;
    }
+   return( YES);
 }
 
 
@@ -80,7 +81,7 @@ void   setupScene( UIWindow *window)
 
    view  = [UIView viewWithFrame:frame];
    [view setMargins:insets];
-   [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+   [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [[window contentPlane] addSubview:view];
 }

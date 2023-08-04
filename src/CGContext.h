@@ -1,7 +1,7 @@
 #import "import.h"
 
 #import "CGColor.h"
-#include "millivg.h"
+#include "microvg.h"
 
 struct NVGcontext;
 

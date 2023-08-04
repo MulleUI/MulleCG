@@ -3,13 +3,13 @@
 #### 🍢 microvg - conveniences atop nanovg
 
 All functions accept the current nanovg context `NVGcontext *vg` as the
-first parameter. To distinguis them from **nanovg**, they are prefixed `mvg`
+first parameter. To distinguish them from **nanovg**, they are prefixed `mvg`
 (microvg) instead of nvg (nanovg).
 
 Unless indicated or obvious from the function parameters, you set the desired
-nanovg state before the function call. Functions try to avoid clobber nanovg
+nanovg state before the function call. Functions try to avoid clobbering nanovg
 state, that is not apparently affected from the function call parameters.
-(But check the header declaration for exception).
+(But check the header declaration for exceptions).
 
 
 #### Example

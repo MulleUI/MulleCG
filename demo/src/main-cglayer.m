@@ -12,7 +12,7 @@
 // layer. Technically that makes little sense, but it shows
 // CGLayer working...
 //
-static void   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CALayer *layer, void *_context)
 {
    CGContext                     *context = _context;
    CGLayer                       *cgLayer;
@@ -56,7 +56,7 @@ static void   drawStuff( CALayer *layer, void *_context)
       canvas.origin = CGPointZero;
       canvas.size   = CGSizeMake( originalCanvas.size.height / 2.0, originalCanvas.size.width / 2.0);
       cgLayer        = [CGLayer layerWithBitmapSize:MulleIntegerSizeMakeWithSize( canvas.size)
-                                         imageFlags:0
+                                       textureFlags:0
                                             context:context];
       // 3. flush drawings so they don't appear in our framebuffer
       [context flushRender];
@@ -99,6 +99,7 @@ static void   drawStuff( CALayer *layer, void *_context)
       [context flushRender];
    }
 //   [UIApp requestTerminate];
+   return( YES);
 }
 
 

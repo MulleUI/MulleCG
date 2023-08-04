@@ -115,7 +115,7 @@ int   main( int argc, char *argv[])
          // so it can act as a texture
          //
          cgLayer = [CGLayer layerWithBitmapSize:MulleIntegerSizeMake( W, H)
-                                    imageFlags:0
+                                  textureFlags:0
                                        context:context];
          if( ! cgLayer)
          {

@@ -123,10 +123,10 @@ static void   drawStuff1( CALayer *layer, CGContext *context)
 
    mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
 
-   mvgStrokeLineH( vg, CGRectGetMinX( rect),
-                    CGRectGetMaxX( rect),
-                    CGRectGetMidY( rect),
-                    CGColorMakeGray());
+   mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( rect),
+                                CGRectGetWidth( rect),  // why Y ?
+                                1.0,
+                                CGColorMakeGray());
    nvgFontSize( vg, 20.0);
    nvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
    mvgTextInRect( vg,
@@ -168,10 +168,10 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
       mvgStrokeRectWithColor( vg, rects[ i][ 0], 1.0, CGColorMakeGray());
       drawLabelBelowRect( vg, 14, alignMode_text[ i], rects[ i][ 0]);
 
-      mvgStrokeLineH( vg, CGRectGetMinX( rects[ i][ 0]),
-                       CGRectGetMaxX( rects[ i][ 0]),
-                       CGRectGetMidY( rects[ i][ 0]),
-                       CGColorMakeGray());
+      mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( rects[ i][ 0]),
+                                   CGRectGetWidth( rects[ i][ 0]),
+                                   1.0,
+                                   CGColorMakeGray());
       nvgFontSize( vg, 20.0);
       nvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
 
@@ -195,10 +195,10 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
          sprintf( buf, "%s/%s", alignMode_text[ k], contentMode2_text[ j]);
          drawLabelBelowRect( vg, 9, buf, small_rects[ j][ k]);
 
-         mvgStrokeLineH( vg, CGRectGetMinX( small_rects[ j][ k]),
-                          CGRectGetMaxX( small_rects[ j][ k]),
-                          CGRectGetMidY( small_rects[ j][ k]),
-                          CGColorMakeGray());
+         mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( small_rects[ j][ k]),
+                                      CGRectGetWidth( small_rects[ j][ k]),
+                                      1.0,
+                                      CGColorMakeGray());
 
          nvgFontSize( vg, 10.0);
          nvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
@@ -223,10 +223,11 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
          rect = drawLabelBelowRect( vg, 9, contentMode_text[ i], small_rects[ j][ k]);
          if( j == 2 && k == 1)
             drawLabelBelowRect( vg, 12, "ALIGN_VISUAL/FILL", rect);
-         mvgStrokeLineH( vg, CGRectGetMinX( small_rects[ j][ k]),
-                          CGRectGetMaxX( small_rects[ j][ k]),
-                          CGRectGetMidY( small_rects[ j][ k]),
-                          CGColorMakeGray());
+
+         mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( small_rects[ j][ k]),
+                                      CGRectGetWidth( small_rects[ j][ k]),
+                                      1.0,
+                                      CGColorMakeGray());
 
          nvgFontSize( vg, 10.0);
          nvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
@@ -244,7 +245,7 @@ void   setupScene( UIWindow *window)
    frame  = [[window contentPlane] contentRect];
 
    view  = [UIView viewWithFrame:frame];
-   [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+   [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff2]; // drawStuff1];
    [[window contentPlane] addSubview:view];
 }

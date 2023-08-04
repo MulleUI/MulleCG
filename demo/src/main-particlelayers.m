@@ -49,7 +49,7 @@
 
 //
 // Conclusions: filled circles are faster than stroked rectangles
-//              Antialiasing only helps for filling (speed wise)
+//              AntiAliasing only helps for filling (speed wise)
 //              Filling is faster than stroke
 //
 
@@ -89,7 +89,7 @@
    }
    while( (r + g + b) < 0.4);
 
-   self->color       = CGColorMakeWithRGB( r, g, b);
+   self->color = CGColorMakeWithRGB( r, g, b);
    return( self);
 }
 
@@ -137,13 +137,14 @@ static inline void   ParticleUpdate( ParticleLayer *p, CGSize canvasSize)
 }
 
 
-- (void) drawInContext:(CGContext *) context
+- (BOOL) drawInContext:(CGContext *) context
 {
    NVGcontext   *vg;
    CGRect       canvas;
    NSUInteger   i;
 
-   [super drawInContext:context];
+   if( ! [super drawInContext:context])
+      return( NO);
 
    vg     = CGContextGetNVGContext( context);
    canvas = [self canvas];
@@ -170,6 +171,8 @@ static inline void   ParticleUpdate( ParticleLayer *p, CGSize canvasSize)
 
    ParticleUpdate( self, canvas.size);
    ParticleDraw( self, vg);
+
+   return( YES);
 }
 
 @end
@@ -201,13 +204,14 @@ int   main()
    app    = [UIApplication sharedInstance];
    window = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
                       titleUTF8String:"Demo"
-                            styleMask:EDGE_ANTIALIAS ? UIWindowStyleEdgeAntialias : UIWindowStyleNop];
+                            styleMask:UIWindowStylePanes |
+                                      (EDGE_ANTIALIAS ? UIWindowStyleAntiAlias : UIWindowStyleNop)];
    [app addWindow:window];
 
    [window setBackgroundColor:CGColorMakeWithRGBA( 0.0, 0.0, 0.0, 1.0)];
    [window setFrameRate:UIWindowFrameRateSynced];
 
-   setupSceneInView( [window contentPlane]);
+   setupSceneInView( [window contentView]);
 
    return( [app run]);
 }

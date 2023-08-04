@@ -21,7 +21,9 @@ src/texture.frag
 # contents selected with patternfile ??-source--sources
 #
 set( SOURCES
+src/main-arc-cw.m
 src/main-arc.m
+src/main-arcto.m
 src/main-bezier.m
 src/main-canvas.m
 src/main-cgimage-contentmode.m
@@ -36,9 +38,13 @@ src/main-cgimage-section.m
 src/main-cgimage-write.m
 src/main-cglayer-convenient.m
 src/main-cglayer.m
+src/main-circle-hole.m
+src/main-custom-paint.m
+src/main-draw-hole.m
 src/main-draw.m
 src/main-draw-simple2.m
 src/main-draw-simple.m
+src/main-draw-tricky-hole.m
 src/main-dropshadow.m
 src/main-fancy-button.m
 src/main-fancy-stepper.m
@@ -48,9 +54,12 @@ src/main-glfw-cglayer.m
 src/main-glfw-draw-offscreen.m
 src/main-glfw-draw-simple.m
 src/main-glfw-two-windows.m
+src/main-gradient-interpolate.m
 src/main-gradient.m
 src/main-gradient-rotate.m
 src/main-grid.m
+src/main-html5-arc.m
+src/main-html5-arcto.m
 src/main-huge-font.m
 src/main-opengl.m
 src/main-outline-glyph.m
@@ -60,6 +69,10 @@ src/main-particles.m
 src/main-particles-sorted.m
 src/main-rect.m
 src/main-rect-pain.m
+src/main-rotate-rect.m
+src/main-rounded-rect.m
+src/main-rounded-stroke.m
+src/main-scissor.m
 src/main-segments.m
 src/main-shader.m
 src/main-stroke-fill.m

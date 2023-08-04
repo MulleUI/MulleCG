@@ -45,17 +45,17 @@ static void  drawRotated( struct NVGcontext *vg, CGImage *image, CGRect rect, NS
    // texture is at 0.0, we calc the "scaled" texture point
    CGPoint        centerPoint;
    CGPoint        diffPoint;
-   CGFloat        angle;
+   CAAngle        angle;
    CGFloat        scale;
 
-   angle             = CAAngleDegreesToRadians( y * 36 + x * 36.0 / 10);
+   angle             = CADegreesToAngle( y * 36 + x * 36.0 / 10);
    scale             = 4.0;
 
    // calculate position independent the amout of rotation for the
    // center point
    centerPoint       = CGPointMake( rect.size.width / 2.0 / scale,  rect.size.height / 2.0 / scale);
    centerPolarPoint  = CAPolarPointMakeWithPoint( centerPoint);
-   rotatedPolarPoint = CAPolarPointAddAngle( centerPolarPoint, angle);
+   rotatedPolarPoint = CAPolarPointAddRadians( centerPolarPoint, angle);
    rotatedPoint      = CGPointMakeWithPolarPoint( rotatedPolarPoint);
    diffPoint         = CGPointMake( (rotatedPoint.x - centerPoint.x),
                                     (rotatedPoint.y - centerPoint.y));
@@ -162,10 +162,7 @@ static void  drawShifted( struct NVGcontext *vg, CGImage *image, CGRect rect, NS
 }
 
 
-
-
-
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              canvas;
@@ -193,7 +190,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    // is too early, and the texture is gone too soon
    image   = [[[CGImage alloc] initWithRGBABytes:bitmap
                                       bitmapSize:MulleIntegerSizeMake( IW, IH)
-                                      imageFlags:0  // NVG_IMAGE_REPEATX
+                                    textureFlags:0  // NVG_IMAGE_REPEATX
                                          context:context] autorelease];
    assert( image);
 
@@ -217,6 +214,8 @@ static void   drawStuff( CALayer *layer, CGContext *context)
          // drawRotated( vg, image, rects[ y][ x], y, x);
          //drawUnscaled( vg, image, rects[ y][ x], y, x);
       }
+
+   return( YES);
 }
 
 

@@ -40,7 +40,7 @@
 // }
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext  *vg;
    CGFont             *font;
