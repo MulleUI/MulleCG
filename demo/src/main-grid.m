@@ -60,7 +60,7 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
 
    bitmapSize = MulleIntegerSizeMake( 4, 4);
    cgLayer    = [CGLayer layerWithBitmapSize:bitmapSize
-                                  imageFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
+                                textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
                                      context:context];
    if( ! cgLayer)
    {

@@ -8,20 +8,21 @@
 
 #define CGLAYER_DEBUG
 
+
 @implementation CGLayer
 
 + (instancetype) layerWithBitmapSize:(struct MulleIntegerSize) bitmapSize
-                          imageFlags:(NSUInteger) imageFlags
+                        textureFlags:(NSUInteger) textureFlags
                              context:(CGContext *) context
 {
    return( [[[self alloc] initWithBitmapSize:bitmapSize
-                                  imageFlags:imageFlags
+                                textureFlags:textureFlags
                                      context:context] autorelease]);
 }
 
 
 - (instancetype) initWithBitmapSize:(struct MulleIntegerSize) bitmapSize
-                         imageFlags:(NSUInteger) imageFlags
+                       textureFlags:(NSUInteger) textureFlags
                             context:(CGContext *) context
 {
    NVGcontext   *vg;
@@ -39,7 +40,7 @@
    _framebuffer = nvgluCreateFramebuffer( vg,
                                           bitmapSize.width,
                                           bitmapSize.height,
-                                          imageFlags);
+                                          textureFlags);
    if( ! _framebuffer)
    {
       [self release];
@@ -60,13 +61,13 @@
 
 #endif
    return( [self initWithTextureID:textureID
-                       imageFlags:imageFlags
+                     textureFlags:textureFlags
                           context:context]);
 }
 
 
 - (instancetype) initWithImage:(CGImage *) image
-                    imageFlags:(NSUInteger) imageFlags
+                  textureFlags:(NSUInteger) textureFlags
                        context:(CGContext *) context
 {
    struct MulleIntegerSize       bitmapSize;
@@ -80,7 +81,7 @@
 
    bitmapSize = [image bitmapSize];
    self = [self initWithBitmapSize:bitmapSize
-                        imageFlags:imageFlags
+                      textureFlags:textureFlags
                            context:context];
    if( ! self)
       return( self);
@@ -141,7 +142,7 @@
    //
 
 - (instancetype) initWithContentsOfFileCString:(char *) filename
-                                    imageFlags:(NSUInteger) imageFlags
+                                  textureFlags:(NSUInteger) textureFlags
                                        context:(CGContext *) context
 {
    abort();
@@ -150,7 +151,7 @@
 
 
 - (instancetype) initWithFileCData:(struct mulle_data) fileCData
-                        imageFlags:(NSUInteger) imageFlags
+                      textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context
 {
    abort();
@@ -160,7 +161,7 @@
 
 - (instancetype) initWithRGBABytes:(void *) bytes
                         bitmapSize:(struct MulleIntegerSize) bitmapSize
-                        imageFlags:(NSUInteger) imageFlags
+                      textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context
 {
    abort();
@@ -271,7 +272,7 @@
       return( nil);
 
    cgLayer = [self layerWithBitmapSize:size
-                            imageFlags:0
+                          textureFlags:0
                                context:context];
    [cgLayer beginLayerRenderWithBackgroundColor:color
                                devicePixelRatio:1.0

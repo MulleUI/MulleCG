@@ -2,53 +2,31 @@
 
 #import "import-private.h"
 
+#if 0
+
 static float nvg__absf(float a)  { return a >= 0.0f ? a : -a; }
-static float nvg__signf(float a) { return a >= 0.0f ? 1.0f : -1.0f; }
 static float nvg__minf(float a, float b) { return a < b ? a : b; }
-static float nvg__maxf(float a, float b) { return a > b ? a : b; }
 
-
-static float nvg__xabsf(float a)  { return a >= 0.0f ? a : -a; }
 
 #define NVG_KAPPA90 0.5522847493f   // Length proportional to radius of a cubic bezier handle for 90deg arcs.
 
 
-void xnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
-                                           float radTopLeft, float radTopRight,
-                                           float radBottomRight, float radBottomLeft)
+void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
+                                            float radTopLeft, float radTopRight,
+                                            float radBottomRight, float radBottomLeft)
 {
    float halfw = nvg__absf(w)*0.5f;
    float halfh = nvg__absf(h)*0.5f;
-//   float rxBL = nvg__minf( nvg__absf( radBottomLeft), halfw) * nvg__signf(w),  ryBL = nvg__minf( nvg__absf( radBottomLeft), halfh) * nvg__signf(h);
-//   float rxBR = nvg__minf( nvg__absf( radBottomRight), halfw) * nvg__signf(w), ryBR = nvg__minf( nvg__absf( radBottomRight), halfh) * nvg__signf(h);
-//   float rxTR = nvg__minf( nvg__absf( radTopRight), halfw) * nvg__signf(w),    ryTR = nvg__minf( nvg__absf( radTopRight), halfh) * nvg__signf(h);
-//   float rxTL = nvg__minf( nvg__absf( radTopLeft), halfw) * nvg__signf(w),     ryTL = nvg__minf( nvg__absf( radTopLeft), halfh) * nvg__signf(h);
-
-//   float ctrlPointOffsetTL = radTopLeft < 0 ? nvg__absf(radTopLeft) / NVG_KAPPA90 : 0;
-//   float ctrlPointOffsetTR = radTopRight < 0 ? nvg__absf(radTopRight) / NVG_KAPPA90 : 0;
-//   float ctrlPointOffsetBR = radBottomRight < 0 ? nvg__absf(radBottomRight) / NVG_KAPPA90 : 0;
-//   float ctrlPointOffsetBL = radBottomLeft < 0 ? nvg__absf(radBottomLeft) / NVG_KAPPA90 : 0;
-
-//   float ctrlPointOffsetTL = radTopLeft < 0 ? -nvg__absf(radTopLeft) / 0.552284749831 : nvg__absf(radTopLeft) / 0.552284749831;
-//   float ctrlPointOffsetTR = radTopRight < 0 ? -nvg__absf(radTopRight) / 0.552284749831 : nvg__absf(radTopRight) / 0.552284749831;
-//   float ctrlPointOffsetBR = radBottomRight < 0 ? -nvg__absf(radBottomRight) / 0.552284749831 : nvg__absf(radBottomRight) / 0.552284749831;
-//   float ctrlPointOffsetBL = radBottomLeft < 0 ? -nvg__absf(radBottomLeft) / 0.552284749831 : nvg__absf(radBottomLeft) / 0.552284749831;
-
-
-//   float ctrlPointOffsetTL = radTopLeft < 0 ? nvg__absf(radTopLeft) : 0;
-//   float ctrlPointOffsetTR = radTopRight < 0 ? nvg__absf(radTopRight) : 0;
-//   float ctrlPointOffsetBR = radBottomRight < 0 ? nvg__absf(radBottomRight) : 0;
-//   float ctrlPointOffsetBL = radBottomLeft < 0 ? nvg__absf(radBottomLeft) : 0;
 
    // this is in the order on how its' drawn (almost)
-   float rxTL = nvg__minf( nvg__absf( radTopLeft), halfw) * nvg__signf(w); // * nvg__signf(radTopLeft);
-   float ryTL = nvg__minf( nvg__absf( radTopLeft), halfh) * nvg__signf(h); // * nvg__signf(radTopLeft);
-   float rxBL = nvg__minf( nvg__absf( radBottomLeft), halfw) * nvg__signf(w); // * nvg__signf(radBottomLeft);
-   float ryBL = nvg__minf( nvg__absf( radBottomLeft), halfh) * nvg__signf(h); // * nvg__signf(radBottomLeft);
-   float rxBR = nvg__minf( nvg__absf( radBottomRight), halfw) * nvg__signf(w); // * nvg__signf(radBottomRight);
-   float ryBR = nvg__minf( nvg__absf( radBottomRight), halfh) * nvg__signf(h); // * nvg__signf(radBottomRight);
-   float rxTR = nvg__minf( nvg__absf( radTopRight), halfw) * nvg__signf(w); // * nvg__signf(radTopRight);
-   float ryTR = nvg__minf( nvg__absf( radTopRight), halfh) * nvg__signf(h); // * nvg__signf(radTopRight);
+   float rxTL = nvg__minf( nvg__absf( radTopLeft), halfw);
+   float ryTL = nvg__minf( nvg__absf( radTopLeft), halfh);
+   float rxBL = nvg__minf( nvg__absf( radBottomLeft), halfw);
+   float ryBL = nvg__minf( nvg__absf( radBottomLeft), halfh);
+   float rxBR = nvg__minf( nvg__absf( radBottomRight), halfw);
+   float ryBR = nvg__minf( nvg__absf( radBottomRight), halfh);
+   float rxTR = nvg__minf( nvg__absf( radTopRight), halfw);
+   float ryTR = nvg__minf( nvg__absf( radTopRight), halfh);
 
    float kappaTL = (radTopLeft < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
    float kappaBL = (radBottomLeft < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
@@ -59,37 +37,187 @@ void xnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
    CGPoint   c2;
    CGPoint   p;
 
+   // draw top left (end) to bottom left (start)
+
+   nvgBeginPath( vg);
+
+   p = CGPointMake( x,
+                    y + h - ryBL);
+   mvgMoveTo( vg, p);
+
+   // draw bottom left corner
+   if( radBottomLeft < 0.0)
+   {
+      c1 = CGPointMake( x + rxBL * kappaBL,
+                        y + h - ryBL);
+      c2 = CGPointMake( x + rxBL,
+                        y + h - ryBL * kappaBL);
+   }
+   else
+   {
+      c1 = CGPointMake( x,
+                        y + h - ryBL * kappaBL);
+      c2 = CGPointMake( x + rxBL * kappaBL,
+                        y + h);
+   }
+   p  = CGPointMake( x + rxBL,
+                     y + h);
+
+   mvgBezierTo(  vg, c1, c2, p);
+
+   // draw bottom left to bottom right corner
+
+   p = CGPointMake( x + w - rxBR, y + h);
+   mvgLineTo(    vg, p);
+
+   // draw bottom right corner
+
+   if( radBottomRight < 0.0)
+   {
+      c1 = CGPointMake( x + w - rxBR,
+                        y + h - ryBR * kappaBR);
+      c2 = CGPointMake( x + w - rxBR * kappaBR,
+                        y + h - ryBR);
+   }
+   else
+   {
+      c1 = CGPointMake( x + w - rxBR * kappaBR,
+                        y + h);
+      c2 = CGPointMake( x + w,
+                        y + h - ryBR * kappaBR);
+   }
+   p  = CGPointMake( x + w,
+                     y + h - ryBR);
+
+   mvgBezierTo(  vg, c1, c2, p);
+
+   // draw bottom right to top right line
+   p  = CGPointMake( x + w, y + ryTR);
+   mvgLineTo(    vg, p);
+
+   if( radTopRight < 0.0)
+   {
+      c1 = CGPointMake( x + w - rxTR * kappaTR,
+                        y + ryTR);
+      c2 = CGPointMake( x + w - rxTR,
+                        y + ryTR * kappaTR);
+   }
+   else
+   {
+      c1 = CGPointMake( x + w,
+                        y + ryTR * kappaTR);
+      c2 = CGPointMake( x + w - rxTR * kappaTR,
+                        y);
+   }
+   p  = CGPointMake( x + w - rxTR, y);
+
+   mvgBezierTo( vg, c1, c2, p);
+
+   // draw top right to top left line
+   p  = CGPointMake( x + rxTL, y);
+   mvgLineTo(    vg, p);
+
+   // draw top left corner
+   if( radTopLeft < 0.0)
+   {
+      c1 = CGPointMake( x + rxTL,
+                        y + ryTL * kappaTL);
+      c2 = CGPointMake( x + rxTL * kappaTL,
+                        y + ryTL);
+   }
+   else
+   {
+      c1 = CGPointMake( x + rxTL * kappaTL,
+                        y);
+      c2 = CGPointMake( x,
+                        y + ryTL * kappaTL);
+   }
+   p  = CGPointMake( x, y + rxTL);
+
+   mvgBezierTo( vg, c1, c2, p);
+
+   mvgClosePath( vg);
+
+}
+
+static inline void   xmvgRoundedRectVarying( NVGcontext *vg,
+                                             CGRect rect,
+                                             struct MulleCornerInsets corners)
+{
    nvgStrokeWidth( vg, 2.0);
+   xxnvgRoundedRectVarying( vg, rect.origin.x,
+                                rect.origin.y,
+                                rect.size.width,
+                                rect.size.height,
+                                corners.tl,
+                                corners.tr,
+                                corners.br,
+                                corners.bl);
+   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x808080FF));
+   nvgStroke( vg);//   nvgFillColor( vg, CGColorMakeRed());
+}
+
+#endif
+
+
+#if 0
+void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
+                                             float radTopLeft, float radTopRight,
+                                             float radBottomRight, float radBottomLeft)
+{
+   float halfw = nvg__absf(w)*0.5f;
+   float halfh = nvg__absf(h)*0.5f;
+
+   // this is in the order on how its' drawn (almost)
+   float rxTL = nvg__minf( nvg__absf( radTopLeft), halfw);
+   float ryTL = nvg__minf( nvg__absf( radTopLeft), halfh);
+   float rxBL = nvg__minf( nvg__absf( radBottomLeft), halfw);
+   float ryBL = nvg__minf( nvg__absf( radBottomLeft), halfh);
+   float rxBR = nvg__minf( nvg__absf( radBottomRight), halfw);
+   float ryBR = nvg__minf( nvg__absf( radBottomRight), halfh);
+   float rxTR = nvg__minf( nvg__absf( radTopRight), halfw);
+   float ryTR = nvg__minf( nvg__absf( radTopRight), halfh);
+
+   float kappaTL = (radTopLeft < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
+   float kappaBL = (radBottomLeft < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
+   float kappaBR = (radBottomRight < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
+   float kappaTR = (radTopRight < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
+
+   CGPoint   c1;
+   CGPoint   c2;
+   CGPoint   p;
 
    // draw top left (end) to bottom left (start)
 
    nvgBeginPath( vg);
-   p = CGPointMake( x, y + nvg__xabsf( ryTL));
-   mvgMoveTo(    vg, p);
-   p = CGPointMake( x, y + h - nvg__xabsf( ryBL));
-   mvgLineTo(    vg, p);
+   p = CGPointMake( x,
+                    y + ryTL);
+   mvgMoveTo( vg, p);
+   p = CGPointMake( x,
+                    y + h - ryBL);
+   mvgLineTo( vg, p);
    nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xF02020FF));
    nvgStroke( vg);
 
    // draw bottom left corner
    nvgBeginPath( vg);
-   mvgMoveTo(    vg, p);
+   mvgMoveTo( vg, p);
 
    if( radBottomLeft < 0.0)
    {
-      c1 = CGPointMake( x + nvg__xabsf( rxBL) * kappaBL,
-                        y + h  - nvg__xabsf( ryBL));
-      c2 = CGPointMake( x + nvg__xabsf( rxBL),
-                        y + h - nvg__xabsf( ryBL) * kappaBL);
+      c1 = CGPointMake( x + rxBL * kappaBL,
+                        y + h - ryBL);
+      c2 = CGPointMake( x + rxBL,
+                        y + h - ryBL * kappaBL);
    }
    else
    {
       c1 = CGPointMake( x,
-                        y + h - nvg__xabsf( ryBL) * kappaBL);
-      c2 = CGPointMake( x + nvg__xabsf( rxBL) * kappaBL,
+                        y + h - ryBL * kappaBL);
+      c2 = CGPointMake( x + rxBL * kappaBL,
                         y + h);
    }
-   p  = CGPointMake( x + nvg__xabsf( rxBL),
+   p  = CGPointMake( x + rxBL,
                      y + h);
 
    mvgBezierTo(  vg, c1, c2, p);
@@ -103,7 +231,7 @@ void xnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
 
    nvgBeginPath( vg);
    mvgMoveTo(    vg, p);
-   p = CGPointMake( x + w - nvg__xabsf( rxBR), y + h);
+   p = CGPointMake( x + w - rxBR, y + h);
    mvgLineTo(    vg, p);
    nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x20F020FF));
    nvgStroke( vg);
@@ -114,20 +242,20 @@ void xnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
 
    if( radBottomRight < 0.0)
    {
-      c1 = CGPointMake( x + w - nvg__xabsf( rxBR),
-                        y + h - nvg__xabsf( ryBR) * kappaBR);
-      c2 = CGPointMake( x + w - nvg__xabsf( rxBR) * kappaBR,
-                        y + h - nvg__xabsf( ryBR));
+      c1 = CGPointMake( x + w - rxBR,
+                        y + h - ryBR * kappaBR);
+      c2 = CGPointMake( x + w - rxBR * kappaBR,
+                        y + h - ryBR);
    }
    else
    {
-      c1 = CGPointMake( x + w - nvg__xabsf( rxBR) * kappaBR,
+      c1 = CGPointMake( x + w - rxBR * kappaBR,
                         y + h);
       c2 = CGPointMake( x + w,
-                        y + h - nvg__xabsf( ryBR) * kappaBR);
+                        y + h - ryBR * kappaBR);
    }
    p  = CGPointMake( x + w,
-                     y + h - nvg__xabsf( ryBR));
+                     y + h - ryBR);
 
    mvgBezierTo(  vg, c1, c2, p);
    nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xF080F0FF));
@@ -139,7 +267,7 @@ void xnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
    // draw bottom right to top right line
    nvgBeginPath( vg);
    mvgMoveTo(    vg, p);
-   p  = CGPointMake( x + w, y + nvg__xabsf( ryTR));
+   p  = CGPointMake( x + w, y + ryTR);
    mvgLineTo(    vg, p);
    nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x2020F0FF));
    nvgStroke( vg);
@@ -150,19 +278,19 @@ void xnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
 
    if( radTopRight < 0.0)
    {
-      c1 = CGPointMake( x + w - nvg__xabsf( rxTR) * kappaTR,
-                        y + nvg__xabsf( ryTR));
-      c2 = CGPointMake( x + w - nvg__xabsf( rxTR),
-                        y + nvg__xabsf( ryTR) * kappaTR);
+      c1 = CGPointMake( x + w - rxTR * kappaTR,
+                        y + ryTR);
+      c2 = CGPointMake( x + w - rxTR,
+                        y + ryTR * kappaTR);
    }
    else
    {
       c1 = CGPointMake( x + w,
-                        y + nvg__xabsf( ryTR) * kappaTR);
-      c2 = CGPointMake( x + w - nvg__xabsf( rxTR) * kappaTR,
+                        y + ryTR * kappaTR);
+      c2 = CGPointMake( x + w - rxTR * kappaTR,
                         y);
    }
-   p  = CGPointMake( x + w - nvg__xabsf( rxTR), y);
+   p  = CGPointMake( x + w - rxTR, y);
 
    mvgBezierTo( vg, c1, c2, p);
    nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x404060FF));
@@ -175,7 +303,7 @@ void xnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
    // draw top right to top left line
    nvgBeginPath( vg);
    mvgMoveTo(    vg, p);
-   p  = CGPointMake( x + nvg__xabsf( rxTL), y);
+   p  = CGPointMake( x + rxTL, y);
    mvgLineTo(    vg, p);
    nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xF080F0FF));
    nvgStroke( vg);
@@ -186,19 +314,19 @@ void xnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
 
    if( radTopLeft < 0.0)
    {
-      c1 = CGPointMake( x + nvg__xabsf( rxTL),
-                        y + nvg__xabsf( ryTL) * kappaTL);
-      c2 = CGPointMake( x + nvg__xabsf( rxTL) * kappaTL,
-                        y + nvg__xabsf( ryTL));
+      c1 = CGPointMake( x + rxTL,
+                        y + ryTL * kappaTL);
+      c2 = CGPointMake( x + rxTL * kappaTL,
+                        y + ryTL);
    }
    else
    {
-      c1 = CGPointMake( x + nvg__xabsf( rxTL) * kappaTL,
+      c1 = CGPointMake( x + rxTL * kappaTL,
                         y);
       c2 = CGPointMake( x,
-                        y + nvg__xabsf( ryTL) * kappaTL);
+                        y + ryTL * kappaTL);
    }
-   p  = CGPointMake( x, y + nvg__xabsf( rxTL));
+   p  = CGPointMake( x, y + rxTL);
 
    mvgBezierTo( vg, c1, c2, p);
    nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x404060FF));
@@ -206,29 +334,9 @@ void xnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
 
    mvgFillCircleWithColor( vg, c1, 2.0, CGColorMakeRed());
    mvgFillCircleWithColor( vg, c2, 2.0, CGColorMakeGreen());
-
-//   nvgLineTo(    vg, x + w, y + h - ryBR);
-//   nvgLineTo(    vg, x + w, y + ryTR);
-//   nvgLineTo(    vg, x + w - rxTR, y);
-//   nvgLineTo(    vg, x + rxTL, y);
-//   nvgLineTo(    vg, x, y + ryTL);
-//   nvgClosePath( vg);
 }
+#endif
 
-
-static inline void   xmvgRoundedRectVarying( NVGcontext *vg,
-                                             CGRect rect,
-                                             struct MulleCornerInsets corners)
-{
-   xnvgRoundedRectVarying( vg, rect.origin.x,
-                               rect.origin.y,
-                               rect.size.width,
-                               rect.size.height,
-                               corners.tl,
-                               corners.tr,
-                               corners.br,
-                               corners.bl);
-}
 
 
 static void   drawRoundedRect( struct NVGcontext *vg, CGRect canvas, struct MulleCornerInsets insets)
@@ -249,12 +357,15 @@ static void   drawRoundedRect( struct NVGcontext *vg, CGRect canvas, struct Mull
                               insets.br,
                               insets.bl);
    nvgStrokeWidth( vg, 8);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x808080FF));
+   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xF0C0C0FF));
    nvgStroke( vg);//   nvgFillColor( vg, CGColorMakeRed());
 
 
-   nvgStrokeWidth( vg, 2);
-   xmvgRoundedRectVarying( vg, rect, insets);
+   mvgBeginPath( vg);
+   mvgRoundedRectVarying( vg, rect, insets);
+   mvgStrokeWidth( vg, 2);
+   mvgStrokeColor( vg, CGColorMakeWithHexColor( 0x808080FF));
+   mvgStroke( vg);//   nvgFillColor( vg, CGColorMakeRed());
 
 //   nvgFill( vg);
 
@@ -262,7 +373,7 @@ static void   drawRoundedRect( struct NVGcontext *vg, CGRect canvas, struct Mull
 }
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext          *vg;
    CGRect                     canvas;
@@ -292,6 +403,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 //                               -CGRectGetHeight( rect));
          drawRoundedRect( vg, rect, insets);
       }
+   return( YES);
 }
 
 

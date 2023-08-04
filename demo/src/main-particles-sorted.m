@@ -55,7 +55,7 @@
 
 //
 // Conclusions: filled circles are faster than stroked rectangles
-//              Antialiasing only helps for filling (speed wise)
+//              AntiAliasing only helps for filling (speed wise)
 //              Filling is faster than stroke
 //
 
@@ -235,7 +235,7 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
 }
 
 
-- (void) drawInContext:(CGContext *) context
+- (BOOL) drawInContext:(CGContext *) context
 {
    NVGcontext   *vg;
    CGRect       canvas;
@@ -245,7 +245,8 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
 
 //   MulleUICLog( stderr, "%#@: %#@ drawInContext\n", [NSThread currentThread], self);
 
-   [super drawInContext:context];
+   if( ! [super drawInContext:context])
+      return( NO);
 
    vg     = CGContextGetNVGContext( context);
    canvas = [self canvas];
@@ -295,6 +296,8 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
 
    ParticleDrawRange( _particles, range, vg);
    range.location += range.length;
+
+   return( YES);
 }
 
 @end
@@ -322,7 +325,7 @@ int   main()
 
    styleMask  = UIWindowStyleMaskDefault;
    styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
-   styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleEdgeAntialias, EDGE_ANTIALIAS);
+   styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleAntiAlias, EDGE_ANTIALIAS);
 
    window     = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
                           titleUTF8String:"Demo"

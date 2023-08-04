@@ -11,7 +11,7 @@
 #define ROWS  4
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext    *vg;
    CGRect               canvas;
@@ -41,7 +41,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       case 1 :
          paint = [[[CGImage alloc] initWithRGBABytes:bitmap2
                                           bitmapSize:MulleIntegerSizeMake( 32, 32)
-                                          imageFlags:0  // NVG_IMAGE_REPEATX
+                                        textureFlags:0  // NVG_IMAGE_REPEATX
                                              context:context] autorelease];
          break;
 
@@ -99,6 +99,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
          }
       }
    }
+   return( YES);
 }
 
 

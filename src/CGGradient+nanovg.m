@@ -5,7 +5,7 @@
 
 #import "import-private.h"
 
-#include "millivg.h"
+#include "microvg.h"
 #include <math.h>
 
 #import "CGContext.h"
@@ -16,19 +16,21 @@
 static NVGpaint
    CGGradientNVGpaintForRect( CGGradient *self, CGRect rect, NVGcontext *vg)
 {
-   NVGpaint         paint;
-   CGFloat          w, h;
-   CAAngleRadians   angle;
-   CGPoint          start;
-   CGPoint          end;
+   CGFloat      radians;
+   CGFloat      w, h;
+   CGPoint      end;
+   CGPoint      start;
+   NVGpaint     paint;
+   CARotation   rotation;
 
-   angle = [self angle];
-   w     = rect.size.width  * cosf( angle);
-   h     = rect.size.height * -sinf( angle);
-   start = CGPointMake( rect.origin.x + rect.size.width / 2.0 - w / 2.0,
-                        rect.origin.y + rect.size.height / 2.0 - h / 2.0);
-   end   = CGPointMake( start.x + w, start.y + h);
-   paint = mvgLinearGradient( vg, start, end, [self startColor], [self endColor]);
+   rotation = [self rotation];
+   radians  = CARotationToRadians( rotation);
+   w        = rect.size.width  * cosf( radians);
+   h        = rect.size.height * sinf( radians);
+   start    = CGPointMake( rect.origin.x + rect.size.width / 2.0 - w / 2.0,
+                           rect.origin.y + rect.size.height / 2.0 - h / 2.0);
+   end      = CGPointMake( start.x + w, start.y + h);
+   paint    = mvgLinearGradient( vg, start, end, [self startColor], [self endColor]);
    return( paint);
 }
 
@@ -105,9 +107,6 @@ void   mvgFillCircleWithGradient( NVGcontext *vg,
    }
    mvgFill( vg);
 }
-
-
-
 
 
 

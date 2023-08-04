@@ -3,7 +3,7 @@
 #import "import-private.h"
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
    CGRect              canvas;
@@ -23,9 +23,11 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
 
-
-   CGRectPartitionIntoRowsAndColumns( CGRectInset( canvas, 10, 10), CGSizeMake( 10, 10), 2, 2, (CGRect *) rects);
-
+   CGRectPartitionIntoRowsAndColumns( CGRectInset( canvas, 10, 10),
+                                      CGSizeMake( 10, 10),
+                                      2,
+                                      2,
+                                      (CGRect *) rects);
 
    // NVGpaint nvgLinearGradient(NVGcontext* ctx, float sx, float sy, float ex, float ey,
    //                  NVGcolor icol, NVGcolor ocol);
@@ -96,18 +98,18 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    rect   = rects[ 1][ 1];
    radius = CGRectGetOuterRadius( rect);
    radius = radius * _CAQuadraticGetValue( CAQuadraticEaseOut, x);
-   paint  = mvgRadialGradient( vg,
-                               CGRectGetCenterPoint( rect),
-                               0.0,
-                               radius,
-                               CGColorMakeYellow(),
-                               CGColorMakeBlue());
+   paint  = mvgRadialGradient( vg, CGRectGetCenterPoint( rect),
+                                   0.0,
+                                   radius,
+                                   CGColorMakeYellow(),
+                                   CGColorMakeBlue());
    mvgFillRectWithNVGpaint( vg, rect, paint);
 
    if( drawHelpers)
    {
       mvgFillCircleWithColor( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
    }
+   return( YES);
 }
 
 

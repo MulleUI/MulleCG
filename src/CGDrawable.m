@@ -14,7 +14,7 @@ CGDrawableOptions   CGDrawableOptionsDefault =
    .rotation          = CGRotationNone,
    .scale             = CGScaleNone,
    .flags.flip        = CGFlipNone,
-   .flags.repeat      = CGRepeatNone,
+   .flags.repeat      = CGRepeatAsIs,
    .flags.contentMode = CGContentModeCenterPoint
 };
 
@@ -26,7 +26,7 @@ CGDrawableOptions   CGDrawableOptionsScaleToFit =
    .rotation          = CGRotationNone,
    .scale             = CGScaleToFit,
    .flags.flip        = CGFlipNone,
-   .flags.repeat      = CGRepeatNone,
+   .flags.repeat      = CGRepeatAsIs,
    .flags.contentMode = CGContentModeCenterPoint
 };
 
@@ -51,7 +51,7 @@ PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 
 // if you want to do more, do your own layer
 
-CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians angle)
+CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngle angle)
 {
    CAPolarPoint   rotatedPolarPoint;
    CAPolarPoint   centerPolarPoint;
@@ -64,7 +64,7 @@ CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians angle)
    // center point
    centerPoint       = CGPointMake( patternRect.size.width / 2.0, patternRect.size.height / 2.0);
    centerPolarPoint  = CAPolarPointMakeWithPoint( centerPoint);
-   rotatedPolarPoint = CAPolarPointAddAngle( centerPolarPoint, angle);
+   rotatedPolarPoint = CAPolarPointAddRadians( centerPolarPoint, CAAngleToRadians( angle));
    rotatedPoint      = CGPointMakeWithPolarPoint( rotatedPolarPoint);
    diffPoint         = CGPointMake( rotatedPoint.x - centerPoint.x,
                                     rotatedPoint.y - centerPoint.y);
@@ -75,7 +75,7 @@ CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians angle)
 
 
 CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
-                                                 CAAngleRadians angle,
+                                                 CAAngle angle,
                                                  CGVector scaleFactor)
 {
    CAPolarPoint   rotatedPolarPoint;
@@ -89,7 +89,7 @@ CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
    // center point
    centerPoint       = CGPointMake( patternRect.size.width / 2.0, patternRect.size.height / 2.0);
    centerPolarPoint  = CAPolarPointMakeWithPoint( centerPoint);
-   rotatedPolarPoint = CAPolarPointAddAngle( centerPolarPoint, angle);
+   rotatedPolarPoint = CAPolarPointAddRadians( centerPolarPoint, CAAngleToRadians( angle));
    rotatedPoint      = CGPointMakeWithPolarPoint( rotatedPolarPoint);
    diffPoint         = CGPointMake( rotatedPoint.x - centerPoint.x,
                                     rotatedPoint.y - centerPoint.y);
@@ -100,7 +100,7 @@ CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
 
 
 static CGAffineTransform   textureMapperTransform( CGRect rect,
-                                                   CGFloat angle,
+                                                   CGFloat rotation,
                                                    CGSize extent)
 {
    CGAffineTransform   rotate;
@@ -119,7 +119,7 @@ static CGAffineTransform   textureMapperTransform( CGRect rect,
    //                          float angle,
    //                          int image,
    //                          float alpha)
-   rotate        = CGAffineTransformMakeRotationInline( angle);
+   rotate        = CGAffineTransformMakeRotationInline( rotation);
    translate     = CGAffineTransformMakeTranslationInline( rect.origin.x, rect.origin.y);
    paint         = CGAffineTransformConcatInline( rotate, translate);
 
@@ -143,7 +143,7 @@ static CGAffineTransform   textureMapperTransform( CGRect rect,
 // bitmapSize should also be the correct max imageSize
 //
 CGAffineTransform   CGRectReverseImageMapperTransform( CGRect rect,
-                                                       CGFloat angle,
+                                                       CAAngle angle,
                                                        CGSize extent,
                                                        CGSize imageSize)
 {
@@ -162,7 +162,7 @@ CGAffineTransform   CGRectReverseImageMapperTransform( CGRect rect,
 }
 
 
-//static CGPoint  CGRectGetOriginToCenterForAngleAndExtent( CGRect rect,
+//static CGPoint  CGRectGetOriginToCenterForRotationAndExtent( CGRect rect,
 //                                                          CAAngleRadians angle,
 //                                                          CGSize extent)
 //{
@@ -230,10 +230,10 @@ CGAffineTransform   CGRectReverseImageMapperTransform( CGRect rect,
 //
 
 
-CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
-                                                         CGPoint texturePoint,
-                                                         CAAngleRadians angle,
-                                                         CGSize extent)
+CGPoint  CGRectGetOriginToTexturePointForRotationAndExtent( CGRect rect,
+                                                            CGPoint texturePoint,
+                                                            CGFloat rotation,
+                                                            CGSize extent)
 {
    CGPoint             rotatedPoint;
    CGPoint             rotatedOrigin;
@@ -244,7 +244,7 @@ CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
 
 #ifdef DRAWABLE_DEBUG
    fprintf( stderr, "rect=%s angle=%.3f extent=%s\n",
-         CGRectUTF8String( rect), CAAngleRadiansToDegrees( angle), CGSizeUTF8String( extent));
+         CGRectUTF8String( rect), CAAngleToDegrees( rotation), CGSizeUTF8String( extent));
 #endif
 
    // xform should place texture at center so
@@ -264,7 +264,7 @@ CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
    fprintf( stderr, "centerPoint      : %s\n", CGPointUTF8String( centerPoint));
 #endif   
 
-   xform              = textureMapperTransform( centeredRect, angle, extent);
+   xform              = textureMapperTransform( centeredRect, rotation, extent);
    xform              = CGAffineTransformInvert( xform);
 
    // now when we apply the transform to the center point of the texture
@@ -309,9 +309,9 @@ CGPoint  CGRectGetOriginToTexturePointForAngleAndExtent( CGRect rect,
 }
 
 
-static CGPoint  CGRectGetOriginToCenterForAngleAndExtent( CGRect rect,
-                                                          CAAngleRadians angle,
-                                                          CGSize extent)
+static CGPoint  CGRectGetOriginToCenterForRotationAndExtent( CGRect rect,
+                                                             CGFloat rotation,
+                                                             CGSize extent)
 {
    CGPoint             rotatedPoint;
    CGPoint             rotatedOrigin;
@@ -322,7 +322,7 @@ static CGPoint  CGRectGetOriginToCenterForAngleAndExtent( CGRect rect,
 
 #ifdef DRAWABLE_DEBUG
    fprintf( stderr, "rect=%s angle=%.3f extent=%s\n",
-         CGRectUTF8String( rect), CAAngleRadiansToDegrees( angle), CGSizeUTF8String( extent));
+         CGRectUTF8String( rect), CAAngleToDegrees( rotation), CGSizeUTF8String( extent));
 #endif
    // xform should place texture at center so
    //rect.origin        = CGRectGetCenterPoint( rect);
@@ -339,7 +339,7 @@ static CGPoint  CGRectGetOriginToCenterForAngleAndExtent( CGRect rect,
 #ifdef DRAWABLE_DEBUG
    fprintf( stderr, "centerPoint      : %s\n", CGPointUTF8String( centerPoint));
 #endif
-   xform              = textureMapperTransform( centeredRect, angle, extent);
+   xform              = textureMapperTransform( centeredRect, rotation, extent);
    xform              = CGAffineTransformInvert( xform);
 
    // now when we apply the transform to the center point of the texture
@@ -386,23 +386,23 @@ static NSInteger   CGBitmapDrawableGetImageID( id <CGBitmapDrawable> self,
                                                CGDrawableOptions *options,
                                                CGContext *context)
 {
-   NSInteger    imageFlags;
+   NSInteger    textureFlags;
    NSInteger    textureID;
    CGImage      *image;
 
    // if we are a CGImage we can't really change, but a UIBitmapImage can
-   imageFlags = [self imageFlags];
+   textureFlags = [self textureFlags];
    if( options->flags.repeat != CGRepeatAsIs)
    {
-      imageFlags  &= ~(NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
+      textureFlags &= ~(NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
       if( options->flags.repeat & CGRepeatHorizontally)
-         imageFlags |= NVG_IMAGE_REPEATX;
+         textureFlags |= NVG_IMAGE_REPEATX;
       if( options->flags.repeat & CGRepeatVertically)
-         imageFlags |= NVG_IMAGE_REPEATY;
+         textureFlags |= NVG_IMAGE_REPEATY;
    }
 
    image = [self cgImageWithContext:context
-                         imageFlags:imageFlags];
+                       textureFlags:textureFlags];
 
    if( ! image)
       return( -1);
@@ -511,7 +511,7 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
    if( options->rotation != 0.0 || options->scale != CGScaleToFit)
    {
       placedRect         = CGSizePlaceInRect( patternRect.size, rect, options->flags.contentMode);
-      patternRect.origin = CGRectGetOriginToCenterForAngleAndExtent( placedRect, options->rotation, patternRect.size);
+      patternRect.origin = CGRectGetOriginToCenterForRotationAndExtent( placedRect, options->rotation, patternRect.size);
    }
    else
       patternRect.origin = rect.origin;
@@ -520,7 +520,10 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
 }
 
 
-CGRect   CGDrawablePatternRect( id <CGDrawable> self, CGRect rect, CGRect fromRect, CGFloat rotation)
+CGRect   CGDrawablePatternRect( id <CGDrawable> self,
+                                CGRect rect,
+                                CGRect fromRect,
+                                CAAngle rotation)
 {
    CGSize              size;
    CGRect              sectionRect;
@@ -550,10 +553,10 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self, CGRect rect, CGRect fromRe
    texturePoint.x = (CGRectGetMidX( sectionRect) - rect.origin.x) / rect.size.width;
    texturePoint.y = (CGRectGetMidY( sectionRect) - rect.origin.y) / rect.size.height;
 
-   r.origin = CGRectGetOriginToTexturePointForAngleAndExtent( rect,
-                                                              texturePoint,
-                                                              rotation,
-                                                              r.size);
+   r.origin = CGRectGetOriginToTexturePointForRotationAndExtent( rect,
+                                                                 texturePoint,
+                                                                 rotation,
+                                                                 r.size);
    return( r);
 }
 
@@ -568,8 +571,8 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self, CGRect rect, CGRect fromRe
    if( ! options)
       options = &CGDrawableOptionsScaleToFit;
 
-   assert( options->scale == CGScaleToFit);
-   assert( options->flags.repeat      == CGRepeatNone);
+   assert( options->scale             == CGScaleToFit);
+   assert( options->flags.repeat      == CGRepeatNone || options->flags.repeat == CGRepeatAsIs);
    assert( options->flags.contentMode == CGContentModeCenterPoint);
 
    r = CGDrawablePatternRect( self, rect, fromRect, options->rotation);
@@ -586,7 +589,7 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self, CGRect rect, CGRect fromRe
 }
 
 
-- (NSUInteger) imageFlags 
+- (NSUInteger) textureFlags
 {
    return( 0);
 }
@@ -594,7 +597,7 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self, CGRect rect, CGRect fromRe
 
 - (BOOL) isRepeating   
 {
-   return( [self imageFlags] & (NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY) ? YES : NO);
+   return( [self textureFlags] & (NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY) ? YES : NO);
 }
 
 

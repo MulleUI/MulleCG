@@ -40,6 +40,7 @@ src/generic/include-private.h
 #
 set( PRIVATE_HEADERS
 src/CGGradient+Private.h
+src/CGPaint+Private.h
 )
 
 #
@@ -102,8 +103,8 @@ src/_emoji.inc
 src/_entypo.inc
 src/_entypo.ttf.inc
 src/microvg/microvg.h
-src/microvg/millivg.h
-src/microvg/millivg-nanowrap.h
+src/microvg/microvg-nanowrap.h
+src/microvg/nanovg-extensions.inc
 src/mulle-color/CGColorDiff.h
 src/mulle-color/CGColor.h
 src/mulle-color/mulle-color.h

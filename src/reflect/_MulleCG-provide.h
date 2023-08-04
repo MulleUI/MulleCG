@@ -11,8 +11,8 @@
  */
 #include "nanovg.h"
 #include "microvg.h"
-#include "millivg.h"
-#include "millivg-nanowrap.h"
+#include "microvg-nanowrap.h"
+#include "nanovg-extensions.inc"
 #include "CGColor.h"
 #include "mulle-color.h"
 #include "nanovg+UTF8String.h"

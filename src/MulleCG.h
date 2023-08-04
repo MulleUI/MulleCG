@@ -8,7 +8,7 @@
 #include "nanovg.h"
 
 #include "microvg.h"
-#include "millivg.h"
+#include "microvg.h"
 
 #ifdef __has_include
 # if __has_include( "_MulleCG-versioncheck.h")

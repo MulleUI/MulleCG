@@ -13,7 +13,9 @@ static CGLayer   *texture;
 // In this example, we use nvg to draw something into a CGLayer (aka texture).
 // Then we use this CGLayer as paint (texture) for a rectangle.
 // The drawing of the texture must be done outside of the main window render
-// loop.
+// loop. (why ? Apparently because at the time of writing this there was
+// no way to "stack" framebuffer bindings.
+// TODO: update the code to stack...)
 //
 static void   drawTexture( CGContext *context, CGSize size)
 {
@@ -45,7 +47,7 @@ static void   drawTexture( CGContext *context, CGSize size)
 
 static CGLayer  *createTexture( CGContext *context,
                                 CGFloat pixelRatio,
-                                NSUInteger imageFlags)
+                                NSUInteger textureFlags)
 {
    CGFrameInfo                   *info;
    CGFloat                       radius;
@@ -60,7 +62,7 @@ static CGLayer  *createTexture( CGContext *context,
    // we create a small 32x32 texture
 
    texture = [[CGLayer layerWithBitmapSize:MulleIntegerSizeMake( 32, 32)
-                                imageFlags:imageFlags
+                              textureFlags:textureFlags
                                    context:context] retain];
    assert( texture);
 
@@ -88,6 +90,7 @@ static void  drawStuff( CALayer *layer, CGContext *context)
    CGFloat      angle;
    CGRect       rect;
    CGRect       shape;
+   CGFloat      rotation;
    NVGpaint     paint;
    NSUInteger   frameNumber;
    NVGcontext   *vg;
@@ -97,11 +100,11 @@ static void  drawStuff( CALayer *layer, CGContext *context)
    rect  = [layer canvas];
    shape = CGRectInset( rect, 60, 60);
 
-   vg    = CGContextGetNVGContext( context);
-   angle = 3.141 * 2 * (frameNumber % 360) / 360;
+   vg       = CGContextGetNVGContext( context);
+   rotation = (frameNumber % 360) / 360.0;
 
    nvgTranslate( vg, CGRectGetMidX( shape), CGRectGetMidY( shape));
-   nvgRotate( vg, angle);
+   nvgRotate( vg, CARotationToAngle( rotation));
    nvgTranslate( vg, -CGRectGetMidX( shape), -CGRectGetMidY( shape));
 
    nvgBeginPath( vg);
@@ -110,7 +113,10 @@ static void  drawStuff( CALayer *layer, CGContext *context)
       // ugliness fix this, this need not be an object
 
 #ifdef HAVE_TEXTURE
-      paint = mvgImagePattern( vg, CGRectMake( 0, 0, 32, 32), angle, [texture textureID], 1.0);
+      paint = mvgImagePattern( vg, CGRectMake( 0, 0, 32, 32),
+                                   rotation,
+                                   [texture textureID],
+                                   1.0);
       nvgFillPaint( vg, paint);
 #else
       nvgFillColor( vg, CGColorMakeWithHexColor( 0xFFFF00FF));
@@ -167,6 +173,7 @@ int   main( int argc, char *argv[])
     */
    app = [UIApplication sharedInstance];
 
+   // different styleMask just for fun
    styleMask = UIWindowStyleMaskDefault;
    styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
    styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);

@@ -216,10 +216,12 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 {
    assert( [self isActive]);
 
+   // TODO: maybe boobytrappe mvgFontFace to make it unusable as one must
+   //       use [font nameUTF8String] to get the proper string...
    if( font)
-      mvgFontFace( _vg, [font nameUTF8String]);
+      nvgFontFace( _vg, [font nameUTF8String]);
    else
-      mvgFontFace( _vg, "sans");
+      nvgFontFace( _vg, "sans");
 
    _hasLoadedFont = YES;
 }

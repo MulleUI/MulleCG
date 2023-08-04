@@ -10,7 +10,7 @@
 
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              rect;
@@ -39,7 +39,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    // is too early, and the texture is gone too soon
    image   = [[[CGImage alloc] initWithRGBABytes:bitmap
                                       bitmapSize:MulleIntegerSizeMake( 8, 8)
-                                      imageFlags:NVG_IMAGE_NEAREST  // NVG_IMAGE_REPEATX
+                                    textureFlags:NVG_IMAGE_NEAREST  // NVG_IMAGE_REPEATX
                                          context:context] autorelease];
    assert( image);
 
@@ -58,7 +58,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 //      written = YES;
 //
 //      cgLayer = [[[CGLayer alloc] initWithImage:image
-//                                     imageFlags:NVG_IMAGE_NEAREST
+//                                   textureFlags:NVG_IMAGE_NEAREST
 //                                        context:context] autorelease];
 //      bitmapImage = [cgLayer bitmapImage];
 //      if( ! bitmapImage)
@@ -66,6 +66,8 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 //
 //      [bitmapImage writeToPNGUTF8String:"layer.png"];
    }
+
+   return( YES);
 }
 
 

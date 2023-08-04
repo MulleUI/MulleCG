@@ -32,16 +32,16 @@ struct CGFrameInfo;
 @property char                      *debugNameUTF8String;  // useful for debugging
 
 + (instancetype) layerWithBitmapSize:(struct MulleIntegerSize) size
-                          imageFlags:(NSUInteger) imageFlags
+                        textureFlags:(NSUInteger) textureFlags
                              context:(CGContext *) context;
 
 - (instancetype) initWithBitmapSize:(struct MulleIntegerSize) size
-                         imageFlags:(NSUInteger) imageFlags
+                       textureFlags:(NSUInteger) textureFlags
                             context:(CGContext *) context;
 
 // more or less for completeness... probably makes no sense
 - (instancetype) initWithImage:(CGImage *) image
-                    imageFlags:(NSUInteger) imageFlags
+                  textureFlags:(NSUInteger) textureFlags
                        context:(CGContext *) context;
 
 

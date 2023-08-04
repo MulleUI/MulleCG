@@ -86,11 +86,11 @@ typedef NS_ENUM( NSUInteger, CGFlip)
 
 typedef NS_ENUM( NSUInteger, CGRepeat)
 {
-   CGRepeatNone         = 0x0,
+   CGRepeatAsIs         = 0x0,  // repeat if indicated by textureFlags
    CGRepeatHorizontally = 0x1,
    CGRepeatVertically   = 0x2,
    CGRepeatBoth         = 0x3,
-   CGRepeatAsIs         = 0x4    // use what's there
+   CGRepeatNone         = 0x4
 };
 
 
@@ -146,7 +146,7 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeDefault( void)
                                   CGRotationNone,
                                   CGScaleNone,
                                   CGFlipNone,
-                                  CGRepeatNone,
+                                  CGRepeatAsIs,
                                   CGContentModeCenterPoint));
 }
 
@@ -158,9 +158,10 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeScaleToFit( void)
                                   CGRotationNone,
                                   CGScaleToFit,
                                   CGFlipNone,
-                                  CGRepeatNone,
+                                  CGRepeatAsIs,
                                   CGContentModeCenterPoint));
 }
+
 
 
 //
@@ -199,12 +200,12 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeScaleToFit( void)
 PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
 
 // this is called by drawRect to get a texture from the desired options.
-// The imageFlags in CGImage are not necessarily identical to
+// The textureFlags in CGImage are not necessarily identical to
 // the passed in value, but reflect the actual image settings.Mostly this
 // means that a texture may be requested as flipped, but it is already, so
-// the imageFlags for FLIP_X are off
+// the textureFlags for FLIP_X are off
 - (CGImage *) cgImageWithContext:(CGContext *) context
-                      imageFlags:(NSUInteger) imageFlags;
+                    textureFlags:(NSUInteger) textureFlags;
 
 - (struct CGBitmapInfo) bitmapInfo;
 
@@ -213,7 +214,7 @@ PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
 
 //
 // this calls drawRect:options:context:drawableBitmapImage: after calling
-// cgImageWithContext:imageFlags:
+// cgImageWithContext:textureFlags:
 // A bitmap drawing is always centered, to make scaling and rotation
 // more useful.
 //
@@ -230,7 +231,7 @@ PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
 // default returns NULL, for images which aren't accessible
 - (void *) bytes;
 
-- (NSUInteger) imageFlags;
+- (NSUInteger) textureFlags;
 
 PROTOCOLCLASS_END()
 
@@ -248,11 +249,11 @@ PROTOCOLCLASS_END()
 
 
 MULLE_CG_EXTERN_GLOBAL
-CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngleRadians angle);
+CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngle angle);
 
 MULLE_CG_EXTERN_GLOBAL
 CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
-                                                 CAAngleRadians angle,
+                                                 CAAngle rotation,
                                                  CGVector scaleFactor);
 
 MULLE_CG_EXTERN_GLOBAL
@@ -261,9 +262,3 @@ CGSize   CGBitmapDrawableGetBitmapExtent( id <CGBitmapDrawable> self,
                                           CGSize bitmapSize,
                                           CGDrawableOptions *options);
 
-
-MULLE_CG_EXTERN_GLOBAL
-CGRect   CGImagePatternRect( CGImage *self,
-                             CGRect rect,
-                             CGRect fromRect,
-                             CGFloat rotation);

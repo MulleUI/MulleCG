@@ -33,7 +33,6 @@ src/CGPaint+nanovg.m
 src/CGPath.c
 src/CGPath+nanovg.c
 src/microvg/microvg.c
-src/microvg/millivg.c
 src/mulle-color/CGColorDiff.c
 src/mulle-color/CGColor.c
 src/mulle-color/mulle-color.c

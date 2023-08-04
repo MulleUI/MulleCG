@@ -9,7 +9,7 @@
 #define ICONS_TEXT   "➕➖"
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    CGRect               rect;
    struct NVGcontext    *vg;
@@ -59,6 +59,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                 rect.origin.y + 150.0,
                 ICONS_TEXT,
                 NULL);   
+   return( YES);
 }
 
 
@@ -75,7 +76,7 @@ void   setupScene( UIWindow *window)
 
    view  = [UIView viewWithFrame:frame];
    [view setMargins:insets];
-   [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+   [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [[window contentPlane] addSubview:view];
 }

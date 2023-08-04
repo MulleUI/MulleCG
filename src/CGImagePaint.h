@@ -29,18 +29,18 @@ typedef NS_ENUM( NSUInteger, CGImagePaintBlendStyle)
    CGImage   *_otherImage;
 }
 
-@property( assign) CGFloat          blend;
+@property( assign) CGFloat   blend;
 //@property( assign) CGImagePaintBlendStyle   blendStyle;
-@property( assign) CAAngleRadians   angle;
+@property( assign) CGFloat   rotation;
 
 + (instancetype) imagePaintWithImage:(CGImage *) image
                           otherImage:(CGImage *) otherImage
                                blend:(CGFloat) blend
-                               angle:(CAAngleRadians) angle;
+                            rotation:(CGFloat) angle;
 
 - (instancetype) initWithImage:(CGImage *) image
                     otherImage:(CGImage *) otherImage
                          blend:(CGFloat) blend
-                         angle:(CAAngleRadians) angle;
+                      rotation:(CGFloat) rotation;
 
 @end

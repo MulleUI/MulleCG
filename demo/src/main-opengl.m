@@ -73,12 +73,12 @@ void  drawOpenGL3( UIWindow *window,
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
-   UIView   *contentPlane;
+   UIView   *contentView;
    CGRect   rect;
    CGRect   frame;
 
-   contentPlane     = [window contentPlane];
-   rect             = [contentPlane contentRect];
+   contentView      = [window contentView];
+   rect             = [contentView contentRect];
    rect             = CGRectInset( rect, 40, 40);
 
    frame            = rect;
@@ -86,13 +86,13 @@ void   setupScene( UIWindow *window)
 
    view = [UIView viewWithFrame:frame];
    [view setBackgroundColor:[UIColor redColor]];
-   [contentPlane addSubview:view];
+   [contentView addSubview:view];
 
    frame.origin.x = CGRectGetMaxX( rect) - frame.size.width;
 
    view = [UIView viewWithFrame:frame];
    [view setBackgroundColor:[UIColor greenColor]];
-   [contentPlane addSubview:view];
+   [contentView addSubview:view];
 }
 
 

@@ -2,105 +2,116 @@
 
 #import "import-private.h"
 
-#include "draw-flag.inc"
 
-
-/* To check for leaks uncomment the requestTerminate and run with:
-n
-   MULLE_OBJC_PEDANTIC_EXIT=YES \
-   MULLE_OBJC_EPHEMERAL_SINGLEON=YES \
-   MULLE_TESTALLOCATOR=YES \
-   MULLE_TESTALLOCATOR_TRACE=3 \
-   MULLE_OBJC_TRACE_INSTANCE=YES \
-   MULLE_OBJC_TRACE_METHOD_CALL=YES ./kitchen/Debug/draw-simple
- */
-
-CAAngleRadians   directions[ 16];
-
-
-static void   drawStuff( CALayer *layer, CGContext *context)
+static void   drawArc( CGContext *context,
+                       CGRect rect,
+                       CGColor color)
 {
+   // insets are flipped, because rect is flipped!
+   CGPoint             p0, p1, p2;
+   CAPolarPoint        x0, x1, x2;
+   CGFloat             r;
+   CGFloat             factor;
+   struct NVGcontext   *vg;
+   NSUInteger          frameNr;
+
+   vg      = CGContextGetNVGContext( context);
+   frameNr = [context numberOfFrames] % 240;
+   if( frameNr >= 120)
+      factor = 1.0 - (frameNr - 120) / 119.0;
+   else
+      factor = frameNr / 119.0;
+
+   factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
+
+   r  = CGRectGetHeight( rect);
+   p0 = CGRectGetTopPoint( rect);                                                // RED
+   x1 = CAPolarPointMakeWithDegrees( r, 0.0 + 90.0 * factor);           // BLUE
+   x2 = CAPolarPointMakeWithDegrees( r, (90.0 + 90.0) - 90.0 * factor);  // LIME
+
+   p1 = CGPointAddPolarPoint( p0, x1);
+   p2 = CGPointAddPolarPoint( p0, x2);
+
+   {
+      mvgBeginPath( vg);
+      mvgMoveTo( vg, p1);
+      mvgArcTo( vg, p0, p2, r);
+      mvgStrokeWidth( vg, 3.0);
+      mvgStrokeColor( vg, CGColorMakeBlack());
+      mvgStroke( vg);
+#if 0
+      mvgBeginPath( vg);
+      mvgMoveTo( vg, p1);
+      mvgArcTo( vg, p2, p0, r);
+      mvgStrokeWidth( vg, 1.0);
+      mvgStrokeColor( vg, CGColorMakeIndigo());
+      mvgStroke( vg);
+
+      mvgBeginPath( vg);
+      mvgMoveTo( vg, p0);
+      mvgArcTo( vg, p1, p2, r);
+      mvgStrokeWidth( vg, 1.0);
+      mvgStrokeColor( vg, CGColorMakeOlive());
+      mvgStroke( vg);
+
+      mvgBeginPath( vg);
+      mvgMoveTo( vg, p0);
+      mvgArcTo( vg, p2, p1, r);
+      mvgStrokeWidth( vg, 1.0);
+      mvgStrokeColor( vg, CGColorMakeSalmon());
+      mvgStroke( vg);
+
+      mvgBeginPath( vg);
+      mvgMoveTo( vg, p2);
+      mvgArcTo( vg, p0, p1, r);
+      mvgStrokeWidth( vg, 2.0);
+      mvgStrokeColor( vg, CGColorMakeOrange());
+      mvgStroke( vg);
+
+      mvgBeginPath( vg);
+      mvgMoveTo( vg, p2);
+      mvgArcTo( vg, p1, p0, r);
+      mvgStrokeWidth( vg, 2.0);
+      mvgStrokeColor( vg, CGColorMakeDodgerBlue());
+      mvgStroke( vg);
+#endif
+
+      mvgStrokeLineWithColor( vg, p0, p1, 0.5, CGColorMakeBlack());
+      mvgStrokeLineWithColor( vg, p0, p2, 0.5, CGColorMakeBlack());
+
+      mvgFillCircleWithColor( vg, p0, 5.0, CGColorMakeRed());
+      mvgFillCircleWithColor( vg, p1, 5.0, CGColorMakeBlue());
+      mvgFillCircleWithColor( vg, p2, 5.0, CGColorMakeLime());
+   }
+}
+
+
+static BOOL   drawStuff( CALayer *layer, void *_context)
+{
+   CGContext           *context = _context;
    struct NVGcontext   *vg;
    CGRect              canvas;
-   CGFloat             radius;
-   CGPoint             tangentPoints[ 2];
-   CGPoint             p1;
-   CGPoint             p2;
-   CGPoint             tmp;
-   unsigned int        i;
-
+   CGRect              rect;
 
    vg     = CGContextGetNVGContext( context);
-   canvas = [layer canvas];
-   nvgTranslate( vg, canvas.origin.x + canvas.size.width / 2.0,
-                     canvas.origin.y + canvas.size.height / 2.0);
+   canvas = CGSizePlaceInRect( CGSizeMake( 200, 100), [layer canvas], CGContentModeCenterPoint);
+   rect   = CGRectIntegral( canvas);
+   mvgStrokeRectWithColor( vg, rect, 3.0, CGColorMake( 0.0, 0.0, 0.0, 0.2));
 
-   radius = 90.0;
-   for( i = 0; i < 15; i++)
-   {
-      nvgBeginPath( vg);
-      nvgArc( vg, 0, 0, radius, directions[ i], directions[ i + 1], NVG_CW);
-      nvgStrokeColor( vg, CGColorMakeWithHSLA( 0.1 + 0.9 * i / 15.0, 1.0, 0.5, 1.0));
-      nvgStrokeWidth( vg, 4);
-      nvgStroke( vg);
-   }
+   drawArc( context, rect, CGColorMakeDodgerBlue());
 
-   // last segment
-   {
-      nvgBeginPath( vg);
-      nvgArc( vg, 0, 0, radius, directions[ 15], directions[ 0], NVG_CW);
-      nvgStrokeColor( vg, CGColorMakeWithHSLA( 0.1 + 0.9 * 15 / 15.0, 1.0, 0.5, 1.0));
-      nvgStrokeWidth( vg, 4);
-      nvgStroke( vg);
-   }
-
-   nvgBeginPath( vg);
-   nvgCircle( vg, 0, 0, radius);
-
-   for( i = 0; i < 16; i++)
-   {
-      tmp = CGPointMakeWithPolarPoint( CAPolarPointMake( radius + 4, directions[ i]));
-      nvgMoveTo( vg, tmp.x, tmp.y);
-      tmp = CGPointMakeWithPolarPoint( CAPolarPointMake( radius - 4, directions[ i]));
-      nvgLineTo( vg, tmp.x, tmp.y);
-   }
-   nvgStrokeColor( vg, CGColorMakeGray());
-   nvgStrokeWidth( vg, 1);
-   nvgStroke( vg);
-
+   return( YES);
 }
 
 
 
 int   main( int argc, char *argv[])
 {
-   auto CAAngleRadians  tmp[ 16] =
-   {
-      CAAngleRadiansNNE,
-      CAAngleRadiansNE ,
-      CAAngleRadiansENE,
-      CAAngleRadiansE  ,
-      CAAngleRadiansESE,
-      CAAngleRadiansSE ,
-      CAAngleRadiansSSE,
-      CAAngleRadiansS  ,
-      CAAngleRadiansSSW,
-      CAAngleRadiansSW ,
-      CAAngleRadiansWSW,
-      CAAngleRadiansW  ,
-      CAAngleRadiansWNW,
-      CAAngleRadiansNW ,
-      CAAngleRadiansNNW,
-      CAAngleRadiansN
-   };
-   memcpy( directions, tmp, sizeof( directions));
    return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
-                                           CGSizeMake( 200, 200),
+                                           CGSizeMake( 600, 400),
                                            NULL,
-                                           0.0f));
+                                           60.0f));
 }
-
-
 
 
 //
@@ -138,4 +149,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

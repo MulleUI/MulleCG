@@ -6,31 +6,27 @@
 #include "include-private.h"
 
 
+// TODO: this could just be part of nanovg-extensions.inc
+//       further more this could be added wholesale with nvg__appendCommands
 void   mvgAddCGPath( NVGcontext *vg, CGPathRef path)
 {
-   unsigned int    n_commands;
-   CGFloat        *f;
-   unsigned char  *p;
-   unsigned char  *sentinel;
-   CGFloat         x, y;
-   CGFloat         x1, y1;
-   CGFloat         x2, y2;
-   CGFloat         r;
+   unsigned int    n;
+   float           *f;
+   float           *sentinel;
+   float           x, y;
+   float           x1, y1;
+   float           x2, y2;
+   float           r;
 
    if( ! path)
       return;
 
-   n_commands = mulle_buffer_get_length( &path->_commands);
-   if( ! n_commands)
-      return;
-
-   p = mulle_buffer_get_bytes( &path->_commands);
-   f = _mulle_floatarray_get_floats( &path->_floats);
-
-   sentinel = &p[ n_commands];
-   while( p < sentinel)
+   n        = _mulle_floatarray_get_count( &path->_floats);
+   f        = _mulle_floatarray_get_floats( &path->_floats);
+   sentinel = &f[ n];
+   while( f < sentinel)
    {
-      switch( *p)
+      switch( (int) *f++)
       {
       case CGPathMoveCommand:
          x = *f++;
@@ -80,6 +76,5 @@ void   mvgAddCGPath( NVGcontext *vg, CGPathRef path)
          nvgClosePath( vg);
          break;
       }
-      ++p;
    }
 }

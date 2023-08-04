@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 
-static void   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CALayer *layer, void *_context)
 {
    CGContext           *context = _context;
    struct NVGcontext   *vg;
@@ -37,6 +37,7 @@ static void   drawStuff( CALayer *layer, void *_context)
                     bounds[ 3]);
    fprintf( stderr, "App exits intentionally now\n");
    exit( 0);
+   return( NO);
 }
 
 

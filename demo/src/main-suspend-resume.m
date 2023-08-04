@@ -3,7 +3,7 @@
 #import "import-private.h"
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
    CGRect              canvas;
@@ -53,6 +53,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
                 canvas.size.height);
    nvgFillColor( vg, nvgRGBAf( 0.0, 0.0, 1.0, 1.0));
    nvgFill( vg);
+   return( YES);
 }
 
 

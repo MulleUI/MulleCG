@@ -60,16 +60,16 @@ static void  strokeBoundsInRect( NVGcontext *vg, float bounds[ 4], CGRect rect, 
    CGPoint   point;
 
    point = CGPointMirrorInRectH( CGPointMake( bounds[ 0], 0), rect);
-   mvgStrokeLineV( vg, bounds[ 0], CGRectGetMinY( rect), CGRectGetMidY( rect), color);
-   mvgStrokeLineV( vg, point.x, CGRectGetMidY( rect), CGRectGetMaxY( rect), color);
-   mvgStrokeLineV( vg, bounds[ 2], CGRectGetMinY( rect), CGRectGetMidY( rect), color);
+   mvgStrokeLineVWithColor( vg, CGPointMake( bounds[ 0], CGRectGetMinY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color);
+   mvgStrokeLineVWithColor( vg, CGPointMake( point.x,    CGRectGetMidY( rect)), CGRectGetHeight( rect), 1.0, color);
+   mvgStrokeLineVWithColor( vg, CGPointMake( bounds[ 2], CGRectGetMinY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color);
 
 //   point = CGPointMirrorInRectH( CGPointMake( bounds[ 2], 0), rect);
-//   mvgStrokeLineV( vg, bounds[ 2], CGRectGetMinY( rect), CGRectGetMidY( rect), color);
-//   mvgStrokeLineV( vg, point.x, CGRectGetMidY( rect), CGRectGetMaxY( rect), color);
+//   mvgStrokeLineVWithColor( vg, bounds[ 2], CGRectGetMinY( rect), CGRectGetMidY( rect), 1.0, color);
+//   mvgStrokeLineVWithColor( vg, point.x, CGRectGetMidY( rect), CGRectGetMaxY( rect), 1.0, color);
 
-//   mvgStrokeLineH( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 1], color);
-//   mvgStrokeLineH( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 3], color);
+//   mvgStrokeLineHWithColor( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 1], 1.0, color);
+//   mvgStrokeLineHWithColor( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 3], 1.0, color);
 }
 
 static void  strokeBoundsInRect2( NVGcontext *vg, float bounds[ 4], CGRect rect, CGColor color)
@@ -77,16 +77,16 @@ static void  strokeBoundsInRect2( NVGcontext *vg, float bounds[ 4], CGRect rect,
    CGPoint   point;
 
    point = CGPointMirrorInRectH( CGPointMake( bounds[ 0], 0), rect);
-   mvgStrokeLineV( vg, bounds[ 0], CGRectGetMidY( rect), CGRectGetMaxY( rect), color);
-   mvgStrokeLineV( vg, point.x, CGRectGetMinY( rect), CGRectGetMidY( rect), color);
-   mvgStrokeLineV( vg, bounds[ 2], CGRectGetMidY( rect), CGRectGetMaxY( rect), color);
+   mvgStrokeLineVWithColor( vg, CGPointMake( bounds[ 0], CGRectGetMaxY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color);
+   mvgStrokeLineVWithColor( vg, CGPointMake( point.x,    CGRectGetMidY( rect)), CGRectGetHeight( rect), 1.0, color);
+   mvgStrokeLineVWithColor( vg, CGPointMake( bounds[ 2], CGRectGetMaxY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color);
 
 //   point = CGPointMirrorInRectH( CGPointMake( bounds[ 2], 0), rect);
-//   mvgStrokeLineV( vg, bounds[ 2], CGRectGetMinY( rect), CGRectGetMidY( rect), color);
-//   mvgStrokeLineV( vg, point.x, CGRectGetMidY( rect), CGRectGetMaxY( rect), color);
+//   mvgStrokeLineVWithColor( vg, bounds[ 2], CGRectGetMinY( rect), CGRectGetMidY( rect), 1.0, color);
+//   mvgStrokeLineVWithColor( vg, point.x, CGRectGetMidY( rect), CGRectGetMaxY( rect), 1.0, color);
 
-//   mvgStrokeLineH( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 1], color);
-//   mvgStrokeLineH( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 3], color);
+//   mvgStrokeLineHWithColor( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 1], 1.0, color);
+//   mvgStrokeLineHWithColor( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 3], 1.0, color);
 }
 
 
@@ -138,7 +138,7 @@ static CGPoint   textOriginForAlignment( CGRect  rect, int alignment)
 #define USE_OLD_CODE
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext    *vg;
    CGFont               *font;
@@ -198,8 +198,8 @@ static void   drawStuff( CALayer *layer, CGContext *context)
 //         nvgTextColor( vg, CGColorMakeWithRGB( 0.5, 0.5, 0.5), CGColorMakeWhite()); // TODO: use textColor
 //         nvgText( vg, origin.x, origin.y, s, NULL);
 
-         mvgStrokeLineH( vg, CGRectGetMinX( rect), CGRectGetMaxX( rect), CGRectGetMidY( rect), CGColorMakeGray());
-         mvgStrokeLineV( vg, CGRectGetMidX( rect), CGRectGetMinY( rect), CGRectGetMaxY( rect), CGColorMakeGray());
+         mvgStrokeLineHWithColor( vg, CGRectGetTopLeftPoint( rect), CGRectGetWidth( rect), 1.0, CGColorMakeGray());
+         mvgStrokeLineVWithColor( vg, CGRectGetTopLeftPoint( rect), CGRectGetHeight( rect), 1.0, CGColorMakeGray());
 
          strokeBoundsInRect( vg, textBounds, rect, CGColorMakeWithRGBA( 1, 0, 0, 0.666));
          strokeBounds( vg, visualBounds, CGColorMakeGreen());
@@ -230,6 +230,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
       }
       nvgRestore( vg);
    }
+   return( YES);
 }
 
 
@@ -241,7 +242,7 @@ void   setupScene( UIWindow *window)
    frame  = [[window contentPlane] contentRect];
 
    view  = [UIView viewWithFrame:frame];
-   [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+   [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [[window contentPlane] addSubview:view];
 }

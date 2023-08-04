@@ -1,7 +1,7 @@
 #include "nanovg.h"
 
 // this is the nanovg header wrapped for mulle-geometry types. In order to
-// not have to "think" too much which functions are available in millivg and
+// not have to "think" too much which functions are available in microvg and
 // which in nanovg, all functions that are available in nanovg are wrapped
 // so mvgBeginFrame is just the same as nvgBeginFrame.
 // But mvgRect takes a CGRect instead of four floats.
@@ -212,21 +212,21 @@ static inline void   mvgTranslate( NVGcontext *vg, CGPoint p)
 }
 
 // Rotates current coordinate system.
-static inline void   mvgRotate( NVGcontext *vg, CGFloat angle)
+static inline void   mvgRotate( NVGcontext *vg, CARotation rotation)
 {
-   nvgRotate( vg, angle);
+   nvgRotate( vg, CARotationToRadians( rotation));
 }
 
 // Skews the current coordinate system along X axis.
-static inline void   mvgSkewX( NVGcontext *vg, CGFloat angle)
+static inline void   mvgSkewX( NVGcontext *vg, CAAngle angle)
 {
-   nvgSkewX( vg, angle);
+   nvgSkewX( vg, CAAngleToRadians( angle));
 }
 
 // Skews the current coordinate system along Y axis.
-static inline void   mvgSkewY( NVGcontext *vg, CGFloat angle)
+static inline void   mvgSkewY( NVGcontext *vg, CAAngle angle)
 {
-   nvgSkewY( vg, angle);
+   nvgSkewY( vg, CAAngleToRadians( angle));
 }
 
 // Scales the current coordinate system.
@@ -254,7 +254,7 @@ static inline void   mvgCurrentTransform( NVGcontext *vg, float xform[6])
 // Sets the transform to identity matrix.
 static inline void   mvgTransformIdentity( float dst[6])
 {
-   nvgTransformIdentity(dst);
+   nvgTransformIdentity( dst);
 }
 
 // Sets the transform to translation matrix.
@@ -269,22 +269,22 @@ static inline void   mvgTransformScale( float dst[6], CGVector s)
    nvgTransformScale( dst, s.dx, s.dy);
 }
 
-// Sets the transform to rotate matrix. Angle is specified in radians.
-static inline void   mvgTransformRotate( float dst[6], CGFloat a)
+// Sets the transform to rotate matrix. Give a rotation here not an angle.
+static inline void   mvgTransformRotate( float dst[6], CARotation a)
 {
-   nvgTransformRotate( dst, a);
+   nvgTransformRotate( dst, CARotationToRadians( a));
 }
 
-// Sets the transform to skew-x matrix. Angle is specified in radians.
-static inline void   mvgTransformSkewX( float dst[6], CGFloat a)
+// Sets the transform to skew-x matrix.
+static inline void   mvgTransformSkewX( float dst[6], CAAngle a)
 {
-   nvgTransformSkewX( dst, a);
+   nvgTransformSkewX( dst, CAAngleToRadians( a));
 }
 
-// Sets the transform to skew-y matrix. Angle is specified in radians.
+// Sets the transform to skew-y matrix.
 static inline void   mvgTransformSkewY( float dst[6], CGFloat a)
 {
-   nvgTransformSkewY( dst, a);
+   nvgTransformSkewY( dst, CAAngleToRadians( a));
 }
 
 // Sets the transform to the result of multiplication of two transforms, of A = A*B.
@@ -321,35 +321,35 @@ static inline CGPoint   mvgTransformPoint( float xform[ 6], CGPoint point)
 //
 // NanoVG allows you to load jpg, png, psd, tga, pic and gif files to be used for rendering.
 // In addition you can upload your own image. The image loading is provided by stb_image.
-// The parameter imageFlags is combination of flags defined in NVGimageFlags.
+// The parameter textureFlags is combination of flags defined in NVGimageFlags.
 
 // Creates image by loading it from the disk from specified file name.
 // Returns handle to the image
 // Creates image by loading it from the disk from specified file name.
 static inline CGImageID   mvgCreateImage( NVGcontext *vg,
                                           char *filename,
-                                          NSUInteger imageFlags)
+                                          NSUInteger textureFlags)
 {
-   return( nvgCreateImage( vg, filename, imageFlags));
+   return( nvgCreateImage( vg, filename, textureFlags));
 }
 
 // Creates image by loading it from the specified chunk of memory.
 static inline CGImageID   mvgCreateImageMem( NVGcontext *vg,
-                                             NSInteger imageFlags,
+                                             NSInteger textureFlags,
                                              void *data,
                                              size_t ndata)
 {
-   return( nvgCreateImageMem( vg, imageFlags, data, ndata));
+   return( nvgCreateImageMem( vg, textureFlags, data, ndata));
 }
 
 // Creates image from specified image data.
 static inline CGImageID   mvgCreateImageRGBA( NVGcontext *vg,
                                               NSInteger w,
                                               NSInteger h,
-                                              NSUInteger imageFlags,
+                                              NSUInteger textureFlags,
                                               void *data)
 {
-   return( nvgCreateImageRGBA( vg, w, h, imageFlags, data));
+   return( nvgCreateImageRGBA( vg, w, h, textureFlags, data));
 }
 
 // Updates image data specified by image handle.
@@ -406,19 +406,19 @@ static inline NVGpaint
 // had to manually correct "rect" for the feather value.
 //
 static inline NVGpaint
-   mvgBoxGradient( NVGcontext* vg, CGRect rect, float r, float f, CGColor icol, CGColor ocol)
+   mvgBoxGradient( NVGcontext* vg, CGRect rect, CGFloat radius, CGFloat feather, CGColor innerColor, CGColor outerColor)
 {
    CGRect   gradientRect;
 
-   gradientRect = CGRectInset( rect, f / 4.0, f / 4.0);
+   gradientRect = CGRectInset( rect, feather / 4.0, feather / 4.0);
    return( nvgBoxGradient( vg, gradientRect.origin.x,
                                gradientRect.origin.y,
                                gradientRect.size.width,
                                gradientRect.size.height,
-                               r,
-                               f,
-                               icol,
-                               ocol));
+                               radius,
+                               feather,
+                               innerColor,
+                               outerColor));
 }
 
 // Creates and returns a radial gradient. Parameters (cx,cy) specify the center, inr and outr specify
@@ -427,12 +427,12 @@ static inline NVGpaint
 static inline NVGpaint
    mvgRadialGradient( NVGcontext *vg,
                       CGPoint center,
-                      float inr,
-                      float outr,
-                      CGColor icol,
-                      CGColor ocol)
+                      CGFloat innerRadius,
+                      CGFloat outerRadius,
+                      CGColor innerColor,
+                      CGColor outerColor)
 {
-   return( nvgRadialGradient( vg, center.x, center.y, inr, outr, icol, ocol));
+   return( nvgRadialGradient( vg, center.x, center.y, innerRadius, outerRadius, innerColor, outerColor));
 }
 
 // Creates and returns an image pattern. Parameters (ox,oy) specify the left-top location of the image pattern,
@@ -440,15 +440,15 @@ static inline NVGpaint
 // The gradient is transformed by the current transform when it is passed to nvgFillPaint() or nvgStrokePaint().
 static inline NVGpaint   mvgImagePattern( NVGcontext* vg,
                                           CGRect rect,
-                                          CAAngleRadians angle,
+                                          CARotation rotation,
                                           CGImageID image,
-                                          float alpha)
+                                          CGFloat alpha)
 {
    return( nvgImagePattern( vg, rect.origin.x,
                                 rect.origin.y,
                                 rect.size.width,
                                 rect.size.height,
-                                angle,
+                                CARotationToRadians( rotation),
                                 image,
                                 alpha));
 }
@@ -537,9 +537,9 @@ static inline void   mvgQuadTo( NVGcontext *vg, CGPoint control, CGPoint point)
 }
 
 // Adds an arc segment at the corner defined by the last path point, and two specified points.
-static inline void   mvgArcTo( NVGcontext *vg, CGPoint middle, CGPoint point, CGFloat radius)
+static inline void   mvgArcTo( NVGcontext *vg, CGPoint tangent1, CGPoint tangent2, CGFloat radius)
 {
-   nvgArcTo( vg, middle.x, middle.y, point.x, point.y, radius);
+   nvgArcTo( vg, tangent1.x, tangent1.y, tangent2.x, tangent2.y, radius);
 }
 
 // Closes current sub-path with a line segment.
@@ -558,11 +558,11 @@ static inline void   mvgPathWinding( NVGcontext *vg, NSInteger dir)
 static inline void   mvgArc( NVGcontext *vg, 
                              CGPoint center, 
                              CGFloat radius, 
-                             CAAngleRadians a0, 
-                             CAAngleRadians a1, 
+                             CAAngle a0, 
+                             CAAngle a1, 
                              NSInteger dir)
 {
-   nvgArc( vg, center.x, center.y, radius, a0, a1, dir);
+   nvgArc( vg, center.x, center.y, radius, CAAngleToRadians( a0), CAAngleToRadians( a1), dir);
 }
 
 // Creates new rectangle shaped sub-path.
@@ -571,10 +571,25 @@ static inline void   mvgRect( NVGcontext *vg, CGRect rect)
    nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
 }
 
+
+// this function accepts negative insets
+static inline void   mvgRoundedRectVarying( NVGcontext *vg,
+                                            CGRect rect,
+                                            struct MulleCornerInsets insets)
+{
+   void _mvgRoundedRectVarying(NVGcontext* ctx, float x, float y, float w, float h,
+                                            float radTopLeft, float radTopRight,
+                                            float radBottomRight, float radBottomLeft);
+
+   _mvgRoundedRectVarying( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height,
+                               insets.tl, insets.tr, insets.br, insets.bl);
+}
+
 // Creates new rounded rectangle shaped sub-path.
+// this function accepts negative radius
 static inline void   mvgRoundedRect( NVGcontext *vg, CGRect rect, CGFloat r)
 {
-   nvgRoundedRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height, r);
+   mvgRoundedRectVarying( vg, rect, MulleCornerInsetsMake( r, r, r, r));
 }
 
 
@@ -765,7 +780,7 @@ static inline NSInteger   mvgTextBreakLines( NVGcontext *vg,
 // Creates a NanoVG context with specified flags.
 static inline NVGcontext * mvgCreateInternal( NVGparams *params)
 {
-   return( nvgCreateInternal(params));
+   return( nvgCreateInternal( params));
 }
 
 // Deletes a NanoVG context created with nvgCreateInternal.

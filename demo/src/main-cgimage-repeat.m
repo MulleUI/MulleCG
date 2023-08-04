@@ -8,7 +8,7 @@
 #include "bitmap.inc"
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    CGDrawableOptions     options;
    CGRect                canvas;
@@ -92,6 +92,8 @@ static void   drawStuff( CALayer *layer, CGContext *context)
    [image drawRect:rects[ 1][ 1]
            options:&options
            context:context];
+
+   return( YES);
 }
 
 

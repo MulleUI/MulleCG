@@ -61,37 +61,6 @@ char   *_CGNVGBackendErrorUTF8String( void *error)
    }
 }
 
-
-void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
-{
-   GLenum       err;
-   static int   counter;
-   char         *s;
-
-   err = glGetError();
-   if( err != GL_NO_ERROR)
-   {
-      if( counter < 50)  // gets tedious fast
-      {
-         s = [ctxt backendUTF8String];
-         if( ! s)
-            s = [CGContext nanoVGBackendUTF8String];
-
-         mulle_fprintf( stderr, "%s error %@ %s( 0x%x) \"%s\": %s\n",
-                                 s,
-                                 ctxt,
-                                 _CGNVGBackendErrorShortUTF8String( (void *) (intptr_t) err),
-                                 err,
-                                 _CGNVGBackendErrorUTF8String( (void *) (intptr_t) err),
-                                 str ? str : "???");
-         ++counter;
-      }
-      assert( err == GL_NO_ERROR);
-      return;
-   }
-}
-
-
 //
 // MEMO: we can't do NANOVG_GL2_IMPLEMENTATION because we need
 //       for example secondary framebuffers, which nanovg would not
@@ -127,10 +96,54 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
 }
 
 
-- (void) _initNanoVGWithEdgeAntialiasing:(BOOL) edgeAntialiasing
+- (char *) nanovgInfoUTF8String
+{
+   char   *s;
+
+   s = MulleObjC_asprintf( "%s%s%s",
+                           [[self class] nanoVGBackendUTF8String],
+                           _nvgFlags & NVG_ANTIALIAS ? " AA" : " NOAA",
+                           _nvgFlags & NVG_STENCIL_STROKES ? " Stencil" : "");
+   return( s);
+}
+
+
+void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
+{
+   GLenum       err;
+   static int   counter;
+   char         *s;
+
+   err = glGetError();
+   if( err != GL_NO_ERROR)
+   {
+      if( counter < 50)  // gets tedious fast
+      {
+         s = [ctxt backendUTF8String];
+         if( ! s)
+            s = [CGContext nanoVGBackendUTF8String];
+
+         mulle_fprintf( stderr, "%s error %@ %s( 0x%x) \"%s\": %s\n",
+                                 s,
+                                 ctxt,
+                                 _CGNVGBackendErrorShortUTF8String( (void *) (intptr_t) err),
+                                 err,
+                                 _CGNVGBackendErrorUTF8String( (void *) (intptr_t) err),
+                                 str ? str : "???");
+         ++counter;
+      }
+      assert( err == GL_NO_ERROR);
+      return;
+   }
+}
+
+
+
+
+- (void) _initNanoVGWithEdgeAntiAliasing:(BOOL) edgeAntiAliasing
                        useStencilStrokes:(BOOL) useStencilStrokes
 { 
-   _nvgFlags  = edgeAntialiasing ? NVG_ANTIALIAS : 0;
+   _nvgFlags  = edgeAntiAliasing ? NVG_ANTIALIAS : 0;
    _nvgFlags |= useStencilStrokes ? NVG_STENCIL_STROKES : 0;
 #ifdef DEBUG
    _nvgFlags |= NVG_DEBUG;
@@ -144,6 +157,10 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
 #endif
 #ifdef NANOVG_GLES3_IMPLEMENTATION
    _vg  = nvgCreateGLES3( _nvgFlags);
+#endif
+
+#ifdef DEBUG
+   fprintf( stderr, "nanovg context          : %s\n", [self nanovgInfoUTF8String]);
 #endif
 
    _framebufferBits = GL_COLOR_BUFFER_BIT;

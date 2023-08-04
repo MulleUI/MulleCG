@@ -70,3 +70,15 @@ void   mvgStrokeLineWithPaint( NVGcontext *vg,
                                CGPoint end,
                                CGFloat strokeWidth,
                                CGPaint *paint);
+
+void   mvgStrokeLineHWithPaint( NVGcontext *vg,
+                                CGPoint point,
+                                CGFloat width,
+                                CGFloat strokeWidth,
+                                CGPaint *paint);
+
+void   mvgStrokeLineVWithPaint( NVGcontext *vg,
+                                CGPoint start,
+                                CGFloat height,
+                                CGFloat strokeWidth,
+                                CGPaint *paint);

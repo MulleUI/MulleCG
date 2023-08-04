@@ -53,7 +53,7 @@
 - (void) resumeRender;
 
 // called by -init / -finalize
-- (void) _initNanoVGWithEdgeAntialiasing:(BOOL) edgeAntialiasing
+- (void) _initNanoVGWithEdgeAntiAliasing:(BOOL) edgeAntiAliasing
                        useStencilStrokes:(BOOL) useStencilStrokes;
 - (void) _finalizeNanoVG;
 
@@ -70,7 +70,10 @@
 // drawings should have completed...
 - (struct CGBitmap) framebufferBitmap;
 
+- (char *) nanovgInfoUTF8String;
+
 @end
+
 
 void   CGShaderUTF8SourcesParseUniforms( struct CGShaderUTF8Sources *sources,
                                          struct mulle_assoc *assoc);

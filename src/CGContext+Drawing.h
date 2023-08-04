@@ -104,6 +104,10 @@ static inline CGFloat  CGRectGetStrokeMaxY( CGRect rect, CGFloat strokeWidth)
 
 
 @interface CGContext( Drawing) <UIGraphicsDrawing>
+
+// this is not part of UIGraphicsDrawing
+- (void) drawIcon:(mulle_utf32_t) icon
+          atPoint:(CGPoint) rect;
 @end
 
 
@@ -119,5 +123,14 @@ static inline void  CGContextDrawText( CGContext *self,
   fontNameUTF8String:NULL
             fontSize:fontSize
             hexColor:CGHexColorMakeWithColor( color)];
+}
+
+
+static inline void   CGContextDrawIconInRect( CGContext *self,
+                                              mulle_utf32_t icon,
+                                              CGRect rect)
+{
+   [self drawIcon:icon
+          atPoint:CGRectGetCenterPoint( rect)];
 }
 

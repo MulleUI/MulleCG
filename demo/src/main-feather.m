@@ -9,7 +9,7 @@
 
 #define DISTANCE   40
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    CGRect               canvas;
    CGRect               rect;
@@ -187,6 +187,8 @@ static void   drawStuff( CALayer *layer, CGContext *context)
          nvgRestore( vg);
          ++i;
       }
+
+   return( YES);
 }
 
 

@@ -26,14 +26,14 @@
 
 - (CGTextureID) textureIDWithBytes:(void *) bytes
                         bitmapSize:(struct MulleIntegerSize) size
-                        imageFlags:(NSUInteger) imageFlags;
+                      textureFlags:(NSUInteger) textureFlags;
 - (CGTextureID) textureIDWithFileCData:(struct mulle_data) fileCData
-                            imageFlags:(NSUInteger) imageFlags;
+                          textureFlags:(NSUInteger) textureFlags;
 - (CGTextureID) textureIDWithContentsOfFileCString:(char *) filename
-                                      imageFlags:(NSUInteger) imageFlags;
+                                    textureFlags:(NSUInteger) textureFlags;
 - (CGTextureID) textureIDWithGPUTextureRGBA:(void *) gpuTexture
                                  bitmapSize:(struct MulleIntegerSize) size
-                                 imageFlags:(NSUInteger) imageFlags;
+                               textureFlags:(NSUInteger) textureFlags;
 
 - (void) deleteTextureID:(CGTextureID) textureID;
 

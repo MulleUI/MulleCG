@@ -20,14 +20,28 @@
 @interface CGPaint : NSObject < NSCopying>
 
 + (CGPaint *) paintWithColor:(CGColor) color;
-
++ (CGPaint *) paintWithHexColor:(CGHexColor) color;
++ (CGPaint *) paintWithStartColor:(CGColor) startColor
+                         endColor:(CGColor) endColor;
++ (CGPaint *) paintWithStartColor:(CGColor) startColor
+                         endColor:(CGColor) endColor
+                         rotation:(CGFloat) rotation;
 //
 // for textures this will be gray, for gradients its the middleColor between
 // start and end
 //
 - (CGColor) mainColor;
 - (BOOL) isTexture;  // default: YES
+- (BOOL) isGradient;  // default: NO (mono color gradient says also NO)
 - (CGFloat) alpha;   // default: 1.0
+- (BOOL) needsBounds;  // mono color, does not need it others do
+
+// for mono colors, this will return just self (guaranteed)
+- (CGPaint *) rotatedPaint:(CGFloat) rotation;
+
+// when a paint incorporates a stroke, this is strokeWidth / 2, that will
+// overdraw on a fill! (default 0)
+- (CGFloat) overdraw;
 
 @end
 
@@ -35,6 +49,6 @@
 // subclasses must implement these
 @interface CGPaint( Subclasses)
 
-- (CGFloat) angle;  // default 0.0
+- (CGFloat) rotation;  // default 0.0
 
 @end

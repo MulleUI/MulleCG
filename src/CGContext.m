@@ -257,7 +257,7 @@ static UIGraphicsBackend   defaultBackends[] =
    {
       mulle_thread_mutex_do( Self._freeTypeLock)
       {
-         [self _initNanoVGWithEdgeAntialiasing:options & UIGraphicsEdgeAntialiasing
+         [self _initNanoVGWithEdgeAntiAliasing:options & UIGraphicsEdgeAntiAliasing
                              useStencilStrokes:options & UIGraphicsUseStencilStrokes];
       }
 
@@ -460,7 +460,7 @@ static UIGraphicsBackend   defaultBackends[] =
    if( ! MulleIntegerSizeEqualToIntegerSize( oldSize, size))
    {
       layer = [CGLayer layerWithBitmapSize:size
-                                imageFlags:0
+                              textureFlags:0
                                    context:self];
 #ifdef DEBUG
       {

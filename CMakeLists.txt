@@ -15,6 +15,7 @@ include( Environment)
 add_compile_definitions( NANOVG_CLEARTYPE
 FONS_USE_FREETYPE
 FT_CONFIG_OPTION_SUBPIXEL_RENDERING
+NANOVG_EXTENSION_SOURCE="nanovg-extensions.inc"
 )
 
 # for mulle-color

@@ -27,7 +27,7 @@ NSUInteger   alignments[] =
 #define N_ALIGNMENTS  (sizeof( alignments) / sizeof( alignments[ 0]))
 
 
-static void   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
    struct NVGcontext    *vg;
    CGFont               *font;
@@ -131,6 +131,7 @@ static void   drawStuff( CALayer *layer, CGContext *context)
          nvgRestore( vg);
       }
    }
+   return( YES);
 }
 
 
@@ -142,7 +143,7 @@ void   setupScene( UIWindow *window)
    frame  = [[window contentPlane] contentRect];
 
    view  = [UIView viewWithFrame:frame];
-   [view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
+   [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
    [[window contentPlane] addSubview:view];
 }

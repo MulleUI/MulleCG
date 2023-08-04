@@ -186,7 +186,7 @@ int   main( int argc, char *argv[])
    for( i = 0; i < 2; i++)
    {
       window[ i] = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 600, 300)
-                             titleUTF8String:i == 0 ? "No Antialias" : "AntiAlias"
+                             titleUTF8String:i == 0 ? "No AntiAlias" : "AntiAlias"
                                    styleMask:UIWindowStyleMaskDefault];
       [window[ i] setDrawCallback:drawStuff[ i]];
       [window[ i] setBackgroundColor:CGColorMakeBlack()];

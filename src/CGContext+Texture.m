@@ -14,26 +14,26 @@
 
 - (CGTextureID) textureIDWithBytes:(void *) bytes
                       bitmapSize:(struct MulleIntegerSize) size
-                      imageFlags:(NSUInteger) imageFlags
+                    textureFlags:(NSUInteger) textureFlags
 {
    CGTextureID   textureID;
 
    textureID = nvgCreateImageRGBA( _vg,
                                    (int) size.width,
                                    (int) size.height,
-                                   (int) imageFlags,
+                                   (int) textureFlags,
                                    bytes);
    return( textureID);
 }
 
 
 - (CGTextureID) textureIDWithFileCData:(struct mulle_data) fileCData
-                          imageFlags:(NSUInteger) imageFlags
+                        textureFlags:(NSUInteger) textureFlags
 {
    CGTextureID   textureID;
 
    textureID = nvgCreateImageMem( _vg,
-                                  imageFlags,
+                                  textureFlags,
                                   fileCData.bytes,
                                   (int) fileCData.length);
    return( textureID);
@@ -41,25 +41,25 @@
 
 
 - (CGTextureID) textureIDWithContentsOfFileCString:(char *) filename
-                                      imageFlags:(NSUInteger) imageFlags
+                                    textureFlags:(NSUInteger) textureFlags
 {
    CGTextureID   textureID;
 
-   textureID = nvgCreateImage( _vg, filename, imageFlags);
+   textureID = nvgCreateImage( _vg, filename, textureFlags);
    return( textureID);
 }
 
 
 - (CGTextureID) textureIDWithGPUTextureRGBA:(void *) gpuTexture
                                  bitmapSize:(struct MulleIntegerSize) size
-                                 imageFlags:(NSUInteger) imageFlags
+                               textureFlags:(NSUInteger) textureFlags
 {
    CGTextureID   textureID;
 
    textureID = nvgCreateImageTexture( _vg,
                                       size.width,
                                       size.height,
-                                      imageFlags,
+                                      textureFlags,
                                       NVG_TEXTURE_RGBA,
                                       gpuTexture);
    return( textureID);
