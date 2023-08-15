@@ -29,9 +29,9 @@ typedef NS_ENUM( NSUInteger, CGImagePaintBlendStyle)
    CGImage   *_otherImage;
 }
 
-@property( assign) CGFloat   blend;
+@property( readonly) CGFloat   blend;
 //@property( assign) CGImagePaintBlendStyle   blendStyle;
-@property( assign) CGFloat   rotation;
+@property( readonly) CGFloat   rotation;
 
 + (instancetype) imagePaintWithImage:(CGImage *) image
                           otherImage:(CGImage *) otherImage

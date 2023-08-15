@@ -37,11 +37,10 @@ static inline void   mvgFillRectWithImage( NVGcontext *vg,
 
 
 static inline void   mvgFillCircleWithImage( NVGcontext *vg,
-                                             CGPoint center,
-                                             CGFloat radius,
+                                             CACircle circle,
                                              CGImage *image)
 {
-   mvgFillCircleWithPaint( vg, center, radius, image);
+   mvgFillCircleWithPaint( vg, circle, image);
 }
 
 
@@ -65,12 +64,11 @@ static inline void   mvgStrokeRectWithImage( NVGcontext *vg,
 
 
 static inline void   mvgStrokeCircleWithImage( NVGcontext *vg,
-                                               CGPoint center,
-                                               CGFloat radius,
+                                               CACircle circle,
                                                CGFloat strokeWidth,
                                                CGImage *image)
 {
-   mvgStrokeCircleWithPaint( vg, center, radius, strokeWidth, image);
+   mvgStrokeCircleWithPaint( vg, circle, strokeWidth, image);
 }
 
 

@@ -94,8 +94,8 @@ void   mvgFillRectWithColor( NVGcontext *vg, CGRect rect, CGColor color);
 void   mvgFillRectWithNVGpaint( NVGcontext *vg, CGRect rect, NVGpaint paint);
 
 
-void   mvgFillCircleWithColor( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color);
-void   mvgFillCircleWithNVGpaint( NVGcontext *vg, CGPoint center, CGFloat radius, NVGpaint paint);
+void   mvgFillCircleWithColor( NVGcontext *vg, CACircle circle, CGColor color);
+void   mvgFillCircleWithNVGpaint( NVGcontext *vg, CACircle circle, NVGpaint paint);
 
 
 // Creates a new rectangle path and strokes it with the given color.
@@ -105,11 +105,29 @@ void   mvgStrokeRoundedRectWithColor( NVGcontext *vg,
                                       CGFloat strokeWidth,
                                       CGColor color);
 
+//
+// does not stroke outside of the rect bounds, i.e. corrects for strokeWidth
+//
+void   mvgStrokeInsideOfRoundedRectWithColor( NVGcontext *vg,
+                                              CGRect rect,
+                                              CGFloat cornerRadius,
+                                              CGFloat strokeWidth,
+                                              CGColor color);
+
 // Creates a new rectangle path and strokes it with the given color.
 void   mvgStrokeRectWithColor( NVGcontext *vg,
                                CGRect rect,
                                CGFloat strokeWidth,
                                CGColor color);
+
+//
+// does not stroke outside of the rect bounds, i.e. corrects for strokeWidth
+//
+void   mvgStrokeInsideOfRectWithColor( NVGcontext *vg,
+                                       CGRect rect,
+                                       CGFloat strokeWidth,
+                                       CGColor color);
+
 
 // Creates a line and strokes it with the color.
 void   mvgStrokeLineWithColor( NVGcontext *vg,
@@ -119,8 +137,7 @@ void   mvgStrokeLineWithColor( NVGcontext *vg,
                                CGColor color);
 
 void   mvgStrokeCircleWithColor( NVGcontext *vg,
-                                 CGPoint center,
-                                 CGFloat radius,
+                                 CACircle circle,
                                  CGFloat strokeWidth,
                                  CGColor color);
 
@@ -193,6 +210,17 @@ void   mvgTextInRect( NVGcontext *vg,
                       CGContentMode contentMode,
                       MulleTextOptions options);
 
+
+//
+// As above, but uses printf formatting for more convenience
+// Don't use '\n' at the end
+//
+void   mvgFormatInRect( struct NVGcontext *vg,
+                        CGRect rect,
+                        CGContentMode contentMode,
+                        MulleTextOptions options,
+                        char *format,
+                        ...);
 
 //
 // Calculate change to origin needed to properly place the string.

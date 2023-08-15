@@ -63,8 +63,7 @@ static void   drawCircle( struct NVGcontext *vg, CGRect rect, CGFloat animation)
 {
    rect = CGRectInset( rect, 20, 20);
    rect = CGRectInset( rect, animation, animation);
-   mvgCircle( vg, CGRectGetCenterPoint( rect),
-                  CGRectGetInnerRadius( rect));
+   mvgCircle( vg, CGRectGetInnerCircle( rect));
 }
 
 

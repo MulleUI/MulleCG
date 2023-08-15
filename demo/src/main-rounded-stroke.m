@@ -79,8 +79,8 @@ static void   drawRoundedStroke( struct NVGcontext *vg,
    mvgFill( vg);
 
 
-   mvgFillCircleWithColor( vg, CGPointMake( rect.origin.x + offset, rect.origin.y), 2.0, CGColorMakeRed());
-   mvgFillCircleWithColor( vg, CGPointMake( rect.origin.x + offset, rect.origin.y + radius), 2.0, CGColorMakeBlue());
+   mvgFillCircleWithColor( vg, CACircleMake( CGPointMake( rect.origin.x + offset, rect.origin.y), 2.0), CGColorMakeRed());
+   mvgFillCircleWithColor( vg, CACircleMake( CGPointMake( rect.origin.x + offset, rect.origin.y + radius), 2.0), CGColorMakeBlue());
 }
 
 

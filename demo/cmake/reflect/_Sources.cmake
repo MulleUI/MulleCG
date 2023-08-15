@@ -25,6 +25,7 @@ src/main-arc-cw.m
 src/main-arc.m
 src/main-arcto.m
 src/main-bezier.m
+src/main-blend.m
 src/main-canvas.m
 src/main-cgimage-contentmode.m
 src/main-cgimage-flip.m
@@ -39,6 +40,7 @@ src/main-cgimage-write.m
 src/main-cglayer-convenient.m
 src/main-cglayer.m
 src/main-circle-hole.m
+src/main-composite.m
 src/main-custom-paint.m
 src/main-draw-hole.m
 src/main-draw.m
@@ -70,6 +72,7 @@ src/main-particles-sorted.m
 src/main-rect.m
 src/main-rect-pain.m
 src/main-rotate-rect.m
+src/main-rotate-stroke.m
 src/main-rounded-rect.m
 src/main-rounded-stroke.m
 src/main-scissor.m

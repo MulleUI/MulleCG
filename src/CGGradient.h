@@ -19,21 +19,21 @@
 
 + (instancetype) gradientWithStartColor:(CGColor) startColor
                                endColor:(CGColor) endColor
-                               rotation:(CGFloat) rotation;
+                               rotation:(CARotation) rotation;
 
 + (instancetype) gradientWithColors:(CGColor *) colors
                           locations:(CGFloat *) locations
                               count:(NSUInteger) count
-                           rotation:(CGFloat) rotation;
+                           rotation:(CARotation) rotation;
 
 - (instancetype) initWithStartColor:(CGColor) startColor
                            endColor:(CGColor) endColor
-                           rotation:(CGFloat) rotation;
+                           rotation:(CARotation) rotation;
 
 - (instancetype) initWithColors:(CGColor *) colors
                       locations:(CGFloat *) locations
                           count:(NSUInteger) count
-                       rotation:(CGFloat) rotation;
+                       rotation:(CARotation) rotation;
 
 
 // conveniences with angle CAAngleRadiansE (L->R) use CAAngleRadiansN for
@@ -55,7 +55,13 @@
 
 // or reversed ?
 - (CGGradient *) reversedGradient; // rotated 180 degrees
-- (CGGradient *) rotatedGradient:(CGFloat) rotation;
+- (CGGradient *) rotatedGradient:(CARotation) rotation;
+- (CGGradient *) brightenedGradient:(CGFloat) brighten;
+- (CGGradient *) dimmedGradient:(CGFloat) dim;
+- (CGGradient *) transparentGradient:(CGFloat) alpha;
+
+- (CGGradient *) gradientByChangingColorsWithFunction:(CGColor (*)( CGColor, void *)) f
+                                             userInfo:(void *) userInfo;
 
 @end
 
@@ -65,7 +71,7 @@
 - (CGColor) startColor;
 - (CGColor) endColor;
 
-- (CGFloat) rotation;
+- (CARotation) rotation;
 
 - (NSUInteger) numberOfColors;
 // location[ 0] is always 0.0

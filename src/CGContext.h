@@ -55,7 +55,7 @@ struct CGContextFramebuffer
 
 // handle
 static inline struct CGContextFramebuffer
-CGContextFramebufferMake( void *handle, NSUInteger type)
+   CGContextFramebufferMake( void *handle, NSUInteger type)
 {
    assert( type >= CGContextDefaultFramebuffer && type <= CGContextOpenGLFramebuffer);
    return( (struct CGContextFramebuffer) { .handle = handle, .type = type });
@@ -63,14 +63,14 @@ CGContextFramebufferMake( void *handle, NSUInteger type)
 
 
 static inline struct CGContextFramebuffer
-CGContextFramebufferMakeDefault( void)
+   CGContextFramebufferMakeDefault( void)
 {
    return( (struct CGContextFramebuffer) { .handle = NULL, .type = CGContextDefaultFramebuffer });
 }
 
 
 static inline struct CGContextFramebuffer
-CGContextFramebufferMakeWithLayer( CGLayer *layer)
+   CGContextFramebufferMakeWithLayer( CGLayer *layer)
 {
    assert( layer);
    return( (struct CGContextFramebuffer) { .handle = layer, .type = CGContextLayerFramebuffer });
@@ -78,7 +78,7 @@ CGContextFramebufferMakeWithLayer( CGLayer *layer)
 
 
 static inline struct CGContextFramebuffer
-CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
+   CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
 {
    assert( handle);
    return( (struct CGContextFramebuffer) { .handle = handle, .type = CGContextOpenGLFramebuffer });
@@ -121,7 +121,6 @@ struct CGContextItem
    struct mulle_map                 _shaderMap;
    struct mulle__pointerarray       _deletedTextureIDs;
    struct mulle__pointerarray       _deletedFramebuffers;
-   NSUInteger                       _numberOfFrames;  // counts endRenders...
    BOOL                             _isRendering;
    BOOL                             _isActive;
    BOOL                             _isFreshLayer;
@@ -168,6 +167,7 @@ struct CGContextItem
 @property( assign) struct UIInputState                     inputState;
 @property( assign, getter=isInitializedFramebuffer) BOOL   initializedFramebuffer;
 
+@property( assign) NSUInteger                              numberOfFrames;  // counts endRenders...
 
 + (void) setDebugEnabled:(BOOL) flag;
 
@@ -270,4 +270,34 @@ static inline struct NVGcontext   *CGContextGetNVGContext( CGContextRef self)
 static inline struct NVGcontext   *_CGContextGetNVGContext( CGContextRef self)
 {
    return( ((struct{ @defs( CGContext); } *) self)->_vg);
+}
+
+
+// we want to produce (excepting the quadratic) for a rate of 4
+// 0.0, 0.5, 1.0, 1.5
+static inline CGFloat  CGContextGetBackAndForthAnimationFactor( CGContext *context, NSUInteger rate)
+{
+   NSUInteger   n;
+   NSUInteger   halfRate;
+   CGFloat      factor;
+
+   assert( rate >= 4);
+
+   halfRate = rate / 2;
+   n        = [context numberOfFrames] % rate;
+
+   if( n <= halfRate)
+      factor = n / ((CGFloat) halfRate);  // 0: 0 1: 0.5 2: 1
+   else
+      factor = 1.0f - ((n - halfRate) / (CGFloat) halfRate);  // 3: 0.5
+   factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
+   return( factor);
+}
+
+
+static inline CGFloat  CGContextGetLinearAnimationFactor( CGContext *context, NSUInteger rate)
+{
+   assert( rate >= 2);
+
+   return( ([context numberOfFrames] % rate) / (CGFloat) (rate - 1));
 }

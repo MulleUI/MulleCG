@@ -302,7 +302,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
             iconText = cpToUTF8( preicon, icon);
 
             nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
-            nvgTextColor( vg, colors[ 3], CGColorByMultiplyingAlpha( colors[ 1], 0.2));
+            nvgTextColor( vg, colors[ 3], CGColorMultiplyAlpha( colors[ 1], 0.2));
             mvgTextInRect( vg, iconText,
                                NULL,
                                iconRect,
@@ -318,8 +318,8 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
 
          nvgFontFace(vg, "sans");
          nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
-         nvgTextColor( vg, CGColorByMultiplyingAlpha( colors[ 3], 0.9),
-                           CGColorByMultiplyingAlpha( colors[ 1], 1.0));
+         nvgTextColor( vg, CGColorMultiplyAlpha( colors[ 3], 0.9),
+                           CGColorMultiplyAlpha( colors[ 1], 1.0));
          mvgTextInRect( vg, text,
                             NULL,
                             CGRectInset( textRect, 4, 4),

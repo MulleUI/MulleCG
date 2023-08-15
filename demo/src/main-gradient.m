@@ -52,7 +52,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
    if( drawHelpers)
    {
-      mvgFillCircleWithColor( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
+      mvgFillCircleWithColor( vg, CACircleMake( CGRectGetCenterPoint( rect), 3.0), CGColorMakeBlack());
       mvgStrokeRectWithColor( vg, gradientRect, 1.0, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.66));
       mvgStrokeRectWithColor( vg, CGRectExtrude( gradientRect,
                                         feather / 2.0,
@@ -63,15 +63,15 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
    rect  = rects[ 0][ 1];
    paint = mvgBoxGradient( vg, rect,
+                               CGColorMakeBlue(),
                                0.0,
                                feather,
-                               CGColorMakeBlue(),
                                CGColorMakeYellow());
    mvgFillRectWithNVGpaint( vg, rect, paint);
 
    if( drawHelpers)
    {
-      mvgFillCircleWithColor( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
+      mvgFillCircleWithColor( vg, CACircleMake( CGRectGetCenterPoint( rect), 3.0), CGColorMakeBlack());
 
       mvgStrokeWidth( vg, 1.0);
       mvgStrokeRectWithColor( vg, gradientRect, 1.0, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.66));
@@ -84,30 +84,28 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    }
 
    rect  = rects[ 1][ 0];
-   paint = mvgLinearGradient( vg, CGRectGetTopLeftPoint( rect),
-                                  CGRectGetBottomRightPoint( rect),
+   paint = mvgLinearGradient( vg, rect,
                                   CGColorMakeYellow(),
                                   CGColorMakeBlue());
    mvgFillRectWithNVGpaint( vg, rect, paint);
 
    if( drawHelpers)
    {
-      mvgFillCircleWithColor( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
+      mvgFillCircleWithColor( vg, CACircleMake( CGRectGetCenterPoint( rect), 3.0), CGColorMakeBlack());
    }
 
    rect   = rects[ 1][ 1];
    radius = CGRectGetOuterRadius( rect);
    radius = radius * _CAQuadraticGetValue( CAQuadraticEaseOut, x);
-   paint  = mvgRadialGradient( vg, CGRectGetCenterPoint( rect),
-                                   0.0,
-                                   radius,
+   paint  = mvgRadialGradient( vg, CACircleMake( CGRectGetCenterPoint( rect), radius),
                                    CGColorMakeYellow(),
+                                   0.0,
                                    CGColorMakeBlue());
    mvgFillRectWithNVGpaint( vg, rect, paint);
 
    if( drawHelpers)
    {
-      mvgFillCircleWithColor( vg, CGRectGetCenterPoint( rect), 3.0, CGColorMakeBlack());
+      mvgFillCircleWithColor( vg, CACircleMake( CGRectGetCenterPoint( rect), 3.0), CGColorMakeBlack());
    }
    return( YES);
 }

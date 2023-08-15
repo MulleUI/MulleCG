@@ -109,22 +109,22 @@ void   mvgFillRectWithNVGpaint( NVGcontext *vg, CGRect rect, NVGpaint paint)
 
 
 /***/
-void   mvgFillCircleWithColor( NVGcontext *vg, CGPoint center, CGFloat radius, CGColor color)
+void   mvgFillCircleWithColor( NVGcontext *vg, CACircle circle, CGColor color)
 {
    mvgBeginPath( vg);
    {
-      mvgCircle( vg, center, radius);
+      mvgCircle( vg, circle);
       mvgFillColor( vg, color);
    }
    mvgFill( vg);
 }
 
 
-void   mvgFillCircleWithNVGpaint( NVGcontext *vg, CGPoint center, CGFloat radius, NVGpaint paint)
+void   mvgFillCircleWithNVGpaint( NVGcontext *vg, CACircle circle, NVGpaint paint)
 {
    mvgBeginPath( vg);
    {
-      mvgCircle( vg, center, radius);
+      mvgCircle( vg, circle);
       mvgFillPaint( vg, paint);
    }
    mvgFill( vg);
@@ -148,6 +148,25 @@ void   mvgStrokeRoundedRectWithColor( NVGcontext *vg,
 }
 
 
+void   mvgStrokeInsideOfRoundedRectWithColor( NVGcontext *vg,
+                                              CGRect rect,
+                                              CGFloat cornerRadius,
+                                              CGFloat strokeWidth,
+                                              CGColor color)
+{
+   mvgBeginPath( vg);
+   {
+      rect = CGRectInset( rect, strokeWidth / 2.0f, strokeWidth / 2.0f);
+
+      mvgRoundedRect( vg, rect, cornerRadius);
+      mvgStrokeColor( vg, color);
+      mvgStrokeWidth( vg, strokeWidth);
+   }
+   mvgStroke( vg);
+}
+
+
+
 void   mvgStrokeRectWithColor( NVGcontext *vg,
                                CGRect rect,
                                CGFloat strokeWidth,
@@ -163,15 +182,31 @@ void   mvgStrokeRectWithColor( NVGcontext *vg,
 }
 
 
+void   mvgStrokeInsideOfRectWithColor( NVGcontext *vg,
+                                       CGRect rect,
+                                       CGFloat strokeWidth,
+                                       CGColor color)
+{
+   mvgBeginPath( vg);
+   {
+      rect = CGRectInset( rect, strokeWidth / 2.0f, strokeWidth / 2.0f);
+
+      mvgRect( vg, rect);
+      mvgStrokeColor( vg, color);
+      mvgStrokeWidth( vg, strokeWidth);
+   }
+   mvgStroke( vg);
+}
+
+
 void   mvgStrokeCircleWithColor( NVGcontext *vg,
-                                 CGPoint center,
-                                 CGFloat radius,
+                                 CACircle circle,
                                  CGFloat strokeWidth,
                                  CGColor color)
 {
    mvgBeginPath( vg);
    {
-      mvgCircle( vg, center, radius);
+      mvgCircle( vg, circle);
       mvgStrokeColor( vg, color);
       mvgStrokeWidth( vg, strokeWidth);
    }
@@ -501,6 +536,34 @@ void   mvgTextInRect( struct NVGcontext *vg,
    while( 0);
 
    nvgRestore( vg);
+}
+
+
+void   mvgFormatInRect( struct NVGcontext *vg,
+                        CGRect rect,
+                        CGContentMode contentMode,
+                        MulleTextOptions options,
+                        char *format,
+                        ...)
+{
+   auto char   tmp[ 256];
+   va_list     args;
+   char        *s;
+   size_t      len;
+
+   if( ! format)
+      return;
+
+   va_start( args, format);
+
+   mulle_buffer_do_flexible( buffer, tmp, sizeof( tmp))
+   {
+      mulle_buffer_vsprintf( buffer, format, args);
+      len = mulle_buffer_get_length( buffer);
+      s   = mulle_buffer_get_bytes( buffer);
+      mvgTextInRect( vg, s, &s[ len], rect, contentMode, options);
+   }
+   va_end( args);
 }
 
 

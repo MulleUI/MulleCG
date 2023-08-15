@@ -101,17 +101,17 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
             case 0 : nvgBeginPath( vg);
                      break;
 
-            case 1 : mvgFillCircleWithColor( vg, centerPoint, 4.0, CGColorMakeDarkGray());
+            case 1 : mvgFillCircleWithColor( vg, CACircleMake( centerPoint, 4.0), CGColorMakeDarkGray());
                      nvgBeginPath( vg);
                      mvgMoveTo( vg, centerPoint);
                      break;
 
-            case 2 : mvgFillCircleWithColor( vg, leftPoint, 4.0, CGColorMakeDarkGray());
+            case 2 : mvgFillCircleWithColor( vg, CACircleMake( leftPoint, 4.0), CGColorMakeDarkGray());
                      nvgBeginPath( vg);
                      mvgMoveTo( vg, leftPoint);
                      break;
 
-            case 3 : mvgFillCircleWithColor( vg, rightPoint, 4.0, CGColorMakeDarkGray());
+            case 3 : mvgFillCircleWithColor( vg, CACircleMake( rightPoint, 4.0), CGColorMakeDarkGray());
                      nvgBeginPath( vg);
                      mvgMoveTo( vg, rightPoint);
                      break;

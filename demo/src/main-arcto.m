@@ -82,7 +82,7 @@ static void   drawArcTo( CGContext *context,
          break;
       }
 
-      mvgStrokeCircleWithColor( vg, p1, r, 0.5, CGColorMakeOrange());
+      mvgStrokeCircleWithColor( vg, CACircleMake( p1, r), 0.5, CGColorMakeOrange());
 //      mvgStrokeLineHWithColor( vg, p1, r, 0.5, CGColorMakeRed());
 
       mvgStrokeLineWithColor( vg, p0, p1, 0.5, CGColorMakeGreen());
@@ -97,9 +97,9 @@ static void   drawArcTo( CGContext *context,
       mvgStrokeColor( vg, color);
       mvgStroke( vg);
 
-      mvgFillCircleWithColor( vg, p0, 2.0, CGColorMakeRed());
-      mvgFillCircleWithColor( vg, p1, 2.0, CGColorMakeBlue());
-      mvgFillCircleWithColor( vg, p2, 2.0, CGColorMakeLime());
+      mvgFillCircleWithColor( vg, CACircleMake( p0, 2.0), CGColorMakeRed());
+      mvgFillCircleWithColor( vg, CACircleMake( p1, 2.0), CGColorMakeBlue());
+      mvgFillCircleWithColor( vg, CACircleMake( p2, 2.0), CGColorMakeLime());
    }
    mvgRestore( vg);
 }

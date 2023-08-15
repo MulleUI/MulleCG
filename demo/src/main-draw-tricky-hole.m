@@ -89,9 +89,9 @@ static void   drawArcHole( struct NVGcontext *vg, CGRect rect)
    angle[ 3] = CARadiansToAngle( atan2( intersectionPoint[ 3].y - center.y, intersectionPoint[ 3].x - center.x));
  
    mvgMoveTo( vg, intersectionPoint[ 1]);
-   mvgArc( vg, center, radius, angle[ 1], angle[ 0], NVG_CW);
+   mvgArc( vg, CACircleMake( center, radius), angle[ 1], angle[ 0], NVG_CW);
    mvgLineTo( vg, intersectionPoint[ 2]);
-   mvgArc( vg, center, radius, angle[ 2], angle[ 3], NVG_CW);
+   mvgArc( vg, CACircleMake( center, radius), angle[ 2], angle[ 3], NVG_CW);
    mvgLineTo( vg, intersectionPoint[ 1]);
 }
 
@@ -127,7 +127,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
    if( animShape)
    {
-      bRect = CGRectMakeWithCenterPointAndInnerRadius( CGRectGetCenterPoint( rect), 50.0);
+      bRect = CACircleGetOuterRect( CACircleMake( CGRectGetCenterPoint( rect), 50.0));
       bRect = CGRectOffset( bRect, animation * rect.size.width / 2.0 / 20.0, 0.0);
       mvgRect( vg, bRect);
       mvgPathWinding( vg, NVG_HOLE);
@@ -135,9 +135,9 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    else
    {
       radius = CGRectGetHeight( aRect) / 2.0;
-      bRect  = CGRectMakeWithCenterPointAndInnerRadius( CGRectGetCenterPoint( rect), radius);
+      bRect  = CACircleGetOuterRect( CACircleMake( CGRectGetCenterPoint( rect), radius));
       bRect  = CGRectOffset( bRect, animation * rect.size.width / 2.0 / 20.0, 0.0);
-      mvgCircle( vg, CGRectGetCenterPoint( bRect), radius - 1.0);
+      mvgCircle( vg, CACircleMake( CGRectGetCenterPoint( bRect), radius - 1.0));
       mvgPathWinding( vg, NVG_HOLE);
    }
 
