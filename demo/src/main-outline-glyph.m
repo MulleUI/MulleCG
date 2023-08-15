@@ -489,7 +489,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    if( drawHelpers)
    {
       mvgBeginPath( vg);
-      mvgCircle( vg, CGPointZero, 3);
+      mvgCircle( vg, CACircleMake( CGPointZero, 3));
       mvgStrokeWidth( vg, 0.75f);
       mvgStrokeColor( vg, CGColorMakePowderBlue());
       mvgFillColor( vg, CGColorMakeBlueViolet());

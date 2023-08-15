@@ -41,8 +41,7 @@ void   mvgFillRoundedRectWithPaint( NVGcontext *vg,
 void   mvgFillRectWithPaint( NVGcontext *vg, CGRect rect, CGPaint *paint);
 // will use linear Gradient!
 void   mvgFillCircleWithPaint( NVGcontext *vg,
-                               CGPoint center,
-                               CGFloat radius,
+                               CACircle circle,
                                CGPaint *paint);
 void   mvgFillLineWithPaint( NVGcontext *vg,
                              CGPoint start,
@@ -61,8 +60,7 @@ void   mvgStrokeRectWithPaint( NVGcontext *vg,
                                CGPaint *paint);
 // will use linear Gradient!
 void   mvgStrokeCircleWithPaint( NVGcontext *vg,
-                                 CGPoint center,
-                                 CGFloat radius,
+                                 CACircle circle,
                                  CGFloat strokeWidth,
                                  CGPaint *paint);
 void   mvgStrokeLineWithPaint( NVGcontext *vg,

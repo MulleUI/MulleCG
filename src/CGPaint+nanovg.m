@@ -85,15 +85,14 @@ void   mvgFillRectWithPaint( NVGcontext *vg, CGRect rect, CGPaint *paint)
 
 
 void   mvgFillCircleWithPaint( NVGcontext *vg, 
-                               CGPoint center, 
-                               CGFloat radius, 
+                               CACircle circle,
                                CGPaint *paint)
 {
    CGRect   rect;
 
    mvgBeginPath( vg);
-   mvgCircle( vg, center, radius);
-   rect = CGRectMakeWithCenterPointAndInnerRadius( center, radius);
+   mvgCircle( vg, circle);
+   rect = CACircleGetOuterRect( circle);
    fillWithBoundsAndPaint( vg, rect, paint);
 }
 
@@ -144,16 +143,15 @@ void   mvgStrokeRectWithPaint( NVGcontext *vg,
 
 
 void   mvgStrokeCircleWithPaint( NVGcontext *vg, 
-                                 CGPoint center, 
-                                 CGFloat radius, 
+                                 CACircle circle,
                                  CGFloat strokeWidth,
                                  CGPaint *paint)
 {
    CGRect   rect;
 
    mvgBeginPath( vg);
-   mvgCircle( vg, center, radius);
-   rect = CGRectMakeWithCenterPointAndInnerRadius( center, radius);
+   mvgCircle( vg, circle);
+   rect = CACircleGetOuterRect( circle);
    strokeWithBoundsAndPaint( vg, rect, strokeWidth, paint);
 }  
 

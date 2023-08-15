@@ -17,7 +17,7 @@
 
 + (instancetype) newWithStartColor:(CGColor) startColor
                           endColor:(CGColor) endColor
-                          rotation:(CGFloat) rotation
+                          rotation:(CARotation) rotation
 {
    _CGTwoColorGradient   *obj;
 
@@ -71,7 +71,7 @@
 }
 
 
-- (CGGradient *) rotatedGradient:(CGFloat) rotation
+- (CGGradient *) rotatedGradient:(CARotation) rotation
 {
    return( [_CGTwoColorGradient newWithStartColor:_startColor
                                          endColor:_endColor
@@ -82,14 +82,12 @@
 
 
 
-
-
 @implementation _CGMultiColorGradient
 
 + (instancetype) newWithColors:(CGColor *) colors
                      locations:(CGFloat *) locations
                          count:(NSUInteger) count
-                      rotation:(CGFloat) rotation
+                      rotation:(CARotation) rotation
 {
    float                    *p_location;
    float                    location;
@@ -223,73 +221,16 @@
    return( alpha);
 }
 
-
 @end
 
 
 @implementation CGGradient
 
 
-+ (instancetype) gradientWithStartColor:(CGColor) startColor
-                               endColor:(CGColor) endColor
-                                  rotation:(CGFloat) rotation
-{
-   return( [[_CGTwoColorGradient newWithStartColor:startColor
-                                          endColor:endColor
-                                          rotation:rotation] autorelease]);
-}
-
-
-+ (instancetype) gradientWithColors:(CGColor *) colors
-                          locations:(CGFloat *) locations
-                              count:(NSUInteger) count
-                           rotation:(CGFloat) rotation
-{
-   if( count < 2)
-      return( nil);
-
-   return( [[_CGMultiColorGradient newWithColors:colors
-                                       locations:locations
-                                           count:count
-                                        rotation:rotation] autorelease]);
-}
-
-
-
-+ (instancetype) gradientWithStartColor:(CGColor) startColor
-                               endColor:(CGColor) endColor
-{
-   return( [self gradientWithStartColor:startColor
-                               endColor:endColor
-                               rotation:0.0]);
-}
-
-
-+ (instancetype) gradientWithColors:(CGColor *) colors
-                          locations:(CGFloat *) locations
-                              count:(NSUInteger) count
-{
-   return( [self gradientWithColors:colors
-                          locations:locations
-                              count:count
-                           rotation:0.0]);
-}
-
-
-- (instancetype) initWithStartColor:(CGColor) startColor
-                           endColor:(CGColor) endColor
-                           rotation:(CGFloat) rotation
-{
-   return( [_CGTwoColorGradient newWithStartColor:startColor
-                                         endColor:endColor
-                                        rotation:rotation]);
-}
-
-
-- (instancetype) initWithColors:(CGColor *) colors
-                      locations:(CGFloat *) locations
-                          count:(NSUInteger) count
-                       rotation:(CGFloat) rotation
+static id   CGGradientCreateWithColors( CGColor *colors,
+                                        CGFloat *locations,
+                                        NSUInteger count,
+                                        CARotation rotation)
 {
    switch( count)
    {
@@ -306,6 +247,61 @@
 }
 
 
++ (instancetype) gradientWithColors:(CGColor *) colors
+                          locations:(CGFloat *) locations
+                              count:(NSUInteger) count
+                           rotation:(CARotation) rotation
+{
+   return( CGGradientCreateWithColors( colors, locations, count, rotation));
+}
+
+
++ (instancetype) gradientWithColors:(CGColor *) colors
+                          locations:(CGFloat *) locations
+                              count:(NSUInteger) count
+{
+   return( CGGradientCreateWithColors( colors, locations, count, 0.0f));
+}
+
+
++ (instancetype) gradientWithStartColor:(CGColor) startColor
+                               endColor:(CGColor) endColor
+                               rotation:(CARotation) rotation
+{
+   return( [[_CGTwoColorGradient newWithStartColor:startColor
+                                          endColor:endColor
+                                          rotation:rotation] autorelease]);
+}
+
+
++ (instancetype) gradientWithStartColor:(CGColor) startColor
+                               endColor:(CGColor) endColor
+{
+   return( [[_CGTwoColorGradient newWithStartColor:startColor
+                                          endColor:endColor
+                                          rotation:0.0f] autorelease]);
+}
+
+
+- (instancetype) initWithColors:(CGColor *) colors
+                      locations:(CGFloat *) locations
+                          count:(NSUInteger) count
+                       rotation:(CARotation) rotation
+{
+   return( CGGradientCreateWithColors( colors, locations, count, rotation));
+}
+
+
+- (instancetype) initWithStartColor:(CGColor) startColor
+                           endColor:(CGColor) endColor
+                           rotation:(CARotation) rotation
+{
+   return( [_CGTwoColorGradient newWithStartColor:startColor
+                                         endColor:endColor
+                                        rotation:rotation]);
+}
+
+
 - (instancetype) initWithStartColor:(CGColor) startColor
                            endColor:(CGColor) endColor
 {
@@ -315,15 +311,11 @@
 }
 
 
-
 - (instancetype) initWithColors:(CGColor *) colors
                       locations:(CGFloat *) locations
                           count:(NSUInteger) count
 {
-   return( [self initWithColors:colors
-                      locations:locations
-                          count:count
-                       rotation:0.0]);
+   return( CGGradientCreateWithColors( colors, locations, count, 0.0f));
 }
 
 
@@ -349,7 +341,6 @@
 {
    return( YES);
 }  // default: NO (mono color gradient says also NO)
-
 
 
 - (char *) UTF8String
@@ -413,7 +404,7 @@
 }
 
 
-- (CGPaint *) rotatedPaint:(CGFloat) rotation
+- (CGPaint *) rotatedPaint:(CARotation) rotation
 {
    return( [self rotatedGradient:rotation]);
 }
@@ -421,8 +412,75 @@
 
 - (CGGradient *) reversedGradient // rotated 180 degrees
 {
-   return( [self rotatedGradient:0.5]);
+   return( [self rotatedGradient:0.5f]);
 }
+
+
+- (CGGradient *) gradientByChangingColorsWithFunction:(CGColor (*)( CGColor, void *)) f
+                                             userInfo:(void *) userInfo
+{
+   NSUInteger   count;
+   CGGradient   *gradient;
+   NSUInteger   i;
+
+   count = [self numberOfColors];
+   mulle_flexarray_do( tmp_locations, float, 8, count)
+   {
+      [self getLocations:tmp_locations];
+      mulle_flexarray_do( tmp_colors, CGColor, 8, count)
+      {
+         [self getColors:tmp_colors];
+         for( i = 0; i < count; i++)
+            tmp_colors[ i] = (*f)( tmp_colors[ i], userInfo);
+
+         gradient = [CGGradient gradientWithColors:tmp_colors
+                                         locations:tmp_locations
+                                             count:count
+                                          rotation:_rotation];
+      }
+   }
+   return( gradient);
+}
+
+
+static CGColor   dimmer( CGColor color, void *dim_p)
+{
+   CGFloat   dim = *(CGFloat *) dim_p;
+
+   return( CGColorDim( color, dim));
+}
+
+
+- (CGGradient *) brightenedGradient:(CGFloat) brighten
+{
+   brighten = -brighten;
+   return( [self gradientByChangingColorsWithFunction:dimmer
+                                             userInfo:&brighten]);
+}
+
+
+- (CGGradient *) dimmedGradient:(CGFloat) dim
+{
+   return( [self gradientByChangingColorsWithFunction:dimmer
+                                             userInfo:&dim]);
+}
+
+
+
+static CGColor   alphizer( CGColor color, void *alpha_p)
+{
+   CGFloat   alpha = *(CGFloat *) alpha_p;
+
+   return( CGColorBySettingAlpha( color, alpha));
+}
+
+
+- (CGGradient *) transparentGradient:(CGFloat) alpha
+{
+   return( [self gradientByChangingColorsWithFunction:alphizer
+                                             userInfo:&alpha]);
+}
+
 
 @end
 

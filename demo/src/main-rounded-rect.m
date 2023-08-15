@@ -343,7 +343,7 @@ static void   drawRoundedRect( struct NVGcontext *vg, CGRect canvas, struct Mull
 {
    CGRect    rect;
 
-   rect = CGRectInset( canvas, fabsf( insets.tl), fabsf( insets.br));
+   rect = CGRectInset( canvas, fabsf( insets.topLeft), fabsf( insets.bottomRight));
 
    // insets are flipped, because rect is flipped!
 
@@ -352,10 +352,10 @@ static void   drawRoundedRect( struct NVGcontext *vg, CGRect canvas, struct Mull
                               rect.origin.y,
                               rect.size.width,
                               rect.size.height,
-                              insets.tl,
-                              insets.tr,
-                              insets.br,
-                              insets.bl);
+                              insets.topLeft,
+                              insets.topRight,
+                              insets.bottomRight,
+                              insets.bottomLeft);
    nvgStrokeWidth( vg, 8);
    nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xF0C0C0FF));
    nvgStroke( vg);//   nvgFillColor( vg, CGColorMakeRed());

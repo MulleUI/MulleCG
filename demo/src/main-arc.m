@@ -26,8 +26,8 @@ static void   drawArc( CGContext *context,
 
    r  = CGRectGetHeight( rect);
    p0 = CGRectGetTopPoint( rect);                                                // RED
-   x1 = CAPolarPointMakeWithDegrees( r, 0.0 + 90.0 * factor);           // BLUE
-   x2 = CAPolarPointMakeWithDegrees( r, (90.0 + 90.0) - 90.0 * factor);  // LIME
+   x1 = CAPolarPointMakeWithAngle( r, CADegreesToAngle( 0.0 + 90.0 * factor));           // BLUE
+   x2 = CAPolarPointMakeWithAngle( r, CADegreesToAngle( (90.0 + 90.0) - 90.0 * factor));  // LIME
 
    p1 = CGPointAddPolarPoint( p0, x1);
    p2 = CGPointAddPolarPoint( p0, x2);
@@ -79,9 +79,9 @@ static void   drawArc( CGContext *context,
       mvgStrokeLineWithColor( vg, p0, p1, 0.5, CGColorMakeBlack());
       mvgStrokeLineWithColor( vg, p0, p2, 0.5, CGColorMakeBlack());
 
-      mvgFillCircleWithColor( vg, p0, 5.0, CGColorMakeRed());
-      mvgFillCircleWithColor( vg, p1, 5.0, CGColorMakeBlue());
-      mvgFillCircleWithColor( vg, p2, 5.0, CGColorMakeLime());
+      mvgFillCircleWithColor( vg, CACircleMake( p0, 5.0), CGColorMakeRed());
+      mvgFillCircleWithColor( vg, CACircleMake( p1, 5.0), CGColorMakeBlue());
+      mvgFillCircleWithColor( vg, CACircleMake( p2, 5.0), CGColorMakeLime());
    }
 }
 

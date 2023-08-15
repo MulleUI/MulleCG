@@ -7,24 +7,33 @@
 #define COLS   10
 
 
+static void   drawGridInRect( CGContext  *context, CGRect rect)
+{
 #define B   { 0xF8, 0xF8, 0xF8, 0xFF }
 #define G   { 0xC2, 0xC2, 0xC2, 0xFF }
 
+   static uint8_t   imagedata[ 8][ 8][ 4] =
+   {
+       { B, B, B, B,  G, G, G, G },
+       { B, B, B, B,  G, G, G, G },
+       { B, B, B, B,  G, G, G, G },
+       { B, B, B, B,  G, G, G, G },
 
-static uint8_t   imagedata[ 8][ 8][ 4] =
-{
-    { B, B, B, B,  G, G, G, G },
-    { B, B, B, B,  G, G, G, G },
-    { B, B, B, B,  G, G, G, G },
-    { B, B, B, B,  G, G, G, G },
+       { G, G, G, G,  B, B, B, B },
+       { G, G, G, G,  B, B, B, B },
+       { G, G, G, G,  B, B, B, B },
+       { G, G, G, G,  B, B, B, B },
+   };
+   CGImage   *image;
 
-    { G, G, G, G,  B, B, B, B },
-    { G, G, G, G,  B, B, B, B },
-    { G, G, G, G,  B, B, B, B },
-    { G, G, G, G,  B, B, B, B },
-};
-
-
+   image = [[[CGImage alloc] initWithRGBABytes:imagedata
+                                    bitmapSize:MulleIntegerSizeMake( 8, 8)
+                                  textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
+                                       context:context] autorelease];
+   [image drawRect:rect
+           options:NULL
+           context:context];
+}
 
 
 static BOOL   drawStuff( CALayer *layer, CGContext *context)
@@ -48,14 +57,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
    canvas = [layer canvas];
 
-
-   image = [[[CGImage alloc] initWithRGBABytes:imagedata
-                                    bitmapSize:MulleIntegerSizeMake( 8, 8)
-                                  textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
-                                       context:context] autorelease];
-   [image drawRect:canvas
-           options:NULL
-           context:context];
+   drawGridInRect( context, canvas);
 
    canvas = CGRectInset( canvas, 5.0f, 5.0f);
    CGRectPartitionVertically( canvas, 5.0, ROWS, rows);

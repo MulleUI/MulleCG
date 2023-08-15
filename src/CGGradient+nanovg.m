@@ -14,23 +14,39 @@
 @implementation CGGradient ( nanovg)
 
 static NVGpaint
-   CGGradientNVGpaintForRect( CGGradient *self, CGRect rect, NVGcontext *vg)
+   CGGradientNVGpaintForRect( CGGradient *self,
+                              CGRect rect,
+                              CARotation rotation,
+                              CGFloat smoothness,
+                              BOOL isRectangular,
+                              NVGcontext *vg)
 {
    CGFloat      radians;
    CGFloat      w, h;
    CGPoint      end;
    CGPoint      start;
+   CGPoint      center;
    NVGpaint     paint;
-   CARotation   rotation;
+   CGFloat      size;
 
-   rotation = [self rotation];
    radians  = CARotationToRadians( rotation);
-   w        = rect.size.width  * cosf( radians);
-   h        = rect.size.height * sinf( radians);
-   start    = CGPointMake( rect.origin.x + rect.size.width / 2.0 - w / 2.0,
-                           rect.origin.y + rect.size.height / 2.0 - h / 2.0);
+   if( isRectangular)
+   {
+      w     = rect.size.width * cosf( radians) * smoothness;
+      h     = rect.size.height * sinf( radians) * smoothness;
+   }
+   else
+   {
+      size  = CGRectGetMinimumSize( rect);
+      w     = size * cosf( radians) * smoothness;
+      h     = size * sinf( radians) * smoothness;
+   }
+
+   center   = CGRectGetCenterPoint( rect);
+   start    = CGPointMake( center.x - w / 2.0, center.y - h / 2.0);
    end      = CGPointMake( start.x + w, start.y + h);
-   paint    = mvgLinearGradient( vg, start, end, [self startColor], [self endColor]);
+
+   paint    = nvgLinearGradient( vg, start.x, start.y, end.x, end.y, [self startColor], [self endColor]);
    return( paint);
 }
 
@@ -40,7 +56,7 @@ static NVGpaint
 {
    NVGpaint   paint;
 
-   paint = CGGradientNVGpaintForRect( self, rect, vg);
+   paint = CGGradientNVGpaintForRect( self, rect, [self rotation], 1.0f, YES, vg);
    return( paint);
 }
 
@@ -50,9 +66,32 @@ static NVGpaint
 {
    NVGpaint   paint;
 
-   paint = CGGradientNVGpaintForRect( self, rect, vg);
+   paint = CGGradientNVGpaintForRect( self, rect, [self rotation], 1.0f, YES, vg);
    return( paint);
 }
+
+
+- (NVGpaint) linearGradientNVGpaintWithBounds:(CGRect) rect
+                                   smoothness:(CGFloat) smoothness
+                                   NVGcontext:(NVGcontext *) vg
+{
+   NVGpaint   paint;
+
+   paint = CGGradientNVGpaintForRect( self, rect, [self rotation], smoothness, YES, vg);
+   return( paint);
+}
+
+
+- (NVGpaint) rectangularLinearGradientNVGpaintWithBounds:(CGRect) rect
+                                              smoothness:(CGFloat) smoothness
+                                              NVGcontext:(NVGcontext *) vg
+{
+   NVGpaint   paint;
+
+   paint = CGGradientNVGpaintForRect( self, rect, [self rotation], smoothness, NO, vg);
+   return( paint);
+}
+
 
 
 - (NVGpaint) boxGradientNVGpaintWithBounds:(CGRect) rect
@@ -64,26 +103,24 @@ static NVGpaint
 
    paint = mvgBoxGradient( vg,
                            rect,
+                           [self endColor],
                            radius,
                            feather,
-                           [self startColor],
-                           [self endColor]);
+                           [self startColor]);
    return( paint);
 }
 
 
-- (NVGpaint) radialGradientNVGpaintWithCenter:(CGPoint) center
+- (NVGpaint) radialGradientNVGpaintWithCircle:(CACircle) circle
                                   innerRadius:(CGFloat) innerRadius
-                                  outerRadius:(CGFloat) outerRadius
                                    NVGcontext:(NVGcontext *) vg
 {
    NVGpaint   paint;
 
    paint = mvgRadialGradient( vg,
-                              center,
-                              innerRadius,
-                              outerRadius,
+                              circle,
                               [self startColor],
+                              innerRadius,
                               [self endColor]);
    return( paint);
 }
@@ -93,16 +130,14 @@ static NVGpaint
 
 
 void   mvgFillCircleWithGradient( NVGcontext *vg,
-                                  CGPoint center,
-                                  CGFloat radius,
+                                  CACircle circle,
                                   CGGradient *gradient)
 {
    mvgBeginPath( vg);
    {
-      mvgCircle( vg, center, radius);
-      mvgFillPaint( vg, [gradient radialGradientNVGpaintWithCenter:center
+      mvgCircle( vg, circle);
+      mvgFillPaint( vg, [gradient radialGradientNVGpaintWithCircle:circle
                                                        innerRadius:0.0
-                                                       outerRadius:radius
                                                         NVGcontext:vg]);
    }
    mvgFill( vg);
@@ -111,21 +146,132 @@ void   mvgFillCircleWithGradient( NVGcontext *vg,
 
 
 void   mvgStrokeCircleWithGradient( NVGcontext *vg,
-                                    CGPoint center,
-                                    CGFloat radius,
+                                    CACircle circle,
                                     CGFloat strokeWidth,
                                     CGGradient *gradient)
 {
    mvgBeginPath( vg);
    {
-      mvgCircle( vg, center, radius);
-      mvgStrokePaint( vg, [gradient radialGradientNVGpaintWithCenter:center
+      mvgCircle( vg, circle);
+      circle = CACircleExtrude( circle, strokeWidth / 2.0);
+      mvgStrokePaint( vg, [gradient radialGradientNVGpaintWithCircle:circle
                                                          innerRadius:0.0
-                                                         outerRadius:radius + strokeWidth / 2.0
                                                           NVGcontext:vg]);
       mvgStrokeWidth( vg, strokeWidth);
    }
    mvgStroke( vg);
 }
 
+
+void   mvgFillRoundedRectWithLinearGradient( NVGcontext *vg,
+                                             CGRect rect,
+                                             CGFloat cornerRadius,
+                                             CGFloat smoothness,
+                                             CGGradient *gradient)
+{
+   NVGpaint     paint;
+
+   mvgBeginPath( vg);
+   mvgRoundedRect( vg, rect, cornerRadius);
+
+#ifdef NIL_PAINT_DRAWS_BLACK
+   if( ! gradient)
+   {
+      mvgFillColor( vg, CGColorMakeBlack());
+      mvgFill( vg);
+      return;
+   }
+#endif
+
+   paint = CGGradientNVGpaintForRect( gradient, rect, [gradient rotation], smoothness, YES, vg);
+
+   mvgFillPaint( vg, paint);
+   mvgFill( vg);
+}
+
+
+void   mvgFillRoundedRectWithRectangularLinearGradient( NVGcontext *vg,
+                                                        CGRect rect,
+                                                        CGFloat cornerRadius,
+                                                        CGFloat smoothness,
+                                                        CGGradient *gradient)
+{
+   NVGpaint     paint;
+
+   mvgBeginPath( vg);
+   mvgRoundedRect( vg, rect, cornerRadius);
+
+#ifdef NIL_PAINT_DRAWS_BLACK
+   if( ! gradient)
+   {
+      mvgFillColor( vg, CGColorMakeBlack());
+      mvgFill( vg);
+      return;
+   }
+#endif
+
+   paint = CGGradientNVGpaintForRect( gradient, rect, [gradient rotation], smoothness, NO, vg);
+
+   mvgFillPaint( vg, paint);
+   mvgFill( vg);
+}
+
+
+
+void   mvgStrokeRoundedRectWithLinearGradient( NVGcontext *vg,
+                                               CGRect rect,
+                                               CGFloat cornerRadius,
+                                               CGFloat strokeWidth,
+                                               CGFloat smoothness,
+                                               CGGradient *gradient)
+{
+   NVGpaint     paint;
+
+   mvgBeginPath( vg);
+   mvgRoundedRect( vg, rect, cornerRadius);
+
+#ifdef NIL_PAINT_DRAWS_BLACK
+   if( ! gradient)
+   {
+      mvgStrokeColor( vg, CGColorMakeBlack());
+      mvgStroke( vg);
+      return;
+   }
+#endif
+
+   paint = CGGradientNVGpaintForRect( gradient, rect, [gradient rotation], smoothness, YES, vg);
+
+   mvgStrokePaint( vg, paint);
+   mvgStrokeWidth( vg, strokeWidth);
+   mvgStroke( vg);
+}
+
+
+void   mvgStrokeRoundedRectWithRectangularLinearGradient( NVGcontext *vg,
+                                                          CGRect rect,
+                                                          CGFloat cornerRadius,
+                                                          CGFloat strokeWidth,
+                                                          CGFloat smoothness,
+                                                          CGGradient *gradient)
+{
+   NVGpaint     paint;
+
+   mvgBeginPath( vg);
+   mvgRoundedRect( vg, rect, cornerRadius);
+
+#ifdef NIL_PAINT_DRAWS_BLACK
+   if( ! gradient)
+   {
+      mvgStrokeColor( vg, CGColorMakeBlack());
+      mvgStroke( vg);
+      return;
+   }
+#endif
+
+   paint = CGGradientNVGpaintForRect( gradient, rect, [gradient rotation], smoothness, NO, vg);
+
+   mvgStrokePaint( vg, paint);
+   mvgStrokeWidth( vg, strokeWidth);
+   mvgStroke( vg);
+}
 

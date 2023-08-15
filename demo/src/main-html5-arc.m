@@ -24,7 +24,7 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
    center = CGRectGetCenterPoint( [layer canvas]);
 
    mvgBeginPath( vg);
-   mvgArc( vg, center, 150.0, 2 * M_PI / 120.0, 2 * M_PI * factor, NVG_CW);
+   mvgArc( vg, CACircleMake( center, 150.0), CARadiansToAngle( 2 * M_PI / 120.0), CARadiansToAngle( 2 * M_PI * factor), NVG_CW);
    mvgClosePath( vg);
    mvgFillColor( vg, CGColorMakeBlue());
    mvgFill( vg);
@@ -33,7 +33,7 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
    mvgStroke( vg);
 
    mvgBeginPath( vg);
-   mvgArc( vg, center, 100.0, 2 * M_PI / 120.0, 2 * M_PI * factor, NVG_CCW);
+   mvgArc( vg, CACircleMake( center, 100.0), CARadiansToAngle( 2 * M_PI / 120.0), CARadiansToAngle( 2 * M_PI * factor), NVG_CCW);
    mvgClosePath( vg);
    mvgFillColor( vg, CGColorMakeRed());
    mvgFill( vg);

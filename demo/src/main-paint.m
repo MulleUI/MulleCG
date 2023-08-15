@@ -58,12 +58,12 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
          {
          case 0  : mvgStrokeRectWithPaint( vg, rect, strokeWidth, paint); break;
          case 1  : mvgStrokeRoundedRectWithPaint( vg, rect, 3.0, strokeWidth, paint); break;
-         case 2  : mvgStrokeCircleWithPaint( vg, CGRectGetCenterPoint( rect), CGRectGetInnerRadius( rect), strokeWidth, paint); break;
+         case 2  : mvgStrokeCircleWithPaint( vg, CGRectGetInnerCircle( rect), strokeWidth, paint); break;
          case 3  : mvgStrokeLineWithPaint( vg, CGRectGetTopLeftPoint( rect), CGRectGetBottomRightPoint( rect), strokeWidth, paint); break;
 
          case 4  : mvgFillRectWithPaint( vg, rect, paint); break;
          case 5  : mvgFillRoundedRectWithPaint( vg, rect, 3.0, paint); break;
-         case 6  : mvgFillCircleWithPaint( vg, CGRectGetCenterPoint( rect), CGRectGetInnerRadius( rect), paint); break;
+         case 6  : mvgFillCircleWithPaint( vg, CGRectGetInnerCircle( rect), paint); break;
          case 7  : break;
          }
 
@@ -73,12 +73,12 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
             {
             case 8  : mvgStrokeRectWithImage( vg, rect, strokeWidth, (CGImage *) paint); break;
             case 9  : mvgStrokeRoundedRectWithImage( vg, rect, 3.0, strokeWidth, (CGImage *) paint); break;
-            case 10 : mvgStrokeCircleWithImage( vg, CGRectGetCenterPoint( rect), CGRectGetInnerRadius( rect), strokeWidth, (CGImage *) paint); break;
+            case 10 : mvgStrokeCircleWithImage( vg, CGRectGetInnerCircle( rect), strokeWidth, (CGImage *) paint); break;
             case 11 : mvgStrokeLineWithImage( vg, CGRectGetTopLeftPoint( rect), CGRectGetBottomRightPoint( rect), strokeWidth, (CGImage *) paint); break;
 
             case 12 : mvgFillRectWithImage( vg, rect, (CGImage *) paint); break;
             case 13 : mvgFillRoundedRectWithImage( vg, rect, 3.0, (CGImage *) paint); break;
-            case 14 : mvgFillCircleWithImage( vg, CGRectGetCenterPoint( rect), CGRectGetInnerRadius( rect), (CGImage *) paint); break;
+            case 14 : mvgFillCircleWithImage( vg, CGRectGetInnerCircle( rect), (CGImage *) paint); break;
             case 15 : break;
             }
          }
@@ -88,12 +88,12 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
             {
             case 8  : mvgStrokeRectWithGradient( vg, rect, strokeWidth, (CGGradient *) paint); break;
             case 9  : mvgStrokeRoundedRectWithGradient( vg, rect, 3.0, strokeWidth, (CGGradient *) paint); break;
-            case 10 : mvgStrokeCircleWithGradient( vg, CGRectGetCenterPoint( rect), CGRectGetInnerRadius( rect), strokeWidth, (CGGradient *) paint); break;
+            case 10 : mvgStrokeCircleWithGradient( vg, CGRectGetInnerCircle( rect), strokeWidth, (CGGradient *) paint); break;
             case 11 : mvgStrokeLineWithGradient( vg, CGRectGetTopLeftPoint( rect), CGRectGetBottomRightPoint( rect), strokeWidth, (CGGradient *) paint); break;
 
             case 12 : mvgFillRectWithGradient( vg, rect, (CGGradient *) paint); break;
             case 13 : mvgFillRoundedRectWithGradient( vg, rect, 3.0, (CGGradient *) paint); break;
-            case 14 : mvgFillCircleWithGradient( vg, CGRectGetCenterPoint( rect), CGRectGetInnerRadius( rect), (CGGradient *) paint); break;
+            case 14 : mvgFillCircleWithGradient( vg, CGRectGetInnerCircle( rect), (CGGradient *) paint); break;
             case 15 : break;
             }
          }

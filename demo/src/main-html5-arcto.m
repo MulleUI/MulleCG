@@ -59,16 +59,16 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
 
    mvgBeginPath( vg);
    mvgFillColor( vg, CGColorMakeBlue());
-   mvgArc( vg, p0, 5, 0, 2 * M_PI, NVG_CW);
+   mvgArc( vg, CACircleMake( p0, 5), CARadiansToAngle( 0), CARadiansToAngle( CA_2xPI), NVG_CW);
    mvgFill( vg);
 
    mvgBeginPath( vg);
    mvgFillColor( vg, CGColorMakeRed());
-   mvgArc( vg, p1, 5, 0, 2 * M_PI, NVG_CW);
+   mvgArc( vg, CACircleMake( p1, 5), CARadiansToAngle( 0), CARadiansToAngle( CA_2xPI), NVG_CW);
    mvgFill( vg);
 
    mvgBeginPath( vg);
-   mvgArc( vg, p2, 5, 0, 2 * M_PI, NVG_CW);
+   mvgArc( vg, CACircleMake( p2, 5), CARadiansToAngle( 0), CARadiansToAngle( CA_2xPI), NVG_CW);
    mvgFill( vg);
 
    return( YES);

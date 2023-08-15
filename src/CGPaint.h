@@ -17,6 +17,8 @@
 // but its kind of convenient to have this as a base class for CGGradient
 // and CGImage as it involves less typing.
 //
+// All CGPaint classes are immutable.
+//
 @interface CGPaint : NSObject < NSCopying>
 
 + (CGPaint *) paintWithColor:(CGColor) color;

@@ -386,27 +386,34 @@ static inline void   mvgDeleteImage( NVGcontext *vg, CGImageID image)
 // Paints
 
 static inline NVGpaint
-   mvgLinearGradient( NVGcontext* vg, CGPoint start, CGPoint end, CGColor icol, CGColor ocol)
+   mvgLinearGradient( NVGcontext* vg, CGRect rect, CGColor icol, CGColor ocol)
 {
-   return( nvgLinearGradient( vg, start.x,
-                                  start.y,   // must be two points and not a rect
-                                  end.x,
-                                  end.y,
+   return( nvgLinearGradient( vg, CGRectGetMinX( rect),
+                                  CGRectGetMinY( rect),
+                                  CGRectGetMaxX( rect),
+                                  CGRectGetMaxY( rect),
                                   icol,
                                   ocol));
 }
 
 //
-// Creates and returns a box gradient. Box gradient is a feathered rounded rectangle, it is useful for rendering
-// drop shadows or highlights for boxes. Parameters (x,y) define the top-left corner of the rectangle,
-// (w,h) define the size of the rectangle, r defines the corner radius, and f feather. Feather defines how blurry
-// the border of the rectangle is. Parameter icol specifies the inner color and ocol the outer color of the gradient.
-// The gradient is transformed by the current transform when it is passed to nvgFillPaint() or nvgStrokePaint().
-// This function "fixes" the behaviour of the original box gradient, where you
+// Creates and returns a box gradient. Box gradient is a feathered rounded
+// rectangle, it is useful for rendering drop shadows or highlights for boxes.
+// Feather defines how blurry the border of the rectangle is.
+// Parameter color specifies the inner color and featherColor the outer color
+// of the gradient.
+// The gradient is transformed by the current transform when it is passed to
+// nvgFillPaint() or nvgStrokePaint().
+// This function "fixes" the behavior of the original box gradient, where you
 // had to manually correct "rect" for the feather value.
 //
 static inline NVGpaint
-   mvgBoxGradient( NVGcontext* vg, CGRect rect, CGFloat radius, CGFloat feather, CGColor innerColor, CGColor outerColor)
+   mvgBoxGradient( NVGcontext *vg,
+                   CGRect rect,
+                   CGColor color,
+                   CGFloat cornerRadius,
+                   CGFloat feather,
+                   CGColor featherColor)
 {
    CGRect   gradientRect;
 
@@ -415,29 +422,46 @@ static inline NVGpaint
                                gradientRect.origin.y,
                                gradientRect.size.width,
                                gradientRect.size.height,
-                               radius,
+                               cornerRadius,
                                feather,
-                               innerColor,
-                               outerColor));
+                               color,
+                               featherColor));
 }
 
-// Creates and returns a radial gradient. Parameters (cx,cy) specify the center, inr and outr specify
-// the inner and outer radius of the gradient, icol specifies the start color and ocol the end color.
-// The gradient is transformed by the current transform when it is passed to nvgFillPaint() or nvgStrokePaint().
+//
+// Creates and returns a radial gradient.
+// The radial gradient fills circle with color. Specify an innerRadius with
+// an innerColor for the gradient.
+// The gradient is transformed by the current transform when it is passed
+// to nvgFillPaint() or nvgStrokePaint().
+//
+// This function is quite unlike `nvgRadialGradient` in terms of parameter
+// order. `nvgRadialGradient` is sort of inner circle first than outer circle,
+// which I find counter intuitive.
+//
 static inline NVGpaint
    mvgRadialGradient( NVGcontext *vg,
-                      CGPoint center,
+                      CACircle circle,
+                      CGColor color,
                       CGFloat innerRadius,
-                      CGFloat outerRadius,
-                      CGColor innerColor,
-                      CGColor outerColor)
+                      CGColor innerColor)
 {
-   return( nvgRadialGradient( vg, center.x, center.y, innerRadius, outerRadius, innerColor, outerColor));
+   return( nvgRadialGradient( vg, circle.center.x,
+                                  circle.center.y,
+                                  innerRadius,
+                                  circle.radius,
+                                  innerColor,
+                                  color));
 }
 
-// Creates and returns an image pattern. Parameters (ox,oy) specify the left-top location of the image pattern,
-// (ex,ey) the size of one image, angle rotation around the top-left corner, image is handle to the image to render.
-// The gradient is transformed by the current transform when it is passed to nvgFillPaint() or nvgStrokePaint().
+// Creates and returns an image pattern. Parameters the location and size of
+// one image, angle rotation around the top-left corner, image is handle to
+// the image to render. Because the angle rotation is around the left corner
+// and not the center, the rotation will rarely do what you want it to, so
+// use CGImage instead.
+// The gradient is transformed by the current transform when it is passed to
+// nvgFillPaint() or nvgStrokePaint().
+//
 static inline NVGpaint   mvgImagePattern( NVGcontext* vg,
                                           CGRect rect,
                                           CARotation rotation,
@@ -458,8 +482,9 @@ static inline NVGpaint   mvgImagePattern( NVGcontext* vg,
 //
 // Scissoring
 //
-// Scissoring allows you to clip the rendering NSIntegero a rectangle. This is useful for various
-// user NSIntegererface cases like rendering a text edit or a timeline.
+// Scissoring allows you to clip the rendering NSIntegero a rectangle. This is
+// useful for varioususer NSInterface cases like rendering a text edit or a
+// timeline.
 
 
 
@@ -556,13 +581,17 @@ static inline void   mvgPathWinding( NVGcontext *vg, NSInteger dir)
 
 // Creates new circle arc shaped sub-path
 static inline void   mvgArc( NVGcontext *vg, 
-                             CGPoint center, 
-                             CGFloat radius, 
+                             CACircle circle,
                              CAAngle a0, 
                              CAAngle a1, 
                              NSInteger dir)
 {
-   nvgArc( vg, center.x, center.y, radius, CAAngleToRadians( a0), CAAngleToRadians( a1), dir);
+   nvgArc( vg, circle.center.x,
+               circle.center.y,
+               circle.radius,
+               CAAngleToRadians( a0),
+               CAAngleToRadians( a1),
+               dir);
 }
 
 // Creates new rectangle shaped sub-path.
@@ -582,7 +611,7 @@ static inline void   mvgRoundedRectVarying( NVGcontext *vg,
                                             float radBottomRight, float radBottomLeft);
 
    _mvgRoundedRectVarying( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height,
-                               insets.tl, insets.tr, insets.br, insets.bl);
+                               insets.topLeft, insets.topRight, insets.bottomRight, insets.bottomLeft);
 }
 
 // Creates new rounded rectangle shaped sub-path.
@@ -600,9 +629,9 @@ static inline void   mvgEllipse( NVGcontext *vg, CGPoint center, CGFloat rx, CGF
 }
 
 // Creates new circle shaped sub-path.
-static inline void   mvgCircle( NVGcontext *vg, CGPoint center, CGFloat r)
+static inline void   mvgCircle( NVGcontext *vg, CACircle circle)
 {
-   nvgCircle( vg, center.x, center.y, r);
+   nvgCircle( vg, circle.center.x, circle.center.y, circle.radius);
 }
 
 // Fills the current path with current fill style.

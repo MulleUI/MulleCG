@@ -18,16 +18,36 @@
 @interface CGGradient( nanovg)
 
 - (NVGpaint) linearGradientNVGpaintWithBounds:(CGRect) rect
-                                  NVGcontext:(NVGcontext *) vg;
+                                   NVGcontext:(NVGcontext *) vg;
 
+//
+// Use this usually for rotating a gradient around a shape
+// smoothness is usually 1.0f, unless you want a harder gradient
+// rotation is usually 0.0f to 1.0f
+//
+// An easy way to get more than just two color gradients, use two gradients
+// with color alphas of 0.5 and fill twice (or fallback on OpenGL)
+//
+- (NVGpaint) linearGradientNVGpaintWithBounds:(CGRect) rect
+                                   smoothness:(CGFloat) smoothness
+                                   NVGcontext:(NVGcontext *) vg;
+
+// this will rotate the gradient as if it was a giant rectangle
+- (NVGpaint) rectangularLinearGradientNVGpaintWithBounds:(CGRect) rect
+                                              smoothness:(CGFloat) smoothness
+                                              NVGcontext:(NVGcontext *) vg;
+
+//
+// A box gradient is just a linear two color gradient with the "feather"
+// It's prime use is shadows...
+//
 - (NVGpaint) boxGradientNVGpaintWithBounds:(CGRect) rect
                               cornerRadius:(CGFloat) radius
                                    feather:(CGFloat) feather
                                 NVGcontext:(NVGcontext *) vg;
 
-- (NVGpaint) radialGradientNVGpaintWithCenter:(CGPoint) center
+- (NVGpaint) radialGradientNVGpaintWithCircle:(CACircle) circle
                                   innerRadius:(CGFloat) innerRadius
-                                  outerRadius:(CGFloat) outerRadius
                                    NVGcontext:(NVGcontext *) vg;
 
 @end
@@ -35,13 +55,11 @@
 
 // will use radialGradient!
 void   mvgFillCircleWithGradient( NVGcontext *vg,
-                                  CGPoint center,
-                                  CGFloat radius,
+                                  CACircle circle,
                                   CGGradient *gradient);
 // will use radialGradient!
 void   mvgStrokeCircleWithGradient( NVGcontext *vg,
-                                    CGPoint center,
-                                    CGFloat radius,
+                                    CACircle circle,
                                     CGFloat strokeWidth,
                                     CGGradient *gradient);
 
@@ -54,6 +72,36 @@ static inline void   mvgFillRoundedRectWithGradient( NVGcontext *vg,
    mvgFillRoundedRectWithPaint( vg, rect, cornerRadius, gradient);
 }
 
+
+MULLE_CG_EXTERN_GLOBAL
+void   mvgFillRoundedRectWithLinearGradient( NVGcontext *vg,
+                                             CGRect rect,
+                                             CGFloat cornerRadius,
+                                             CGFloat smoothness,
+                                             CGGradient *gradient);
+
+MULLE_CG_EXTERN_GLOBAL
+void   mvgFillRoundedRectWithRectangularLinearGradient( NVGcontext *vg,
+                                                        CGRect rect,
+                                                        CGFloat cornerRadius,
+                                                        CGFloat smoothness,
+                                                        CGGradient *gradient);
+
+MULLE_CG_EXTERN_GLOBAL
+void   mvgStrokeRoundedRectWithLinearGradient( NVGcontext *vg,
+                                               CGRect rect,
+                                               CGFloat cornerRadius,
+                                               CGFloat strokeWidth,
+                                               CGFloat smoothness,
+                                               CGGradient *gradient);
+
+MULLE_CG_EXTERN_GLOBAL
+void   mvgStrokeRoundedRectWithRectangularLinearGradient( NVGcontext *vg,
+                                                          CGRect rect,
+                                                          CGFloat cornerRadius,
+                                                          CGFloat strokeWidth,
+                                                          CGFloat smoothness,
+                                                          CGGradient *gradient);
 
 
 static inline void   mvgFillRectWithGradient( NVGcontext *vg,
