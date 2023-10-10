@@ -100,7 +100,7 @@ int   main( int argc, char *argv[])
    [window setFrameRateHz:UIWindowFrameRateUnsynced];  // run with low frequency to detect texture leaks
    [window setDrawCallback:drawStuff];
    // turning this on boosts from 1100 to 1400! (with -O0 sic!)
-   [window setKeepOSGraphicsContext:YES];
+   [window setKeepOSGraphicsContextActive:YES];
 
    [window setFrameDelegate:[MulleUIPerf object]];
 

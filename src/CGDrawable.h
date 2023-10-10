@@ -102,10 +102,10 @@ typedef NS_ENUM( NSUInteger, CGRepeat)
 
 typedef struct CGDrawableOptions
 {
-   CGFloat      alpha;
-   CGFloat      cornerRadius;  // cornerradius is used for bitmap images only
-   CGFloat      rotation;      // 0 means no rotation
-   CGFloat      scale;         // 0.0 means scale to fit,
+   CGFloat             alpha;
+   MulleCornerInsets   cornerInsets;  // cornerInsets are used for bitmap images only
+   CGFloat             rotation;      // 0 means no rotation
+   CGFloat             scale;         // 0.0 means scale to fit,
    struct
    {
       unsigned int   flip        : 3;
@@ -119,8 +119,31 @@ extern CGDrawableOptions   CGDrawableOptionsDefault;
 extern CGDrawableOptions   CGDrawableOptionsScaleToFit;
 
 
-static inline CGDrawableOptions   CGDrawableOptionsMake( CGFloat alpha,
-                                                         CGFloat cornerRadius,
+static inline CGDrawableOptions   CGDrawableOptionsMakeWithCornerRadius( CGFloat cornerRadius,
+                                                                         CGFloat alpha,
+                                                                         CGFloat rotation,
+                                                                         CGFloat scale,
+                                                                         CGFlip flip,
+                                                                         CGRepeat repeat,
+                                                                         CGContentMode contentMode)
+{
+   return( (CGDrawableOptions) {
+                                 .alpha                    = alpha,
+                                 .cornerInsets.topLeft     = cornerRadius,
+                                 .cornerInsets.topRight    = cornerRadius,
+                                 .cornerInsets.bottomLeft  = cornerRadius,
+                                 .cornerInsets.bottomRight = cornerRadius,
+                                 .rotation                 = rotation,
+                                 .scale                    = scale,
+                                 .flags.flip               = flip,
+                                 .flags.repeat             = repeat,
+                                 .flags.contentMode        = contentMode
+                              });
+}
+
+
+static inline CGDrawableOptions   CGDrawableOptionsMake( MulleCornerInsets cornerInsets,
+                                                         CGFloat alpha,
                                                          CGFloat rotation,
                                                          CGFloat scale,
                                                          CGFlip flip,
@@ -129,7 +152,7 @@ static inline CGDrawableOptions   CGDrawableOptionsMake( CGFloat alpha,
 {
    return( (CGDrawableOptions) {
                                  .alpha             = alpha,
-                                 .cornerRadius      = cornerRadius,
+                                 .cornerInsets      = cornerInsets,
                                  .rotation          = rotation,
                                  .scale             = scale,
                                  .flags.flip        = flip,
@@ -141,26 +164,26 @@ static inline CGDrawableOptions   CGDrawableOptionsMake( CGFloat alpha,
 
 static inline CGDrawableOptions   CGDrawableOptionsMakeDefault( void)
 {
-   return( CGDrawableOptionsMake( 1.0f,
-                                  0.0f,
-                                  CGRotationNone,
-                                  CGScaleNone,
-                                  CGFlipNone,
-                                  CGRepeatAsIs,
-                                  CGContentModeCenterPoint));
+   return( CGDrawableOptionsMakeWithCornerRadius( 0.0f,
+                                                  1.0f,
+                                                  CGRotationNone,
+                                                  CGScaleNone,
+                                                  CGFlipNone,
+                                                  CGRepeatAsIs,
+                                                  CGContentModeCenterPoint));
 }
 
 
 static inline CGDrawableOptions   CGDrawableOptionsMakeScaleToFit( void)
 {
-   return( CGDrawableOptionsMake( 1.0f,
-                                  0.0f,
-                                  CGRotationNone,
-                                  CGScaleToFit,
-                                  CGFlipNone,
-                                  CGRepeatAsIs,
-                                  CGContentModeCenterPoint));
-}
+   return( CGDrawableOptionsMakeWithCornerRadius( 0.0f,
+                                                  1.0f,
+                                                  CGRotationNone,
+                                                  CGScaleToFit,
+                                                  CGFlipNone,
+                                                  CGRepeatAsIs,
+                                                  CGContentModeCenterPoint));
+}                
 
 
 

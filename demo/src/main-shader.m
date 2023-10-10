@@ -27,9 +27,9 @@ static struct CGShaderUTF8Sources   monochromeShaderSources =
 
 @interface DemoLayer : CAOpenGLLayer
 {
-   GLuint      VBO;
-   GLuint      VAO;
-   CGShaderID  shaderProgram;
+   GLuint      _VBO;
+   GLuint      _VAO;
+   CGShaderID  _shaderProgram;
 }
 @end
 
@@ -38,9 +38,9 @@ static struct CGShaderUTF8Sources   monochromeShaderSources =
 
 - (void) initShaderProgramWithContext:(CGContext *) context
 {
-   shaderProgram = [context compileShaderWithShaderSources:&monochromeShaderSources];
+   _shaderProgram = [context compileShaderWithShaderSources:&monochromeShaderSources];
    CGContextCheckBackendError( context, "after compileShaderWithShaderSources");
-   assert( shaderProgram);
+   assert( _shaderProgram);
 }
 
 
@@ -54,15 +54,15 @@ static struct CGShaderUTF8Sources   monochromeShaderSources =
           0.0f,  0.75f, 0.0f   // top
     };
 
-   glGenVertexArrays( 1, &VAO);
+   glGenVertexArrays( 1, &_VAO);
    CGContextCheckBackendError( context, "after glGenVertexArrays");
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-   glBindVertexArray( VAO);
+   glBindVertexArray( _VAO);
    CGContextCheckBackendError( context, "after glBindVertexArray");
 
-   glGenBuffers( 1, &VBO);
+   glGenBuffers( 1, &_VBO);
    CGContextCheckBackendError( context, "after glGenBuffers");
-   glBindBuffer( GL_ARRAY_BUFFER, VBO);
+   glBindBuffer( GL_ARRAY_BUFFER, _VBO);
    CGContextCheckBackendError( context, "after glBindBuffer");
    glBufferData( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
    CGContextCheckBackendError( context, "after glBufferData");
@@ -72,36 +72,18 @@ static struct CGShaderUTF8Sources   monochromeShaderSources =
    glEnableVertexAttribArray(0);
    CGContextCheckBackendError( context, "after glEnableVertexAttribArray");
 
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    // glBindVertexArray(0);
+   // You can unbind the VAO afterwards so other VAO calls won't accidentally
+   // modify this _VAO, but this rarely happens. Modifying other
+   // VAOs requires a call to glBindVertexArray anyways so we generally
+   // don't unbind VAOs (nor VBOs) when it's not directly necessary.
+   // glBindVertexArray(0);
 }
 
 
-static MulleUIResourceStorageDefineKey( test_image);
-
-- (CGImage *) testImageWithContext:(CGContext *) context
-{
-   CGImage   *image;
-
-   image = [context resourceForKey:MulleUIResourceStorageKey( test_image)];
-   if( ! image)
-   {
-      image = [[[CGImage alloc] initWithRGBABytes:bitmap2
-                                       bitmapSize:MulleIntegerSizeMake( 32, 32)
-                                     textureFlags:0  // NVG_IMAGE_REPEATX
-                                          context:context] autorelease];
-      // though the image will be already known as a resource by the context
-      // we want to conveniently recover it "by name" also, and keep it
-      // retained there
-      [context setResource:image
-                    forKey:MulleUIResourceStorageKey( test_image)];
-   }
-   return( image);
-}
+static MulleUIResourceStorageKeyDefine( test_image);
 
 
-- (void) drawOpenGLWithContext:(CGContext *) context
+- (void) drawOpenGLInContext:(CGContext *) context
 {
    float     timeValue;
    float     greenValue;
@@ -109,17 +91,20 @@ static MulleUIResourceStorageDefineKey( test_image);
    GLfloat   rgba[ 4];
    CGImage   *image;
 
-   if( ! VAO)
+   if( ! _VAO)
       [self initVertexBufferWithContext:context];
-   if( ! shaderProgram)
+   if( ! _shaderProgram)
       [self initShaderProgramWithContext:context];
 
-   glBindVertexArray(VAO);
+   glBindVertexArray(_VAO);
    CGContextCheckBackendError( context, "after glBindVertexArray");
-   [context useShader:shaderProgram];
+   [context useShader:_shaderProgram];
 
 #ifdef DRAW_TEXTURE
-   image = [self testImageWithContext:context];
+   image = [context imageWithRGBABytes:bitmap2
+                            bitmapSize:MulleIntegerSizeMake( 32, 32)
+                          textureFlags:0
+                           resourceKey:MulleUIResourceStorageKey( test_image)];
    assert( image);
    [context bindImage:image
         toTextureUnit:0];
@@ -128,7 +113,7 @@ static MulleUIResourceStorageDefineKey( test_image);
 //   timeValue  = glfwGetTime();
 //   greenValue = sin(timeValue) / 2.0f + 0.5f;
 
-//   vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+//   vertexColorLocation = glGetUniformLocation(_shaderProgram, "ourColor");
 //
 //   rgba[ 0] = 0.0;
 //   rgba[ 1] = greenValue;
@@ -136,7 +121,7 @@ static MulleUIResourceStorageDefineKey( test_image);
 //   rgba[ 3] = 1.0;
 //
 //   // MEMO: glUniform4f does not work !!!
-   texLoc = glGetUniformLocation( (GLuint) shaderProgram, "u_tex0");
+   texLoc = glGetUniformLocation( (GLuint) _shaderProgram, "u_tex0");
    // if we assert here, the shader has some glitch and the uniform was
    // optimized away
    if( texLoc == -1)
@@ -154,9 +139,11 @@ static MulleUIResourceStorageDefineKey( test_image);
 
 - (void) finalize
 {
-   glDeleteVertexArrays( 1, &VAO);
-   glDeleteBuffers( 1, &VBO);
-   // [self deleteShader:shaderProgram];
+   if( _VAO)
+      glDeleteVertexArrays( 1, &_VAO);
+   if( _VBO)
+      glDeleteBuffers( 1, &_VBO);
+   // [self deleteShader:_shaderProgram];
 
    [super finalize];
 }
@@ -164,23 +151,83 @@ static MulleUIResourceStorageDefineKey( test_image);
 @end
 
 
+static void   usage( void)
+{
+   fprintf( stderr, "\n"
+"Usage:\n"
+"   arc-cw [options]\n"
+"\n"
+"Options:\n"
+"   -a      : disable default antialias (nvg/glfw)\n"
+"   -d      : support deprecated OpenGL\n"
+"   -f      : force edge antialias (nvg)\n"
+"   -r      : not retained\n"
+"\n");
+   exit( 1);
+}
+
+
 int   main( int argc, char *argv[])
 {
-   UIApplication   *app;
-   UIWindow        *window;
-   CALayer         *layer;
+   UIWindow       *window;
+   UIApplication  *app;
+   CALayer        *layer;
+   NSUInteger     styleMask;
+   int            i;
+
+   styleMask = UIWindowStyleMaskDefault;
+
+   /*
+    * window and app
+    */
+   for( i = 1; i < argc; i++)
+   {
+      if( argv[ i][ 0] != '-')
+         break;
+      switch( argv[ i][ 1])
+      {
+      case 'a' :
+         styleMask &= ~UIWindowStyleAntiAlias;
+         break;
+
+      case 'd' :
+         styleMask |= UIWindowOpenGLDeprecated;
+         break;
+
+      case 'f' :
+         styleMask |= UIWindowStyleForceEdgeAntiAlias;
+         break;
+
+      case 'r' :
+         styleMask &= ~UIWindowStyleRetained;
+         break;
+
+      default :
+         usage();
+      }
+   }
+
+   if( i != argc)
+      usage();
 
    app = [UIApplication sharedInstance];
+   @autoreleasepool
    {
       [CGContext setDebugEnabled:YES];
-      layer  = [DemoLayer layerWithFrame:CGRectMake( 10, 10, 620, 380)];
+      layer  = [DemoLayer layerWithFrame:CGRectMake( 20, 20, 600, 340)];
       window = [UIWindow windowWithLayer:layer
-                         titleUTF8String:NULL];
-      [window setFrameRateHz:30.0];
+                         titleUTF8String:"Demo"
+                               styleMask:styleMask];
+
+      assert( window);
+      [window setBackgroundColor:CGColorMakeGray()];
+      [window setFrameRateHz:1.0];
       [app addWindow:window];
    }
    return( [app run]);
 }
+
+
 
 
 

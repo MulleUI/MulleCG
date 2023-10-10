@@ -1,8 +1,8 @@
 #import "import-private.h"
 
 
-static void   drawStuff1( CALayer *layer, void *context);
-static void   drawStuff2( CALayer *layer, void *context);
+static BOOL   drawStuff1( CALayer *layer, void *context);
+static BOOL   drawStuff2( CALayer *layer, void *context);
 
 
 static void    flipDraw( CALayer *layer, CGContext *context)
@@ -19,7 +19,7 @@ static void    flipDraw( CALayer *layer, CGContext *context)
 }
 
 
-static void   drawStuff1( CALayer *layer, void *context)
+static BOOL   drawStuff1( CALayer *layer, void *context)
 {
    struct NVGcontext   *vg;
    CGRect              canvas;
@@ -57,10 +57,11 @@ static void   drawStuff1( CALayer *layer, void *context)
    nvgFill( vg);
 
    flipDraw( layer, context);
+   return( YES);
 }
 
 
-static void   drawStuff2( CALayer *layer, void *context)
+static BOOL   drawStuff2( CALayer *layer, void *context)
 {
    struct NVGcontext   *vg;
    CGRect              canvas;
@@ -83,6 +84,7 @@ static void   drawStuff2( CALayer *layer, void *context)
    }
 
    flipDraw( layer, context);
+   return( YES);
 }
 
 

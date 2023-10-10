@@ -25,7 +25,7 @@
 //    UIView          *view;
 //    UIWindowPlane   *contentPlane;
 // 
-//    contentPlane = [window contentPlane];
+//    contentPlane = [window contentView];
 //    frame        = [contentPlane contentRect];
 //    frame        = UIEdgeInsetsInsetRect( frame, UIEdgeInsetsMake( 10, 10, 10, 10));
 // 
@@ -52,9 +52,12 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
    mvgStrokeRectWithColor( vg, canvas, 1.0, CGColorMakeOrange());
    nvgFontSize( vg, canvas.size.height);
-   nvgTextColor( vg, CGColorMakeWhite(), CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0));
+   nvgTextColor( vg, CGColorMakeWhite());
+   nvgTextBackgroundColor( vg, CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0));
    nvgTextAlign( vg, NVG_ALIGN_CENTER|NVG_ALIGN_BOTTOM);
-   nvgText( vg, CGRectGetMidX( canvas), CGRectGetMaxY( canvas), "|y|", NULL);   
+   nvgText( vg, CGRectGetMidX( canvas), CGRectGetMaxY( canvas), "|y|", NULL);
+
+   return( YES);
 }
 
 
@@ -63,14 +66,14 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame = [[window contentPlane] contentRect];
+   frame = [[window contentView] contentRect];
    frame = UIEdgeInsetsInsetRect( frame, UIEdgeInsetsMake( 10, 10, 10, 10));
 
    view  = [UIView viewWithFrame:frame];
    [view setClipsToBounds:NO];
    [view setMasksToBounds:NO];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 }
 
 

@@ -31,9 +31,10 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
                                       COLS,
                                       rects);
 
-   frameNr      = [context numberOfFrames];
-   vg           = CGContextGetNVGContext( context);
-   i = 0;
+   frameNr = [context numberOfFrames];
+   vg      = CGContextGetNVGContext( context);
+   i       = 0;
+   
    for( y = 0; y < ROWS; y++)
       for( x = 0; x < COLS; x++)
       {

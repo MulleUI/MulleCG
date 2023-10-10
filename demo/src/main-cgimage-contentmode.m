@@ -112,13 +112,13 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
       for( x = 0; x < COLUMNS; x++)
       {
          i = (y * COLUMNS + x);
-         options = CGDrawableOptionsMake( 1.0,
-                                          0.0,
-                                          0, // CGFloatToRadians( 360.0 / (COLUMNS * ROWS) * i),
-                                          CGScaleNone, // 4.0 - ((4.0 / 9.0) * i),
-                                          CGFlipNone,
-                                          CGRepeatNone, // CGRepeatBoth,
-                                          contentMode[ i]);
+         options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                          1.0,
+                                                          0, // CGFloatToRadians( 360.0 / (COLUMNS * ROWS) * i),
+                                                          CGScaleNone, // 4.0 - ((4.0 / 9.0) * i),
+                                                          CGFlipNone,
+                                                          CGRepeatNone, // CGRepeatBoth,
+                                                          contentMode[ i]);
          [image drawRect:rects[ y][ x]
                  options:&options
                  context:context];
@@ -133,10 +133,10 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
+   [[window contentView] addSubview:view];
 }
 
 

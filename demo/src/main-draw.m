@@ -427,7 +427,7 @@ void   setupScene( UIWindow *window)
    CGRect         frame;
    UIEdgeInsets   insets;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
 
    insets = UIEdgeInsetsMake( 20, 20, 20, 20);
    frame  = UIEdgeInsetsInsetRect( frame, insets);
@@ -436,7 +436,7 @@ void   setupScene( UIWindow *window)
    [view setMargins:insets];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 }
 
 

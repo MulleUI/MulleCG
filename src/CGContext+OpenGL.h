@@ -15,8 +15,11 @@
 
 @interface CGContext( OpenGL)
 
++ (NVGcontext *) createPathContext;
+
 + (CGContextNanoVGBackend) nanoVGBackend;
 + (char *) nanoVGBackendUTF8String;
+- (char *) nanovgInfoUTF8String;
 
 - (void *) gpuTextureForImageID:(NSInteger) textureID;
 
@@ -53,11 +56,7 @@
 - (void) resumeRender;
 
 // called by -init / -finalize
-- (void) _initNanoVGWithEdgeAntiAliasing:(BOOL) edgeAntiAliasing
-                       useStencilStrokes:(BOOL) useStencilStrokes;
-- (void) _finalizeNanoVG;
-
-
+- (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options;
 
 // retrieve openGLError if any, print and abort
 - (void) assertNoBackendError:(char *) str;
@@ -70,15 +69,25 @@
 // drawings should have completed...
 - (struct CGBitmap) framebufferBitmap;
 
++ (BOOL) supportsAntiAliasing;
+
 - (char *) nanovgInfoUTF8String;
+
+- (CGImage *) resolveMultiSampleImage:(CGImage *) image;
+
+@end
+
+
+@interface CGLayoutContext ( OpenGL)
+
+- (void) _initializeNanoVG:(NSUInteger) flags;
+- (void) _finalizeNanoVG;
 
 @end
 
 
 void   CGShaderUTF8SourcesParseUniforms( struct CGShaderUTF8Sources *sources,
                                          struct mulle_assoc *assoc);
-
-
 
 char   *CGNVGBackendErrorUTF8String( void);
 char   *_CGNVGBackendErrorShortUTF8String( void *error);
@@ -94,3 +103,50 @@ static inline void   CGContextCheckBackendError( CGContext *ctxt, char *str)
    _CGContextCheckBackendError( ctxt, str);
 #endif
 }
+
+// cleans error state, returns YES if there were errors
+BOOL   CGContextResetBackendError( CGContext *ctxt);
+
+
+struct CGContextFramebuffer
+   CGContextCurrentOpenGLFramebuffer( CGContext *self);
+
+// must be an OpenGL framebuffer
+void   CGContextSetCurrentOpenGLFramebuffer( CGContext *self,
+                                             struct CGContextFramebuffer fb);
+
+typedef NS_ENUM( NSUInteger, CGContextFramebufferMode)
+{
+   CGContextFramebufferModeDefault = 0,
+   CGContextFramebufferModeRead    = 1,
+   CGContextFramebufferModeWrite   = 2,
+   CGContextFramebufferModeDraw    = 2  // synonym
+};
+
+/*
+ * The next functions are only available in OpenGLES 3 and OpenGL3
+ */
+void   _CGContextBindFramebuffer( CGContext *self,
+                                  CGContextFramebufferMode type,
+                                  struct CGContextFramebuffer fb);
+
+void   CGContextBindFramebuffer( CGContext *self,
+                                 struct CGContextFramebuffer fb);
+
+// will bind to "dst"
+void   _CGContextBlitFramebufferImage( CGContext *self,
+                                       struct CGContextFramebuffer dst,
+                                       CGRect rect,
+                                       CGImage *src,
+                                       BOOL interpolate);
+
+// will bind to "dst"
+void   _CGContextBlitFramebufferFramebuffer( CGContext *self,
+                                             struct CGContextFramebuffer dst,
+                                             CGRect rect,
+                                             struct CGContextFramebuffer src,
+                                             BOOL interpolate);
+
+struct MulleIntegerSize
+   _CGContextBitmapSizeOfOpenGLFramebuffer( CGContext *self,
+                                            struct CGContextFramebuffer fb);

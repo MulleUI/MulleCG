@@ -1,9 +1,8 @@
-#import "import.h"
+#import "CGLayoutContext.h"
 
 #import "CGColor.h"
 #include "microvg.h"
 
-struct NVGcontext;
 
 @class CGFont;
 @class CGLayer;
@@ -11,12 +10,20 @@ struct NVGcontext;
 @class CGImage;
 
 
+@interface NSObject( CGLayerForward)
+
+- (BOOL) isMultiSample;
+
+@end
+
+
 typedef NS_ENUM( NSUInteger, CGContextNanoVGBackend)
 {
    CG_GL3,
    CG_GL3_2,
    CG_GLES2,
-   CG_GLES3
+   CG_GLES3,
+   CG_GLES3_2
 };
 
 
@@ -40,9 +47,12 @@ struct CGShaderUTF8Sources
 
 typedef NS_ENUM( NSUInteger, CGContextFramebufferType)
 {
-   CGContextDefaultFramebuffer,
-   CGContextLayerFramebuffer,
-   CGContextOpenGLFramebuffer
+   CGContextDefaultFramebuffer            = 0,
+   CGContextLayerFramebuffer              = 1,
+   CGContextOpenGLFramebuffer             = 2,
+   CGContextDefaultMultiSampleFramebuffer = 0x10,
+   CGContextLayerMultiSampleFramebuffer   = 0x11,
+   CGContextOpenGLMultiSampleFramebuffer  = 0x12
 };
 
 
@@ -57,15 +67,22 @@ struct CGContextFramebuffer
 static inline struct CGContextFramebuffer
    CGContextFramebufferMake( void *handle, NSUInteger type)
 {
-   assert( type >= CGContextDefaultFramebuffer && type <= CGContextOpenGLFramebuffer);
+   assert( (type >= CGContextDefaultFramebuffer && type <= CGContextOpenGLFramebuffer) ||
+           (type >= CGContextDefaultMultiSampleFramebuffer && type <= CGContextOpenGLMultiSampleFramebuffer));
    return( (struct CGContextFramebuffer) { .handle = handle, .type = type });
 }
 
 
 static inline struct CGContextFramebuffer
-   CGContextFramebufferMakeDefault( void)
+   CGContextFramebufferMakeDefault( BOOL isMultiSample)
 {
-   return( (struct CGContextFramebuffer) { .handle = NULL, .type = CGContextDefaultFramebuffer });
+   return( (struct CGContextFramebuffer)
+           {
+              .handle = NULL,
+              .type = isMultiSample
+                      ? CGContextDefaultMultiSampleFramebuffer
+                      : CGContextDefaultFramebuffer
+           });
 }
 
 
@@ -73,15 +90,36 @@ static inline struct CGContextFramebuffer
    CGContextFramebufferMakeWithLayer( CGLayer *layer)
 {
    assert( layer);
-   return( (struct CGContextFramebuffer) { .handle = layer, .type = CGContextLayerFramebuffer });
+   return( (struct CGContextFramebuffer)
+           {
+               .handle = layer,
+               .type = [layer isMultiSample]
+                       ? CGContextLayerMultiSampleFramebuffer
+                       : CGContextLayerFramebuffer
+           });
 }
 
 
 static inline struct CGContextFramebuffer
-   CGContextFramebufferMakeWithOpenGLFramebuffer( void *handle)
+   CGContextFramebufferMakeWithOpenGLHandle( void *handle, BOOL isMultiSample)
 {
-   assert( handle);
-   return( (struct CGContextFramebuffer) { .handle = handle, .type = CGContextOpenGLFramebuffer });
+   if( ! handle)
+      return( CGContextFramebufferMakeDefault( isMultiSample));
+   return( (struct CGContextFramebuffer)
+           {
+              .handle = handle,
+              .type   = isMultiSample
+                        ? CGContextOpenGLMultiSampleFramebuffer
+                        : CGContextOpenGLFramebuffer
+           });
+}
+
+
+
+static inline int
+   CGContextFramebufferIsMultiSample( struct CGContextFramebuffer fb)
+{
+   return( fb.type >= CGContextDefaultMultiSampleFramebuffer);
 }
 
 
@@ -109,14 +147,11 @@ struct CGContextItem
 // no accidental switching. If the context is tied to an OpenGL (or Vulcan
 // whatever) context -isActive will say YES.
 //
-@interface CGContext : NSObject < MulleUIResourceMap>
+@interface CGContext : CGLayoutContext
 {
-   struct NVGcontext                *_vg;
    struct CGFrameInfo               _currentFrameInfo;
    struct CGContextFramebuffer      _currentFramebuffer;
 
-   struct MulleUIResourceStorage    _resourceStorage;
-   struct mulle_map                 _fontMap;
    struct mulle_map                 _gpuTextureMap;
    struct mulle_map                 _shaderMap;
    struct mulle__pointerarray       _deletedTextureIDs;
@@ -124,7 +159,6 @@ struct CGContextItem
    BOOL                             _isRendering;
    BOOL                             _isActive;
    BOOL                             _isFreshLayer;
-   int                              _nvgFlags; // used for nvgCreate
    CGShaderID                       _activeShader;
 
    mulle_absolutetime_t             _firstRenderTimeStamp;
@@ -138,7 +172,7 @@ struct CGContextItem
    mulle_atomic_pointer_t           _scratchLayer;     // CGLayer
 
    CGLayer                          *_renderLayer;     // ephemeral(!)
-   BOOL                             _hasLoadedFont;
+   NSUInteger                       _renderLayerTextureFlags;
 }
 
 @property( assign, readonly) BOOL   shareID;
@@ -156,11 +190,8 @@ struct CGContextItem
 // So render into [CGImage] - blit -> [offscreen] - blit -> [framebuffer]
 //
 
-@property( assign) BOOL             debugEnabled;
-@property( assign) char             *debugNameUTF8String;  // useful for debugging
-
-@property( assign) NSUInteger       framebufferBits;
-@property( assign) id               OSWindow;
+@property( assign) NSUInteger                              framebufferBits;
+@property( assign) id                                      OSWindow;
 
 @property( assign, readonly) UIGraphicsBackend             backend;
 
@@ -168,8 +199,6 @@ struct CGContextItem
 @property( assign, getter=isInitializedFramebuffer) BOOL   initializedFramebuffer;
 
 @property( assign) NSUInteger                              numberOfFrames;  // counts endRenders...
-
-+ (void) setDebugEnabled:(BOOL) flag;
 
 
 + (void) registerShaderSources:(struct CGShaderUTF8Sources *) source
@@ -182,8 +211,6 @@ struct CGContextItem
 - (id) initWithBackend:(UIGraphicsBackend) backend
                shareID:(NSUInteger) shareID
                options:(UIGraphicsOptions) options;
-
-- (struct NVGcontext *) nvgContext;
 
 - (void) beginRender:(struct CGFrameInfo *) info;
 - (struct CGFrameInfo) bindRender:(struct CGFrameInfo *) info;
@@ -212,8 +239,6 @@ struct CGContextItem
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info;
 - (struct CGFrameInfo *) currentFrameInfo;
 
-- (void) reset; // resets drawing state (incl. scissor and transform)
-
 // betweenbeginRender: and endRender:
 - (BOOL) isRendering;
 
@@ -221,7 +246,6 @@ struct CGContextItem
 // to the window. If isActive is no, you can/must not do any graphics
 // calls for example.
 - (BOOL) isActive;
-- (BOOL) hasLoadedFont;
 
 - (NSUInteger) numberOfFrames;
 - (mulle_relativetime_t) secondsSinceFirstRender;
@@ -252,7 +276,8 @@ struct CGContextItem
 - (NSUInteger) keyModifiers;
 - (NSUInteger) buttonStates;
 
-- (struct MulleUIResourceStorage *) _resourceStorage;
+// is this still used ? does it make sense ?
+- (CGFloat) fontScale;
 
 
 @end
@@ -275,11 +300,11 @@ static inline struct NVGcontext   *_CGContextGetNVGContext( CGContextRef self)
 
 // we want to produce (excepting the quadratic) for a rate of 4
 // 0.0, 0.5, 1.0, 1.5
-static inline CGFloat  CGContextGetBackAndForthAnimationFactor( CGContext *context, NSUInteger rate)
+static inline float  CGContextGetBackAndForthAnimationFactor( CGContext *context, NSUInteger rate)
 {
    NSUInteger   n;
    NSUInteger   halfRate;
-   CGFloat      factor;
+   float        factor;
 
    assert( rate >= 4);
 
@@ -287,17 +312,22 @@ static inline CGFloat  CGContextGetBackAndForthAnimationFactor( CGContext *conte
    n        = [context numberOfFrames] % rate;
 
    if( n <= halfRate)
-      factor = n / ((CGFloat) halfRate);  // 0: 0 1: 0.5 2: 1
+      factor = n / ((float) halfRate);  // 0: 0 1: 0.5 2: 1
    else
-      factor = 1.0f - ((n - halfRate) / (CGFloat) halfRate);  // 3: 0.5
+      factor = 1.0f - ((n - halfRate) / (float) halfRate);  // 3: 0.5
    factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
    return( factor);
 }
 
 
-static inline CGFloat  CGContextGetLinearAnimationFactor( CGContext *context, NSUInteger rate)
+static inline float  CGContextGetLinearAnimationFactor( CGContext *context, NSUInteger rate)
 {
    assert( rate >= 2);
 
-   return( ([context numberOfFrames] % rate) / (CGFloat) (rate - 1));
+   return( (float) ([context numberOfFrames] % rate) / (float) (rate - 1));
 }
+
+
+struct MulleIntegerSize
+   CGContextBitmapSizeOfFramebuffer( CGContext *self,
+                                     struct CGContextFramebuffer fb);

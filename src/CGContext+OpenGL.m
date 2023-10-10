@@ -7,13 +7,78 @@
 
 #import "import-private.h"
 
+#import "CGContext+Drawing.h"
+#import "CGLayoutContext.h"
 #import "CGImage.h"
 #import "CGLayer.h"
 #import "CGColor.h"
 #include <ctype.h>
 
 
+@implementation CGImage ( OpenGL)
+
+- (GLint) openGLSamplerType
+{
+   return( [self isMultiSample]
+           ? GL_TEXTURE_2D_MULTISAMPLE
+           : GL_TEXTURE_2D);
+}
+
+@end
+
+@implementation CGLayoutContext ( OpenGL)
+
+- (void) _initializeNanoVG:(NSUInteger) flags
+{
+#ifdef NANOVG_GL3_IMPLEMENTATION
+   _vg  = nvgCreateGL3( _nvgFlags);
+#else
+# ifdef NANOVG_GLES2_IMPLEMENTATION
+   _vg  = nvgCreateGLES2( _nvgFlags);
+# else
+#  ifdef NANOVG_GLES3_IMPLEMENTATION
+   _vg  = nvgCreateGLES3( _nvgFlags);
+#  else
+#   error "Any of NANOVG_GL3/GLES2/GLES3_IMPLEMENTATION must be defined"
+#  endif
+# endif
+#endif
+   assert( _vg);
+}
+
+
+- (void) _finalizeNanoVG
+{
+#ifdef NANOVG_GL3_IMPLEMENTATION
+   nvgDeleteGL3( _vg);
+   _vg = NULL;
+#else
+# ifdef NANOVG_GLES2_IMPLEMENTATION
+   nvgDeleteGLES2(_vg);
+   _vg = NULL;
+# else
+#  ifdef NANOVG_GLES3_IMPLEMENTATION
+   nvgDeleteGLES3(_vg);
+   _vg = NULL;
+#  endif
+# endif
+#endif
+}
+
+@end
+
+
+
 @implementation CGContext ( OpenGL)
+
+
++ (BOOL) supportsAntiAliasing
+{
+#ifdef NANOVG_HAVE_MSAA
+   return( YES);
+#endif
+   return( NO);
+}
 
 
 char   *CGNVGBackendErrorUTF8String( void)
@@ -69,13 +134,13 @@ char   *_CGNVGBackendErrorUTF8String( void *error)
 + (char *) nanoVGBackendUTF8String
 {
 #ifdef NANOVG_GL3_IMPLEMENTATION
-   return( "nanoVG OpenGL v3.0+");
+   return( "OpenGL v3.2+");
 #endif
 #ifdef NANOVG_GLES2_IMPLEMENTATION
-   return( "nanoVG GLES v2.0+");
+   return( "GLES v2.0+");
 #endif
 #ifdef NANOVG_GLES3_IMPLEMENTATION
-   return( "nanoVG GLES v3.2+");
+   return( "GLES v3.2+");
 #endif
    abort();
 }
@@ -84,13 +149,13 @@ char   *_CGNVGBackendErrorUTF8String( void *error)
 + (CGContextNanoVGBackend) nanoVGBackend
 {
 #ifdef NANOVG_GL3_IMPLEMENTATION
-   return( CG_GL3);
+   return( CG_GL3_2);
 #endif
 #ifdef NANOVG_GLES2_IMPLEMENTATION
    return( CG_GLES2);
 #endif
 #ifdef NANOVG_GLES3_IMPLEMENTATION
-   return( CG_GLES3);
+   return( CG_GLES3_2);
 #endif
    abort();
 }
@@ -100,10 +165,12 @@ char   *_CGNVGBackendErrorUTF8String( void *error)
 {
    char   *s;
 
-   s = MulleObjC_asprintf( "%s%s%s",
+   s = MulleObjC_asprintf( "%s%s%s%s%s",
                            [[self class] nanoVGBackendUTF8String],
-                           _nvgFlags & NVG_ANTIALIAS ? " AA" : " NOAA",
-                           _nvgFlags & NVG_STENCIL_STROKES ? " Stencil" : "");
+                           _nvgFlags & NVG_ANTIALIAS ? " EdgeAA" : "",
+                           _nvgFlags & NVG_CLEARTYPE ? " ClearType" : "",
+                           _nvgFlags & NVG_STENCIL_STROKES ? " Stencil" : "",
+                           _nvgFlags & NVG_MSAA ? " MSAA" : "");
    return( s);
 }
 
@@ -138,49 +205,68 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
 }
 
 
+BOOL   CGContextResetBackendError( CGContext *ctxt)
+{
+   GLenum       err;
+   BOOL         flag;
+
+   for( flag = NO;; flag = YES)
+   {
+      err = glGetError();
+      if( err == GL_NO_ERROR)
+         return( flag);
+   }
+}
 
 
-- (void) _initNanoVGWithEdgeAntiAliasing:(BOOL) edgeAntiAliasing
-                       useStencilStrokes:(BOOL) useStencilStrokes
-{ 
-   _nvgFlags  = edgeAntiAliasing ? NVG_ANTIALIAS : 0;
-   _nvgFlags |= useStencilStrokes ? NVG_STENCIL_STROKES : 0;
+
++ (NVGcontext *) createPathContext
+{
+   struct NVGcontext  *pathContext;
+
+#ifdef NANOVG_GL3_IMPLEMENTATION
+   pathContext  = nvgCreateGL3( NVG_PATH_ONLY);
+#endif
+#ifdef NANOVG_GLES2_IMPLEMENTATION
+   pathContext  = nvgCreateGLES2( NVG_PATH_ONLY);
+#endif
+#ifdef NANOVG_GLES3_IMPLEMENTATION
+   pathContext  = nvgCreateGLES3( NVG_PATH_ONLY);
+#endif
+   assert( pathContext);
+   return( pathContext);
+}
+
+
+- (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options
+{
+   _nvgFlags  = (options & UIGraphicsEdgeAntiAliasing)  ? NVG_ANTIALIAS : 0;
+   _nvgFlags |= (options & UIGraphicsUseStencilStrokes) ? NVG_STENCIL_STROKES : 0;
+   _nvgFlags |= (options & UIGraphicsUseClearType)      ? NVG_CLEARTYPE : 0;
 #ifdef DEBUG
    _nvgFlags |= NVG_DEBUG;
 #endif
 
 #ifdef NANOVG_GL3_IMPLEMENTATION
-   _vg  = nvgCreateGL3( _nvgFlags);
+   _nvgFlags |= (options & UIGraphicsUseMSAA) ? NVG_MSAA : 0;
+   _vg        = nvgCreateGL3( _nvgFlags);
 #endif
 #ifdef NANOVG_GLES2_IMPLEMENTATION
-   _vg  = nvgCreateGLES2( _nvgFlags);
+   _vg        = nvgCreateGLES2( _nvgFlags);
 #endif
 #ifdef NANOVG_GLES3_IMPLEMENTATION
-   _vg  = nvgCreateGLES3( _nvgFlags);
+   _nvgFlags |= (options & UIGraphicsUseMSAA) ? NVG_MSAA : 0;
+   _vg        = nvgCreateGLES3( _nvgFlags);
 #endif
 
+   assert( _vg);
 #ifdef DEBUG
    fprintf( stderr, "nanovg context          : %s\n", [self nanovgInfoUTF8String]);
 #endif
 
    _framebufferBits = GL_COLOR_BUFFER_BIT;
-   if( useStencilStrokes)
+   if( options & UIGraphicsUseStencilStrokes)
       _framebufferBits |= GL_STENCIL_BUFFER_BIT;
-}
-
-
-- (void) _finalizeNanoVG
-{
-#ifdef NANOVG_GL3_IMPLEMENTATION
-   nvgDeleteGL3( _vg);
-#endif
-#ifdef NANOVG_GLES2_IMPLEMENTATION
-   nvgDeleteGLES2(_vg);
-#endif
-#ifdef NANOVG_GLES3_IMPLEMENTATION
-   nvgDeleteGLES3(_vg);
-#endif
-   _vg = NULL;
 }
 
 
@@ -237,6 +323,7 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
    [self clearFramebufferBits:_framebufferBits & ~GL_COLOR_BUFFER_BIT
                         color:CGColorMakeWithHexColor(0x00000000)];
 }
+
 
 
 //#define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX   0x9048
@@ -380,12 +467,16 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
 {
    void                          *gpuTexture;
    GLuint                        tmpFramebuffer;
+   GLint                         samplerType;
    struct CGBitmap               bitmap;
    struct CGContextFramebuffer   next;
    struct CGContextFramebuffer   previous;
    struct MulleIntegerSize       bitmapSize;
    size_t                        size;
-
+   BOOL                          isMultiSample;
+#if defined( NANOVG_GLES3_IMPLEMENTATION)
+   NVGLUframebuffer              *nvgResultFramebuffer;
+#endif
    assert( _isActive);
 
    bitmapSize       = [image bitmapSize];
@@ -403,25 +494,50 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
 
    //
    // create a temporary framebuffer
-   // attach texture of image ot it to it
+   // attach texture of image to it
    // read pixels from it, done
    // AFAIK this doesn't touch or need any OpenGL state, so we can just
    // interpose this, if we restore the bound framebuffer
    //
+
+   gpuTexture  = [image gpuTexture];
+
    glGenFramebuffers( 1, &tmpFramebuffer);
    CGContextCheckBackendError( self, "glGenFramebuffers");
 
-   next     = CGContextFramebufferMakeWithOpenGLFramebuffer( (void *) (uintptr_t) tmpFramebuffer);
+   isMultiSample = [image isMultiSample];
+   next          = CGContextFramebufferMakeWithOpenGLHandle( (void *) (uintptr_t) tmpFramebuffer,
+                                                             isMultiSample);
+   samplerType   = isMultiSample ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+
    previous = [self bindFramebuffer:next];
    {
-      gpuTexture = [image gpuTexture];
       glFramebufferTexture2D( GL_FRAMEBUFFER,
                               GL_COLOR_ATTACHMENT0,
-                              GL_TEXTURE_2D,
+                              samplerType,
                               (GLuint) (uintptr_t) gpuTexture,
                               0);
       CGContextCheckBackendError( self, "glFramebufferTexture2D");
 
+      // multisample framebuffers/textures need to be copied to
+      // non-multisample first (how clumsy)
+#if defined( NANOVG_GLES3_IMPLEMENTATION)
+      if( samplerType == GL_TEXTURE_2D_MULTISAMPLE)
+      {
+         nvgResultFramebuffer = nvgluCreateFramebuffer( _vg, bitmapSize.width,
+                                                             bitmapSize.height,
+                                                             NVG_IMAGE_RBO_LESS);
+         nvgluBindDrawFramebuffer( nvgResultFramebuffer);
+         CGContextCheckBackendError( self, "nvgluBindDrawFramebuffer");
+         glBindFramebuffer( GL_READ_FRAMEBUFFER, (GLuint) (uintptr_t) next.handle);
+         CGContextCheckBackendError( self, "glBindFramebuffer");
+         glBlitFramebuffer( 0, 0, bitmapSize.width, bitmapSize.height,
+                            0, 0, bitmapSize.width, bitmapSize.height,
+                            GL_COLOR_BUFFER_BIT, GL_NEAREST);
+         CGContextCheckBackendError( self, "glBlitFramebuffer");
+         nvgluBindFramebuffer( nvgResultFramebuffer);
+      }
+#endif
       glReadPixels( 0, 0,
                     bitmapSize.width,
                     bitmapSize.height,
@@ -429,6 +545,14 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
                     GL_UNSIGNED_BYTE,
                     bitmap.bytes);
       CGContextCheckBackendError( self, "glReadPixels");
+
+#if defined( NANOVG_GLES3_IMPLEMENTATION)
+      if( samplerType == GL_TEXTURE_2D_MULTISAMPLE)
+      {
+         nvgluBindFramebuffer( NULL);
+         nvgluDeleteFramebuffer( nvgResultFramebuffer);
+      }
+#endif
    }
    [self bindFramebuffer:previous];
 
@@ -448,10 +572,10 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
    CGBitmapEncoding          encoding;
    GLenum                    format;
    GLenum                    type;
+   GLint                     samplerType;
    size_t                    size;
    NSUInteger                textureID;
    void                      *gpuTexture;
-   struct NVGcontext         *vg;
 
    assert( _isActive);
 
@@ -462,9 +586,8 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
 
    assert( [image context] == self);
 
-   vg        = CGContextGetNVGContext( self);
    textureID = [image textureID];
-   nvgImageTextureInfo( vg, textureID, NULL, NULL, &gpuTexture);
+   nvgImageTextureInfo( _vg, textureID, NULL, NULL, &gpuTexture);
 
    bitmapSize        = [image bitmapSize];
    size              = bitmapSize.width * bitmapSize.height * 4;
@@ -477,17 +600,19 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
    bitmap.bytes      = mulle_allocator_malloc( bitmap.allocator, size);
    bitmap.info       = CGBitmapInfoMake( bitmapSize, 0, encoding);
 
-   glBindTexture( GL_TEXTURE_2D, (int) (intptr_t) gpuTexture);
+   samplerType       = [image openGLSamplerType];
+
+   glBindTexture( samplerType, (int) (intptr_t) gpuTexture);
    CGContextCheckBackendError( self, "glBindTexture");
    {
-      glGetTexImage( GL_TEXTURE_2D,
+      glGetTexImage( samplerType,
                      0, // level
                      format,
                      type,
                      bitmap.bytes);
       CGContextCheckBackendError( self, "glGetTexImage");
    }
-   glBindTexture( GL_TEXTURE_2D, 0);
+   glBindTexture( samplerType, 0);
    CGContextCheckBackendError( self, "glBindTexture");
 
    return( bitmap);
@@ -595,8 +720,264 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
    assert( GL_TEXTURE15 == GL_TEXTURE0 + 15);
    glActiveTexture( GL_TEXTURE0 + index);
    CGContextCheckBackendError( self, "glActiveTexture");
-   glBindTexture( GL_TEXTURE_2D, (GLuint) (uintptr_t) gpuTexture);
+   glBindTexture( [image openGLSamplerType], (GLuint) (uintptr_t) gpuTexture);
    CGContextCheckBackendError( self, "glBindTexture");
+}
+
+
+static BOOL  _CGContextCurrentContextIsMultiSample( CGContext *self,  GLint FBO)
+{
+#if defined( GL_ES_VERSION_3_0) || defined( GL_VERSION_3_0)
+   GLint   samples;
+   GLint   defaultRBO;
+   GLint   stencilRenderbuffer;
+
+   // Queries of default framebuffers are supported only if the GL version is
+   // 4.5 or higher. Otherwise, an GL_INVALID_OPERATION error is generated.
+   // shucks,  Queries of the framebuffer-dependent parameters
+   // GL_SAMPLES, GL_SAMPLE_BUFFERS supported only if the GL version is 4.5
+   // or higher. Double shucks.
+   if( FBO == 0)
+   {
+      glGetIntegerv( GL_SAMPLES, &samples);
+      CGContextCheckBackendError( self, "glGetIntegerv");
+   }
+   else
+   {
+      glGetIntegerv( GL_RENDERBUFFER_BINDING, &defaultRBO);
+      CGContextCheckBackendError( self, "glGetIntegerv");
+      glGetFramebufferAttachmentParameteriv( GL_FRAMEBUFFER,
+                                             GL_STENCIL_ATTACHMENT,
+                                             GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME,
+                                             &stencilRenderbuffer);
+      CGContextCheckBackendError( self, "glGetFramebufferAttachmentParameteriv");
+      glBindRenderbuffer(GL_RENDERBUFFER, stencilRenderbuffer);
+      glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_SAMPLES, &samples);
+      CGContextCheckBackendError( self, "glGetRenderbufferParameteriv");
+      glBindRenderbuffer(GL_RENDERBUFFER, defaultRBO);
+      CGContextCheckBackendError( self, "glBindRenderbuffer");
+   }
+   return( samples > 1);
+#else
+   return( NO);
+#endif
+}
+
+
+struct CGContextFramebuffer
+   CGContextCurrentOpenGLFramebuffer( CGContext *self)
+{
+   BOOL    isMultiSample;
+   GLint   defaultFBO;
+
+   glGetIntegerv( GL_FRAMEBUFFER_BINDING, &defaultFBO);
+   CGContextCheckBackendError( self, "glGetIntegerv");
+
+
+   isMultiSample = _CGContextCurrentContextIsMultiSample( self, defaultFBO);
+   return( CGContextFramebufferMakeWithOpenGLHandle( (void *) (intptr_t) defaultFBO,
+                                                      isMultiSample));
+}
+
+
+void
+   CGContextSetCurrentOpenGLFramebuffer( CGContext *self, struct CGContextFramebuffer fb)
+{
+   assert( fb.type == CGContextOpenGLFramebuffer
+           || fb.type == CGContextDefaultFramebuffer
+           || fb.type == CGContextOpenGLMultiSampleFramebuffer
+           || fb.type == CGContextDefaultMultiSampleFramebuffer);
+
+   glBindFramebuffer(GL_FRAMEBUFFER, (GLuint) (uintptr_t) fb.handle);
+   CGContextCheckBackendError( self, "glBindFramebuffer");
+}
+
+
+struct MulleIntegerSize
+   _CGContextBitmapSizeOfOpenGLFramebuffer( CGContext *self,
+                                            struct CGContextFramebuffer fb)
+{
+#if defined( GL_ES_VERSION_3_0) || defined( GL_VERSION_3_0)
+   GLint    defaultFBO;
+   GLint    texture;
+   GLint    width, height;
+   GLint    samplerType;
+
+   assert( fb.type == CGContextOpenGLFramebuffer
+           || fb.type == CGContextDefaultFramebuffer
+           || fb.type == CGContextOpenGLMultiSampleFramebuffer
+           || fb.type == CGContextDefaultMultiSampleFramebuffer);
+
+   glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+   glBindFramebuffer(GL_FRAMEBUFFER, (GLuint) (uintptr_t) fb.handle);
+   {
+      CGContextCheckBackendError( self, "glBindTexture");
+      glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0,
+                                            GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME,
+                                            &texture);
+      CGContextCheckBackendError( self, "glGetFramebufferAttachmentParameteriv");
+      samplerType = CGContextFramebufferIsMultiSample( fb)
+                    ? GL_TEXTURE_2D_MULTISAMPLE
+                    : GL_TEXTURE_2D;
+
+      glBindTexture( samplerType, texture);
+      glGetTexLevelParameteriv( samplerType, 0, GL_TEXTURE_WIDTH, &width);
+      glGetTexLevelParameteriv( samplerType, 0, GL_TEXTURE_HEIGHT, &height);
+      glBindTexture( samplerType, 0);
+
+      CGContextCheckBackendError( self, "glGetTexLevelParameteriv");
+   }
+   glBindFramebuffer( GL_FRAMEBUFFER, defaultFBO);
+
+   CGContextCheckBackendError( self, "glBindTexture");
+   return( MulleIntegerSizeMake( width, height));
+#else
+   abort();
+#endif
+}
+
+
+void   _CGContextBindFramebuffer( CGContext *self,
+                                  CGContextFramebufferMode type,
+                                  struct CGContextFramebuffer fb)
+{
+#if defined( GL_ES_VERSION_3_0) || defined( GL_VERSION_3_0)
+   static GLint  glType[] = {
+                              GL_FRAMEBUFFER,
+                              GL_READ_FRAMEBUFFER,
+                              GL_DRAW_FRAMEBUFFER
+                             };
+   GLuint   handle;
+
+   assert( type >= 0 && type <= 2);
+
+   switch( fb.type)
+   {
+   case CGContextDefaultFramebuffer :
+   case CGContextOpenGLFramebuffer  :
+   case CGContextDefaultMultiSampleFramebuffer :
+   case CGContextOpenGLMultiSampleFramebuffer  :
+      handle = (GLuint) (uintptr_t) fb.handle;
+      break;
+
+   case CGContextLayerFramebuffer :
+   case CGContextLayerMultiSampleFramebuffer :
+      handle = (GLuint) (uintptr_t) [(CGLayer *) fb.handle gpuTexture];
+      break;
+   }
+
+   glBindFramebuffer( glType[ type], handle);
+   CGContextCheckBackendError( self, "glBindFramebuffer");
+#else
+   abort();
+#endif
+}
+
+
+void   _CGContextBlitFramebufferFramebuffer( CGContext *self,
+                                             struct CGContextFramebuffer dst,
+                                             CGRect rect,
+                                             struct CGContextFramebuffer src,
+                                             BOOL interpolate)
+{
+#if defined( GL_ES_VERSION_3_0) || defined( GL_VERSION_3_0)
+   struct MulleIntegerSize   srcSize;
+   struct MulleIntegerSize   dstSize;
+
+   srcSize = CGContextBitmapSizeOfFramebuffer( self, src);
+   dstSize = CGContextBitmapSizeOfFramebuffer( self, dst);
+
+   // maybe overzealous
+   if( MulleIntegerSizeEqualToIntegerSize( srcSize, dstSize))
+      interpolate = NO;
+
+   /* When using glBlitFramebuffer, it is not a problem to specify attachments
+      that do not exist. The function will simply ignore the non-existent
+      attachments and perform the blit operation on the attachments that do
+      exist. This means that you can use glBlitFramebuffer to copy specific
+      color, depth, or stencil buffers from one framebuffer to another,
+      even if not all of these buffers exist in both framebuffers.
+    */
+   {
+      _CGContextBindFramebuffer( self, CGContextFramebufferModeWrite, dst);
+      _CGContextBindFramebuffer( self, CGContextFramebufferModeRead, src);
+      glBlitFramebuffer( 0, 0, srcSize.width, srcSize.height,
+                         (int) rect.origin.x, (int) rect.origin.y,
+                         (int) rect.size.width, (int) rect.size.height,
+                         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT,
+                         interpolate ? GL_LINEAR : GL_NEAREST);
+      CGContextCheckBackendError( self, "glBlitFramebuffer");
+      // return to consistent state
+      _CGContextBindFramebuffer( self, CGContextFramebufferModeRead, dst);
+   }
+#else
+   abort();
+#endif
+}
+
+
+void   _CGContextBlitFramebufferImage( CGContext *self,
+                                       struct CGContextFramebuffer dst,
+                                       CGRect rect,
+                                       CGImage *src,
+                                       BOOL interpolate)
+{
+#if defined( GL_ES_VERSION_3_0) || defined( GL_VERSION_3_0)
+   GLuint                        tmpFramebuffer;
+   struct CGContextFramebuffer   tmpfb;
+   GLuint                        samplerType;
+   void                          *gpuTexture;
+   BOOL                          isMultiSample;
+
+   glGenFramebuffers( 1, &tmpFramebuffer);
+   CGContextCheckBackendError( self, "glGenFramebuffers");
+
+   isMultiSample = [src isMultiSample];
+   tmpfb          = CGContextFramebufferMakeWithOpenGLHandle( (void *) (uintptr_t) tmpFramebuffer,
+                                                              isMultiSample);
+   samplerType = isMultiSample ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+
+   gpuTexture = [src gpuTexture];
+
+   _CGContextBindFramebuffer( self, CGContextFramebufferModeDefault, tmpfb);
+   glFramebufferTexture2D( GL_FRAMEBUFFER,
+                           GL_COLOR_ATTACHMENT0,
+                           samplerType,
+                           (GLuint) (uintptr_t) gpuTexture,
+                           0);
+   // this will bind dst
+   _CGContextBlitFramebufferFramebuffer( self, dst, rect, tmpfb, interpolate);
+
+   glDeleteFramebuffers( 1, &tmpFramebuffer);
+   CGContextCheckBackendError( self, "glDeleteFramebuffers");
+#else
+   abort();
+#endif
+}
+
+
+
+- (CGImage *) resolveMultiSampleImage:(CGImage *) image
+{
+   NSUInteger                    textureFlags;
+   CGLayer                       *layer;
+   struct CGContextFramebuffer   previous;
+
+   assert( [image isMultiSample]);
+
+   textureFlags  = [image textureFlags] & ~NVG_IMAGE_MSAA;
+   layer         = [CGLayer layerWithBitmapSize:[image bitmapSize]
+                                   textureFlags:textureFlags
+                                        context:self];
+
+   previous = [self bindFramebuffer:CGContextFramebufferMakeWithLayer( layer)];
+   [self blitRect:CGRectMakeWithOriginAndSize( CGPointZero, [layer size])
+            image:image
+            scale:NO];
+   [self bindFramebuffer:previous];
+
+   return( layer);
 }
 
 

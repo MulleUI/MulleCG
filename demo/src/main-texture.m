@@ -133,7 +133,7 @@ void   setupScene( UIWindow *window)
    CGRect      rect;
    CGContext   *context;
 
-   contentPlane = [window contentPlane];
+   contentPlane = [window contentView];
    rect         = [contentPlane contentRect];
    rect         = CGRectInset( rect, 40, 40);
 

@@ -2,12 +2,16 @@
 
 #import "import-private.h"
 
+#import "CGImage+DebugPrivate.h"
+#import "CGContext+DebugPrivate.h"
 #import "CGContext.h"
 #import "CGContext+OpenGL.h"
 #import "CGContext+Texture.h"
 
 #include <errno.h>
 
+
+#define CGIMAGE_DEBUG
 
 @implementation CGSharedGPUTexture : NSObject
 
@@ -41,7 +45,7 @@
 @end
 
 
-@implementation CGContext( CGImage)
+@implementation CGContext( CGImageGPUTexture)
 
 - (CGImage *) imageWithGPUTextureRGBA:(void *) gpuTexture
                      sharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
@@ -56,8 +60,7 @@
    image = mulle_map_get( &_gpuTextureMap, gpuTexture);
    if( image)
    {
-      if( _debugEnabled)
-         MulleUILog( "reuse %#@ for gpuTexture %p", image, gpuTexture);
+      CGContextLog( "reuse %#@ for gpuTexture %p", image, gpuTexture);
 
       assert( ! sharedGPUTexture || [image sharedGPUTexture] == sharedGPUTexture);
       return( [image textureFlags] == textureFlags ? image : nil);
@@ -68,8 +71,7 @@
                                          bitmapSize:size
                                        textureFlags:textureFlags
                                             context:self] autorelease];
-   if( _debugEnabled)
-      MulleUILog( "remember %#@ for gpuTexture %p", image, gpuTexture);
+   CGContextLog( "remember %#@ for gpuTexture %p", image, gpuTexture);
 
    mulle_map_insert( &_gpuTextureMap, gpuTexture, image);
    return( image);
@@ -81,8 +83,7 @@
    void   *gpuTexture;
 
    gpuTexture = [[image sharedGPUTexture] gpuTexture];
-   if( _debugEnabled)
-      MulleUILog( "forget %#@ for gpuTexture %p",
+   CGContextLog( "forget %#@ for gpuTexture %p",
                   image,
                   [[image sharedGPUTexture] gpuTexture]);
    // if key is NULL its no problem
@@ -95,7 +96,23 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 
 
+@implementation NSObject( CGImage)
+
+- (BOOL) __isCGImage
+{
+   return( NO);
+}
+
+@end
+
+
 @implementation CGImage
+
+- (BOOL) __isCGImage
+{
+   return( YES);
+}
+
 
 - (instancetype) initWithTextureID:(NSInteger) textureID
                       textureFlags:(NSUInteger) textureFlags
@@ -127,8 +144,8 @@
    NSUInteger   textureID;
 
    textureID = [context textureIDWithGPUTextureRGBA:gpuTexture
-                                       bitmapSize:size
-                                     textureFlags:textureFlags];
+                                         bitmapSize:size
+                                        textureFlags:textureFlags];
 
    self = [self initWithTextureID:textureID
                      textureFlags:textureFlags
@@ -158,10 +175,6 @@
 {
    if( _textureID && context == _context)
    {
-#ifdef CGLAYER_DEBUG
-      MulleUILog( "delete texture %td", _textureID);
-#endif
-
       // the gpuTexture may have been nil-ed out by finalize
       // assert( [context isActive]);
       // the context NEED NOT be active! (check deleteTextureID: code)
@@ -177,10 +190,6 @@
 //
 - (void) finalize
 {
-#ifdef CGLAYER_DEBUG
-   MulleUILog( "finalize texture %td", _textureID);
-#endif
-
    [_context removeFromSharedGPUTextureMap:self];
 
    if( [_sharedGPUTexture retainCount] > 1)
@@ -192,7 +201,6 @@
       // _CGContextGetNVGContext( _context);
       //
       [_context forgetTextureID:_textureID];
-      _textureID = 0;  // but don't delete it now
    }
 
    [_sharedGPUTexture release];
@@ -210,7 +218,7 @@
 {
    if( [context shareID] != [_context shareID])
    {
-      MulleUILog( "ImageID requested for context %#@ is in non-sharable context %#@",
+      CGImageLog( "ImageID requested for context %#@ is in non-sharable context %#@",
                   context, _context);
       assert( 0);
       return( nil);
@@ -218,7 +226,7 @@
 
    if( textureFlags != _textureFlags)
    {
-      MulleUILog( "Non standard textureFlags 0x%tx (0x%x) requested. Use UIBitmapImage instead (for now)", textureFlags, _textureFlags);
+      CGImageLog( "Non standard textureFlags 0x%tx (0x%x) requested. Use UIBitmapImage instead (for now)", textureFlags, _textureFlags);
       // would need to construct a new CGImage, but CGImage is too low level
       // use UIBitmapImage instead
       assert( 0);
@@ -290,8 +298,8 @@
                                 bitmapSize:bitmapSize
                               textureFlags:textureFlags & 0x3F];
    return( [self initWithTextureID:textureID
-                     textureFlags:textureFlags
-                          context:context]);
+                      textureFlags:textureFlags
+                           context:context]);
 }
 
 
@@ -323,7 +331,7 @@
    if( isFlipped)
    {
       convertedEncoding = CGBitmapEncodingFlipYRGBABytes;
-      textureFlags       ^= NVG_IMAGE_FLIPY;
+      textureFlags     ^= NVG_IMAGE_FLIPY;
    }
 
    convertedBitmapInfo = CGBitmapInfoMake( bitmap.info.size, 0, convertedEncoding);
@@ -503,8 +511,8 @@
    {
       _sharedGPUTexture = [[image sharedGPUTexture] retain];
 
-      if( [_context debugEnabled])
-         MulleUILog( "shared gpuTexture=%p in context %#@ with %#@ of %#@",
+      if( [_context debugEnabled] || _debugEnabled)
+         CGImageLog( "shared gpuTexture=%p in context %#@ with %#@ of %#@",
                      [_sharedGPUTexture gpuTexture], _context, image, otherContext);
    }
 
@@ -516,6 +524,13 @@
 {
    return( [_context RGBABytesBitmapOfImage:self
                                   allocator:allocator]);
+}
+
+// this is a hack, until we properly turn multisample layers into standard
+// cgimages for paints
+- (BOOL) isMultiSample
+{
+   return( (_textureFlags & NVG_IMAGE_MSAA) ? YES : NO);
 }
 
 
@@ -530,5 +545,13 @@
                            self->_sharedGPUTexture);
    return( s);
 }
+
+- (CGImage *) resolvedImage
+{
+   assert( ! [self isMultiSample]);
+
+   return( self);
+}
+
 
 @end

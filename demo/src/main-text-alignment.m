@@ -124,8 +124,8 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
             nvgStrokeWidth( vg, 1.0);
             nvgStroke( vg);
 
-            nvgTextColor( vg, CGColorMakeWithHSVA( x / (CGFloat) N_ALIGNMENTS, 1.0, 1.0, 1.0),
-                              CGColorMakeWhite()); // TODO: use textColor
+            nvgTextColor( vg, CGColorMakeWithHSVA( x / (CGFloat) N_ALIGNMENTS, 1.0, 1.0, 1.0));
+            nvgTextBackgroundColor( vg, CGColorMakeWhite());
             nvgText( vg, origin.x, origin.y, s, NULL);
          }
          nvgRestore( vg);
@@ -140,12 +140,12 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
 
    view  = [UIView viewWithFrame:frame];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 }
 
 

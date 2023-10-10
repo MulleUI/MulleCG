@@ -12,22 +12,13 @@
 - (NVGpaint) NVGpaintWithBounds:(CGRect) rect
                      NVGcontext:(NVGcontext *) vg
 {
-   return( mvgImagePattern( vg, rect, [self rotation], [self textureID], 1.0));
+   CGImage   *image;
+
+   image = [self resolvedImage];
+   return( mvgImagePattern( vg, rect, [image rotation], [image textureID], 1.0));
 }
 
-
-- (void) strokeWithBounds:(CGRect) rect
-                  context:(CGContext *) context
-{
-   NVGcontext   *vg;
-   NVGpaint     paint;
-
-   vg    = CGContextGetNVGContext( context);
-   paint = [self NVGpaintWithBounds:rect
-                         NVGcontext:vg];
-   mvgStrokePaint( vg, paint);
-   mvgStroke( vg);
-}
+// inherit the rest from CGPaint
 
 @end
 

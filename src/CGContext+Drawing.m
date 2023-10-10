@@ -5,6 +5,7 @@
 
 #import "import-private.h"
 
+#import "CGContext+OpenGL.h"
 #import "CGDrawable.h"
 #import "CGImage.h"
 #include "CGPath+nanovg.h"
@@ -35,17 +36,55 @@
 
 
 - (void) strokeRect:(CGRect) rect
-              width:(CGFloat) width
+        strokeWidth:(CGFloat) strokeWidth
            hexColor:(NSUInteger) color
 {
+   if( strokeWidth <= 0.0f)
+      return;
+
    nvgBeginPath( _vg);
    {
       nvgRect( _vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgStrokeWidth( _vg, width);
+      nvgStrokeWidth( _vg, strokeWidth);
       nvgStrokeColor( _vg, CGColorMakeWithHexColor( color));
    }
    nvgStroke( _vg);
 }
+
+
+- (void) blitRect:(CGRect) rect
+            image:(id) image
+            scale:(BOOL) scale
+{
+   CGDrawableOptions             *options;
+   struct CGContextFramebuffer   dst;
+
+   if( ! [image isMultiSample])
+   {
+      options = scale ? &CGDrawableOptionsScaleToFit :
+                        &CGDrawableOptionsDefault;
+
+      // this code will be used if MSAA is not available, as
+      // _CGContextBlitFramebufferImage will be just an empty shell
+      //
+
+      nvgSave( _vg);
+      nvgGlobalCompositeOperation( _vg, NVG_COPY);
+
+      [image drawRect:rect
+              options:options
+              context:self];
+
+      nvgRestore( _vg);
+      return;
+   }
+
+   //  a hack for UIWindow+Thread refresh code
+   dst = CGContextCurrentOpenGLFramebuffer( self);
+   _CGContextBlitFramebufferImage( self, dst, rect, image, NO);
+   CGContextSetCurrentOpenGLFramebuffer( self, dst);
+}
+
 
 
 - (void) drawRect:(CGRect) rect
@@ -56,19 +95,22 @@
 
    options = scale ? &CGDrawableOptionsScaleToFit :
                      &CGDrawableOptionsDefault;
+   assert( ! [image isMultiSample]);
    [image drawRect:rect
            options:options
            context:self];
 }
 
 
-- (void) drawBitmap:(struct CGBitmap) fb
+
+- (void) fillRect:(CGRect) rect
+           bitmap:(struct CGBitmap) fb
+            scale:(BOOL) scale
 {
-   CGImage                  *image;
-   CGDrawableOptions        options;
-   CGRect                   rect;
-   struct CGBitmapInfo      convertedBitmapInfo;
-   struct CGBitmap          convertedFb;
+   CGImage               *image;
+   CGDrawableOptions     *options;
+   struct CGBitmapInfo   convertedBitmapInfo;
+   struct CGBitmap       convertedFb;
 
    if( CGBitmapIsNull( fb))
       return;
@@ -96,10 +138,10 @@
                                   textureFlags:0
                                        context:self] autorelease];
 
-   rect    = CGRectMakeWithIntegerSize( fb.info.size);
-   options = CGDrawableOptionsMakeScaleToFit();
+   options = scale ? &CGDrawableOptionsScaleToFit :
+                     &CGDrawableOptionsDefault;
    [image drawRect:rect
-           options:&options
+           options:options
            context:self];
 
    // just for debugging, draws a frame somewhere
@@ -155,14 +197,13 @@
    vg = CGContextGetNVGContext( self);
 
    nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-   end = (char *) mulle_utf32_as_utf8( icon, (mulle_utf8_t *) icon_utf8);
-   mvgText( vg, point, icon_utf8, end);
+   end = (char *) mulle_utf32_as_utf8( icon, icon_utf8);
+   nvgText( vg, point.x, point.y, icon_utf8, end);
 }
 
 
-- (void) fillCircleAtPoint:(CGPoint) point
-                    radius:(CGFloat) radius
-                  hexColor:(NSUInteger) color
+- (void) fillCircle:(CACircle) circle
+           hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
 
@@ -170,26 +211,28 @@
 
    nvgBeginPath( vg);
    {
-      nvgCircle( vg, point.x, point.y, radius);
+      mvgCircle( vg, circle);
       nvgFillColor( vg, CGColorMakeWithHexColor( color));
    }
    nvgFill( vg);
 }
 
 
-- (void) strokeCircleAtPoint:(CGPoint) point
-                      radius:(CGFloat) radius
-                       width:(CGFloat) width
-                    hexColor:(NSUInteger) color
+- (void) strokeCircle:(CACircle) circle
+          strokeWidth:(CGFloat) strokeWidth
+             hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
+
+   if( strokeWidth <= 0.0f)
+      return;
 
    vg = CGContextGetNVGContext( self);
 
    nvgBeginPath( vg);
    {
-      nvgCircle( vg, point.x, point.y, radius);
-      nvgStrokeWidth( vg, width);
+      mvgCircle( vg, circle);
+      nvgStrokeWidth( vg, strokeWidth);
       nvgStrokeColor( vg, CGColorMakeWithHexColor( color));
    }
    nvgStroke( vg);
@@ -197,16 +240,19 @@
 
 
 - (void) fillPoint:(CGPoint) point 
-             width:(CGFloat) width
+         pointSize:(CGFloat) size
           hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
+
+   if( size <= 0.0f)
+      return;
 
    vg = CGContextGetNVGContext( self);
 
    nvgBeginPath( vg);
    {
-      nvgRect( vg, point.x - width / 2.0, point.y - width / 2.0, width, width);
+      nvgRect( vg, point.x - size / 2.0, point.y - size / 2.0, size, size);
       nvgFillColor( vg, CGColorMakeWithHexColor( color));
    }
    nvgFill( vg);
@@ -215,10 +261,13 @@
 
 - (void) strokeLineFromPoint:(CGPoint) from 
                      toPoint:(CGPoint) to
-                       width:(CGFloat) strokeWidth
+                 strokeWidth:(CGFloat) strokeWidth
                     hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
+
+   if( strokeWidth <= 0.0f)
+      return;
 
    vg = CGContextGetNVGContext( self);
 
@@ -251,10 +300,13 @@
 
 
 - (void) strokePath:(CGPath *) path 
-              width:(CGFloat) strokeWidth
+        strokeWidth:(CGFloat) strokeWidth
            hexColor:(NSUInteger) color
 {
    struct NVGcontext   *vg;
+
+   if( strokeWidth <= 0.0f)
+      return;
 
    vg = CGContextGetNVGContext( self);
 

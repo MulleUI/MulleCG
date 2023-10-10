@@ -29,6 +29,9 @@
    NVGpaint   paint;
    CGFloat    blend;
 
+   if( strokeWidth <= 0.0f)
+      return;
+
    blend = (_image == _otherImage) ? 0.0f : _blend;
    rect  = CGRectExtrude( rect, strokeWidth / 2.0f, strokeWidth / 2.0f);
 

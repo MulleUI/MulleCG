@@ -48,10 +48,70 @@ static BOOL   drawStuff( CALayer *layer, void *context)
 }
 
 
+
+static void   usage( void)
+{
+   fprintf( stderr, "\n"
+"Usage:\n"
+"   canvas [options]\n"
+"\n"
+"Options:\n"
+"   -a      : disable default antialias (nvg/glfw)\n"
+"   -f      : force edge antialias (nvg)\n"
+"   -r      : not retained\n"
+"\n");
+   exit( 1);
+}
+
+
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
-                                           CGSizeMake( 200, 200),
-                                           NULL, 
-                                           100.f));      
+   UIWindow       *window;
+   UIApplication  *app;
+   NSUInteger     styleMask;
+   int            i;
+
+   styleMask = UIWindowStyleMaskDefault;
+
+   /*
+    * window and app
+    */
+   for( i = 1; i < argc; i++)
+   {
+      if( argv[ i][ 0] != '-')
+         break;
+      switch( argv[ i][ 1])
+      {
+      case 'r' :
+         styleMask &= ~UIWindowStyleRetained;
+         break;
+
+      case 'f' :
+         styleMask |= UIWindowStyleForceEdgeAntiAlias;
+         break;
+
+      case 'a' :
+         styleMask &= ~UIWindowStyleAntiAlias;
+         break;
+
+      default :
+         usage();
+      }
+   }
+
+   if( i != argc)
+      usage();
+
+   app = [UIApplication sharedInstance];
+   @autoreleasepool
+   {
+      window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 600, 400)
+                                titleUTF8String:"Demo"
+                                      styleMask:styleMask] autorelease];
+
+      assert( window);
+      [[window contentView] setDrawCallback:drawStuff];
+      [app addWindow:window];
+   }
+   return( [app run]);
 }

@@ -13,8 +13,8 @@
 
 
 - (CGTextureID) textureIDWithBytes:(void *) bytes
-                      bitmapSize:(struct MulleIntegerSize) size
-                    textureFlags:(NSUInteger) textureFlags
+                        bitmapSize:(struct MulleIntegerSize) size
+                      textureFlags:(NSUInteger) textureFlags
 {
    CGTextureID   textureID;
 
@@ -28,7 +28,7 @@
 
 
 - (CGTextureID) textureIDWithFileCData:(struct mulle_data) fileCData
-                        textureFlags:(NSUInteger) textureFlags
+                          textureFlags:(NSUInteger) textureFlags
 {
    CGTextureID   textureID;
 
@@ -41,7 +41,7 @@
 
 
 - (CGTextureID) textureIDWithContentsOfFileCString:(char *) filename
-                                    textureFlags:(NSUInteger) textureFlags
+                                      textureFlags:(NSUInteger) textureFlags
 {
    CGTextureID   textureID;
 
@@ -55,12 +55,18 @@
                                textureFlags:(NSUInteger) textureFlags
 {
    CGTextureID   textureID;
+   int           textureType;
 
+   textureType = NVG_TEXTURE_RGBA;
+#ifdef NVG_TEXTURE_MSAA
+   if( textureFlags & NVG_IMAGE_MSAA)
+      textureType = NVG_TEXTURE_MSAA;
+#endif
    textureID = nvgCreateImageTexture( _vg,
                                       size.width,
                                       size.height,
                                       textureFlags,
-                                      NVG_TEXTURE_RGBA,
+                                      textureType,
                                       gpuTexture);
    return( textureID);
 }

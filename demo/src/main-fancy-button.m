@@ -302,9 +302,10 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
             iconText = cpToUTF8( preicon, icon);
 
             nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
-            nvgTextColor( vg, colors[ 3], CGColorMultiplyAlpha( colors[ 1], 0.2));
+            nvgTextColor( vg, colors[ 3]);
+            nvgTextBackgroundColor( vg, CGColorMultiplyAlpha( colors[ 1], 0.2));
             mvgTextInRect( vg, iconText,
-                               NULL,
+                               (size_t) -1,
                                iconRect,
                                CGContentModeScaleAspectFit,
                                MVGTextAlignVisually);
@@ -318,10 +319,10 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
 
          nvgFontFace(vg, "sans");
          nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
-         nvgTextColor( vg, CGColorMultiplyAlpha( colors[ 3], 0.9),
-                           CGColorMultiplyAlpha( colors[ 1], 1.0));
+         nvgTextColor( vg, CGColorMultiplyAlpha( colors[ 3], 0.9));
+         nvgTextBackgroundColor( vg, CGColorMultiplyAlpha( colors[ 1], 1.0));
          mvgTextInRect( vg, text,
-                            NULL,
+                            (size_t) -1,
                             CGRectInset( textRect, 4, 4),
                             CGContentModeScaleAspectFit,
                             MVGTextAlignVisually);
@@ -360,10 +361,11 @@ static void   drawButton( CALayer *layer, CGContext *context)
          vg = CGContextGetNVGContext( context);
          nvgFontSize( vg, 14.0f);
          nvgFontFace( vg, "sans");
-         nvgTextColor( vg, CGColorMakeWhite(), CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 1.0));
+         nvgTextColor( vg, CGColorMakeWhite());
+         nvgTextBackgroundColor( vg, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 1.0));
          mvgTextInRect( vg,
                         CGRectUTF8String( rect),
-                        NULL,
+                        (size_t) -1,
                         CGRectPlaceBelowRect( rect, 0.0, 16.0f),
                         CGContentModeCenterPoint,
                         0);
@@ -376,10 +378,10 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawButton];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] setDrawCallback:(CALayerDrawCallback_t *) drawButton];
+   [[window contentView] addSubview:view];
 }
 
 

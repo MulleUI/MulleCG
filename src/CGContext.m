@@ -2,9 +2,11 @@
 
 #import "CGContext.h"
 
-#import "CGContext+CGFont.h"
+#import "CGLayoutContext+CGFont.h"
+#import "CGContext+DebugPrivate.h"
 #import "CGContext+OpenGL.h"
 #import "CGContext+Drawing.h"
+#import "CGContext+Shader.h"
 #import "CGContext+Shader.h"
 #import "CGContext+Texture.h"
 #import "CGImage.h"
@@ -95,10 +97,25 @@ static void   recycle_ivar_object( mulle_atomic_pointer_t *p, id obj)
 }
 
 
+@implementation NSObject( CGContext)
+
+- (BOOL) __isCGContext
+{
+   return( NO);
+}
+
+@end
+
+
 //
 // there shall be no OpenGL calls or constants here. Just nanovg stuff
 //
 @implementation CGContext
+
+- (BOOL) __isCGContext
+{
+   return( YES);
+}
 
 static struct
 {
@@ -107,14 +124,12 @@ static struct
    struct mulle_container_keyvaluecallback   _shaderMapCallback;
    struct mulle_container_keyvaluecallback   _shaderSourcesCallback;
    struct mulle_map                          _registeredSources;
-   char                                      _debugEnabled;
 } Self;
 
 
 + (void) initialize
 {
    struct mulle_allocator   *allocator;
-   char                     *s;
 
    mulle_thread_mutex_init( &Self._freeTypeLock);
 
@@ -129,16 +144,6 @@ static struct
 
    allocator = MulleObjCClassGetAllocator( self);
    mulle_map_init( &Self._registeredSources, 0, &Self._shaderSourcesCallback, allocator);
-
-   s = getenv( "CGContextDebugEnabled");
-   if( s)
-      Self._debugEnabled = (char) strtol( s, NULL, 0);
-   else 
-   {
-#ifdef CGCONTEXT_DEBUG_ENABLED
-      Self._debugEnabled = CGCONTEXT_DEBUG_ENABLED;
-#endif
-   }
 }
 
 
@@ -146,12 +151,6 @@ static struct
 {
    mulle_thread_mutex_done( &Self._freeTypeLock);
    mulle_map_done( &Self._registeredSources);
-}
-
-
-+ (void) setDebugEnabled:(BOOL) flag
-{
-   Self._debugEnabled = flag;
 }
 
 
@@ -245,10 +244,6 @@ static UIGraphicsBackend   defaultBackends[] =
                options:(UIGraphicsOptions) options
 {
    struct mulle_allocator   *allocator;
-   static SEL                selectors[ 2] = {
-                                                @selector( contextDidAddObject:),
-                                                @selector( contextDidRemoveObject:)
-                                             };
 
    _backend  = backend;
    _shareID  = shareID;
@@ -257,8 +252,7 @@ static UIGraphicsBackend   defaultBackends[] =
    {
       mulle_thread_mutex_do( Self._freeTypeLock)
       {
-         [self _initNanoVGWithEdgeAntiAliasing:options & UIGraphicsEdgeAntiAliasing
-                             useStencilStrokes:options & UIGraphicsUseStencilStrokes];
+         [self _initNanoVGWithGraphicsOptions:options];
       }
 
       if( ! _vg)
@@ -269,22 +263,19 @@ static UIGraphicsBackend   defaultBackends[] =
       }
    }
 
-   [self _initFontCache];
-   [self _initResourceStorage:&_resourceStorage
-            callbackSelectors:selectors];
+   // do this now to gez CGContextLayout
+   self = [super init];
+   if( self)
+   {
+      allocator = MulleObjCInstanceGetAllocator( self);
+      _mulle__pointerarray_init( &_deletedTextureIDs, 0, allocator);
+      _mulle__pointerarray_init( &_deletedFramebuffers, 0, allocator);
+      // this is merely there to provide a mapping, it doesn't own the CGImage
+      _mulle_map_init( &_gpuTextureMap, 0, &Self._gpuTextureMapCallback, allocator);
 
-   allocator = MulleObjCInstanceGetAllocator( self);
-   _mulle__pointerarray_init( &_deletedTextureIDs, 0, allocator);
-   _mulle__pointerarray_init( &_deletedFramebuffers, 0, allocator);
-   // this is merely there to provide a mapping, it doesn't own the CGImage
-   _mulle_map_init( &_gpuTextureMap, 0, &Self._gpuTextureMapCallback, allocator);
-
-   // this is a way to rendezvous to exisiting shaders by name
-   _mulle_map_init( &_shaderMap, 0, &Self._shaderMapCallback, allocator);
-
-   _debugEnabled = Self._debugEnabled;
-   if( _debugEnabled)
-      MulleUILog( "init");
+      // this is a way to rendezvous to exisiting shaders by name
+      _mulle_map_init( &_shaderMap, 0, &Self._shaderMapCallback, allocator);
+   }
 
    return( self);
 }
@@ -304,8 +295,7 @@ static UIGraphicsBackend   defaultBackends[] =
       assert( ! _isRendering);
    }
 
-   if( _debugEnabled)
-      MulleUILogThisMethod();
+   CGContextLog("");
 
    [self _resetFontCache];
    [self _finalizeResourceStorage:&_resourceStorage];
@@ -313,8 +303,7 @@ static UIGraphicsBackend   defaultBackends[] =
    [self deleteFramebuffers];
    [self deleteShaders];
 
-   if( _debugEnabled)
-      MulleUILog( "autorelease offScreenFramebuffer");
+   CGContextLog( "autorelease offScreenFramebuffer");
 
    // by acquiring we nil and autorelease, which is what we want to do
    acquire_ivar_object( &_drawnLayer);
@@ -336,34 +325,17 @@ static UIGraphicsBackend   defaultBackends[] =
 {
    struct mulle_allocator   *allocator;
 
-   if( _debugEnabled)
-      MulleUILogThisMethod();
-
-   [self _doneFontCache];
+   CGContextLog("");
 
    // images in _gpuTextureMap aren't retained just blow map away
    mulle_map_done( &_gpuTextureMap);
    mulle_map_done( &_shaderMap);
-
-   [self _doneResourceStorage:&_resourceStorage];
 
    allocator = MulleObjCInstanceGetAllocator( self);
    _mulle__pointerarray_done( &_deletedFramebuffers, allocator);
    _mulle__pointerarray_done( &_deletedTextureIDs, allocator);
 
    [super dealloc];
-}
-
-
-- (struct NVGcontext *) nvgContext
-{
-   return( CGContextGetNVGContext( self));
-}
-
-
-- (struct MulleUIResourceStorage *) _resourceStorage
-{
-   return( &_resourceStorage);
 }
 
 
@@ -380,11 +352,6 @@ static UIGraphicsBackend   defaultBackends[] =
 - (BOOL) isActive
 {
    return( _isActive);
-}
-
-- (BOOL) hasLoadedFont
-{
-   return( _hasLoadedFont);
 }
 
 
@@ -435,9 +402,16 @@ static UIGraphicsBackend   defaultBackends[] =
    return( _currentFrameInfo.now - _firstRenderTimeStamp);
 }
 
+
 - (char *) backendUTF8String
 {
    return( UIGraphicsBackendUTF8String( _backend));
+}
+
+
+- (CGFloat) fontScale
+{
+   return( _currentFrameInfo.window.UIScale.dx * 1.35); // Still true ????
 }
 
 
@@ -450,6 +424,7 @@ static UIGraphicsBackend   defaultBackends[] =
 
 
 - (CGLayer *) layerWithSize:(struct MulleIntegerSize) size
+                textureFlags:(NSUInteger) textureFlags
 {
    CGLayer                   *layer;
    struct MulleIntegerSize   oldSize;
@@ -460,7 +435,7 @@ static UIGraphicsBackend   defaultBackends[] =
    if( ! MulleIntegerSizeEqualToIntegerSize( oldSize, size))
    {
       layer = [CGLayer layerWithBitmapSize:size
-                              textureFlags:0
+                              textureFlags:textureFlags
                                    context:self];
 #ifdef DEBUG
       {
@@ -471,23 +446,15 @@ static UIGraphicsBackend   defaultBackends[] =
          [layer setDebugNameUTF8String:s];
       }
 #endif
-#ifdef RESIZE_DEBUG
-      mulleui_log_object_method( self,
-                                 (char *) __PRETTY_FUNCTION__,
-                                 "created new layer %#@ with size %s",
-                                 layer,
-                                 MulleIntegerSizeUTF8String( size));
-#endif
+      CGContextLogVerbose( "created new layer %#@ with size %s",
+                           layer,
+                           MulleIntegerSizeUTF8String( size));
    }
    else
    {
-#ifdef RESIZE_DEBUG
-      mulleui_log_object_method( self,
-                                 (char *) __PRETTY_FUNCTION__,
-                                 "reused layer %#@ with size %s",
-                                 layer,
-                                 MulleIntegerSizeUTF8String( size));
-#endif
+      CGContextLogVerbose( "reused layer %#@ with size %s",
+                           layer,
+                           MulleIntegerSizeUTF8String( size));
    }
    return( layer);
 }
@@ -495,6 +462,8 @@ static UIGraphicsBackend   defaultBackends[] =
 
 - (void) beginRender:(struct CGFrameInfo *) info
 {
+   NSUInteger   textureFlags;
+
    assert( ! _isRendering);
 
    // not 100% sure why this is written this way
@@ -504,14 +473,10 @@ static UIGraphicsBackend   defaultBackends[] =
    assert( info);
    assert( info->window.pixelRatio != 0.0);
 
-#ifdef RENDER_DEBUG
-   mulleui_log_object_method( self,
-                              (char *) __PRETTY_FUNCTION__,
-                              "Viewport: %s, FB: %s, Window: %s",
-                              MulleIntegerRectUTF8String( info->viewportFrame),
-                              MulleIntegerSizeUTF8String( info->window.framebufferSize),
-                              CGSizeUTF8String( info->window.frame.size));
-#endif
+   CGContextRenderLog( "Viewport: %s, FB: %s, Window: %s",
+                 MulleIntegerRectUTF8String( info->viewportFrame),
+                 MulleIntegerSizeUTF8String( info->window.framebufferSize),
+                 CGSizeUTF8String( info->window.frame.size));
 
    // not 100% sure why this is written this way
 
@@ -535,7 +500,11 @@ static UIGraphicsBackend   defaultBackends[] =
    {
       // will acquire hopefully a preexisting layer for reuse
       assert( ! _renderLayer);
-      _renderLayer = [[self layerWithSize:info->window.framebufferSize] retain];
+
+      textureFlags = ( _nvgFlags & NVG_IMAGE_MSAA) ? NVG_MSAA : 0;
+      _renderLayer = [[self layerWithSize:info->window.framebufferSize
+                             textureFlags:textureFlags] retain];
+      assert( _renderLayer);
 
       [self bindFramebuffer:CGContextFramebufferMakeWithLayer( _renderLayer)];
    }
@@ -574,6 +543,7 @@ static struct CGFrameInfo   emptyInfo;
 {
    assert( _isActive);
 
+   CGContextRenderLog( "");
    // MEMO: this also flushes the font cache, not sure if this desirable or
    //       necessary or too painful ??
    //
@@ -598,19 +568,15 @@ static struct CGFrameInfo   emptyInfo;
 
    assert( _isRendering);
 
-#ifdef RENDER_DEBUG
-   mulleui_log_object_method( self,
-                              (char *) __PRETTY_FUNCTION__,
-                              "");
-#endif
+   CGContextRenderLog( "");
 
    _isRendering = 0;
    _numberOfFrames++;
 
    /*
-    * return to default 
+    * return to default, for unbinding YES or NO makes no difference
     */
-   [self bindFramebuffer:CGContextFramebufferMakeDefault()];
+   [self bindFramebuffer:CGContextFramebufferMakeDefault( NO)];
    CGContextCheckBackendError( self, "unbind buffer");
 
    if( _rendersOffScreen)
@@ -634,19 +600,18 @@ static struct CGFrameInfo   emptyInfo;
       MulleUIWriteImageToPNGFileSequenceAsync( _renderLayer, "render-layer");
 #endif
 
-#ifdef SWAP_DEBUG
-      mulleui_log_object_method( self,
-                                 (char *) __PRETTY_FUNCTION__,
-                                 "least recent layer %#@",
-                                 _renderLayer);
-#endif
+      CGContextRenderLogVerbose( "least recent layer %#@", _renderLayer);
+
       [_renderLayer autorelease];
       _renderLayer = nil;
    }
 
    // so if we rendered to the "window" framebuffer mark it as initialized
-   if( _currentFramebuffer.type == CGContextDefaultFramebuffer)
+   if( _currentFramebuffer.type == CGContextDefaultFramebuffer ||
+       _currentFramebuffer.type == CGContextDefaultMultiSampleFramebuffer)
+   {
       _initializedFramebuffer = YES;
+   }
 }
 
 
@@ -666,14 +631,6 @@ static struct CGFrameInfo   emptyInfo;
 {
    // if there are no draw commands, this does nothing
    nvgFlushFrame( _vg);
-}
-
-
-- (void) reset
-{
-   assert( _isRendering);
-
-   nvgReset( _vg);
 }
 
 
@@ -715,21 +672,27 @@ static struct CGFrameInfo   emptyInfo;
    old = _currentFramebuffer;
    // the old layer should notice that its unbound to set its
    // initialized flag
-   if( old.type == CGContextLayerFramebuffer)
+   if( old.type == CGContextLayerFramebuffer
+      || old.type == CGContextLayerMultiSampleFramebuffer)
+   {
       [(CGLayer *) old.handle _unbindFromContext];  // nvg will restore
+   }
 
    switch( fb.type)
    {
    case CGContextDefaultFramebuffer :
+   case CGContextDefaultMultiSampleFramebuffer  :
       // this is GL on the "bottom" anyway
       nvgluBindFramebuffer( NULL);
       break;
 
    case CGContextLayerFramebuffer :
+   case CGContextLayerMultiSampleFramebuffer  :
       [(CGLayer *) fb.handle _bindToContext];  // nvg will restore
       break;
 
    case CGContextOpenGLFramebuffer  :
+   case CGContextOpenGLMultiSampleFramebuffer  :
       [self bindOpenGLFramebuffer:fb.handle];
       break;
 
@@ -752,9 +715,11 @@ static struct CGFrameInfo   emptyInfo;
       return( _initializedFramebuffer);
 
    case CGContextLayerFramebuffer  :
+   case CGContextLayerMultiSampleFramebuffer  :
       return( [(CGLayer *) _currentFramebuffer.handle isInitializedFramebuffer]);
 
    case CGContextOpenGLFramebuffer :
+   case CGContextOpenGLMultiSampleFramebuffer  :
       return( NO);
    }
 }
@@ -797,6 +762,51 @@ static struct CGFrameInfo   emptyInfo;
 {
    return( acquire_ivar_object( &_scratchLayer));
 }
+
+
+static struct MulleIntegerSize
+   _CGContextBitmapSizeOfLayerFramebuffer( CGContext *self,
+                                           struct CGContextFramebuffer fb)
+{
+   assert( fb.type == CGContextLayerFramebuffer
+           || fb.type == CGContextLayerMultiSampleFramebuffer);
+   return( [(CGLayer *) fb.handle bitmapSize]);
+}
+
+
+static struct MulleIntegerSize
+   _CGContextBitmapSizeOfDefaultFramebuffer( CGContext *self,
+                                             struct CGContextFramebuffer fb)
+{
+   struct CGFrameInfo   info;
+
+   assert( fb.type == CGContextDefaultFramebuffer
+           || fb.type == CGContextDefaultMultiSampleFramebuffer);
+   [self getCurrentFrameInfo:&info];
+   return( CGFrameInfoGetFramebufferSize( &info));
+}
+
+
+struct MulleIntegerSize
+   CGContextBitmapSizeOfFramebuffer( CGContext *self,
+                                     struct CGContextFramebuffer fb)
+{
+   switch( fb.type)
+   {
+   case CGContextDefaultFramebuffer :
+   case CGContextDefaultMultiSampleFramebuffer :
+      return( _CGContextBitmapSizeOfDefaultFramebuffer( self, fb));
+   case CGContextLayerFramebuffer :
+   case CGContextLayerMultiSampleFramebuffer :
+      return( _CGContextBitmapSizeOfLayerFramebuffer( self, fb));
+   case CGContextOpenGLFramebuffer :
+   case CGContextOpenGLMultiSampleFramebuffer :
+      return( _CGContextBitmapSizeOfOpenGLFramebuffer( self, fb));
+   }
+   abort();
+}
+
+
 
 
 // - (MulleTextureImage *) framebufferImageWithIntegerSize:(struct CGBitmapInfo) size

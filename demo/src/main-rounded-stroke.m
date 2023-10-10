@@ -130,7 +130,7 @@ int   main( int argc, char *argv[])
    app = [UIApplication sharedInstance];
 
    window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 600, 400)];
-   [[window contentPlane] setDrawCallback:drawStuff];
+   [[window contentView] setDrawCallback:drawStuff];
    [window setFrameRateHz:60.0f];
    [app addWindow:window];
 

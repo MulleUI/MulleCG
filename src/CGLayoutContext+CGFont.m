@@ -1,7 +1,7 @@
 //
 // Copyright (c) 2020 Nat!, Mulle kybernetiK
 //
-#import "CGContext+CGFont.h"
+#import "CGLayoutContext+CGFont.h"
 
 #import "import-private.h"
 
@@ -49,7 +49,7 @@ unsigned char   entypo_ttf[] =
 
 
 
-@implementation CGContext ( CGFont)
+@implementation CGLayoutContext ( CGFont)
 
 static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
@@ -60,12 +60,6 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
       .keycallback   = mulle_container_keycallback_copied_cstring,
       .valuecallback = *MulleObjCContainerValueRetainCallback
    };
-}
-
-
-- (CGFloat) fontScale
-{
-   return( _currentFrameInfo.window.UIScale.dx * 1.35); // Still true ????
 }
 
 
@@ -90,35 +84,51 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 }
 
 
-- (void) addFontWithCData:(struct mulle_data) data
-       fontNameUTF8String:(char *) name
+- (CGFont *) fontWithCData:(struct mulle_data) data
+        fontNameUTF8String:(char *) name
 {
    CGFont    *font;
    CGFontID  fontID;
 
-   assert( ! mulle_map_get( &_fontMap, name));
+   assert( name);
+
+   font = mulle_map_get( &_fontMap, name);
+   if( font)
+      return( font);
 
    fontID = mvgCreateFontMem( _vg, name, data.bytes, (int) data.length, 0);
-   font      = [CGFont fontWithNameUTF8String:name
-                                       fontID:fontID];
+   if( fontID == -1)
+      return( nil);
+
+   font = [CGFont fontWithNameUTF8String:name
+                                  fontID:fontID];
 
    mulle_map_insert( &_fontMap, name, font);
+   return( font);
 }
 
 
-- (void) addFontWithContentsOfFileWithFileRepresentationString:(char *) filename
-                                            fontNameUTF8String:(char *) name
+- (CGFont *) fontWithContentsOfFileWithFileRepresentationString:(char *) filename
+                                             fontNameUTF8String:(char *) name
 {
    CGFont     *font;
    CGFontID   fontID;
 
-   assert( ! mulle_map_get( &_fontMap, name));
+   assert( filename);
+   assert( name);
+
+   font = mulle_map_get( &_fontMap, name);
+   if( font)
+      return( font);
 
    fontID = mvgCreateFont( _vg, name, filename);
-   font      = [CGFont fontWithNameUTF8String:name
-                                       fontID:fontID];
+   if( fontID == -1)
+      return( nil);
 
+   font = [CGFont fontWithNameUTF8String:name
+                                  fontID:fontID];
    mulle_map_insert( &_fontMap, name, font);
+   return( font);
 }
 
 
@@ -136,12 +146,12 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
       return( font);
 
    fontID = mvgCreateFontMem( [self nvgContext],
-                                 "fallback",
-                                 emoji_font_ttf,
-                                 (int) s_emoji_font_ttf,
-                                 0);
-   font      = [CGFont fontWithNameUTF8String:"fallback"
-                                       fontID:fontID];
+                              "fallback",
+                              emoji_font_ttf,
+                              (int) s_emoji_font_ttf,
+                              0);
+   font   = [CGFont fontWithNameUTF8String:"fallback"
+                                    fontID:fontID];
 
    mulle_map_insert( &_fontMap, "fallback", font);
    return( font);
@@ -212,10 +222,8 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 }
 
 
-- (void) setFont:(CGFont *) font
+- (void) useFont:(CGFont *) font
 {
-   assert( [self isActive]);
-
    // TODO: maybe boobytrappe mvgFontFace to make it unusable as one must
    //       use [font nameUTF8String] to get the proper string...
    if( font)
@@ -224,30 +232,6 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
       nvgFontFace( _vg, "sans");
 
    _hasLoadedFont = YES;
-}
-
-
-- (void) useFontWithNameUTF8String:(char *) name
-{
-   CGFont   *font;
-
-   assert( [self isActive]);
-
-   font = [self fontWithNameUTF8String:name];
-   if( font)
-      [self setFont:font];
-}
-
-
-- (void) useDefaultFont
-{
-   CGFont   *font;
-
-   assert( [self isActive]);
-
-   font = [self defaultFont];
-   assert( font);
-   [self setFont:font];
 }
 
 
@@ -263,6 +247,5 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 {
    return( nvgGetFontHandle( _vg, -1));
 }
-
 
 @end

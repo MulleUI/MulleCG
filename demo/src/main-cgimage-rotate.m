@@ -55,96 +55,97 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    // knob in texture is at angle 180. So 12:00 is acually offset - 180
 
 #if 1
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CADegreesToRotation( 0 - OFFSET),
-                                    SCALE,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CADegreesToRotation( 0 - OFFSET),
+                                                    SCALE,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 0][ 1]
            options:&options
            context:context];
 #endif
 #if 1
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CADegreesToRotation( 45 - OFFSET),
-                                    SCALE,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CADegreesToRotation( 45 - OFFSET),
+                                                    SCALE,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 0][ 2]
            options:&options
            context:context];
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CADegreesToRotation( 90 - OFFSET),
-                                    SCALE,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CADegreesToRotation( 90 - OFFSET),
+                                                    SCALE,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 1][ 2]
            options:&options
            context:context];
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CADegreesToRotation( 135 - OFFSET),
-                                    SCALE,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CADegreesToRotation( 135 - OFFSET),
+                                                    SCALE,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 2][ 2]
            options:&options
            context:context];
 #endif
    // row
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CADegreesToRotation( 180 - OFFSET),
-                                    SCALE,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CADegreesToRotation( 180 - OFFSET),
+                                                    SCALE,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 2][ 1]
            options:&options
            context:context];
 #if 1
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CADegreesToRotation( 225 - OFFSET),
-                                    SCALE,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CADegreesToRotation( 225 - OFFSET),
+                                                    SCALE,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 2][ 0]
            options:&options
            context:context];
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CADegreesToRotation( 270 - OFFSET),
-                                    SCALE,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CADegreesToRotation( 270 - OFFSET),
+                                                    SCALE,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 1][ 0]
            options:&options
            context:context];
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CADegreesToRotation( 315 - OFFSET),
-                                    SCALE,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CADegreesToRotation( 315 - OFFSET),
+                                                    SCALE,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 0][ 0]
            options:&options
            context:context];
 #endif
+   return( YES);
 }
 
 

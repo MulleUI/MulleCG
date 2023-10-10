@@ -72,20 +72,14 @@ static void   drawGridInRect( CGContext  *context, CGRect rect)
        { G, G, G, G,  B, B, B, B },
        { G, G, G, G,  B, B, B, B },
    };
-   static MulleUIResourceStorageDefineKey( grid);
+   static MulleUIResourceStorageKeyDefine( grid);
    CGImage   *image;
 
-   // TODO: cache this in context
-   image = [context resourceForKey:MulleUIResourceStorageKey( grid)];
-   if( ! image)
-   {
-      image = [[[CGImage alloc] initWithRGBABytes:imagedata
-                                    bitmapSize:MulleIntegerSizeMake( 8, 8)
-                                  textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
-                                       context:context] autorelease];
-      [context setResource:image
-                    forKey:MulleUIResourceStorageKey( grid)];
-   }
+   image = [context imageWithRGBABytes:imagedata
+                            bitmapSize:MulleIntegerSizeMake( 8, 8)
+                          textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
+                           resourceKey:MulleUIResourceStorageKey( grid)];
+   assert( image);
 
    [image drawRect:rect
            options:NULL
@@ -169,6 +163,11 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
    vg = CGContextGetNVGContext( context);
 
    canvas = [layer canvas];
+//   MulleUICLog( "f: %s b: %s c: %s",
+//                     CGRectUTF8String( [layer frame]),
+//                     CGRectUTF8String( [layer bounds]),
+//                     CGRectUTF8String( [layer canvas]));
+
    CGRectPartitionVerticallyAndHorizontally( CGRectInset( canvas, 8, 8),
                                              CGSizeMake( 8, 8),
                                              3,
@@ -189,7 +188,8 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
 
          [context useDefaultFont];
          mvgFontSize( vg, 12.0f);
-         mvgTextColor( vg, CGColorMakeBlack(), CGColorMakeWhite());
+         mvgTextColor( vg, CGColorMakeBlack());
+         mvgTextBackgroundColor( vg, CGColorMakeWhite());
          mvgFormatInRect( vg, CGRectInset( info, 2, 2),
                               CGContentModeCenterPoint,
                               0,

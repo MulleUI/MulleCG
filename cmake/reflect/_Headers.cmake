@@ -72,7 +72,8 @@ nanovg/src/nanovg.h
 nanovg/src/stb_image.h
 nanovg/src/stb_truetype.h
 src/CGAffineTransform+nanovg.h
-src/CGContext+CGFont.h
+src/CGContextBase.h
+src/CGContext+CGImage.h
 src/CGContext+Drawing.h
 src/CGContext+OpenGL.h
 src/CGContext+Render.h
@@ -88,6 +89,8 @@ src/CGImagePaint+nanovg.h
 src/CGImage.h
 src/CGImage+nanovg.h
 src/CGLayer.h
+src/CGLayoutContext+CGFont.h
+src/CGLayoutContext.h
 src/CGPaint.h
 src/CGPaint+nanovg.h
 src/CGPath.h

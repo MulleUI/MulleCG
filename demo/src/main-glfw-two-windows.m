@@ -52,13 +52,14 @@ static void   drawStuff( CGRect canvas,
    sprintf( buf, "%td", counter);
 
    font = [context fontWithNameUTF8String:"sans"];
-   [context setFont:font];
+   [context useFont:font];
 
    canvas.size.width  *= 3.0;
 
    nvgFontSize( vg, 32);
    nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-   nvgTextColor( vg, CGColorMakeWithHexColor( 0x0000000FF), middleColor);
+   nvgTextColor( vg, CGColorMakeWithHexColor( 0x0000000FF));
+   nvgTextBackgroundColor( vg, middleColor);
    nvgText( vg, CGRectGetMidX( canvas), CGRectGetMidY( canvas), buf, NULL);
 }
 
@@ -210,10 +211,11 @@ static MyWindow   *create_window( unsigned int i,
    hints = GLFW_DEFAULT_CONTEXT;
    switch( [MyWindow defaultBackend])
    {
-   case CG_GL3   : hints = GLFW_GL3_CONTEXT; break;
-   case CG_GL3_2 : hints = GLFW_GL3_2_CONTEXT; break;
-   case CG_GLES2 : hints = GLFW_GLES2_CONTEXT; break;
-   case CG_GLES3 : hints = GLFW_GLES3_CONTEXT; break;
+   case CG_GL3     : hints = GLFW_GL3_CONTEXT; break;
+   case CG_GL3_2   : hints = GLFW_GL3_2_CONTEXT; break;
+   case CG_GLES2   : hints = GLFW_GLES2_CONTEXT; break;
+   case CG_GLES3   : hints = GLFW_GLES3_CONTEXT; break;
+   case CG_GLES3_2 : hints = GLFW_GLES3_2_CONTEXT; break;
    }
 
    window = [[[MyWindow alloc] initWithFrame:CGRectMake( 200 + 200 * i, 200, 200, 200)

@@ -51,49 +51,50 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    // subdivide into 2x2
    CGRectPartition2x2( area, CGSizeMake( 4, 4), rects);
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CGRotationNone,
-                                    CGScaleToFit,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CGRotationNone,
+                                                    CGScaleToFit,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 0][ 0]
            options:&options
            context:context];
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CGRotationNone,
-                                    CGScaleToFit,
-                                    CGFlipHorizontally,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CGRotationNone,
+                                                    CGScaleToFit,
+                                                    CGFlipHorizontally,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 0][ 1]
            options:&options
            context:context];
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CGRotationNone,
-                                    CGScaleToFit,
-                                    CGFlipVertically,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CGRotationNone,
+                                                    CGScaleToFit,
+                                                    CGFlipVertically,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 1][ 0]
            options:&options
            context:context];
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CGRotationNone,
-                                    CGScaleToFit,
-                                    CGFlipBoth,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CGRotationNone,
+                                                    CGScaleToFit,
+                                                    CGFlipBoth,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 1][ 1]
            options:&options
            context:context];
+   return( YES);
 }
 
 

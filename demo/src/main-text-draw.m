@@ -20,10 +20,11 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
    mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( rect), CGRectGetWidth( rect), 1.0, CGColorMakeGray());
    mvgFontSize( vg, 80.0);
-   mvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
+   nvgTextColor( vg, CGColorMakeGreen());
+   nvgTextBackgroundColor( vg, CGColorMakeWhite());
    mvgExtendedAlignedText( vg,
                           " uo xu", // Vya Con",
-                          NULL,
+                          (size_t) -1,
                           CGPointMake( CGRectGetMinX( rect),
                           CGRectGetMaxY( rect)),
                           NVG_ALIGN_RIGHT|NVG_ALIGN_BOTTOM,
@@ -37,12 +38,12 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame = [[window contentPlane] contentRect];
+   frame = [[window contentView] contentRect];
 
    view  = [UIView viewWithFrame:frame];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 }
 
 

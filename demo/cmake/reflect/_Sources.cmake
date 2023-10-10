@@ -39,9 +39,11 @@ src/main-cgimage-section.m
 src/main-cgimage-write.m
 src/main-cglayer-convenient.m
 src/main-cglayer.m
+src/main-cglayoutcontext.m
 src/main-circle-hole.m
 src/main-composite.m
 src/main-custom-paint.m
+src/main-dial.m
 src/main-draw-hole.m
 src/main-draw.m
 src/main-draw-simple2.m
@@ -69,6 +71,7 @@ src/main-paint.m
 src/main-particlelayers.m
 src/main-particles.m
 src/main-particles-sorted.m
+src/main-precompiled.m
 src/main-rect.m
 src/main-rect-pain.m
 src/main-rotate-rect.m
@@ -87,6 +90,7 @@ src/main-text-contentmode.m
 src/main-text-draw.m
 src/main-text-extent.m
 src/main-text.m
+src/main-text-simple.m
 src/main-texture.m
 src/parse_uniform.c
 )

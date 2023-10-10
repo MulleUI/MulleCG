@@ -42,7 +42,8 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger mode)
 
    nvgFontFace( vg, "sans");
    nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
-   nvgTextColor( vg, CGColorMakeBlack(), CGColorMakeWhite());
+   nvgTextColor( vg, CGColorMakeBlack());
+   nvgTextBackgroundColor( vg, CGColorMakeWhite());
    nvgFontSize( vg, 13.0);
    nvgText( vg, CGRectGetMidX( canvas),
                 CGRectGetMidY( canvas),
@@ -107,7 +108,9 @@ static void   fillRect( CALayer *layer, CGContext *context, NSUInteger mode)
 
    nvgFontFace( vg, "sans");
    nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
-   nvgTextColor( vg, CGColorMakeWhite(), CGColorMakeRed());
+   nvgTextColor( vg, CGColorMakeWhite());
+   nvgTextBackgroundColor( vg, CGColorMakeRed());
+
    nvgFontSize( vg, 13.0);
    nvgText( vg, CGRectGetMidX( canvas),
                 CGRectGetMidY( canvas),

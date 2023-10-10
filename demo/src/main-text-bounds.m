@@ -195,7 +195,8 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
          nvgFontSize( vg, 80.0);
 
 
-//         nvgTextColor( vg, CGColorMakeWithRGB( 0.5, 0.5, 0.5), CGColorMakeWhite()); // TODO: use textColor
+//         nvgTextColor( vg, CGColorMakeWithRGB( 0.5, 0.5, 0.5));
+ // TODO: use textColor
 //         nvgText( vg, origin.x, origin.y, s, NULL);
 
          mvgStrokeLineHWithColor( vg, CGRectGetTopLeftPoint( rect), CGRectGetWidth( rect), 1.0, CGColorMakeGray());
@@ -209,10 +210,12 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
 
          nvgFontSize( vg, 80.0);
-         nvgTextColor( vg, CGColorMakeBlack(), CGColorMakeWhite()); // TODO: use textColor
+         nvgTextColor( vg, CGColorMakeBlack());
+         nvgTextBackgroundColor( vg, CGColorMakeWhite());
+ // TODO: use textColor
 
          origin = textOriginForAlignment( rect, alignment);
-         adjust = _mvgTLAdjustmentForVisualBounds( vg, s, NULL, alignment, MVGTextAlignVisually);
+         adjust = _mvgTLAdjustmentForVisualBounds( vg, s, (size_t) -1, alignment, MVGTextAlignVisually);
          nvgText( vg, origin.x + adjust.x, origin.y + adjust.y, s, NULL);
 
          nGlyphs = nvgTextGlyphPositions( vg, origin.x + adjust.x, origin.y + adjust.y, s, NULL, positions, 32);
@@ -225,7 +228,9 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
          sprintf( buf, "align: %s | %s",
                      nvgHAlignmentUTF8String( alignment),
                      nvgVAlignmentUTF8String( alignment));
-         nvgTextColor( vg, CGColorMakeBlack(), CGColorMakeWhite()); // TODO: use textColor
+         nvgTextColor( vg, CGColorMakeBlack());
+         nvgTextBackgroundColor( vg, CGColorMakeWhite());
+ // TODO: use textColor
          nvgText( vg, CGRectGetMinX( rect) + 2, CGRectGetMaxY( rect) - 2, buf, NULL);
       }
       nvgRestore( vg);
@@ -239,12 +244,12 @@ void   setupScene( UIWindow *window)
    UIView        *view;
    CGRect         frame;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
 
    view  = [UIView viewWithFrame:frame];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 }
 
 

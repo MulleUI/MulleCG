@@ -17,7 +17,8 @@ enum CGPathCommand
    CGPathCloseSubpathCommand = 3,
    CGPathWindingCommand      = 4,
    CGPathQuadCommand         = 5,
-   CGPathArcCommand          = 6
+   CGPathArcCommand          = 6,
+   CGPathArcToCommand        = 7
 };
 
 
@@ -55,6 +56,11 @@ struct CGPath     *CGPathCreate( struct mulle_allocator *allocator);
 void   _CGPathInit( struct CGPath *path, struct mulle_allocator *allocator);
 void   _CGPathDone( struct CGPath *path);
 void   CGPathDestroy( struct CGPath *path);
+
+static inline struct mulle_allocator  *_CGPathGetAllocator( struct CGPath *path)
+{
+   return( mulle_floatarray_get_allocator( &path->_floats)); 
+}
 
 
 // should only be set
@@ -163,6 +169,30 @@ static inline void  CGPathAddArcToPoint( CGPathRef path,
 }
 
 
+static inline void  CGPathAddArcWithCenterPoint( CGPathRef path,
+                                                 CGPoint point,
+                                                 CGFloat radius,
+                                                 CAAngle a0,
+                                                 CAAngle a1,
+                                                 int direction)
+{
+   if( ! path)
+      return;
+
+   _mulle_floatarray_guarantee( &path->_floats, 7);
+   _mulle_floatarray_add_guaranteed( &path->_floats, CGPathArcCommand);
+   _mulle_floatarray_add_guaranteed( &path->_floats, point.x);
+   _mulle_floatarray_add_guaranteed( &path->_floats, point.y);
+   _mulle_floatarray_add_guaranteed( &path->_floats, radius);
+   _mulle_floatarray_add_guaranteed( &path->_floats, CAAngleToRadians( a0));
+   _mulle_floatarray_add_guaranteed( &path->_floats, CAAngleToRadians( a1));
+   _mulle_floatarray_add_guaranteed( &path->_floats, (float) direction);
+}
+
+
+
+
+
 static inline void  CGPathAddWinding( CGPathRef path, int value)
 {
    float   v;
@@ -188,15 +218,23 @@ static inline void  CGPathCloseSubpath( CGMutablePathRef path)
 
 
 
-// alternative API: kind of useful if you want to switch via CGPath
-// and nanovg via a pointer
-static inline void  CGPathMoveTo( CGPathRef path, float x, float y)
+// alternative API: 
+static inline struct CGPath   *CGPathCreateMutable( void)
+{
+   return( CGPathCreate( NULL));
+}
+
+
+static inline void  CGPathMoveTo( CGPathRef path, 
+                                  CGAffineTransform *xform,
+                                  float x, float y)
 {
    CGPathMoveToPoint( path, CGPointMake( x, y));
 }
 
 
 static inline void  CGPathAddLineTo( CGPathRef path,
+                                     CGAffineTransform *xform,
                                      float x, float y)
 {
    CGPathAddLineToPoint( path, CGPointMake( x, y));
@@ -204,6 +242,7 @@ static inline void  CGPathAddLineTo( CGPathRef path,
 
 
 static inline void  CGPathAddCurveTo( CGPathRef path,
+                                      CGAffineTransform *xform,
                                       float c1x, float c1y,
                                       float c2x, float c2y,
                                       float x, float y)
@@ -215,8 +254,9 @@ static inline void  CGPathAddCurveTo( CGPathRef path,
 
 
 static inline void  CGPathAddQuadTo( CGPathRef path,
-                                      float cx, float cy,
-                                      float x, float y)
+                                     CGAffineTransform *xform,
+                                     float cx, float cy,
+                                     float x, float y)
 {
    CGPathAddQuadToPoint( path, CGPointMake( cx, cy),
                                CGPointMake( x, y));
@@ -224,6 +264,7 @@ static inline void  CGPathAddQuadTo( CGPathRef path,
 
 
 static inline void  CGPathAddArcTo( CGPathRef path,
+                                    CGAffineTransform *xform,
                                     float cx, float cy,
                                     float x, float y,
                                     float r)
@@ -232,5 +273,21 @@ static inline void  CGPathAddArcTo( CGPathRef path,
                               CGPointMake( x, y),
                               r);
 }
+
+
+static inline void  CGPathAddArc( CGPathRef path,
+                                  CGAffineTransform *xform,
+                                  float cx, float cy,
+                                  float r,
+                                  float a0, float a1,
+                                  int direction)
+{
+   CGPathAddArcWithCenterPoint( path, CGPointMake( cx, cy),
+                                      r,
+                                      CARadiansToAngle( a0),
+                                      CARadiansToAngle( a1),
+                                      direction);
+}
+
 
 #endif

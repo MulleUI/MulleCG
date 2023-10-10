@@ -373,8 +373,9 @@ static void   drawRoundedRect( struct NVGcontext *vg, CGRect canvas, struct Mull
 }
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CALayer *layer, void *_context)
 {
+   CGContext                  *context = _context;
    struct NVGcontext          *vg;
    CGRect                     canvas;
    CGRect                     rect;
@@ -393,9 +394,9 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
          rect   = CGRectIntegral( rects[ j][ i]);
          value  = CGRectGetMinimumSize( rect) / 6;
          if( i == 0)
-            insets = MulleCornerInsetsMake( -value, -value, -value, -value);
+            insets = MulleCornerInsetsMakeWithCornerRadius( -value);
          else
-            insets = MulleCornerInsetsMake( value, value, value, value);
+            insets = MulleCornerInsetsMakeWithCornerRadius( value);
 //         if( j == 1)
 //            rect = CGRectMake( CGRectGetMaxX( rect),
 //                               CGRectGetMaxY( rect),
@@ -416,7 +417,7 @@ int   main( int argc, char *argv[])
    app = [UIApplication sharedInstance];
 
    window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 600, 600)];
-   [[window contentPlane] setDrawCallback:drawStuff];
+   [[window contentView] setDrawCallback:drawStuff];
    [app addWindow:window];
 
    return( [app run]);

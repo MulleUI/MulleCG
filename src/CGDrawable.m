@@ -10,7 +10,7 @@
 CGDrawableOptions   CGDrawableOptionsDefault =
 {
    .alpha             = 1.0f,
-   .cornerRadius      = 0.0f,
+   .cornerInsets      = (MulleCornerInsets) { 0.0f, 0.0f, 0.0f, 0.0f },
    .rotation          = CGRotationNone,
    .scale             = CGScaleNone,
    .flags.flip        = CGFlipNone,
@@ -22,7 +22,7 @@ CGDrawableOptions   CGDrawableOptionsDefault =
 CGDrawableOptions   CGDrawableOptionsScaleToFit =
 {
    .alpha             = 1.0f,
-   .cornerRadius      = 0.0f,
+   .cornerInsets      = (MulleCornerInsets) { 0.0f, 0.0f, 0.0f, 0.0f },
    .rotation          = CGRotationNone,
    .scale             = CGScaleToFit,
    .flags.flip        = CGFlipNone,
@@ -485,7 +485,7 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
                                     options->alpha);
 
    mvgBeginPath( vg);
-   mvgRoundedRect( vg, rect, options->cornerRadius);
+   mvgRoundedRectVarying( vg, rect, options->cornerInsets);
    mvgFillPaint( vg, imgPaint);
    mvgFill( vg);
 }

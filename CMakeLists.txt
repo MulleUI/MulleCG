@@ -12,7 +12,7 @@ list( INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake")
 
 include( Environment)
 
-add_compile_definitions( NANOVG_CLEARTYPE
+add_compile_definitions(
 FONS_USE_FREETYPE
 FT_CONFIG_OPTION_SUBPIXEL_RENDERING
 NANOVG_EXTENSION_SOURCE="nanovg-extensions.inc"
