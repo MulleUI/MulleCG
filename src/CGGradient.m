@@ -227,11 +227,30 @@
 @implementation CGGradient
 
 
-static id   CGGradientCreateWithColors( CGColor *colors,
-                                        CGFloat *locations,
-                                        NSUInteger count,
+
+static id   CGGradientNewWithStartColorAndEndColor(
+                                        CGColor startColor,
+                                        CGColor endColor,
                                         CARotation rotation)
 {
+   if( CGColorEqualToColor( startColor, endColor))
+      return( [_CGMonoColor newWithColor:startColor]);
+
+   return( [_CGTwoColorGradient newWithStartColor:startColor
+                                         endColor:endColor
+                                         rotation:rotation]);
+}
+
+
+static id   CGGradientNewWithColors( CGColor *colors,
+                                     CGFloat *locations,
+                                     NSUInteger count,
+                                     CARotation rotation)
+{
+   // basic simplification, could do more though
+   if( count == 2 && CGColorEqualToColor( colors[ 0], colors[ 1]))
+      count = 1;
+
    switch( count)
    {
    case 0  : return( nil);
@@ -252,7 +271,7 @@ static id   CGGradientCreateWithColors( CGColor *colors,
                               count:(NSUInteger) count
                            rotation:(CARotation) rotation
 {
-   return( CGGradientCreateWithColors( colors, locations, count, rotation));
+   return( [CGGradientNewWithColors( colors, locations, count, rotation) autorelease]);
 }
 
 
@@ -260,7 +279,7 @@ static id   CGGradientCreateWithColors( CGColor *colors,
                           locations:(CGFloat *) locations
                               count:(NSUInteger) count
 {
-   return( CGGradientCreateWithColors( colors, locations, count, 0.0f));
+   return( [CGGradientNewWithColors( colors, locations, count, 0.0f) autorelease]);
 }
 
 
@@ -268,18 +287,16 @@ static id   CGGradientCreateWithColors( CGColor *colors,
                                endColor:(CGColor) endColor
                                rotation:(CARotation) rotation
 {
-   return( [[_CGTwoColorGradient newWithStartColor:startColor
-                                          endColor:endColor
-                                          rotation:rotation] autorelease]);
+   return( [CGGradientNewWithStartColorAndEndColor( startColor,
+                                                    endColor,
+                                                    rotation) autorelease]);
 }
 
 
 + (instancetype) gradientWithStartColor:(CGColor) startColor
                                endColor:(CGColor) endColor
 {
-   return( [[_CGTwoColorGradient newWithStartColor:startColor
-                                          endColor:endColor
-                                          rotation:0.0f] autorelease]);
+   return( [CGGradientNewWithStartColorAndEndColor( startColor, endColor, 0.0f) autorelease]);
 }
 
 
@@ -288,7 +305,7 @@ static id   CGGradientCreateWithColors( CGColor *colors,
                           count:(NSUInteger) count
                        rotation:(CARotation) rotation
 {
-   return( CGGradientCreateWithColors( colors, locations, count, rotation));
+   return( CGGradientNewWithColors( colors, locations, count, rotation));
 }
 
 
@@ -296,18 +313,18 @@ static id   CGGradientCreateWithColors( CGColor *colors,
                            endColor:(CGColor) endColor
                            rotation:(CARotation) rotation
 {
-   return( [_CGTwoColorGradient newWithStartColor:startColor
-                                         endColor:endColor
-                                        rotation:rotation]);
+   return( CGGradientNewWithStartColorAndEndColor( startColor,
+                                                   endColor,
+                                                   rotation));
 }
 
 
 - (instancetype) initWithStartColor:(CGColor) startColor
                            endColor:(CGColor) endColor
 {
-   return( [_CGTwoColorGradient newWithStartColor:startColor
-                                         endColor:endColor
-                                         rotation:0.0]);
+   return( CGGradientNewWithStartColorAndEndColor( startColor,
+                                                   endColor,
+                                                   0.0f));
 }
 
 
@@ -315,8 +332,17 @@ static id   CGGradientCreateWithColors( CGColor *colors,
                       locations:(CGFloat *) locations
                           count:(NSUInteger) count
 {
-   return( CGGradientCreateWithColors( colors, locations, count, 0.0f));
+   return( CGGradientNewWithColors( colors, locations, count, 0.0f));
 }
+
+
+// init w/o colors makes no sense
+- (instancetype) init
+{
+   [self release];
+   return( nil);
+}
+
 
 
 - (id) copy 

@@ -9,14 +9,23 @@
  *
  *      mulle-sde environment set MULLE_MATCH_TO_C_RUN DISABLE
  */
+#ifndef mulle_c_g_provide_h__
+#define mulle_c_g_provide_h__
+
+
 #include "nanovg.h"
+#include "CGAffineTransform+nanovg.h"
+#include "CGPath.h"
+#include "CGPath+nanovg.h"
 #include "microvg.h"
 #include "microvg-nanowrap.h"
-#include "nanovg-extensions.inc"
 #include "CGColor.h"
 #include "mulle-color.h"
 #include "nanovg+UTF8String.h"
 //
-// MULLE_MATCH_TO_C_IGNORE_HEADERS=fontstash.h:nanovg_gl.h:nanovg_gl_utils.h:stb_image.h:stb_truetype.h
+// MULLE_MATCH_TO_C_IGNORE_HEADERS=fontstash.h:nanovg_gl.h:nanovg_gl_utils.h:stb_image.h:stb_truetype.h:nanovg-extensions.inc
 //
-// MULLE_MATCH_TO_C_C_HEADERS=CGColor.h
+// MULLE_MATCH_TO_C_C_HEADERS=CGColor.h:CGPath+nanovg.h:CGPath.h:CGAffineTransform+nanovg.h
+
+
+#endif

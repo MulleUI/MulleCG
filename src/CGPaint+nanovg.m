@@ -8,9 +8,37 @@
 #import "CGContext.h"
 #include "microvg.h"
 
+#import "CGGradient.h"
+#import "CGPaint+Private.h"
 
 // why is this good ?
 // #define NIL_PAINT_DRAWS_BLACK
+
+
+@implementation _CGMonoColor( nanovg)
+
+- (void) strokeWithBounds:(CGRect) rect
+              strokeWidth:(CGFloat) strokeWidth
+               NVGcontext:(NVGcontext *) vg
+{
+   if( strokeWidth <= 0.0f)
+      return;
+
+   mvgStrokeColor( vg, _color);
+   mvgStrokeWidth( vg, strokeWidth);
+   mvgStroke( vg);
+}
+
+
+- (void) fillWithBounds:(CGRect) rect
+             NVGcontext:(NVGcontext *) vg
+{
+   mvgFillColor( vg, _color);
+   mvgFill( vg);
+}
+
+@end
+
 
 
 @implementation CGPaint( nanovg)
@@ -20,6 +48,9 @@
                NVGcontext:(NVGcontext *) vg
 {
    NVGpaint     paint;
+
+   if( strokeWidth <= 0.0f)
+      return;
 
    rect  = CGRectExtrude( rect, strokeWidth / 2.0f, strokeWidth / 2.0f);
    paint = [self NVGpaintWithBounds:rect
@@ -59,6 +90,17 @@ static void   fillWithBoundsAndPaint( NVGcontext *vg,
    [paint fillWithBounds:rect
              NVGcontext:vg];
 
+}
+
+
+void   mvgFillRoundedRectVaryingWithPaint( NVGcontext *vg,
+                                           CGRect rect,
+                                           MulleCornerInsets cornerInsets,
+                                           CGPaint *paint)
+{
+   mvgBeginPath( vg);
+   mvgRoundedRectVarying( vg, rect, cornerInsets);
+   fillWithBoundsAndPaint( vg, rect, paint);
 }
 
 
@@ -102,6 +144,9 @@ static void   strokeWithBoundsAndPaint( NVGcontext *vg,
                                         CGFloat strokeWidth,
                                         CGPaint *paint)
 {
+   if( strokeWidth <= 0.0f)
+      return;
+
 #ifdef NIL_PAINT_DRAWS_BLACK
    if( ! paint)
    {
@@ -115,6 +160,18 @@ static void   strokeWithBoundsAndPaint( NVGcontext *vg,
    [paint strokeWithBounds:rect
                strokeWidth:strokeWidth
                 NVGcontext:vg];
+}
+
+
+void   mvgStrokeRoundedRectVaryingWithPaint( NVGcontext *vg,
+                                             CGRect rect,
+                                             MulleCornerInsets cornerInsets,
+                                             CGFloat strokeWidth,
+                                             CGPaint *paint)
+{
+   mvgBeginPath( vg);
+   mvgRoundedRectVarying( vg, rect, cornerInsets);
+   strokeWithBoundsAndPaint( vg, rect, strokeWidth, paint);
 }
 
 

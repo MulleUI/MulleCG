@@ -42,12 +42,13 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    vg      = CGContextGetNVGContext( context);
 
    [context useDefaultFont];  // default
-   nvgTextColor( vg, CGColorMakeWhite(), CGColorMakeGray());
+   nvgTextColor( vg, CGColorMakeWhite());
+   nvgTextBackgroundColor( vg, CGColorMakeGray());
    nvgFontSize( vg, 14.0);
    sprintf( buf, "frame: %ld", frameNr);
    mvgExtendedAlignedText( vg,
                            buf,
-                           NULL,
+                           (size_t) -1,
                            canvas.origin,
                            CGContentModeLeft|CGContentModeTop,
                            MVGTextAlignVisually);
@@ -162,23 +163,24 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
          [context useDefaultFont];  // default
          textRect = CGRectInset( rect, 10, 10);
          nvgFontSize( vg, 14.0);
-         nvgTextColor( vg, CGColorMakeBlack(), CGColorMakeGreen());
+         nvgTextColor( vg, CGColorMakeBlack());
+         nvgTextBackgroundColor( vg, CGColorMakeGreen());
 
          sprintf( buf, "feather: %g", feather);
          mvgTextInRect( vg, buf,
-                        NULL,
+                        (size_t) -1,
                         CGRectMake( textRect.origin.x, textRect.origin.y + 20, textRect.size.width, 20),
                         CGContentModeLeft,
                         MVGTextAlignVisually);
          sprintf( buf, "gradientRect: %s", CGRectUTF8String( gradientRect));
          mvgTextInRect( vg, buf,
-                        NULL,
+                        (size_t) -1,
                         CGRectMake( textRect.origin.x, textRect.origin.y + 40, textRect.size.width, 20),
                         CGContentModeLeft,
                         MVGTextAlignVisually);
          sprintf( buf, "drawRect: %s", CGRectUTF8String( drawRect));
          mvgTextInRect( vg, buf,
-                        NULL,
+                        (size_t) -1,
                         CGRectMake( textRect.origin.x, textRect.origin.y + 60, textRect.size.width, 20),
                         CGContentModeLeft,
                         MVGTextAlignVisually);

@@ -9,6 +9,10 @@
  *
  *      mulle-sde environment set MULLE_MATCH_TO_C_RUN DISABLE
  */
+#ifndef demos_provide_h__
+#define demos_provide_h__
+
+
 #include "bitmap2.inc"
 #include "bitmap.inc"
 #include "blur.frag.inc"
@@ -17,3 +21,6 @@
 #include "rect.vert.inc"
 #include "simple.frag.inc"
 #include "texture.frag.inc"
+
+
+#endif

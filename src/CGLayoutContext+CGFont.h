@@ -14,30 +14,28 @@
 #import "CGFont.h"
 
 
-@interface CGContext( CGFont)
+@interface CGLayoutContext( CGFont)
 
-- (void) setFont:(CGFont *) font;
 
 - (CGFont *) fallbackFont;
 - (CGFont *) fontWithNameUTF8String:(char *) s;
-- (CGFloat) fontScale;
 - (CGFont *) defaultFont;
 
 - (void) _initFontCache;
 - (void) _doneFontCache;
 - (void) _resetFontCache;
 
-- (void) useFontWithNameUTF8String:(char *) name;
-- (void) useDefaultFont;
-
 /*
- * Fill fontCache with fonts, don't use during draws as it does I/O
+ * Fill fontCache with fonts, preferably don't use during draws as it does I/O
+ * though once loaded the font is cached by the CGContext
  */
-- (void) addFontWithContentsOfFileWithFileRepresentationString:(char *) filename
-                                            fontNameUTF8String:(char *) name;
-- (void) addFontWithCData:(struct mulle_data) data
-       fontNameUTF8String:(char *) name;
+- (CGFont *) fontWithContentsOfFileWithFileRepresentationString:(char *) filename
+                                             fontNameUTF8String:(char *) name;
+- (CGFont *) fontWithCData:(struct mulle_data) data
+        fontNameUTF8String:(char *) name;
 
+// useFont: is obsolete
+- (void) useFont:(CGFont *) font;
 
 //
 // these will return either a FT_Face as a void * or a pointer to stbtt_fontinfo

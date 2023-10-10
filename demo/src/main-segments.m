@@ -295,9 +295,11 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
 
    nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
    nvgGlobalAlpha( vg, 0.8);
-   nvgTextColor( vg, CGColorMakeWhite(), CGColorMakeBlack());
+   nvgTextColor( vg, CGColorMakeWhite());
+   nvgTextBackgroundColor( vg, CGColorMakeBlack());
+
    mvgTextInRect( vg, iconText,
-                      NULL,
+                      (size_t) -1,
                       iconRect,
                       CGContentModeScaleAspectFit,
                       MVGTextAlignVisually);
@@ -366,14 +368,14 @@ void MulleUISegmentedButtonLayoutInit( struct MulleUISegmentedButtonLayout *p,
    p->outerCornerRadius   = CGSizeGetMinimum( p->outerRect.size) / 2.0;
 
    horw                   = CGSizeGetMinimum( p->outerRect.size);
-   horw                   = CGFloatClampToMinMax( horw, 10.0f, 60.0f);
+   horw                   = CGFloatClamp( horw, 10.0f, 60.0f);
 
    p->innerThickness      = roundf( horw / 15.0);
    p->innerRect           = CGRectInset( p->outerRect, p->innerThickness, p->innerThickness);
    p->innerCornerRadius   = CGSizeGetMinimum( p->innerRect.size) / 2.0;
 
    horw                   = CGSizeGetMinimum( p->innerRect.size);
-   horw                   = CGFloatClampToMinMax( horw, 10.0f, 60.0f);
+   horw                   = CGFloatClamp( horw, 10.0f, 60.0f);
 
    p->contentThickness    = roundf( horw / 30.0f);
    p->contentRect         = CGRectInset( p->innerRect, p->contentThickness, p->contentThickness);
@@ -584,11 +586,11 @@ void   setupScene( UIWindow *window)
 
    view  = [UIView viewWithFrame:CGRectMake( 20, 20, 300, 100)];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff2];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 
    view  = [UIView viewWithFrame:CGRectMake( 340, 20, 300, 100)];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff1];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 }
 
 

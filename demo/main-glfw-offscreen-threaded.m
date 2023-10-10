@@ -53,13 +53,14 @@ static void   drawStuff( CGRect canvas,
    sprintf( buf, "%td", counter);
 
    font = [context fontWithNameUTF8String:"sans"];
-   [context setFont:font];
+   [context useFont:font];
 
    canvas.size.width  *= 3.0;
 
    nvgFontSize( vg, 32);
    nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-   nvgTextColor( vg, CGColorMakeWithHexColor( 0x0000000FF), middleColor);
+   nvgTextColor( vg, CGColorMakeWithHexColor( 0x0000000FF));
+   nvgTextBackgroundColor( vg, middleColor);
    nvgText( vg, CGRectGetMidX( canvas), CGRectGetMidY( canvas), buf, NULL);
 }
 

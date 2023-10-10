@@ -43,12 +43,12 @@ export MULLE_SOURCETREE_RESOLVE_TAG="NO"
 #
 #
 #
-export MULLE_MATCH_TO_C_C_HEADERS="CGColor.h"
+export MULLE_MATCH_TO_C_C_HEADERS="CGColor.h:CGPath+nanovg.h:CGPath.h:CGAffineTransform+nanovg.h"
 
 
 #
 #
 #
-export MULLE_MATCH_TO_C_IGNORE_HEADERS="fontstash.h:nanovg_gl.h:nanovg_gl_utils.h:stb_image.h:stb_truetype.h"
+export MULLE_MATCH_TO_C_IGNORE_HEADERS="fontstash.h:nanovg_gl.h:nanovg_gl_utils.h:stb_image.h:stb_truetype.h:nanovg-extensions.inc"
 
 

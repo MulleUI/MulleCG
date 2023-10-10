@@ -98,9 +98,10 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
             [context useFontWithNameUTF8String:"sans"];
             mvgFontSize( vg, 12);
-            mvgTextColor( vg, CGColorMakeWhite(), CGColorMakeWithRGBA( 0.33, 0.33, 0.33, 1.0));
+            mvgTextColor( vg, CGColorMakeWhite());
+            mvgTextBackgroundColor( vg, CGColorMakeWithRGBA( 0.33, 0.33, 0.33, 1.0));
             sprintf( buf, "%.1f°", CAAngleToDegrees( angle));
-            mvgTextInRect( vg, buf, NULL, rect, CGContentModeLeft, MVGTextAlignVisually);
+            mvgTextInRect( vg, buf, (size_t) -1, rect, CGContentModeLeft, MVGTextAlignVisually);
          }
          mvgRestore( vg);
       }
@@ -114,10 +115,10 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 }
 
 

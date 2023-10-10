@@ -236,9 +236,10 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
 
    nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
    nvgGlobalAlpha( vg, 0.8);
-   nvgTextColor( vg, CGColorMakeWhite(), CGColorMakeBlack());
+   nvgTextColor( vg, CGColorMakeWhite());
+   nvgTextBackgroundColor( vg, CGColorMakeBlack());
    mvgTextInRect( vg, iconText,
-                      NULL,
+                      (size_t) -1,
                       iconRect,
                       CGContentModeScaleAspectFit,
                       MVGTextAlignVisually);
@@ -282,7 +283,7 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
        * inner
        */
       horw      = CGSizeGetMinimum( contentRect.size);
-      horw      = CGFloatClampToMinMax( horw, 10.0f, 60.0f);
+      horw      = CGFloatClamp( horw, 10.0f, 60.0f);
       thickness = roundf( horw / 15.0);
       innerRect = CGRectInset( contentRect, thickness, thickness);
 
@@ -359,10 +360,10 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawStepper];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] setDrawCallback:(CALayerDrawCallback_t *) drawStepper];
+   [[window contentView] addSubview:view];
 }
 
 

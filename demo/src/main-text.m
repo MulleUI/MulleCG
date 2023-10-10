@@ -8,31 +8,59 @@
 #define LOOP         1
 #define TEXT         "Der VfL Bochum hat den zweiten Sieg in Folge gefeiert."
 
+#define TEXT_COLOR   CGColorMakeBlack()
+
+static char   *fontFilename;
 
 static BOOL   drawStuff( CALayer *layer, CGContext *context)
 {
-   struct MulleLayout   layout;
+   BOOL                 useClearType;
    CGFloat              height;
-   CGRect               rect;
-   struct NVGcontext    *vg;
-   CGRect               canvas;
    CGFont               *font;
-   void                 *fonsContext;
    CGPoint              point;
-   int                  atlas_w;
+   CGRect               canvas;
+   CGRect               rect;
+   float                factor;
    int                  atlas_h;
+   int                  atlas_w;
    int                  i;
+   struct MulleLayout   layout;
+   struct NVGcontext    *vg;
+   void                 *fonsContext;
+   char                 *fontName;
 
-   font   = [context fontWithNameUTF8String:"sans"];
+   if( fontFilename)
+   {
+      fontName = "custom";
+      font     = [context fontWithContentsOfFileWithFileRepresentationString:fontFilename
+                                                          fontNameUTF8String:fontName];
+   }
+   else 
+   {
+      fontName = "sans";
+      font     = [context fontWithNameUTF8String:fontName];
+   }
+
+   if( ! font)
+   {
+      MulleUICLog( "Could not load font \"%s\"", fontName);
+      abort();;
+   }
+   [context useFont:font];
    canvas = [layer canvas];
 
-   MulleLayoutInit( &layout, canvas, MulleEdgeInsetsZero);
+   MulleLayoutInit( &layout, CGRectInset( canvas, 30, 30), MulleEdgeInsetsZero);
 
    vg = CGContextGetNVGContext( context);
 
-   nvgFontFace( vg, "sans");
+   mvgFillRectWithColor( vg, canvas, CGColorInvertRGB( TEXT_COLOR));
+
+   factor       = CGContextGetLinearAnimationFactor( context, 15.0f);
+   useClearType = factor >= 0.5f;
+   nvgClearType( vg, useClearType);
+
    nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
-   nvgTextColor( vg, nvgRGBA( 0, 0, 0, 0xFF), nvgRGBA( 0xFF, 0xFF, 0xFF, 0xFF)); // TODO: use textColor
+   nvgTextColor( vg, TEXT_COLOR);
 
    for( height = MIN_HEIGHT;; height = height >= MAX_HEIGHT ? MAX_HEIGHT : height + 1)
    {
@@ -56,62 +84,37 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 #endif
 
       nvgFontSize( vg, height);
-      nvgText( vg, rect.origin.x + 0.5,
-                   rect.origin.y,
-                   TEXT,
-                   NULL);
+      nvgText( vg, rect.origin.x, rect.origin.y, TEXT, NULL);
 
       if( ! LOOP)
          break;
    }
+
+   [context useDefaultFont];
+   nvgClearType( vg, 0);
+   nvgFontFace( vg, "sans");
+   nvgFontSize( vg, 13.0f);   if( useClearType)
+      nvgTextColor( vg, CGColorMakeRandomOpaque());
+   else
+      nvgTextColor( vg, CGColorMakeDarkGray());
+   nvgText( vg, CGRectGetMinX( canvas) + 15.0,
+                CGRectGetMaxY( canvas) - 15.0,
+                useClearType ? "ClearType" : "Default",
+                NULL);
+
    return( YES);
 }
 
 
-void   setupScene( UIWindow *window)
-{
-   UIView        *view;
-   CGRect         frame;
-   UIEdgeInsets   insets;
-
-   frame  = [[window contentPlane] contentRect];
-
-   insets = UIEdgeInsetsMake( 30, 30, 30, 30);
-   frame  = UIEdgeInsetsInsetRect( frame, insets);
-
-   view  = [UIView viewWithFrame:frame];
-   [view setMargins:insets];
-   [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
-   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
-}
-
 
 int   main( int argc, char *argv[])
 {
-   UIApplication   *app;
-   UIWindow        *window;
-   NSUInteger      styleMask;
-
-   app = [UIApplication sharedInstance];
-
-   @autoreleasepool
-   {
-      styleMask = UIWindowStyleMaskDefault;
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
-
-      window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 800, 600)
-                         titleUTF8String:"Demo"
-                               styleMask:styleMask];
-
-      assert( window);
-      [window setBackgroundColor:CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 1.0)];
-      setupScene( window);
-
-      [app addWindow:window];
-   }
-   return( [app run]);
+   if( argc > 1)
+      fontFilename = argv[ 1];
+   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+                                           CGSizeMake( 640, 400),
+                                           NULL,
+                                           5.0f));
 }
 
 

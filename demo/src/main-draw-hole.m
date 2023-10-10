@@ -139,10 +139,11 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
             reverse ? "r" : "n");
 
          [context useDefaultFont];
-         mvgTextColor( vg, CGColorMakeGray(), CGColorMakeWhite());
+         mvgTextColor( vg, CGColorMakeGray());
+         mvgTextBackgroundColor( vg, CGColorMakeWhite());
          mvgTextInRect( vg,
                         buf,
-                        NULL,
+                        (size_t) -1,
                         CGRectInset( rect, 4, 4),
                         CGContentModeCenterPoint,
                         0);

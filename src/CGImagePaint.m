@@ -62,5 +62,9 @@
                                     rotation:rotation + _rotation]);
 }
 
+- (BOOL) isTexture
+{
+   return( YES);
+}
 
 @end

@@ -112,7 +112,7 @@ int   main( int argc, char *argv[])
                             styleMask:UIWindowOpenGLDeprecated];
    if( ! window)
    {
-      fprintf( stderr, "Need OpenGL for this demo\n");
+      fprintf( stderr, "Need OpenGL (Not OpenGLES) for this demo\n");
       return( 1);
    }
 

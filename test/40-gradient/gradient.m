@@ -41,11 +41,12 @@ int   main( int argc, char *argv[])
 
    gradient = [CGGradient object];
    test_gradient( gradient, "none");
-   gradient = [CGGradient gradientWithColor:CGColorMakeBlueViolet()];
+   gradient = [CGGradient gradientWithStartColor:CGColorMakeBlueViolet()
+                                        endColor:CGColorMakeBlueViolet()];
    test_gradient( gradient, "one");
 
-   gradient = [CGGradient gradientWithStartColor:CGColorMakeWhite()
-                                        endColor:CGColorMakeGray()];
+   gradient = [CGGradient gradientWithStartColor:CGColorMakeGray()
+                                        endColor:CGColorMakeWhite()];
    test_gradient( gradient, "two");
 
    gradient = [CGGradient gradientWithColors:colorList

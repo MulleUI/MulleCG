@@ -58,13 +58,13 @@ static void   drawBitmap2( CALayer *layer, CGContext *context)
    CGRectPartitionIntoRowsAndColumns( CGRectMake( 0, 0, 32, 32), CGSizeMake( 0, 0), 3, 3, (CGRect *) sections);
 
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CGRotationNone,
-                                    CGScaleToFit,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CGRotationNone,
+                                                    CGScaleToFit,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
 
    // extend middle
    assert( COLUMNS == 4);
@@ -88,10 +88,10 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawBitmap2];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] setDrawCallback:(CALayerDrawCallback_t *) drawBitmap2];
+   [[window contentView] addSubview:view];
 }
 
 

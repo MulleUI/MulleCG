@@ -92,10 +92,11 @@ int   main( int argc, char *argv[])
       hints = GLFW_DEFAULT_CONTEXT;
       switch( [MyWindow defaultBackend])
       {
-      case CG_GL3   : hints = GLFW_GL3_CONTEXT; break;
-      case CG_GL3_2 : hints = GLFW_GL3_2_CONTEXT; break;
-      case CG_GLES2 : hints = GLFW_GLES2_CONTEXT; break;
-      case CG_GLES3 : hints = GLFW_GLES3_CONTEXT; break;
+      case CG_GL3     : hints = GLFW_GL3_CONTEXT; break;
+      case CG_GL3_2   : hints = GLFW_GL3_2_CONTEXT; break;
+      case CG_GLES2   : hints = GLFW_GLES2_CONTEXT; break;
+      case CG_GLES3   : hints = GLFW_GLES3_CONTEXT; break;
+      case CG_GLES3_2 : hints = GLFW_GLES3_2_CONTEXT; break;
       }
 
       window = [[[MyWindow alloc] initWithFrame:CGRectMake( 0, 0, 200, 200)

@@ -24,7 +24,9 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
    nvgFontFace( vg, "sans");
    nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
-   nvgTextColor( vg, nvgRGBA( 0, 0, 0, 0xFF), nvgRGBA( 0xFF, 0xFF, 0xFF, 0xFF)); // TODO: use textColor
+   nvgTextColor( vg, nvgRGBA( 0, 0, 0, 0xFF));
+   nvgTextBackgroundColor( vg, nvgRGBA( 0xFF, 0xFF, 0xFF, 0xFF));
+ // TODO: use textColor
 
    nvgFontSize( vg, 20.0);
    nvgText( vg, rect.origin.x,
@@ -69,7 +71,7 @@ void   setupScene( UIWindow *window)
    CGRect         frame;
    UIEdgeInsets   insets;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
 
    insets = UIEdgeInsetsMake( 30, 30, 30, 30);
    frame  = UIEdgeInsetsInsetRect( frame, insets);
@@ -78,7 +80,7 @@ void   setupScene( UIWindow *window)
    [view setMargins:insets];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 }
 
 

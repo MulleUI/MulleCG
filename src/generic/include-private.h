@@ -21,7 +21,7 @@
 
 #include "_MulleCGBackend.h"
 
-#if MULLE_CG_GLVERSION == MULLE_CG_GL
+#if MULLE_CG_GLVERSION == MULLE_CG_GL3_2 || MULLE_CG_GLVERSION == MULLE_CG_GL3
 // GLFW_INCLUDE_... keep undefined for OpenGL3
 // see: https://www.glfw.org/docs/latest/build_guide.html
 # define GL_GLEXT_PROTOTYPES
@@ -47,6 +47,20 @@
 # include <GLES3/gl3ext.h>
 #endif
 
+
+#if MULLE_CG_GLVERSION == MULLE_CG_GLES3_2
+# define GL_GLEXT_PROTOTYPES
+# include <GLES3/gl32.h>
+# include <GLES3/gl3ext.h>
+// no idea why this is not defined in GLES3/gl32.h
+# ifndef GL_MULTISAMPLE
+# define GL_MULTISAMPLE  0x809D
+# endif
+#endif
+
+#ifndef GL_GLEXT_PROTOTYPES
+# error "MULLE_CG_GLVERSION is undefined or defined with unknown value"
+#endif
 
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"

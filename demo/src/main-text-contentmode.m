@@ -91,10 +91,12 @@ static CGRect   drawLabelBelowRect( struct NVGcontext *vg, float fontSize, char 
                            rect.size.width,
                            fontSize + 4.0);
    nvgFontSize( vg, fontSize);
-   nvgTextColor( vg, CGColorMakeGray(), CGColorMakeWhite());
+   nvgTextColor( vg, CGColorMakeGray());
+   nvgTextBackgroundColor( vg, CGColorMakeWhite());
+
    mvgTextInRect( vg,
                   s,
-                  NULL,
+                  (size_t) -1,
                   rectBelow,
                   CGContentModeCenterPoint,
                   0);
@@ -128,10 +130,11 @@ static void   drawStuff1( CALayer *layer, CGContext *context)
                                 1.0,
                                 CGColorMakeGray());
    nvgFontSize( vg, 20.0);
-   nvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
+   nvgTextColor( vg, CGColorMakeGreen());
+   nvgTextBackgroundColor( vg, CGColorMakeWhite());
    mvgTextInRect( vg,
                   s,
-                  NULL,
+                  (size_t) -1,
                   rect,
                   CGContentModeScaleToFill,
                   MVGTextAlignVisually);
@@ -173,10 +176,11 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
                                    1.0,
                                    CGColorMakeGray());
       nvgFontSize( vg, 20.0);
-      nvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
+      nvgTextColor( vg, CGColorMakeGreen());
+      nvgTextBackgroundColor( vg, CGColorMakeWhite());
 
       for( j = 0; j < N_CONTENT_MODES; j++)
-         mvgTextInRect( vg, s, NULL, rects[ i][ 0], contentMode[ j], alignMode[ i]);
+         mvgTextInRect( vg, s, (size_t) -1, rects[ i][ 0], contentMode[ j], alignMode[ i]);
    }
 
 #endif
@@ -201,8 +205,9 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
                                       CGColorMakeGray());
 
          nvgFontSize( vg, 10.0);
-         nvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
-         mvgTextInRect( vg, s, NULL, small_rects[ j][ k], contentMode2[ j], alignMode[ k]);
+         nvgTextColor( vg, CGColorMakeGreen());
+         nvgTextBackgroundColor( vg, CGColorMakeWhite());
+         mvgTextInRect( vg, s, (size_t) -1, small_rects[ j][ k], contentMode2[ j], alignMode[ k]);
       }
    }
 #endif
@@ -230,8 +235,9 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
                                       CGColorMakeGray());
 
          nvgFontSize( vg, 10.0);
-         nvgTextColor( vg, CGColorMakeGreen(), CGColorMakeWhite());
-         mvgTextInRect( vg, s, NULL, small_rects[ j][ k], contentMode[ i], MVGTextFill|MVGTextAlignVisually);
+         nvgTextColor( vg, CGColorMakeGreen());
+         nvgTextBackgroundColor( vg, CGColorMakeWhite());
+         mvgTextInRect( vg, s, (size_t) -1, small_rects[ j][ k], contentMode[ i], MVGTextFill|MVGTextAlignVisually);
       }
    }
 }
@@ -242,12 +248,12 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
 
    view  = [UIView viewWithFrame:frame];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff2]; // drawStuff1];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 }
 
 

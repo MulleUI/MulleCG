@@ -230,7 +230,8 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
 found:
    vg = CGContextGetNVGContext( context);
    mvgFontSize( vg, 12.0f);
-   mvgTextColor( vg, CGColorMakeBlack(), CGColorMakeWhite());
+   nvgTextColor( vg, CGColorMakeBlack());
+   nvgTextBackgroundColor( vg, CGColorMakeWhite());
    if( [context buttonStates])
       mvgFormatInRect( vg, CGRectInset( info, 2, 2),
                            CGContentModeLeft,

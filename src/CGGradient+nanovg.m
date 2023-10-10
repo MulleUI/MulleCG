@@ -150,6 +150,9 @@ void   mvgStrokeCircleWithGradient( NVGcontext *vg,
                                     CGFloat strokeWidth,
                                     CGGradient *gradient)
 {
+   if( strokeWidth <= 0.0f)
+      return;
+
    mvgBeginPath( vg);
    {
       mvgCircle( vg, circle);
@@ -227,6 +230,9 @@ void   mvgStrokeRoundedRectWithLinearGradient( NVGcontext *vg,
 {
    NVGpaint     paint;
 
+   if( strokeWidth <= 0.0f)
+      return;
+
    mvgBeginPath( vg);
    mvgRoundedRect( vg, rect, cornerRadius);
 
@@ -255,6 +261,9 @@ void   mvgStrokeRoundedRectWithRectangularLinearGradient( NVGcontext *vg,
                                                           CGGradient *gradient)
 {
    NVGpaint     paint;
+
+   if( strokeWidth <= 0.0f)
+      return;
 
    mvgBeginPath( vg);
    mvgRoundedRect( vg, rect, cornerRadius);

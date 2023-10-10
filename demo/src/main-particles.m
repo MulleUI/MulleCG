@@ -244,7 +244,7 @@ int   main()
 
    [window setBackgroundColor:CGColorMakeWithRGBA( 0.0, 0.0, 0.0, 1.0)];
    [window setFrameRate:UIWindowFrameRateSynced];
-   setupSceneInView( [window contentPlane]);
+   setupSceneInView( [window contentView]);
 
    [window setFrameDelegate:[MulleUIPerf object]];
 

@@ -47,6 +47,7 @@ typedef struct NVGcolor   CGColor;
 #include <mulle-container/mulle-container.h>
 #include <mulle-geometry/mulle-geometry.h>
 #include "CGColor.h"
+#include <MulleUIBase/_MulleUIBase-provide.h>
 
 #endif
 

@@ -78,8 +78,9 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
             // draw label
             sprintf( buf, "%s %g-%g", dir == NVG_CW ? "CW" : "CCW",
                                     start, end);
-            nvgTextColor( vg, CGColorMakeBlack(), CGColorMakeWhite());
-            mvgTextInRect( vg, buf, NULL, bottomRect, CGContentModeCenterPoint, 0);
+            nvgTextColor( vg, CGColorMakeBlack());
+            nvgTextBackgroundColor( vg, CGColorMakeWhite());
+            mvgTextInRect( vg, buf, (size_t) -1, bottomRect, CGContentModeCenterPoint, 0);
 
             // draw arc
             // mvgMoveTo( vg, CGRectGetTopPoint( topRect));
@@ -153,7 +154,7 @@ static void   usage( void)
 "Options:\n"
 "   -a      : disable default antialias (nvg/glfw)\n"
 "   -f      : force edge antialias (nvg)\n"
-"   -r      : retained\n"
+"   -r      : not retained\n"
 "\n");
    exit( 1);
 }
@@ -161,10 +162,10 @@ static void   usage( void)
 
 int   main( int argc, char *argv[])
 {
-   UIWindow        *window;
-   UIApplication   *app;
-   NSUInteger      styleMask;
-   int             i;
+   UIWindow       *window;
+   UIApplication  *app;
+   NSUInteger     styleMask;
+   int            i;
 
    styleMask = UIWindowStyleMaskDefault;
 

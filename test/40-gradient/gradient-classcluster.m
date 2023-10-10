@@ -29,17 +29,14 @@ int   main( int argc, char *argv[])
 
    fprintf( stderr, "start: %s\n", __PRETTY_FUNCTION__);
 
-   gradient = [[[CGGradient alloc] initWithColor:CGColorMakeBlueViolet()] autorelease];
    gradient = [[[CGGradient alloc] initWithStartColor:CGColorMakeWhite()
-                                          endColor:CGColorMakeGray()] autorelease];
-   gradient = [[[CGGradient alloc] initWithColor:CGColorMakeWhite()
-                                            color:CGColorMakeGray()] autorelease];
+                                             endColor:CGColorMakeGray()] autorelease];
    gradient = [[[CGGradient alloc] initWithColors:colorList
                                         locations:NULL
-                                            count:5] autorelease];;
+                                            count:5] autorelease];
    gradient = [[[CGGradient alloc] initWithColors:colorList
                                         locations:locationList
-                                            count:5] autorelease];;
+                                            count:5] autorelease];
 
    fprintf( stderr, "end: %s\n", __PRETTY_FUNCTION__);
    return( 0);

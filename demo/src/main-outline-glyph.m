@@ -564,6 +564,8 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
    for( i = 0; i < 3; i++)
       _CGPathDone( &paths[ i]);
+
+   return( YES);
 }
 
 
@@ -573,12 +575,12 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame = [[window contentPlane] contentRect];
+   frame = [[window contentView] contentRect];
 
    view  = [UIView viewWithFrame:frame];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
    [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] addSubview:view];
 }
 
 

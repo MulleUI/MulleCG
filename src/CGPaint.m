@@ -53,9 +53,9 @@
 }
 
 
-- (BOOL) isTexture
+- (BOOL) isMonochrome
 {
-   return( NO);
+   return( YES);
 }
 
 
@@ -157,7 +157,7 @@
 
 - (BOOL) isTexture
 {
-   return( YES);
+   return( NO);
 }
 
 
@@ -165,6 +165,18 @@
 {
    return( NO);
 }  // default: NO (mono color gradient says also NO)
+
+
+- (BOOL) isMonochrome
+{
+   return( NO);
+}
+
+
+- (BOOL) isOpaque
+{
+   return( [self alpha] == 1.0);
+}
 
 
 - (id) copy
@@ -193,6 +205,16 @@
 - (CGFloat) overdraw
 {
    return( 0.0);
+}
+
+
+- (CGColor) suggestedTextColor
+{
+   CGColor   color;
+
+   color = [self mainColor];
+   color = CGColorSuggestTextColor( color);
+   return( color);
 }
 
 @end

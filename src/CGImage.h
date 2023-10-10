@@ -43,8 +43,10 @@
 @end
 
 
-
-//
+// Generally try to create CGImages with the functionality found in
+// CGContext+CGImage, as you then don't have to worry about creating to many
+// textures.
+// -------
 // This is a wrapper for all the nanovg image functionality. Because we use
 // "image" also as CGImage, nanovg image handles are called here "textureID"
 // and the underlying OpenGL texture is the "gpuTexture".
@@ -74,25 +76,25 @@
 @property( readonly, assign) NSUInteger           textureFlags;
 @property( readonly, assign) CGContext            *context;
 @property( readonly, retain) CGSharedGPUTexture   *sharedGPUTexture;
-
+@property NSUInteger                              debugEnabled;
 
 // textureFlags in this call is "informative", it will not affect the image
 // as it has been created already
 - (instancetype) initWithTextureID:(CGTextureID) textureID
-                    textureFlags:(NSUInteger) textureFlags
+                      textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context;
 
 - (instancetype) initWithGPUTextureRGBA:(void *) gpuTexture
                        sharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
                              bitmapSize:(struct MulleIntegerSize) size
-                         textureFlags:(NSUInteger) textureFlags
+                           textureFlags:(NSUInteger) textureFlags
                                 context:(CGContext *) context;
 
 // these methods are germane to CGImage, subclasses may not support this
 // I wanted to avoid inserting another class here
 // textureFlags will affect the texture
 - (instancetype) initWithContentsOfFileCString:(char *) filename
-                                textureFlags:(NSUInteger) textureFlags
+                                  textureFlags:(NSUInteger) textureFlags
                                        context:(CGContext *) context;
 
 // data can be discarded after init
@@ -124,6 +126,13 @@
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
 
 - (void *) gpuTexture;
+
+// multisample images can not be used as paint, use resolvedImage
+- (BOOL) isMultiSample;
+
+// always self, unless isMultiSample is set in which case this will abort
+// only CGLayer actually has resolvedImage
+- (CGImage *) resolvedImage;
 
 //
 // If otherContext is sharing textures with the CGImage context, we can

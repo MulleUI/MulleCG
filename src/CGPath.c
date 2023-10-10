@@ -56,8 +56,14 @@ CGRect   CGPathComputeCoarseBounds( CGPathRef path)
    unsigned int    n;
    float           *f;
    float           *sentinel;
+   float           a0;
+   float           a1;
+   float           dir;
+   float           tmp;
+   float           radius;
    CGPoint         point;
    CGRect          bbox;
+   CACircle        c;
 
    bbox     = CGRectNull; // sic!
    n        = _mulle_floatarray_get_count( &path->_floats);
@@ -105,7 +111,7 @@ CGRect   CGPathComputeCoarseBounds( CGPathRef path)
          break;
 
          // TODO: this is total crap (radius is ignored)
-      case CGPathArcCommand :
+      case CGPathArcToCommand :
          point.x = *f++;
          point.y = *f++;
          bbox    = CGRectEnclosePoint( bbox, point);
@@ -113,6 +119,24 @@ CGRect   CGPathComputeCoarseBounds( CGPathRef path)
          point.y = *f++;
          bbox    = CGRectEnclosePoint( bbox, point);
          (void)    *f++;
+         break;
+
+         // TODO: this is crap angles are ignored
+      case CGPathArcCommand :
+         point.x = *f++;
+         point.y = *f++;
+         radius  = *f++;
+         a0      = *f++;
+         a1      = *f++;
+         dir     = *f++;
+         if( dir == (float) NVG_CCW)
+         {
+            tmp = a0;
+            a0  = a1;
+            a1  = tmp;
+         }
+         c       = CACircleMake( point, radius);
+         bbox    = CGRectUnion( bbox, CACircleOuterRectOfSector( c, a0, a1));
          break;
 
       case CGPathWindingCommand :

@@ -9,8 +9,12 @@
  *
  *      mulle-sde environment set MULLE_MATCH_TO_C_RUN DISABLE
  */
-#import "CGAffineTransform+nanovg.h"
-#import "CGContext+CGFont.h"
+#ifndef mulle_c_g_export_h__
+#define mulle_c_g_export_h__
+
+
+#import "CGContextBase.h"
+#import "CGContext+CGImage.h"
 #import "CGContext+Drawing.h"
 #import "CGContext+OpenGL.h"
 #import "CGContext+Render.h"
@@ -26,11 +30,14 @@
 #import "CGImage.h"
 #import "CGImage+nanovg.h"
 #import "CGLayer.h"
+#import "CGLayoutContext+CGFont.h"
+#import "CGLayoutContext.h"
 #import "CGPaint.h"
 #import "CGPaint+nanovg.h"
-#import "CGPath.h"
-#import "CGPath+nanovg.h"
 #import "MulleObjCLoader+MulleCG.h"
 #import "CGColorDiff.h"
 //
-// MULLE_MATCH_TO_C_IGNORE_HEADERS=fontstash.h:nanovg_gl.h:nanovg_gl_utils.h:stb_image.h:stb_truetype.h
+// MULLE_MATCH_TO_C_IGNORE_HEADERS=fontstash.h:nanovg_gl.h:nanovg_gl_utils.h:stb_image.h:stb_truetype.h:nanovg-extensions.inc
+
+
+#endif

@@ -13,7 +13,7 @@ struct CGFrameInfo;
 // historic name is CGLayer. It has nothing to do with a CALayer though.
 //
 //
-// An drawing rendered into a texture.
+// A drawing rendered into a texture.
 // In technical terms a wrapper for a texture created with
 // nvgluCreateFramebuffer (usually). A texture can not be created during
 // rendering. It has to be done before or after.
@@ -27,9 +27,15 @@ struct CGFrameInfo;
 //
 @interface CGLayer : CGImage
 
-@property( readonly, assign) void   *framebuffer;
+@property( readonly, assign) void      *framebuffer;
+@property char                         *debugNameUTF8String;  // useful for debugging
+// if the layer is multisample, it will be resolved into another
+// image and this will be returned, otherwise it will just return self
+// the image will be kept.
+@property( readonly, retain) CGImage   *resolvedImage;
+
 @property( assign, getter=isInitializedFramebuffer) BOOL   initializedFramebuffer;
-@property char                      *debugNameUTF8String;  // useful for debugging
+
 
 + (instancetype) layerWithBitmapSize:(struct MulleIntegerSize) size
                         textureFlags:(NSUInteger) textureFlags

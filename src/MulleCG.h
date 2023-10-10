@@ -4,11 +4,8 @@
 
 #import "_MulleCG-export.h"
 
-// we have no provide
-#include "nanovg.h"
+#include "_MulleCG-provide.h"
 
-#include "microvg.h"
-#include "microvg.h"
 
 #ifdef __has_include
 # if __has_include( "_MulleCG-versioncheck.h")

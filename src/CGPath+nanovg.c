@@ -17,6 +17,8 @@ void   mvgAddCGPath( NVGcontext *vg, CGPathRef path)
    float           x1, y1;
    float           x2, y2;
    float           r;
+   float           dir;
+   float           a0, a1;
 
    if( ! path)
       return;
@@ -59,12 +61,13 @@ void   mvgAddCGPath( NVGcontext *vg, CGPathRef path)
          break;
 
       case CGPathArcCommand :
-         x1 = *f++;
-         y1 = *f++;
-         x  = *f++;
-         y  = *f++;
-         r  = *f++;
-         nvgArcTo( vg, x1, y1, x2, y2, r);
+         x   = *f++;
+         y   = *f++;
+         r   = *f++;
+         a0  = *f++;
+         a1  = *f++;
+         dir = *f++;
+         nvgArc( vg, x, y, r, a0, a1, (int) dir);
          break;
 
       case CGPathWindingCommand :

@@ -30,9 +30,15 @@
 
 // a linear gradient if a gradient
 - (NVGpaint) NVGpaintWithBounds:(CGRect) rect
-                   NVGcontext:(NVGcontext *) vg;
+                     NVGcontext:(NVGcontext *) vg;
+
 @end
 
+
+void   mvgFillRoundedRectVaryingWithPaint( NVGcontext *vg,
+                                           CGRect rect,
+                                           MulleCornerInsets cornerInsets,
+                                           CGPaint *paint);
 
 void   mvgFillRoundedRectWithPaint( NVGcontext *vg,
                                     CGRect rect,
@@ -48,6 +54,12 @@ void   mvgFillLineWithPaint( NVGcontext *vg,
                              CGPoint end,
                              CGPaint *paint);
 
+
+void   mvgStrokeRoundedRectVaryingWithPaint( NVGcontext *vg,
+                                             CGRect rect,
+                                             MulleCornerInsets cornerInsets,
+                                             CGFloat strokeWidth,
+                                             CGPaint *paint);
 
 void   mvgStrokeRoundedRectWithPaint( NVGcontext *vg,
                                       CGRect rect,

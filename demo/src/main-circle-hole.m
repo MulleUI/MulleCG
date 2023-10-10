@@ -127,7 +127,7 @@ int   main( int argc, char *argv[])
    window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 600, 400)
                              titleUTF8String:"Demo"
                                    styleMask:styleMask] autorelease];
-   [[window contentPlane] setDrawCallback:drawStuff];
+   [[window contentView] setDrawCallback:drawStuff];
    [window setFrameRateHz:60.0f];
    [app addWindow:window];
 

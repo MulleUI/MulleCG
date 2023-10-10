@@ -49,13 +49,13 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
       for( x = 0; x < 5; x++)
          sections[ y][ x] = CGRectMake( 0, 0, x + 1, y + 1);
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CGRotationNone,
-                                    CGScaleToFit,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CGRotationNone,
+                                                    CGScaleToFit,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
 
 
    for( y = 0; y < 5; y++)
@@ -72,10 +72,10 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawBitmap3];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] setDrawCallback:(CALayerDrawCallback_t *) drawBitmap3];
+   [[window contentView] addSubview:view];
 }
 
 

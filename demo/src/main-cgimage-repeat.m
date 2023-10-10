@@ -48,47 +48,47 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    // subdivide into 2x2
    CGRectPartition2x2( area, CGSizeMake( 4, 4), rects);
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CGRotationNone,
-                                    CGScaleToFit,
-                                    CGFlipNone,
-                                    CGRepeatNone,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CGRotationNone,
+                                                    CGScaleToFit,
+                                                    CGFlipNone,
+                                                    CGRepeatNone,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 0][ 0]
            options:&options
            context:context];
 
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CGRotationNone,
-                                    CGScaleToFit,
-                                    CGFlipNone,
-                                    CGRepeatHorizontally,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CGRotationNone,
+                                                    CGScaleToFit,
+                                                    CGFlipNone,
+                                                    CGRepeatHorizontally,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 0][ 1]
            options:&options
            context:context];
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CGRotationNone,
-                                    CGScaleToFit,
-                                    CGFlipNone,
-                                    CGRepeatVertically,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CGRotationNone,
+                                                    CGScaleToFit,
+                                                    CGFlipNone,
+                                                    CGRepeatVertically,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 1][ 0]
            options:&options
            context:context];
 
-   options = CGDrawableOptionsMake( 1.0,
-                                    0.0,
-                                    CGRotationNone,
-                                    CGScaleToFit,
-                                    CGFlipNone,
-                                    CGRepeatBoth,
-                                    CGContentModeCenterPoint);
+   options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
+                                                    1.0,
+                                                    CGRotationNone,
+                                                    CGScaleToFit,
+                                                    CGFlipNone,
+                                                    CGRepeatBoth,
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 1][ 1]
            options:&options
            context:context];
@@ -102,10 +102,10 @@ void   setupScene( UIWindow *window)
    UIView   *view;
    CGRect   frame;
 
-   frame  = [[window contentPlane] contentRect];
+   frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [[window contentView] setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
+   [[window contentView] addSubview:view];
 }
 
 

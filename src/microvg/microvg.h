@@ -61,6 +61,14 @@ static inline struct MulleTextMetrics   mvgTextMetrics( NVGcontext *vg)
  * Conveniences
  */
 
+void   mvgFillWithColor( NVGcontext *vg, CGColor color);
+void   mvgFillWithNVGpaint( NVGcontext *vg, NVGpaint paint);
+
+void   mvgStrokeWithColor( NVGcontext *vg, CGFloat strokeWidth, CGColor color);
+void   mvgStrokeWithNVGpaint( NVGcontext *vg, CGFloat strokeWidth, NVGpaint paint);
+
+
+
 //     p.x         w
 //   p.y ---------------------------
 //
@@ -167,7 +175,6 @@ static inline struct CGShadow
 {
    struct CGShadow   shadow;
 
-  // the blur / 4.0 value is experimentally determined
    shadow.extrudes = (struct MulleEdgeInsets)
                      {
                        .top    = offset.y,
@@ -177,7 +184,7 @@ static inline struct CGShadow
                      };
    shadow.innerColor = color;
    shadow.outerColor = CGColorMakeTransparent();
-   shadow.blur       = blur;   // guesstimate
+   shadow.blur       = blur;
    shadow.hole       = 1;
    return( shadow);
 }
@@ -196,7 +203,7 @@ void   mvgFillRoundedShadow( struct NVGcontext *vg,
 // the option MVGTextNoClip is given. The position within in the rect is
 // determined by contentMode (see: mulle-layout) e.g. CGContentModeTopLeft.
 // With MVGTextAlignVisually the will layout the text visually more pleasing,
-// if the text contains no asencders or descenders or lacks both.
+// if the text contains no ascenders or descenders or lacks both.
 //
 // Option MVGTextAlignBaseline will use the fonts baseline for positioning.
 // With option MVGTextFill the text is layouted according to contentMode
@@ -205,7 +212,7 @@ void   mvgFillRoundedShadow( struct NVGcontext *vg,
 //
 void   mvgTextInRect( NVGcontext *vg,
                       char *s,
-                      char *end,
+                      size_t length,
                       CGRect rect,
                       CGContentMode contentMode,
                       MulleTextOptions options);
@@ -222,13 +229,17 @@ void   mvgFormatInRect( struct NVGcontext *vg,
                         char *format,
                         ...);
 
+
+// more like nvgText but with a format
+void   mvgFormat( struct NVGcontext *vg,  CGPoint point, char *format, ...);
+
 //
 // Calculate change to origin needed to properly place the string.
 // The only recognized MulleTextOptions is MVGTextAlignVisually.
 //
 CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
                                            char *s,
-                                           char *end,
+                                           size_t length,
                                            int alignment,
                                            MulleTextOptions options);
 
@@ -237,7 +248,7 @@ CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
 //
 void   _mvgExtendedAlignedText( struct NVGcontext *vg,
                                 char *s,
-                                char *end,
+                                size_t length,
                                 CGPoint origin,
                                 int alignment,
                                 MulleTextOptions options);
@@ -250,7 +261,7 @@ void   _mvgExtendedAlignedText( struct NVGcontext *vg,
 //
 static inline void   mvgExtendedAlignedText( struct NVGcontext *vg,
                                              char *s,
-                                             char *end,
+                                             size_t length,
                                              CGPoint origin,
                                              int alignment,
                                              MulleTextOptions options)
@@ -263,11 +274,11 @@ static inline void   mvgExtendedAlignedText( struct NVGcontext *vg,
       // general idea: often the alignment and options are given
       // as a constant and the compiler can simplify the if away
       mvgTextAlign( vg, alignment);
-      mvgText( vg, origin, s, end);
+      mvgText( vg, origin, s, length);
    }
    else
    {
-      _mvgExtendedAlignedText( vg, s, end, origin, alignment, options);
+      _mvgExtendedAlignedText( vg, s, length, origin, alignment, options);
    }
 }
 

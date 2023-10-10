@@ -1,10 +1,15 @@
+#ifndef microvg_nanowrap_h__
+#define microvg_nanowrap_h__
+
+
 #include "nanovg.h"
 
-// this is the nanovg header wrapped for mulle-geometry types. In order to
-// not have to "think" too much which functions are available in microvg and
-// which in nanovg, all functions that are available in nanovg are wrapped
-// so mvgBeginFrame is just the same as nvgBeginFrame.
-// But mvgRect takes a CGRect instead of four floats.
+// This is the nanovg header wrapped for mulle-geometry and mulle-color types.
+// In order to not have to "think" too much which functions are available in
+// microvg and which in nanovg, all other functions that are available in
+// nanovg are wrapped so mvgBeginFrame is just the same as nvgBeginFrame.
+//
+// But mvgRect takes a CGRect instead of four floats for example.
 // For you convenience all const types have been removed.
 //
 typedef NSInteger    CGTextureID;
@@ -333,6 +338,7 @@ static inline CGImageID   mvgCreateImage( NVGcontext *vg,
    return( nvgCreateImage( vg, filename, textureFlags));
 }
 
+
 // Creates image by loading it from the specified chunk of memory.
 static inline CGImageID   mvgCreateImageMem( NVGcontext *vg,
                                              NSInteger textureFlags,
@@ -341,6 +347,7 @@ static inline CGImageID   mvgCreateImageMem( NVGcontext *vg,
 {
    return( nvgCreateImageMem( vg, textureFlags, data, ndata));
 }
+
 
 // Creates image from specified image data.
 static inline CGImageID   mvgCreateImageRGBA( NVGcontext *vg,
@@ -352,11 +359,13 @@ static inline CGImageID   mvgCreateImageRGBA( NVGcontext *vg,
    return( nvgCreateImageRGBA( vg, w, h, textureFlags, data));
 }
 
+
 // Updates image data specified by image handle.
 static inline void   mvgUpdateImage( NVGcontext *vg, CGImageID image, void *data)
 {
    nvgUpdateImage( vg, image, (const unsigned char *) data);
 }
+
 
 // Returns the dimensions of a created image.
 static inline struct MulleIntegerSize  mvgImageSize( NVGcontext *vg, CGImageID image)
@@ -366,6 +375,7 @@ static inline struct MulleIntegerSize  mvgImageSize( NVGcontext *vg, CGImageID i
    nvgImageSize( vg, image, &w, &h);
    return( MulleIntegerSizeMake( w, h));
 }
+
 
 // Deletes created image.
 static inline void   mvgDeleteImage( NVGcontext *vg, CGImageID image)
@@ -498,7 +508,7 @@ static inline void   mvgScissor( NVGcontext* vg, CGRect rect)
 // Intersects current scissor rectangle with the specified rectangle.
 // The scissor rectangle is transformed by the current transform.
 // Note: in case the rotation of previous scissor rect differs from
-// the current one, the NSIntegerersection will be done between the specified
+// the current one, the intersection will be done between the specified
 // rectangle and the previous scissor rectangle transformed in the current
 // transform space. The resulting shape is always rectangle.
 static inline void   mvgIntersectScissor( NVGcontext* vg, CGRect rect)
@@ -618,7 +628,7 @@ static inline void   mvgRoundedRectVarying( NVGcontext *vg,
 // this function accepts negative radius
 static inline void   mvgRoundedRect( NVGcontext *vg, CGRect rect, CGFloat r)
 {
-   mvgRoundedRectVarying( vg, rect, MulleCornerInsetsMake( r, r, r, r));
+   mvgRoundedRectVarying( vg, rect, MulleCornerInsetsMakeWithCornerRadius( r));
 }
 
 
@@ -740,69 +750,133 @@ static inline void   mvgFontFace( NVGcontext *vg, char *fontname)
 }
 
 // Draws text string at specified location.
-static inline CGFloat mvgText( NVGcontext *vg, CGPoint point, char *string, char *end)
+static inline CGFloat mvgText( NVGcontext *vg, CGPoint point, char *s, size_t length)
 {
-   return( nvgText( vg, point.x, point.y, string, end));
+   char   *end;
+
+   end = (length == (size_t) -1) ? NULL : &s[ length];
+   return( nvgText( vg, point.x, point.y, s, end));
+}
+
+// use after mvgTextColor not before
+static inline void   mvgClearType( NVGcontext *vg, int enable)
+{
+   nvgClearType( vg, enable);
 }
 
 
-// Draws text string at specified location.
-static inline void   mvgTextColor( NVGcontext *vg, CGColor foreGround, CGColor background)
+static inline void   mvgTextColor( NVGcontext *vg, CGColor color)
 {
-   nvgTextColor( vg, foreGround, background);
+   nvgTextColor( vg, color);
 }
 
-// Measures the specified text string. Parameter bounds should be a pointer to float[4],
-// if the bounding box of the text should be returned. The bounds value are [xmin,ymin, xmax,ymax]
-// Returns the horizontal advance of the measured text (i.e. where the next character should drawn).
+// use after mvgTextColor not before
+static inline void   mvgTextBackgroundColor( NVGcontext *vg, CGColor color)
+{
+   nvgTextBackgroundColor( vg, color);
+}
+
+
+// Measures the specified text string. Parameter bbox is optional,
+// if the bounding box of the text should be returned.
+// Returns the horizontal advance of the measured text
+// (i.e. where the next character should drawn).
 // Measured values are returned in local coordinate space.
-static inline void   mvgTextBounds( NVGcontext *vg, 
-                                    CGPoint point, 
-                                    char *string, 
-                                    char *end, 
-                                    CGFloat bounds[ 4])
+static inline float   mvgTextBounds( NVGcontext *vg,
+                                     CGPoint point,
+                                     char *s,
+                                     size_t length,
+                                     CGRect *bbox)
 {
-   nvgTextBounds( vg, point.x, point.y, string, end, bounds);
+   float  w;
+   float  bounds[ 4];
+   char   *end;
+
+   end = (length == (size_t) -1) ? NULL : &s[ length];
+   w   = nvgTextBounds( vg, point.x, point.y, s, end, bbox ? bounds : NULL);
+   if( bbox)
+      *bbox = CGRectMake( bounds[ 0],
+                          bounds[ 1],
+                          bounds[ 2] - bounds[ 0],
+                          bounds[ 3] - bounds[ 1]);
+   return( w);
 }
 
-// Measures the specified multi-text string. Parameter bounds should be a pointer to float[4],
-// if the bounding box of the text should be returned. The bounds value are [xmin,ymin, xmax,ymax]
+
+static inline void   mvgTextVisualBounds( NVGcontext *vg,
+                                          CGPoint point,
+                                          char *s,
+                                          size_t length,
+                                          CGRect *vbounds)
+{
+   float  bounds[ 6];
+   char   *end;
+
+   end = (length == (size_t) -1) ? NULL : &s[ length];
+   nvgTextVisualBounds( vg, point.x, point.y, s, end, bounds);
+   *vbounds = CGRectMake( bounds[ 0],
+                          bounds[ 1],
+                          bounds[ 2] - bounds[ 0],
+                          bounds[ 3] - bounds[ 1]);
+}
+
+
+
+// Measures the specified multi-text string. bbox is not optional.
 // Measured values are returned in local coordinate space.
 // Measures the specified multi-text string.
 static inline void   
    mvgTextBoxBounds( NVGcontext *vg, 
                      CGPoint point, 
-                     CGFloat breakRowWidth, 
-                     char *string,
-                     char *end,
-                     CGFloat bounds[ 4])
+                     char *s,
+                     size_t length,
+                     CGFloat breakRowWidth,
+                     CGRect *bbox)
 {
-   nvgTextBoxBounds( vg, point.x, point.y, breakRowWidth, string, end, bounds);
+   float  bounds[ 4];
+   char   *end;
+
+   end = (length == (size_t) -1) ? NULL : &s[ length];
+   nvgTextBoxBounds( vg, point.x, point.y, breakRowWidth, s, end, bounds);
+   *bbox = CGRectMake( bounds[ 0],
+                       bounds[ 1],
+                       bounds[ 2] - bounds[ 0],
+                       bounds[ 3] - bounds[ 1]);
 }
 
 // Calculates the glyph x positions of the specified text. If end is specified only the sub-string will be used.
 static inline void   
    mvgTextGlyphPositions( NVGcontext *vg,
                           CGPoint point, 
-                          char *string,
-                          char *end,
-                          NVGglyphPosition* positions, 
+                          char *s,
+                          size_t length,
+                          struct UIGlyphPosition* positions,
                           NSInteger maxPositions)
 {
-   nvgTextGlyphPositions( vg, point.x, point.y, string, end, positions, maxPositions);
+   char   *end;
+
+   end = (length == (size_t) -1) ? NULL : &s[ length];
+   nvgTextGlyphPositions( vg, point.x, point.y,
+                              s, end,
+                              (NVGglyphPosition *) positions, maxPositions);
 }
 
 
 
 // Breaks the specified text NSIntegero lines.
 static inline NSInteger   mvgTextBreakLines( NVGcontext *vg, 
-                                             char *string,
-                                             char *end,
+                                             char *s,
+                                             size_t length,
                                              CGFloat breakRowWidth, 
-                                             NVGtextRow* rows, 
+                                             struct UITextRow* rows,
                                              NSInteger maxRows)
 {
-   return( nvgTextBreakLines( vg, string, end, breakRowWidth, rows, maxRows));
+   char   *end;
+
+   end = (length == (size_t) -1) ? NULL : &s[ length];
+   return( nvgTextBreakLines( vg, s, end,
+                                  breakRowWidth,
+                                  (NVGtextRow *) rows, maxRows));
 }
 
 
@@ -818,3 +892,4 @@ static inline void   mvgDeleteInternal( NVGcontext *vg)
    nvgDeleteInternal( vg);
 }
 
+#endif

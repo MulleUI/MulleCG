@@ -28,13 +28,21 @@
 + (CGPaint *) paintWithStartColor:(CGColor) startColor
                          endColor:(CGColor) endColor
                          rotation:(CGFloat) rotation;
+
+
 //
 // for textures this will be gray, for gradients its the middleColor between
 // start and end
 //
 - (CGColor) mainColor;
+
+// this is either "white" or "black", which to draw upon self
+- (CGColor) suggestedTextColor;
+
 - (BOOL) isTexture;  // default: YES
 - (BOOL) isGradient;  // default: NO (mono color gradient says also NO)
+- (BOOL) isMonochrome;
+- (BOOL) isOpaque;
 - (CGFloat) alpha;   // default: 1.0
 - (BOOL) needsBounds;  // mono color, does not need it others do
 

@@ -3,10 +3,9 @@
 #import "CGContext.h"
 #import "CGContext+OpenGL.h"
 #import "CGContext+Drawing.h"
+#import "CGImage+DebugPrivate.h"
 
 #import "import-private.h"
-
-#define CGLAYER_DEBUG
 
 
 @implementation CGLayer
@@ -53,16 +52,15 @@
    // (how long does the context live though)
    //
    textureID = ((NVGLUframebuffer *) _framebuffer)->image;
-#ifdef CGLAYER_DEBUG
-   MulleUILog( "create framebuffer %p with textureID %td (GPU: %p)",
+
+   CGImageLog( "create framebuffer %p with textureID %td (GPU: %p)",
                      _framebuffer,
                      textureID,
                      [context gpuTextureForImageID:textureID]);
 
-#endif
    return( [self initWithTextureID:textureID
-                     textureFlags:textureFlags
-                          context:context]);
+                      textureFlags:textureFlags
+                           context:context]);
 }
 
 
@@ -94,9 +92,9 @@
    oldFrameInfo = [context bindRender:&frameInfo];
    {
       rect = CGRectMake( 0.0f, 0.0f, bitmapSize.width, bitmapSize.height);
-      [(id <UIGraphicsDrawing>) context  drawRect:rect
-                                            image:image
-                                            scale:1.0];
+      [(id <UIGraphicsDrawing>) context drawRect:rect
+                                          image:image
+                                           scale:1.0];
    }
    [context bindRender:&oldFrameInfo];
    [context bindFramebuffer:old];
@@ -119,9 +117,7 @@
 {
    if( _framebuffer && _context == context)
    {
-#ifdef CGLAYER_DEBUG
-      MulleUILog( "delete framebuffer %p", _framebuffer);
-#endif   
+      CGImageLog( "delete framebuffer %p", _framebuffer);
       // assert( [context isActive]);
       [context deleteFramebuffer:_framebuffer];
       _framebuffer = NULL;
@@ -131,11 +127,11 @@
 }
 
 
-#ifdef CGLAYER_DEBUG
+#ifdef DEBUG
 - (void) dealloc
 {
    assert( ! _framebuffer);
-   MulleUILog( "layer deallocs");
+   CGImageLog( "layer deallocs");
    [super dealloc];
 }
 #endif   
@@ -184,11 +180,11 @@
 
 - (char *) UTF8String
 {
+   auto char   buf[ 64];
+   char        *format;
    char        *result;
    char        *s;
-   auto char   buf[ 64];
    size_t      len;
-   char        *format;
 
    s = MulleObjCClassGetNameUTF8String( NSClassFromObject( self));
    sprintf( buf, "%p",  self);
@@ -239,16 +235,25 @@
  * and upload it into a texture there (again through pixel buffer object).
  * PBOs are buffer objects and are shared across OpenGL contexts.
  *
- * In summary, you cannot directly share framebuffer objects between OpenGL
- * contexts. However, you can work around this limitation by using shared
- * textures, renderbuffers, or pixel buffer objects to transfer data between
- * contexts.
  */
 // so when we do a "shareWithContext" we only share the underlying texture
 // - (id) shareWithContext:(id) otherContext
 // {
 //    [super shareWithContext:otherContext];
 // }
+
+
+- (CGImage *) resolvedImage
+{
+   if( ! _resolvedImage)
+   {
+      if( ! [self isMultiSample])
+         return( self);
+
+      _resolvedImage = [[_context resolveMultiSampleImage:self] retain];
+   }
+   return( _resolvedImage);
+}
 
 
 @end
@@ -304,6 +309,9 @@
 {
    assert( memo);
 
+   [_resolvedImage autorelease];
+   _resolvedImage = nil;
+
    [_context flushRender];
    [_context getCurrentFrameInfo:&memo->frameInfo];
    memo->framebuffer = [_context bindFramebuffer:CGContextFramebufferMakeWithLayer( self)];
@@ -325,9 +333,9 @@
                             devicePixelRatio:(CGFloat) ratio
                              layerRenderInfo:(struct CGLayerRenderInfo *) memo
 {
-   struct NVGcontext          *vg;
    CGFloat                    rgba[ 4];
    struct MulleIntegerSize    bitmapSize;
+   struct NVGcontext          *vg;
 
    [self _beginLayerRender:memo];
 

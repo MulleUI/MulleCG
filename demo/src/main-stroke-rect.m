@@ -103,7 +103,8 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
 
          nvgFontFace( vg, "sans");
          nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
-         nvgTextColor( vg, CGColorMakeBlack(), CGColorMake( 0.0, 1.0, 0.0, 0.75));
+         nvgTextColor( vg, CGColorMakeBlack());
+         nvgTextBackgroundColor( vg, CGColorMake( 0.0, 1.0, 0.0, 0.75));
          nvgFontSize( vg, 12.0);
          nvgTextBox( vg, CGRectGetMinX( fillRect),
                          CGRectGetMidY( fillRect) - 12.0,
