@@ -213,6 +213,19 @@
 }
 
 
+- (void) dealloc
+{
+   MulleObjCObjectSetDuplicatedUTF8String( self, &_debugNameUTF8String, NULL);
+
+   [super dealloc];
+}
+
+- (void) setDebugNameUTF8String:(char *) s
+{
+   MulleObjCObjectSetDuplicatedUTF8String( self, &_debugNameUTF8String, s);
+}
+
+
 - (CGImage *) cgImageWithContext:(CGContext *) context
                     textureFlags:(NSUInteger) textureFlags
 {
@@ -538,13 +551,20 @@
 {
    char   *s;
 
-   s = MulleObjC_asprintf( "<%s %p textureID=%td %@>",
-                           MulleObjCInstanceGetClassNameUTF8String( self),
-                           self,
-                           self->_textureID,
-                           self->_sharedGPUTexture);
+   mulle_buffer_do_autoreleased_string( buffer, NULL, s)
+   {
+      s = MulleObjCClassGetNameUTF8String( NSClassFromObject( self));
+      mulle_buffer_sprintf( buffer, "<%s %p", s, self);
+      if( _debugNameUTF8String)
+         mulle_buffer_sprintf( buffer, " \"%s\"", self->_debugNameUTF8String);
+      mulle_buffer_sprintf( buffer, " textureID=%td", self->_textureID);
+      if( self->_sharedGPUTexture)
+         mulle_buffer_sprintf( buffer, " %#@", self->_sharedGPUTexture);
+      mulle_buffer_add_string( buffer, ">");
+   }
    return( s);
 }
+
 
 - (CGImage *) resolvedImage
 {

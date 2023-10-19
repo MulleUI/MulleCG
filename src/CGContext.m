@@ -27,12 +27,6 @@
 
 //#define CGCONTEXT_DEBUG_ENABLED 3
 
-//#define IVAR_DEBUG
-//#define SWAP_DEBUG
-//#define RESIZE_DEBUG
-//#define RENDER_DEBUG
-// this writes out a PNG for each frame
-//#define RENDER_LAYER_DEBUG
 
 static void   *acquire_ivar_pointer( mulle_atomic_pointer_t *p)
 {
@@ -61,10 +55,7 @@ static void   *acquire_ivar_object( mulle_atomic_pointer_t *p)
    id   obj;
 
    obj = acquire_ivar_pointer( p);
-#ifdef IVAR_DEBUG
-   if( obj)
-      MulleUICLog( "Extracted %#@ from pointer %p, now nil", obj, p);
-#endif
+   // MulleUICLog( "Extracted %#@ from pointer %p, now nil", obj, p);
    return( [obj autorelease]);
 }
 
@@ -83,16 +74,12 @@ static void   recycle_ivar_object( mulle_atomic_pointer_t *p, id obj)
    [obj retain];
    if( ! recycle_ivar_pointer( p, obj))
    {
-#ifdef IVAR_DEBUG
-      MulleUICLog( "Failed to store %#@ into pointer %p", obj, p);
-#endif
+      //MulleUICLog( "Failed to store %#@ into pointer %p", obj, p);
       [obj release];  // if it fails, undo retain
    }
    else
    {
-#ifdef IVAR_DEBUG
-      MulleUICLog( "Stored %#@ in pointer %p", obj, p);
-#endif
+      //MulleUICLog( "Stored %#@ in pointer %p", obj, p);
    }
 }
 
@@ -124,12 +111,18 @@ static struct
    struct mulle_container_keyvaluecallback   _shaderMapCallback;
    struct mulle_container_keyvaluecallback   _shaderSourcesCallback;
    struct mulle_map                          _registeredSources;
+   NSUInteger                                _debugEnabled;
 } Self;
 
 
 + (void) initialize
 {
    struct mulle_allocator   *allocator;
+   char                     *s;
+
+   // don't rerun for subclass
+   if( MulleObjCClassGetID( self) != @selector( CGContext))
+      return;
 
    mulle_thread_mutex_init( &Self._freeTypeLock);
 
@@ -144,14 +137,34 @@ static struct
 
    allocator = MulleObjCClassGetAllocator( self);
    mulle_map_init( &Self._registeredSources, 0, &Self._shaderSourcesCallback, allocator);
+
+   s = getenv( "CGContextDebugEnabled");
+   if( s)
+      Self._debugEnabled = strtol( s, NULL, 0);
+   else
+   {
+#ifdef CGCONTEXT_DEBUG_ENABLED
+      Self._debugEnabled = CGCONTEXT_DEBUG_ENABLED;
+#endif
+   }
 }
 
 
 + (void) deinitialize
 {
+   if( MulleObjCClassGetID( self) != @selector( CGContext))
+      return;
+
    mulle_thread_mutex_done( &Self._freeTypeLock);
    mulle_map_done( &Self._registeredSources);
 }
+
+
++ (void) setDebugEnabled:(NSUInteger) flag
+{
+   Self._debugEnabled = flag;
+}
+
 
 
 static UIGraphicsBackend   defaultBackends[] =
@@ -245,8 +258,9 @@ static UIGraphicsBackend   defaultBackends[] =
 {
    struct mulle_allocator   *allocator;
 
-   _backend  = backend;
-   _shareID  = shareID;
+   _backend      = backend;
+   _shareID      = shareID;
+   _debugEnabled = Self._debugEnabled;
 
    if( backend != UIGraphicsBackendNone)
    {
@@ -263,7 +277,7 @@ static UIGraphicsBackend   defaultBackends[] =
       }
    }
 
-   // do this now to gez CGContextLayout
+   // do this now to get CGContextLayout
    self = [super init];
    if( self)
    {
@@ -430,6 +444,7 @@ static UIGraphicsBackend   defaultBackends[] =
    struct MulleIntegerSize   oldSize;
 
    layer   = acquire_ivar_object( &_scratchLayer);
+   CGContextLogVerbose( "try to reuse layer %#@", layer);
    oldSize = [layer bitmapSize];
 
    if( ! MulleIntegerSizeEqualToIntegerSize( oldSize, size))
@@ -437,15 +452,6 @@ static UIGraphicsBackend   defaultBackends[] =
       layer = [CGLayer layerWithBitmapSize:size
                               textureFlags:textureFlags
                                    context:self];
-#ifdef DEBUG
-      {
-         static NSUInteger   count;
-         char                *s;
-
-         s = MulleObjC_asprintf( "CGLayer-%tu", count++);
-         [layer setDebugNameUTF8String:s];
-      }
-#endif
       CGContextLogVerbose( "created new layer %#@ with size %s",
                            layer,
                            MulleIntegerSizeUTF8String( size));
@@ -505,7 +511,17 @@ static UIGraphicsBackend   defaultBackends[] =
       _renderLayer = [[self layerWithSize:info->window.framebufferSize
                              textureFlags:textureFlags] retain];
       assert( _renderLayer);
+#ifdef DEBUG
+      if( ! [_renderLayer debugNameUTF8String])  // keep old if present
+      {
+         char   buf[ 256];
+         static NSUInteger   counter;  // just for debugging
 
+         mulle_snprintf( buf, sizeof( buf), "RenderFrame #%td (%p)", counter++, self);
+         [_renderLayer setDebugNameUTF8String:buf];
+      }
+#endif
+      CGContextRenderLog( "Begin render into layer %#@", _renderLayer);
       [self bindFramebuffer:CGContextFramebufferMakeWithLayer( _renderLayer)];
    }
 }
@@ -581,9 +597,13 @@ static struct CGFrameInfo   emptyInfo;
 
    if( _rendersOffScreen)
    {
-      // get rid of old "valid" framebuffer previously
+      // get rid of old "valid" framebuffer previously, if still present
       old = acquire_ivar_object( &_drawnLayer);
-      recycle_ivar_object( &_scratchLayer, old);
+      if( old)
+      {
+         CGContextRenderLog( "Recycle scratch %#@ for %#@", _scratchLayer, old);
+         recycle_ivar_object( &_scratchLayer, old);
+      }
 
       // by recycling it in _drawnLayer we store it there, since
       // CGContext is the only one who is _supposed_ to write any NON-NULL value
@@ -596,11 +616,12 @@ static struct CGFrameInfo   emptyInfo;
       [self barrier];
       recycle_ivar_object( &_drawnLayer, _renderLayer);
 
-#ifdef RENDER_LAYER_DEBUG
-      MulleUIWriteImageToPNGFileSequenceAsync( _renderLayer, "render-layer");
-#endif
+      if( self->_debugEnabled & CGContextDebugDumpFrameToFile)
+      {
+         MulleUIWriteImageToPNGFileSequenceAsync( _renderLayer, "render-layer");
+      }
 
-      CGContextRenderLogVerbose( "least recent layer %#@", _renderLayer);
+      CGContextRenderLog( "End render into layer %#@", _renderLayer);
 
       [_renderLayer autorelease];
       _renderLayer = nil;

@@ -38,6 +38,7 @@ src/CGPath+nanovg.c
 src/microvg/microvg.c
 src/mulle-color/CGColorDiff.c
 src/mulle-color/CGColor.c
+src/mulle-color/CGGolorNames.c
 src/mulle-color/mulle-color.c
 src/nanovg+UTF8String.m
 )

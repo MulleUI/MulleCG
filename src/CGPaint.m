@@ -92,6 +92,10 @@
    *locations = 0.0;  // or what ?
 }
 
+- (char *) UTF8String
+{
+   return( CGColorUTF8String( _color));
+}
 
 @end
 
@@ -109,9 +113,6 @@
 //
 + (CGPaint *) paintWithColor:(CGColor) color
 {
-   if( CGColorIsTransparent( color))
-      return( nil);
-
    return( [[_CGMonoColor newWithColor:color] autorelease]);
 }
 

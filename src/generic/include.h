@@ -35,19 +35,37 @@ typedef struct NVGcolor   CGColor;
    Here the prefix is harmless and serves disambiguation. If you have no
    sourcetree, then you don't need it.
  */
-#include "_MulleCG-include.h"
 
 #ifndef MULLE_CG_EXTERN_GLOBAL
 # define MULLE_CG_EXTERN_GLOBAL MULLE_C_EXTERN_GLOBAL
 #endif
 
 
+#ifdef MULLE_CG_BUILD
+# define MULLE__COLOR_BUILD
+#endif
+
+//
+// MULLE_CG_INCLUDE_BARE is needed because there is a loop in "CGColor.h",
+// which includes this file "include.h", which then includes again "CGColor.h".
+// But stuff from CGColor.h is not yet defined. Then this includes some
+// other CGColor headers that depend on CGColor.h Solution: where this is a
+// problem (should be only when compiling this project), strip out the
+// convenience includes)
+//
+#ifndef MULLE_CG_INCLUDE_BARE
 /* You can add some more include statements here */
-#include <mulle-buffer/mulle-buffer.h>
-#include <mulle-container/mulle-container.h>
-#include <mulle-geometry/mulle-geometry.h>
-#include "CGColor.h"
-#include <MulleUIBase/_MulleUIBase-provide.h>
+# include <mulle-buffer/mulle-buffer.h>
+# include <mulle-container/mulle-container.h>
+# include <mulle-geometry/mulle-geometry.h>
+# include "CGColor.h"
+# include "CGColorConstants.h"
+# include "CGColorDiff.h"
+# include "CGColorNames.h"
+# include <MulleUIBase/_MulleUIBase-provide.h>
+
+# include "_MulleCG-include.h"
+#endif
 
 #endif
 

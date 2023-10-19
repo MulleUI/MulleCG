@@ -35,7 +35,7 @@
 #import "CGPaint.h"
 #import "CGPaint+nanovg.h"
 #import "MulleObjCLoader+MulleCG.h"
-#import "CGColorDiff.h"
+#import "CGColorConstants.h"
 //
 // MULLE_MATCH_TO_C_IGNORE_HEADERS=fontstash.h:nanovg_gl.h:nanovg_gl_utils.h:stb_image.h:stb_truetype.h:nanovg-extensions.inc
 

@@ -175,7 +175,8 @@
 
    vg = CGContextGetNVGContext( self);
 
-   nvgFontFace( vg, fontNameUTF8String ? fontNameUTF8String : "sans");
+   [self useFontWithNameUTF8String:fontNameUTF8String ? fontNameUTF8String : "sans"];
+//   nvgFontFace( vg, fontNameUTF8String ? fontNameUTF8String : "sans");
    nvgFontSize( vg, fontSize != 0.0 ? fontSize : 10.0);
    nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
    nvgFillColor( vg, CGColorMakeWithHexColor( color));

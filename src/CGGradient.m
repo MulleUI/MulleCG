@@ -78,6 +78,7 @@
                                          rotation:_rotation + rotation]);
 }
 
+
 @end
 
 
@@ -388,11 +389,8 @@ static id   CGGradientNewWithColors( CGColor *colors,
       {
          location = [self locationAtIndex:i];
          color    = [self colorAtIndex:i];
-         name     = CGColorGetCommonName( color);
-         if( name)
-            mulle_buffer_add_string( buffer, name);
-         else
-            mulle_buffer_sprintf( buffer, "0x%08x", CGColorGetHexColor( color));
+         name     = CGColorUTF8String( color);
+         mulle_buffer_add_string( buffer, name);
          if( n == 1)
             break;
          mulle_buffer_sprintf( buffer, " (%.2f)", location);

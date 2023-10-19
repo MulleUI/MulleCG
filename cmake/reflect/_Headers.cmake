@@ -39,7 +39,9 @@ src/generic/include-private.h
 # contents selected with patternfile ??-header--private-headers
 #
 set( PRIVATE_HEADERS
+src/CGContext+DebugPrivate.h
 src/CGGradient+Private.h
+src/CGImage+DebugPrivate.h
 src/CGPaint+Private.h
 )
 
@@ -100,6 +102,7 @@ src/MulleCG.h
 src/MulleObjCLoader+MulleCG.h
 src/_NotoEmoji-VariableFont_wght.ttf.inc
 src/_NotoSans-Bold.ttf.inc
+src/_NotoSansMono-Regular.ttf.inc
 src/_NotoSans-Regular.ttf.inc
 src/_Roboto-Regular.inc
 src/_emoji.inc
@@ -108,7 +111,9 @@ src/_entypo.ttf.inc
 src/microvg/microvg.h
 src/microvg/microvg-nanowrap.h
 src/microvg/nanovg-extensions.inc
+src/mulle-color/CGColorConstants.h
 src/mulle-color/CGColorDiff.h
+src/mulle-color/CGColorNames.h
 src/mulle-color/CGColor.h
 src/mulle-color/mulle-color.h
 src/nanovg+UTF8String.h
