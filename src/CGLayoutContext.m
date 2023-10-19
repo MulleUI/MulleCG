@@ -22,6 +22,9 @@ static struct
 
 + (void) initialize
 {
+   if( MulleObjCClassGetID( self) != @selector( CGLayoutContext))
+      return;
+
    mulle_thread_mutex_init( &Self._freeTypeLock);
 }
 
@@ -29,6 +32,9 @@ static struct
 
 + (void) deinitialize
 {
+   if( MulleObjCClassGetID( self) != @selector( CGLayoutContext))
+      return;
+
    mulle_thread_mutex_done( &Self._freeTypeLock);
 }
 
@@ -49,6 +55,9 @@ static struct
 #endif
          [self _initializeNanoVG:_nvgFlags];
       }
+
+      _defaultFontName = "sans";
+
       [self _initFontCache];
    }
 
@@ -105,7 +114,6 @@ static struct
                                bounds[ 2] - bounds[ 0],
                                bounds[ 3] - bounds[ 1]);
 }
-
 
 
 - (void) getTextMetrics:(struct UITextMetrics *) metrics;

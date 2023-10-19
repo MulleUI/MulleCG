@@ -5,7 +5,9 @@ enum
    CGContextDebugVerbose          = 0x001000,
 
    CGContextDebugRender           = 0x000002,
-   CGContextDebugRenderVerbose    = 0x002000
+   CGContextDebugRenderVerbose    = 0x002000,
+
+   CGContextDebugDumpFrameToFile   = 0x08000000  // same bit as UIWindow
 };
 
 
@@ -59,7 +61,6 @@ do                                                                          \
                                        (char *) format, ## __VA_ARGS__);    \
 }                                                                           \
 while( 0)
-
 
 #else
 

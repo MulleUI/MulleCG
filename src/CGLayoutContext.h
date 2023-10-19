@@ -14,6 +14,7 @@
 {
    struct mulle_map   _fontMap;
    BOOL               _hasLoadedFont;
+   char               *_defaultFontName; // will be "sans" will not be freed
 }
 
 - (BOOL) hasLoadedFont;

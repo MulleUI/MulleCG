@@ -28,7 +28,6 @@ struct CGFrameInfo;
 @interface CGLayer : CGImage
 
 @property( readonly, assign) void      *framebuffer;
-@property char                         *debugNameUTF8String;  // useful for debugging
 // if the layer is multisample, it will be resolved into another
 // image and this will be returned, otherwise it will just return self
 // the image will be kept.

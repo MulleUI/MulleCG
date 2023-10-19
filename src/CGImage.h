@@ -77,6 +77,7 @@
 @property( readonly, assign) CGContext            *context;
 @property( readonly, retain) CGSharedGPUTexture   *sharedGPUTexture;
 @property NSUInteger                              debugEnabled;
+@property char                                    *debugNameUTF8String;  // useful for debugging
 
 // textureFlags in this call is "informative", it will not affect the image
 // as it has been created already

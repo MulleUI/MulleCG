@@ -19,6 +19,10 @@ static struct
 {
    char   *s;
 
+   // don't rerun for subclass
+   if( MulleObjCClassGetID( self) != @selector( CGContextBase))
+      return;
+
    s = getenv( "CGContextDebugEnabled");
    if( s)
       Self._debugEnabled = strtol( s, NULL, 0);

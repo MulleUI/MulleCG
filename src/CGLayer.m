@@ -172,37 +172,6 @@
 }
 
 
-- (void) setDebugNameUTF8String:(char *) s
-{
-   MulleObjCObjectSetDuplicatedUTF8String( self, &_debugNameUTF8String, s);
-}
-
-
-- (char *) UTF8String
-{
-   auto char   buf[ 64];
-   char        *format;
-   char        *result;
-   char        *s;
-   size_t      len;
-
-   s = MulleObjCClassGetNameUTF8String( NSClassFromObject( self));
-   sprintf( buf, "%p",  self);
-
-   format = "<%s %s>";
-   len    = _debugNameUTF8String ? strlen( _debugNameUTF8String) : 0;
-   if( len)
-   {
-      format = "<%s %s \"%s\">";
-      len   += 3; // < "">\0"
-   }
-   len    += strlen( s) + strlen( buf) + 4; // < "">\0"
-   result  = mulle_malloc( len);
-   sprintf( result, format, s, buf, _debugNameUTF8String);
-   return( MulleObjCAutoreleaseAllocation( result, NULL));
-}
-
-
 - (char *) colorizerPrefixUTF8String
 {
    char        *s;

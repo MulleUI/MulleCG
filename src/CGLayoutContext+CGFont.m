@@ -35,6 +35,12 @@ unsigned char   entypo_ttf[] =
 #define s_entypo_ttf   (sizeof( entypo_ttf) - 1)
 
 
+unsigned char   NotoSansMono_Regular_ttf[] =
+#include "_NotoSansMono-Regular.ttf.inc"
+;
+#define s_NotoSansMono_Regular_ttf   (sizeof( NotoSansMono_Regular_ttf) - 1)
+
+
 #define sans_font_ttf         NotoSans_Regular_ttf
 #define s_sans_font_ttf       s_NotoSans_Regular_ttf
 
@@ -47,6 +53,9 @@ unsigned char   entypo_ttf[] =
 #define icons_font_ttf        entypo_ttf
 #define s_icons_font_ttf      s_entypo_ttf
 
+#define mono_font_ttf         NotoSansMono_Regular_ttf
+#define s_mono_font_ttf       s_NotoSansMono_Regular_ttf
+
 
 
 @implementation CGLayoutContext ( CGFont)
@@ -58,7 +67,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    c_string_to_object_callback = (struct mulle_container_keyvaluecallback)
    {
       .keycallback   = mulle_container_keycallback_copied_cstring,
-      .valuecallback = *MulleObjCContainerValueRetainCallback
+      .valuecallback = *MulleObjCContainerRetainValueCallback
    };
 }
 
@@ -166,7 +175,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    CGFontID fontID;
 
    if( ! s)
-      s = "sans";
+      s = _defaultFontName;
 
    font = mulle_map_get( &_fontMap, s);
    if( font)
@@ -191,14 +200,23 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
                                     0);
       }
       else
-         if( ! strcmp( s, "icons"))
+         if( ! strcmp( s, "mono"))
          {
             fontID = mvgCreateFontMem( _vg,
                                        s,
-                                       icons_font_ttf,
-                                       (int) s_icons_font_ttf,
+                                       mono_font_ttf,
+                                       (int) s_mono_font_ttf,
                                        0);
          }
+         else
+            if( ! strcmp( s, "icons"))
+            {
+               fontID = mvgCreateFontMem( _vg,
+                                          s,
+                                          icons_font_ttf,
+                                          (int) s_icons_font_ttf,
+                                          0);
+            }
 
    if( fontID == -1)
       abort();
@@ -229,7 +247,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    if( font)
       nvgFontFace( _vg, [font nameUTF8String]);
    else
-      nvgFontFace( _vg, "sans");
+      nvgFontFace( _vg, _defaultFontName);
 
    _hasLoadedFont = YES;
 }
