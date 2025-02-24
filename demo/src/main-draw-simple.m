@@ -14,7 +14,7 @@
    MULLE_OBJC_TRACE_INSTANCE=YES \
    MULLE_OBJC_TRACE_METHOD_CALL=YES ./kitchen/Debug/draw-simple
  */
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
 
@@ -27,7 +27,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 200, 200),
                                            NULL,
                                            0.0f));

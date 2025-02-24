@@ -12,9 +12,14 @@
 #import "import.h"
 
 
+// these typedef makes things a little easier to read
+typedef void   *CGGPUTextureID;
+
+// could also use a struct here, but then you meet sir castalot
+typedef void    CGGPUFramebuffer;
 
 //
-// This interface is for internal use of CGImage and CGLayer. The CGImage
+// This interface is for internal use of CGImage and CGFramebuffer. The CGImage
 // becomes a OpenGL texture via nanovg, which abstracts it into a handle
 // which is the `textureID`. The `textureID´ can be converted into a `GPUTexture`
 // for direct use with OpenGL. You wouldn't do this manually though, but use
@@ -24,16 +29,16 @@
 
 @interface CGContext( Texture)
 
-- (CGTextureID) textureIDWithBytes:(void *) bytes
-                        bitmapSize:(struct MulleIntegerSize) size
+- (CGTextureID) textureIDWithRGBABytes:(void *) bytes
+                        bitmapSize:(CGPixelSize) size
                       textureFlags:(NSUInteger) textureFlags;
 - (CGTextureID) textureIDWithFileCData:(struct mulle_data) fileCData
                           textureFlags:(NSUInteger) textureFlags;
 - (CGTextureID) textureIDWithContentsOfFileCString:(char *) filename
                                     textureFlags:(NSUInteger) textureFlags;
-- (CGTextureID) textureIDWithGPUTextureRGBA:(void *) gpuTexture
-                                 bitmapSize:(struct MulleIntegerSize) size
-                               textureFlags:(NSUInteger) textureFlags;
+- (CGTextureID) textureIDWithGPUTexture:(CGGPUTextureID) gpuTexture
+                             bitmapSize:(CGPixelSize) size
+                           textureFlags:(NSUInteger) textureFlags;
 
 - (void) deleteTextureID:(CGTextureID) textureID;
 
@@ -41,6 +46,19 @@
 - (void) forgetTextureID:(CGTextureID) textureID;
 
 
-- (void) deleteFramebuffer:(void *) framebuffer;
+- (void) deleteGPUFramebuffer:(CGGPUFramebuffer *) gpuFramebuffer;
+
+
+- (CGGPUTextureID) gpuTextureForTextureID:(CGTextureID) textureID;
+
+- (void) setRGBABytes:(void *) bytes
+         forTextureID:(CGTextureID) textureID;
+
+- (CGPixelSize) bitmapSizeForTextureID:(CGTextureID) textureID;
+
+
+// this is for transfer of unused framebuffers from the main thread back
+// to our context
+- (void) queueFramebufferForDeletion:(CGFramebuffer *) framebuffer   MULLE_OBJC_THREADSAFE_METHOD;
 
 @end

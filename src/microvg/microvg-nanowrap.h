@@ -4,6 +4,10 @@
 
 #include "nanovg.h"
 
+#include <mulle-c11/mulle-c11-bool.h>
+#include <mulle-c11/mulle-c11-integer.h>
+
+
 // This is the nanovg header wrapped for mulle-geometry and mulle-color types.
 // In order to not have to "think" too much which functions are available in
 // microvg and which in nanovg, all other functions that are available in
@@ -15,7 +19,11 @@
 typedef NSInteger    CGTextureID;
 typedef NSUInteger   CGShaderID;    // 0 is invalid
 typedef NSInteger    CGFontID;      // -1 == invalid
-typedef NSInteger    CGImageID;
+
+#define CGFontIDInvalid      -1  // FONS_INVALID
+#define CGShaderIDInvalid    0
+#define CGTextureIDInvalid   0
+
 
 
 // Begin drawing a new frame
@@ -28,19 +36,22 @@ typedef NSInteger    CGImageID;
 // devicePixelRatio to: frameBufferWidth / windowWidth.
 static inline void   mvgBeginFrame( NVGcontext *vg, CGSize windowSize, CGFloat devicePixelRatio)
 {
-   nvgBeginFrame( vg, windowSize.width, windowSize.height, devicePixelRatio);
+   if( vg)
+      nvgBeginFrame( vg, windowSize.width, windowSize.height, devicePixelRatio);
 }
 
 // Cancels drawing the current frame.
 static inline void   mvgCancelFrame( NVGcontext *vg)
 {
-   nvgCancelFrame( vg);
+   if( vg)
+      nvgCancelFrame( vg);
 }
 
 // Ends drawing flushing remaining render state.
 static inline void   mvgEndFrame( NVGcontext *vg)
 {
-   nvgEndFrame( vg);
+   if( vg)
+      nvgEndFrame( vg);
 }
 
 //
@@ -54,7 +65,8 @@ static inline void   mvgEndFrame( NVGcontext *vg)
 // Composite operation.
 static inline void   mvgGlobalCompositeOperation( NVGcontext *vg, NSInteger op)
 {
-   nvgGlobalCompositeOperation( vg, op);
+   if( vg)
+      nvgGlobalCompositeOperation( vg, op);
 }
 
 // Composite operation with custom pixel arithmetic.
@@ -62,7 +74,8 @@ static inline void   mvgGlobalCompositeBlendFunc( NVGcontext *vg,
                                                   NSUInteger sfactor,
                                                   NSUInteger dfactor)
 {
-   nvgGlobalCompositeBlendFunc( vg, sfactor, dfactor);
+   if( vg)
+      nvgGlobalCompositeBlendFunc( vg, sfactor, dfactor);
 }
 
 // Composite operation with custom pixel arithmetic for RGB and alpha components separately.
@@ -72,7 +85,8 @@ static inline void   mvgGlobalCompositeBlendFuncSeparate( NVGcontext *vg,
                                                           NSUInteger srcAlpha,
                                                           NSUInteger dstAlpha)
 {
-   nvgGlobalCompositeBlendFuncSeparate( vg, srcRGB, dstRGB, srcAlpha, dstAlpha);
+   if( vg)
+      nvgGlobalCompositeBlendFuncSeparate( vg, srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
 
@@ -84,28 +98,31 @@ static inline void   mvgGlobalCompositeBlendFuncSeparate( NVGcontext *vg,
 // The state contains transform, fill and stroke styles, text and font styles,
 // and scissor clipping.
 
-// Pushes and saves the current render state NSIntegero a state stack.
+// Pushes and saves the current render state into a state stack.
 // A matching nvgRestore() must be used to restore the state.
 
 // Sets the transparency applied to all rendered shapes.
-// Pushes and saves the current render state NSIntegero a state stack.
+// Pushes and saves the current render state into a state stack.
 static inline void   mvgSave( NVGcontext *vg)
 {
-   nvgSave( vg);
+   if( vg)
+      nvgSave( vg);
 }
 
 
 // Pops and restores the current render state from the state stack.
 static inline void   mvgRestore( NVGcontext *vg)
 {
-   nvgRestore( vg);
+   if( vg)
+      nvgRestore( vg);
 }
 
 
-// Pops and restores the current render state from the state stack.
+// Resets current render state to default values. Does not affect the render state stack.
 static inline void  mvgReset( NVGcontext *vg)
 {
-   nvgReset( vg);
+   if( vg)
+      nvgReset( vg);
 }
 
 //
@@ -118,64 +135,75 @@ static inline void  mvgReset( NVGcontext *vg)
 // Current render style can be saved and restored using nvgSave() and nvgRestore().
 
 // Sets whether to draw antialias for nvgStroke() and nvgFill(). It's enabled by default.
-static inline void   mvgShapeAntiAlias( NVGcontext *vg, int enabled)
+static inline void   mvgShapeAntiAlias( NVGcontext *vg, BOOL enable)
 {
-   nvgShapeAntiAlias( vg, enabled);
+   if( vg)
+      nvgShapeAntiAlias( vg, (int) enable);
 }
 
 // Sets the stroke style.
 static inline void   mvgStrokeColor( NVGcontext *vg, CGColor color)
 {
-   nvgStrokeColor( vg, color);
+   if( vg)
+      nvgStrokeColor( vg, color);
 }
 
 // Sets the stroke style with a paint.
 static inline void   mvgStrokePaint( NVGcontext *vg, NVGpaint paint)
 {
-   nvgStrokePaint( vg, paint);
+   if( vg)
+      nvgStrokePaint( vg, paint);
 }
 
 // Sets the fill style.
 static inline void   mvgFillColor( NVGcontext *vg, CGColor color)
 {
-   nvgFillColor( vg, color);
+   if( vg)
+      nvgFillColor( vg, color);
 }
 
 // Sets the fill style with a paint.
 static inline void   mvgFillPaint( NVGcontext *vg, NVGpaint paint)
 {
-   nvgFillPaint( vg, paint);
+   if( vg)
+      nvgFillPaint( vg, paint);
 }
 
 // Sets the miter limit of the stroke style.
 static inline void   mvgMiterLimit( NVGcontext *vg, CGFloat limit)
 {
-   nvgMiterLimit( vg, limit);
+   if( vg)
+      nvgMiterLimit( vg, limit);
 }
 
 // Sets the stroke width of the stroke style.
+// If size is -1, then don't do anthing
 static inline void   mvgStrokeWidth( NVGcontext *vg, CGFloat size)
 {
-   nvgStrokeWidth( vg, size);
+   if( vg && size >= 0.0)
+      nvgStrokeWidth( vg, size);
 }
 
 // Sets the line cap of the stroke style.
 static inline void   mvgLineCap( NVGcontext *vg, NSInteger cap)
 {
-   nvgLineCap( vg, cap);
+   if( vg)
+      nvgLineCap( vg, cap);
 }
 
 // Sets the line join of the stroke style.
 static inline void   mvgLineJoin( NVGcontext *vg, NSInteger join)
 {
-   nvgLineJoin( vg, join);
+   if( vg)
+      nvgLineJoin( vg, join);
 }
 
 // Sets the transparency applied to all rendered shapes.
 // Already transparent paths will get proportionally more transparent as well.
 static inline void   mvgGlobalAlpha( NVGcontext *vg, CGFloat alpha)
 {
-   nvgGlobalAlpha( vg, alpha);
+   if( vg)
+      nvgGlobalAlpha( vg, alpha);
 }
 
 
@@ -201,43 +229,50 @@ static inline void   mvgGlobalAlpha( NVGcontext *vg, CGFloat alpha)
 // Sets the global transform matrix to the result of current render target.
 static inline void   mvgResetTransform( NVGcontext *vg)
 {
-   nvgResetTransform( vg);
+   if( vg)
+      nvgResetTransform( vg);
 }
 
 // Premultiplies current coordinate system by specified matrix.
 static inline void   mvgTransform( NVGcontext *vg, CGFloat a, CGFloat b, CGFloat c, CGFloat d, CGFloat e, CGFloat f)
 {
-   nvgTransform( vg, a, b, c, d, e, f);
+   if( vg)
+      nvgTransform( vg, a, b, c, d, e, f);
 }
 
 // Translates current coordinate system.
 static inline void   mvgTranslate( NVGcontext *vg, CGPoint p)
 {
-   nvgTranslate( vg, p.x, p.y);
+   if( vg)
+      nvgTranslate( vg, p.x, p.y);
 }
 
 // Rotates current coordinate system.
 static inline void   mvgRotate( NVGcontext *vg, CARotation rotation)
 {
-   nvgRotate( vg, CARotationToRadians( rotation));
+   if( vg)
+      nvgRotate( vg, CARotationToRadians( rotation));
 }
 
 // Skews the current coordinate system along X axis.
 static inline void   mvgSkewX( NVGcontext *vg, CAAngle angle)
 {
-   nvgSkewX( vg, CAAngleToRadians( angle));
+   if( vg)
+      nvgSkewX( vg, CAAngleToRadians( angle));
 }
 
 // Skews the current coordinate system along Y axis.
 static inline void   mvgSkewY( NVGcontext *vg, CAAngle angle)
 {
-   nvgSkewY( vg, CAAngleToRadians( angle));
+   if( vg)
+      nvgSkewY( vg, CAAngleToRadians( angle));
 }
 
 // Scales the current coordinate system.
 static inline void   mvgScale( NVGcontext *vg, CGVector v)
 {
-   nvgScale( vg, v.dx, v.dy);
+   if( vg)
+      nvgScale( vg, v.dx, v.dy);
 }
 
 
@@ -253,7 +288,8 @@ typedef float   *mvgTransform_t;
 // Retrieves the current transform matrix.
 static inline void   mvgCurrentTransform( NVGcontext *vg, float xform[6])
 {
-   nvgCurrentTransform( vg, xform);
+   if( vg)
+      nvgCurrentTransform( vg, xform);
 }
 
 // Sets the transform to identity matrix.
@@ -306,9 +342,9 @@ static inline void   mvgTransformPremultiply( float dst[6], float src[6])
 
 // Sets the destination to inverse of specified transform.
 // Returns 1 if the inverse could be calculated, else 0.
-static inline NSInteger mvgTransformInverse( float dst[6], float src[6])
+static inline BOOL   mvgTransformInverse( float dst[6], float src[6])
 {
-   return nvgTransformInverse( dst, src);
+   return( nvgTransformInverse( dst, src));
 }
 
 
@@ -331,56 +367,69 @@ static inline CGPoint   mvgTransformPoint( float xform[ 6], CGPoint point)
 // Creates image by loading it from the disk from specified file name.
 // Returns handle to the image
 // Creates image by loading it from the disk from specified file name.
-static inline CGImageID   mvgCreateImage( NVGcontext *vg,
-                                          char *filename,
-                                          NSUInteger textureFlags)
+static inline CGTextureID   mvgCreateImage( NVGcontext *vg,
+                                            char *filename,
+                                            NSUInteger textureFlags)
 {
+   if( ! vg || ! filename)
+      return( CGTextureIDInvalid);
+
    return( nvgCreateImage( vg, filename, textureFlags));
 }
 
 
 // Creates image by loading it from the specified chunk of memory.
-static inline CGImageID   mvgCreateImageMem( NVGcontext *vg,
-                                             NSInteger textureFlags,
-                                             void *data,
-                                             size_t ndata)
+static inline CGTextureID   mvgCreateImageMem( NVGcontext *vg,
+                                               NSInteger textureFlags,
+                                               void *data,
+                                               size_t ndata)
 {
+   if( ! vg ||! data || ! ndata)
+      return( CGTextureIDInvalid);
    return( nvgCreateImageMem( vg, textureFlags, data, ndata));
 }
 
 
 // Creates image from specified image data.
-static inline CGImageID   mvgCreateImageRGBA( NVGcontext *vg,
-                                              NSInteger w,
-                                              NSInteger h,
-                                              NSUInteger textureFlags,
-                                              void *data)
+static inline CGTextureID   mvgCreateImageRGBA( NVGcontext *vg,
+                                                NSInteger w,
+                                                NSInteger h,
+                                                NSUInteger textureFlags,
+                                                void *data)
 {
+   if( ! vg || ! data)
+      return( CGTextureIDInvalid);
    return( nvgCreateImageRGBA( vg, w, h, textureFlags, data));
 }
 
 
 // Updates image data specified by image handle.
-static inline void   mvgUpdateImage( NVGcontext *vg, CGImageID image, void *data)
+static inline void   mvgUpdateImage( NVGcontext *vg, CGTextureID image, void *data)
 {
+   if( ! vg || ! data || image == CGTextureIDInvalid)
+      return;
    nvgUpdateImage( vg, image, (const unsigned char *) data);
 }
 
 
 // Returns the dimensions of a created image.
-static inline struct MulleIntegerSize  mvgImageSize( NVGcontext *vg, CGImageID image)
+static inline CGPixelSize  mvgImageSize( NVGcontext *vg, CGTextureID image)
 {
    int   w, h;
 
+   if( ! vg || image == CGTextureIDInvalid)
+      return( CGPixelSizeZero);
+
    nvgImageSize( vg, image, &w, &h);
-   return( MulleIntegerSizeMake( w, h));
+   return( CGPixelSizeMake( w, h));
 }
 
 
 // Deletes created image.
-static inline void   mvgDeleteImage( NVGcontext *vg, CGImageID image)
+static inline void   mvgDeleteImage( NVGcontext *vg, CGTextureID image)
 {
-   nvgDeleteImage( vg, image);
+   if( vg && image != CGTextureIDInvalid)
+      nvgDeleteImage( vg, image);
 }
 
 
@@ -398,6 +447,9 @@ static inline void   mvgDeleteImage( NVGcontext *vg, CGImageID image)
 static inline NVGpaint
    mvgLinearGradient( NVGcontext* vg, CGRect rect, CGColor icol, CGColor ocol)
 {
+   if( ! vg)
+      return( (NVGpaint){ 0});
+
    return( nvgLinearGradient( vg, CGRectGetMinX( rect),
                                   CGRectGetMinY( rect),
                                   CGRectGetMaxX( rect),
@@ -426,6 +478,9 @@ static inline NVGpaint
                    CGColor featherColor)
 {
    CGRect   gradientRect;
+
+   if( ! vg)
+      return( (NVGpaint){ 0});
 
    gradientRect = CGRectInset( rect, feather / 4.0, feather / 4.0);
    return( nvgBoxGradient( vg, gradientRect.origin.x,
@@ -456,6 +511,9 @@ static inline NVGpaint
                       CGFloat innerRadius,
                       CGColor innerColor)
 {
+   if( ! vg)
+      return( (NVGpaint){ 0});
+
    return( nvgRadialGradient( vg, circle.center.x,
                                   circle.center.y,
                                   innerRadius,
@@ -475,9 +533,12 @@ static inline NVGpaint
 static inline NVGpaint   mvgImagePattern( NVGcontext* vg,
                                           CGRect rect,
                                           CARotation rotation,
-                                          CGImageID image,
+                                          CGTextureID image,
                                           CGFloat alpha)
 {
+   if( ! vg || image == CGTextureIDInvalid)
+      return( (NVGpaint){ 0});
+
    return( nvgImagePattern( vg, rect.origin.x,
                                 rect.origin.y,
                                 rect.size.width,
@@ -492,8 +553,8 @@ static inline NVGpaint   mvgImagePattern( NVGcontext* vg,
 //
 // Scissoring
 //
-// Scissoring allows you to clip the rendering NSIntegero a rectangle. This is
-// useful for varioususer NSInterface cases like rendering a text edit or a
+// Scissoring allows you to clip the rendering into a rectangle. This is
+// useful for various user interface cases like rendering a text edit or a
 // timeline.
 
 
@@ -502,7 +563,8 @@ static inline NVGpaint   mvgImagePattern( NVGcontext* vg,
 // The scissor rectangle is transformed by the current transform.
 static inline void   mvgScissor( NVGcontext* vg, CGRect rect)
 {
-   nvgScissor( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+   if( vg)
+      nvgScissor( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
 }
 
 // Intersects current scissor rectangle with the specified rectangle.
@@ -513,14 +575,16 @@ static inline void   mvgScissor( NVGcontext* vg, CGRect rect)
 // transform space. The resulting shape is always rectangle.
 static inline void   mvgIntersectScissor( NVGcontext* vg, CGRect rect)
 {
-   nvgIntersectScissor( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+   if( vg)
+      nvgIntersectScissor( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
 }
 
 
 // Reset and disables scissoring.
 static inline void   mvgResetScissor( NVGcontext* vg)
 {
-   nvgResetScissor( vg);
+   if( vg)
+      nvgResetScissor( vg);
 }
 
 
@@ -544,49 +608,57 @@ static inline void   mvgResetScissor( NVGcontext* vg)
 // Clears the current path and sub-path
 static inline void   mvgBeginPath( NVGcontext *vg)
 {
-   nvgBeginPath( vg);
+   if( vg)
+      nvgBeginPath( vg);
 }
 
 // Starts new sub-path with specified point as first point.
 static inline void   mvgMoveTo( NVGcontext *vg, CGPoint point)
 {
-   nvgMoveTo( vg, point.x, point.y);
+   if( vg)
+      nvgMoveTo( vg, point.x, point.y);
 }
 
 // Adds line segment from the last point in the path to the specified point.
 static inline void   mvgLineTo( NVGcontext *vg, CGPoint point)
 {
-   nvgLineTo( vg, point.x, point.y);
+   if( vg)
+      nvgLineTo( vg, point.x, point.y);
 }
 
 // Adds cubic bezier segment from last point in the path via two control points to the specified point.
 static inline void   mvgBezierTo( NVGcontext *vg, CGPoint control1, CGPoint control2, CGPoint point)
 {
-   nvgBezierTo( vg, control1.x, control1.y, control2.x, control2.y, point.x, point.y);
+   if( vg)
+      nvgBezierTo( vg, control1.x, control1.y, control2.x, control2.y, point.x, point.y);
 }
 
 // Adds quadratic bezier segment from last point in the path via a control point to the specified point.
 static inline void   mvgQuadTo( NVGcontext *vg, CGPoint control, CGPoint point)
 {
-   nvgQuadTo( vg, control.x, control.y, point.x, point.y);
+   if( vg)
+      nvgQuadTo( vg, control.x, control.y, point.x, point.y);
 }
 
 // Adds an arc segment at the corner defined by the last path point, and two specified points.
 static inline void   mvgArcTo( NVGcontext *vg, CGPoint tangent1, CGPoint tangent2, CGFloat radius)
 {
-   nvgArcTo( vg, tangent1.x, tangent1.y, tangent2.x, tangent2.y, radius);
+   if( vg)
+      nvgArcTo( vg, tangent1.x, tangent1.y, tangent2.x, tangent2.y, radius);
 }
 
 // Closes current sub-path with a line segment.
 static inline void   mvgClosePath( NVGcontext *vg)
 {
-   nvgClosePath( vg);
+   if( vg)
+      nvgClosePath( vg);
 }
 
 // Sets the current sub-path winding, see NVGwinding and NVGsolidity.
 static inline void   mvgPathWinding( NVGcontext *vg, NSInteger dir)
 {
-   nvgPathWinding( vg, dir);
+   if( vg)
+      nvgPathWinding( vg, dir);
 }
 
 // Creates new circle arc shaped sub-path
@@ -596,18 +668,20 @@ static inline void   mvgArc( NVGcontext *vg,
                              CAAngle a1, 
                              NSInteger dir)
 {
-   nvgArc( vg, circle.center.x,
-               circle.center.y,
-               circle.radius,
-               CAAngleToRadians( a0),
-               CAAngleToRadians( a1),
-               dir);
+   if( vg)
+      nvgArc( vg, circle.center.x,
+                  circle.center.y,
+                  circle.radius,
+                  CAAngleToRadians( a0),
+                  CAAngleToRadians( a1),
+                  dir);
 }
 
 // Creates new rectangle shaped sub-path.
 static inline void   mvgRect( NVGcontext *vg, CGRect rect)
 {
-   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+   if( vg)
+      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
 }
 
 
@@ -616,49 +690,63 @@ static inline void   mvgRoundedRectVarying( NVGcontext *vg,
                                             CGRect rect,
                                             struct MulleCornerInsets insets)
 {
-   void _mvgRoundedRectVarying(NVGcontext* ctx, float x, float y, float w, float h,
+   void _mvgRoundedRectVarying( NVGcontext* vg, float x, float y, float w, float h,
                                             float radTopLeft, float radTopRight,
                                             float radBottomRight, float radBottomLeft);
 
-   _mvgRoundedRectVarying( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height,
-                               insets.topLeft, insets.topRight, insets.bottomRight, insets.bottomLeft);
+   if( vg)
+      _mvgRoundedRectVarying( vg, rect.origin.x,
+                                  rect.origin.y,
+                                  rect.size.width,
+                                  rect.size.height,
+                                  insets.topLeft,
+                                  insets.topRight,
+                                  insets.bottomRight,
+                                  insets.bottomLeft);
 }
 
 // Creates new rounded rectangle shaped sub-path.
 // this function accepts negative radius
 static inline void   mvgRoundedRect( NVGcontext *vg, CGRect rect, CGFloat r)
 {
-   mvgRoundedRectVarying( vg, rect, MulleCornerInsetsMakeWithCornerRadius( r));
+   if( vg)
+      mvgRoundedRectVarying( vg, rect, MulleCornerInsetsMakeWithCornerRadius( r));
 }
 
 
 // Creates new ellipse shaped sub-path.
 static inline void   mvgEllipse( NVGcontext *vg, CGPoint center, CGFloat rx, CGFloat ry)
 {
-   nvgEllipse( vg, center.x, center.y, rx, ry);
+   if( vg)
+      nvgEllipse( vg, center.x, center.y, rx, ry);
 }
 
 // Creates new circle shaped sub-path.
 static inline void   mvgCircle( NVGcontext *vg, CACircle circle)
 {
-   nvgCircle( vg, circle.center.x, circle.center.y, circle.radius);
+   if( vg)
+      nvgCircle( vg, circle.center.x, circle.center.y, circle.radius);
 }
 
 // Fills the current path with current fill style.
 static inline void   mvgFill( NVGcontext *vg)
 {
-   nvgFill( vg);
+   if( vg)
+      nvgFill( vg);
 }
 
 // Fills the current path with current stroke style.
 static inline void   mvgStroke( NVGcontext *vg)
 {
-   nvgStroke( vg);
+   if( vg)
+      nvgStroke( vg);
 }
 
 // Creates font by loading it from the disk from specified file name.
 static inline CGFontID   mvgCreateFont( NVGcontext *vg, char *name, char *filename)
 {
+   if( ! vg || ! name || ! filename)
+      return( CGFontIDInvalid);
    return nvgCreateFont( vg, name, filename);
 }
 
@@ -667,113 +755,137 @@ static inline CGFontID   mvgCreateFontMem( NVGcontext *vg,
                                            char *name,
                                            void * data, 
                                            size_t length,
-                                           int freeData)
+                                           BOOL freeData)
 {
-   return nvgCreateFontMem( vg, name, data, length, freeData);
+   if( ! vg || ! name || ! data || ! length)
+      return( CGFontIDInvalid);
+   return( nvgCreateFontMem( vg, name, data, length, freeData));
 }
 
 // Finds a loaded font of specified name, and returns handle to it, or -1 if the font is not found.
-static inline NSInteger   mvgFindFont( NVGcontext *vg, char *name)
+static inline CGFontID   mvgFindFont( NVGcontext *vg, char *name)
 {
-   return nvgFindFont( vg, name);
+   if( ! vg)
+      return( CGFontIDInvalid);
+   return( nvgFindFont( vg, name));
 }
 
 
 // Adds a fallback font by handle.
-static inline int   mvgAddFallbackFontId( NVGcontext* ctx, int baseFont, int fallbackFont)
+static inline CGFontID   mvgAddFallbackFontId( NVGcontext* vg, CGFontID baseFont, CGFontID fallbackFont)
 {
-   return nvgAddFallbackFontId( ctx, baseFont, fallbackFont);
+   if( ! vg || ! baseFont || ! fallbackFont)
+      return( CGFontIDInvalid);
+
+   return nvgAddFallbackFontId( vg, baseFont, fallbackFont);
 }
 
 
 // Adds a fallback font by name.
-static inline int   mvgAddFallbackFont( NVGcontext *ctx, char *baseFont, char *fallbackFont)
+static inline CGFontID   mvgAddFallbackFont( NVGcontext *vg, char *baseFont, char *fallbackFont)
 {
-   return nvgAddFallbackFont( ctx, (const char *) baseFont, (const char *) fallbackFont);
+   if( ! vg || ! baseFont || ! fallbackFont)
+      return( CGFontIDInvalid);
+   return nvgAddFallbackFont( vg, (const char *) baseFont, (const char *) fallbackFont);
 }
 
 
 // Resets fallback fonts by handle.
-static inline void   mvgResetFallbackFontsId( NVGcontext *ctx, int baseFont)
+static inline void   mvgResetFallbackFontsId( NVGcontext *vg, NSInteger baseFont)
 {
-   nvgResetFallbackFontsId( ctx, baseFont);
+   if( vg)
+      nvgResetFallbackFontsId( vg, baseFont);
 }
 
 
 // Resets fallback fonts by name.
-static inline void   mvgResetFallbackFonts( NVGcontext *ctx, char *baseFont)
+static inline void   mvgResetFallbackFonts( NVGcontext *vg, char *baseFont)
 {
-   nvgResetFallbackFonts( ctx, baseFont);
+   if( vg)
+      nvgResetFallbackFonts( vg, baseFont);
 }
 
 
 // Sets the font size of current text style.
 static inline void   mvgFontSize( NVGcontext *vg, CGFloat size)
 {
-   nvgFontSize( vg, size);
+   if( vg)
+      nvgFontSize( vg, size);
 }
 
 // Sets the blur of current text style.
 static inline void   mvgFontBlur( NVGcontext *vg, CGFloat blur)
 {
-   nvgFontBlur( vg, blur);
+   if( vg)
+      nvgFontBlur( vg, blur);
 }
 
 // Sets the letter spacing of current text style.
 static inline void   mvgTextLetterSpacing( NVGcontext *vg, CGFloat spacing)
 {
-   nvgTextLetterSpacing( vg, spacing);
+   if( vg)
+      nvgTextLetterSpacing( vg, spacing);
 }
 
 // Sets the line height of current text style.
 static inline void   mvgTextLineHeight( NVGcontext *vg, CGFloat lineHeight)
 {
-   nvgTextLineHeight( vg, lineHeight);
+   if( vg)
+      nvgTextLineHeight( vg, lineHeight);
 }
 
 // Sets the text align of current text style.
 static inline void   mvgTextAlign( NVGcontext *vg, NSUInteger align)
 {
-   nvgTextAlign( vg, align);
+   if( vg)
+      nvgTextAlign( vg, align);
 }
 
 // Sets the font face based on specified id(font handle).
 static inline void   mvgFontFaceId( NVGcontext *vg, CGFontID fontID)
 {
-   nvgFontFaceId( vg, fontID);
+   if( vg)
+      nvgFontFaceId( vg, fontID);
 }
 
 // Sets the font face based on specified name.
 static inline void   mvgFontFace( NVGcontext *vg, char *fontname)
 {
-   nvgFontFace( vg, fontname);
+   if( vg)
+      nvgFontFace( vg, fontname);
 }
 
 // Draws text string at specified location.
-static inline CGFloat mvgText( NVGcontext *vg, CGPoint point, char *s, size_t length)
+static inline CGFloat   mvgText( NVGcontext *vg, CGPoint point, char *s, size_t length)
 {
    char   *end;
+
+   if( ! vg | ! s)
+      return( 0.0);
 
    end = (length == (size_t) -1) ? NULL : &s[ length];
    return( nvgText( vg, point.x, point.y, s, end));
 }
 
 // use after mvgTextColor not before
-static inline void   mvgClearType( NVGcontext *vg, int enable)
+static inline void   mvgClearType( NVGcontext *vg, BOOL enable)
 {
-   nvgClearType( vg, enable);
+   if( vg)
+      nvgClearType( vg, (int) enable);
 }
 
 
 static inline void   mvgTextColor( NVGcontext *vg, CGColor color)
 {
-   nvgTextColor( vg, color);
+   if( vg)
+      nvgTextColor( vg, color);
 }
 
 // use after mvgTextColor not before
 static inline void   mvgTextBackgroundColor( NVGcontext *vg, CGColor color)
 {
-   nvgTextBackgroundColor( vg, color);
+   if( vg)
+      nvgTextBackgroundColor( vg, color);
 }
 
 
@@ -782,15 +894,18 @@ static inline void   mvgTextBackgroundColor( NVGcontext *vg, CGColor color)
 // Returns the horizontal advance of the measured text
 // (i.e. where the next character should drawn).
 // Measured values are returned in local coordinate space.
-static inline float   mvgTextBounds( NVGcontext *vg,
-                                     CGPoint point,
-                                     char *s,
-                                     size_t length,
-                                     CGRect *bbox)
+static inline CGFloat   mvgTextBounds( NVGcontext *vg,
+                                       CGPoint point,
+                                       char *s,
+                                       size_t length,
+                                       CGRect *bbox)
 {
    float  w;
    float  bounds[ 4];
    char   *end;
+
+   if( ! vg || ! s)
+      return( 0.0);
 
    end = (length == (size_t) -1) ? NULL : &s[ length];
    w   = nvgTextBounds( vg, point.x, point.y, s, end, bbox ? bounds : NULL);
@@ -811,6 +926,12 @@ static inline void   mvgTextVisualBounds( NVGcontext *vg,
 {
    float  bounds[ 6];
    char   *end;
+
+   if( ! vg || ! s)
+   {
+      memset( vbounds, 0, sizeof( CGRect));
+      return;
+   }
 
    end = (length == (size_t) -1) ? NULL : &s[ length];
    nvgTextVisualBounds( vg, point.x, point.y, s, end, bounds);
@@ -836,6 +957,12 @@ static inline void
    float  bounds[ 4];
    char   *end;
 
+   if( ! vg || ! s)
+   {
+      memset( bbox, 0, sizeof( CGRect));
+      return;
+   }
+
    end = (length == (size_t) -1) ? NULL : &s[ length];
    nvgTextBoxBounds( vg, point.x, point.y, breakRowWidth, s, end, bounds);
    *bbox = CGRectMake( bounds[ 0],
@@ -845,7 +972,7 @@ static inline void
 }
 
 // Calculates the glyph x positions of the specified text. If end is specified only the sub-string will be used.
-static inline void   
+static inline NSUInteger
    mvgTextGlyphPositions( NVGcontext *vg,
                           CGPoint point, 
                           char *s,
@@ -855,15 +982,18 @@ static inline void
 {
    char   *end;
 
+   if( ! vg || ! s)
+      return( 0);
+
    end = (length == (size_t) -1) ? NULL : &s[ length];
-   nvgTextGlyphPositions( vg, point.x, point.y,
-                              s, end,
-                              (NVGglyphPosition *) positions, maxPositions);
+   return( nvgTextGlyphPositions( vg, point.x, point.y,
+                                      s, end,
+                                      (NVGglyphPosition *) positions, maxPositions));
 }
 
 
 
-// Breaks the specified text NSIntegero lines.
+// Breaks the specified text into lines.
 static inline NSInteger   mvgTextBreakLines( NVGcontext *vg, 
                                              char *s,
                                              size_t length,
@@ -872,6 +1002,9 @@ static inline NSInteger   mvgTextBreakLines( NVGcontext *vg,
                                              NSInteger maxRows)
 {
    char   *end;
+
+   if( ! vg || ! s)
+      return( 0);
 
    end = (length == (size_t) -1) ? NULL : &s[ length];
    return( nvgTextBreakLines( vg, s, end,
@@ -883,13 +1016,17 @@ static inline NSInteger   mvgTextBreakLines( NVGcontext *vg,
 // Creates a NanoVG context with specified flags.
 static inline NVGcontext * mvgCreateInternal( NVGparams *params)
 {
+   if( ! params)
+      return( NULL);
+
    return( nvgCreateInternal( params));
 }
 
 // Deletes a NanoVG context created with nvgCreateInternal.
 static inline void   mvgDeleteInternal( NVGcontext *vg)
 {
-   nvgDeleteInternal( vg);
+   if( vg)
+      nvgDeleteInternal( vg);
 }
 
 #endif

@@ -162,7 +162,7 @@ static void  drawShifted( struct NVGcontext *vg, CGImage *image, CGRect rect, NS
 }
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              canvas;
@@ -189,7 +189,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon
    image   = [[[CGImage alloc] initWithRGBABytes:bitmap
-                                      bitmapSize:MulleIntegerSizeMake( IW, IH)
+                                      bitmapSize:CGPixelSizeMake( IW, IH)
                                     textureFlags:0  // NVG_IMAGE_REPEATX
                                          context:context] autorelease];
    assert( image);
@@ -226,7 +226,7 @@ void   setupScene( UIWindow *window)
 
    frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentView] setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
+   [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
 
@@ -248,7 +248,7 @@ int   main( int argc, char *argv[])
       setupScene( window);
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

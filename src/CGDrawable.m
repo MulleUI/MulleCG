@@ -33,7 +33,7 @@ CGDrawableOptions   CGDrawableOptionsScaleToFit =
 
 PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 
-- (struct MulleIntegerSize) bitmapSize
+- (CGPixelSize) bitmapSize
 {
    return( [self bitmapInfo].size);
 }
@@ -41,7 +41,7 @@ PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 
 - (CGSize) size
 {
-   struct MulleIntegerSize   size;
+   CGPixelSize   size;
 
    size = [self bitmapSize];
 
@@ -497,11 +497,13 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
 {
    CGRect   patternRect;
    CGRect   placedRect;
+   CGSize   size;
 
    if( ! options)
       options = &CGDrawableOptionsDefault;
 
-   patternRect.size = CGBitmapDrawableGetBitmapExtent( self, rect.size, [self size], options);
+   size             =  [self size];
+   patternRect.size = CGBitmapDrawableGetBitmapExtent( self, rect.size, size, options);
 
    //
    // the nvg texture rotation is around the top left corner, but that's
@@ -523,16 +525,46 @@ void  CGBitmapDrawableDrawRect( id <CGBitmapDrawable> self,
 CGRect   CGDrawablePatternRect( id <CGDrawable> self,
                                 CGRect rect,
                                 CGRect fromRect,
-                                CAAngle rotation)
+                                CGDrawableOptions *options)
 {
    CGSize              size;
    CGRect              sectionRect;
    CGRect              r;
    CGAffineTransform   xform;
    CGPoint             texturePoint;
+   CGPoint             scale;
+   CGPoint             factor;
 
    size        = [self size];
-   xform       = CGRectReverseImageMapperTransform( rect, rotation, rect.size, size);
+   xform       = CGRectReverseImageMapperTransform( rect, options->rotation, rect.size, size);
+
+   if( ! options->flags.textureOverreach &&
+         options->scale != CGScaleNone
+         && fromRect.size.width != 0.0 && fromRect.size.height != 0.0)
+   {
+      //
+      // Unfortunately OpenGL "overreaches" into neighboring texturing, when
+      // scaling up the pixels... so we correct this, otherwise you get ugly
+      // artifacts and borders...
+      //
+      factor.x      = 0.0;
+      factor.y      = 0.0;
+      scale.x       = rect.size.width  / fromRect.size.width;
+      scale.y       = rect.size.height / fromRect.size.height;
+      if( scale.x > 1.0)
+         factor.x = scale.x < 2.0
+                    ? (rect.size.width - fromRect.size.width) / fromRect.size.width / 2.0
+                    : 0.5;
+      if( scale.y > 1.0)
+         factor.y = scale.y < 2.0
+                    ? (rect.size.height - fromRect.size.height) / fromRect.size.height / 2.0
+                    : 0.5;
+
+      fromRect.origin.x    += factor.x;
+      fromRect.origin.y    += factor.y;
+      fromRect.size.width  -= factor.x * 2.0;
+      fromRect.size.height -= factor.y * 2.0;
+   }
    // if fromRect is { CGPointZero, [self size] }, then sectionRect should be
    // exactly rect, otherwise we get a subsection of rect
    sectionRect = CGRectApplyAffineTransform( fromRect, xform);
@@ -555,7 +587,7 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self,
 
    r.origin = CGRectGetOriginToTexturePointForRotationAndExtent( rect,
                                                                  texturePoint,
-                                                                 rotation,
+                                                                 options->rotation,
                                                                  r.size);
    return( r);
 }
@@ -575,7 +607,7 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self,
    assert( options->flags.repeat      == CGRepeatNone || options->flags.repeat == CGRepeatAsIs);
    assert( options->flags.contentMode == CGContentModeCenterPoint);
 
-   r = CGDrawablePatternRect( self, rect, fromRect, options->rotation);
+   r = CGDrawablePatternRect( self, rect, fromRect, options);
 
    // punkt: 
 

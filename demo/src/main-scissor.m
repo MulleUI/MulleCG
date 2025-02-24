@@ -3,7 +3,7 @@
 #import "import-private.h"
 
 
-static BOOL   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
    struct NVGcontext   *vg;
@@ -52,7 +52,7 @@ int   main( int argc, char *argv[])
    [window setFrameRateHz:60.0f];
    [app addWindow:window];
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

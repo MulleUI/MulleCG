@@ -127,7 +127,7 @@ static inline void   ParticleUpdate( struct Particle *p, CGSize canvasSize)
 }
 
 
-@interface ParticlesLayer : CALayer
+@interface ParticlesLayer : CGGraphicsLayer
 {
    struct Particle   *_particles;
 }
@@ -240,15 +240,14 @@ int   main()
    window     = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
                           titleUTF8String:"Demo"
                                 styleMask:styleMask];
-   [app addWindow:window];
-
    [window setBackgroundColor:CGColorMakeWithRGBA( 0.0, 0.0, 0.0, 1.0)];
    [window setFrameRate:UIWindowFrameRateSynced];
    setupSceneInView( [window contentView]);
 
    [window setFrameDelegate:[MulleUIPerf object]];
+   [app addWindow:window];
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

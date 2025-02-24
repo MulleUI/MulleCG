@@ -54,7 +54,7 @@
 //
 
 //Particle object with random starting position, velocity and color
-@interface ParticleLayer : CALayer
+@interface ParticleLayer : CGGraphicsLayer
 {
    CGPoint      location;
    CGVector     velocity;
@@ -204,7 +204,7 @@ int   main()
    app    = [UIApplication sharedInstance];
    window = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
                       titleUTF8String:"Demo"
-                            styleMask:UIWindowStylePanes |
+                            styleMask:UIWindowStylePlanes |
                                       (EDGE_ANTIALIAS ? UIWindowStyleAntiAlias : UIWindowStyleNop)];
    [app addWindow:window];
 
@@ -213,7 +213,7 @@ int   main()
 
    setupSceneInView( [window contentView]);
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

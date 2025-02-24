@@ -8,7 +8,7 @@
 #include "bitmap2.inc"
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              canvas;
@@ -34,7 +34,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon
    image   = [[[CGImage alloc] initWithRGBABytes:bitmap2
-                                      bitmapSize:MulleIntegerSizeMake( 32, 32)
+                                      bitmapSize:CGPixelSizeMake( 32, 32)
                                     textureFlags:0  // NVG_IMAGE_REPEATX
                                          context:context] autorelease];
    assert( image);
@@ -152,12 +152,14 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
+   UIView   *contentView;
    CGRect   frame;
 
-   frame  = [[window contentPlane] contentRect];
+   contentView = [window contentView];
+   frame  = [contentView contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentPlane] setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
-   [[window contentPlane] addSubview:view];
+   [contentView setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
+   [contentView addSubview:view];
 }
 
 
@@ -178,7 +180,7 @@ int   main( int argc, char *argv[])
       setupScene( window);
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

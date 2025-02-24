@@ -1,6 +1,71 @@
-#define _GNU_SOURCE
+#import "import.h"
 
-#import "import-private.h"
+#import <string.h>
+
+
+#define FONT_SIZE   10
+
+
+static BOOL   drawStuff( CGGraphicsLayer *self, CGContext *context)
+{
+   struct NVGcontext   *vg;
+   CGRect              rect;
+   CGRect              textRect;
+
+   [context useFontWithNameUTF8String:"mono"];
+   vg = CGContextGetNVGContext( context);
+
+
+   rect = CGRectMake( 100, 100, FONT_SIZE * 10, FONT_SIZE * 10);
+   rect = CGRectIntegral( rect);
+
+   nvgBeginPath( vg);
+   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+   nvgFillColor( vg, CGColorMakeBlack());
+   nvgFill( vg);
+
+   mvgSave( vg);
+   {
+      mvgIntersectScissor( vg, rect);
+
+      mvgTextColor( vg, CGColorMakeWhite());
+      mvgTextBackgroundColor( vg,  CGColorMakeBlack());
+
+      textRect = CGRectInset( rect, 4.0, 4.0);
+      mvgFontSize( vg, FONT_SIZE);
+      mvgFormatInRect( vg, textRect, CGContentModeLeft|CGContentModeTop, 0, "%s", CGPointUTF8String( rect.origin));
+      mvgFormatInRect( vg, textRect, CGContentModeRight|CGContentModeBottom, 0, "%s", CGSizeUTF8String( rect.size));
+   }
+   mvgRestore( vg);
+   return( YES);
+}
+
+
+
+int   main()
+{
+   UIWindow        *window;
+   UIApplication   *app;
+   UIView          *view;
+
+   /*
+    * window and app
+    */
+   app = [UIApplication sharedInstance];
+   @autoreleasepool
+   {
+      window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 800.0, 600.0)];
+      [window setBackgroundColor:CGColorMakeGray()];
+
+      view  = [window contentView];
+      [view setDrawCallback:drawStuff];
+      [app addWindow:window];
+   }
+   return( [app runApp]);
+}
+
+
+
 
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
@@ -37,3 +102,4 @@
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+

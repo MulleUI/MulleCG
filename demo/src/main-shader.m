@@ -1,4 +1,8 @@
+#define GLFW_INCLUDE_ES3
+
 #import "import.h"
+
+#import "import-private.h"
 
 #define DRAW_TEXTURE
 
@@ -102,7 +106,7 @@ static MulleUIResourceStorageKeyDefine( test_image);
 
 #ifdef DRAW_TEXTURE
    image = [context imageWithRGBABytes:bitmap2
-                            bitmapSize:MulleIntegerSizeMake( 32, 32)
+                            bitmapSize:CGPixelSizeMake( 32, 32)
                           textureFlags:0
                            resourceKey:MulleUIResourceStorageKey( test_image)];
    assert( image);
@@ -155,7 +159,7 @@ static void   usage( void)
 {
    fprintf( stderr, "\n"
 "Usage:\n"
-"   arc-cw [options]\n"
+"   shader [options]\n"
 "\n"
 "Options:\n"
 "   -a      : disable default antialias (nvg/glfw)\n"
@@ -184,6 +188,7 @@ int   main( int argc, char *argv[])
    {
       if( argv[ i][ 0] != '-')
          break;
+
       switch( argv[ i][ 1])
       {
       case 'a' :
@@ -213,7 +218,7 @@ int   main( int argc, char *argv[])
    app = [UIApplication sharedInstance];
    @autoreleasepool
    {
-      [CGContext setDebugEnabled:YES];
+      [CGContext setDebuggingFlags:YES];
       layer  = [DemoLayer layerWithFrame:CGRectMake( 20, 20, 600, 340)];
       window = [UIWindow windowWithLayer:layer
                          titleUTF8String:"Demo"
@@ -224,7 +229,7 @@ int   main( int argc, char *argv[])
       [window setFrameRateHz:1.0];
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

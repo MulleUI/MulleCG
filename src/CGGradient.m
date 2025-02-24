@@ -10,6 +10,7 @@
 
 #import "CGPaint+Private.h"
 #import "CGGradient+Private.h"
+#import "CGColor+UTF8String.h"
 #include "CGColorDiff.h"
 
 
@@ -73,9 +74,9 @@
 
 - (CGGradient *) rotatedGradient:(CARotation) rotation
 {
-   return( [_CGTwoColorGradient newWithStartColor:_startColor
-                                         endColor:_endColor
-                                         rotation:_rotation + rotation]);
+   return( [[_CGTwoColorGradient newWithStartColor:_startColor
+                                          endColor:_endColor
+                                          rotation:_rotation + rotation] autorelease]);
 }
 
 
@@ -226,8 +227,6 @@
 
 
 @implementation CGGradient
-
-
 
 static id   CGGradientNewWithStartColorAndEndColor(
                                         CGColor startColor,
@@ -412,10 +411,10 @@ static id   CGGradientNewWithColors( CGColor *colors,
    CGGradient   *gradient;
 
    count = [self numberOfColors];
-   mulle_flexarray_do( tmp_locations, float, 8, count)
+   mulle_alloca_do( tmp_locations, float, count)
    {
       [self getLocations:tmp_locations];
-      mulle_flexarray_do( tmp_colors, CGColor, 8, count)
+      mulle_alloca_do( tmp_colors, CGColor, count)
       {
          [self getColors:tmp_colors];
          gradient = [CGGradient gradientWithColors:tmp_colors
@@ -448,10 +447,10 @@ static id   CGGradientNewWithColors( CGColor *colors,
    NSUInteger   i;
 
    count = [self numberOfColors];
-   mulle_flexarray_do( tmp_locations, float, 8, count)
+   mulle_alloca_do( tmp_locations, float, count)
    {
       [self getLocations:tmp_locations];
-      mulle_flexarray_do( tmp_colors, CGColor, 8, count)
+      mulle_alloca_do( tmp_colors, CGColor, count)
       {
          [self getColors:tmp_colors];
          for( i = 0; i < count; i++)
@@ -507,4 +506,3 @@ static CGColor   alphizer( CGColor color, void *alpha_p)
 
 
 @end
-

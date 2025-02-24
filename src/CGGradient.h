@@ -13,7 +13,7 @@
 // drawing into concentric circles or rects. Circles need a little overlap
 // to avoid ugliness.
 //
-@interface CGGradient : CGPaint < MulleObjCClassCluster, NSCopying>
+@interface CGGradient : CGPaint < MulleObjCClassCluster, NSCopying, MulleObjCValueProtocols>
 
 @property( readonly) CGFloat   rotation;
 

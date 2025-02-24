@@ -373,7 +373,7 @@ static void   drawRoundedRect( struct NVGcontext *vg, CGRect canvas, struct Mull
 }
 
 
-static BOOL   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                  *context = _context;
    struct NVGcontext          *vg;
@@ -420,7 +420,7 @@ int   main( int argc, char *argv[])
    [[window contentView] setDrawCallback:drawStuff];
    [app addWindow:window];
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

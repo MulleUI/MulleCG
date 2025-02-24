@@ -13,33 +13,6 @@
 @implementation CGLayoutContext
 
 
-static struct
-{
-   mulle_thread_mutex_t   _freeTypeLock;
-} Self;
-
-
-
-+ (void) initialize
-{
-   if( MulleObjCClassGetID( self) != @selector( CGLayoutContext))
-      return;
-
-   mulle_thread_mutex_init( &Self._freeTypeLock);
-}
-
-
-
-+ (void) deinitialize
-{
-   if( MulleObjCClassGetID( self) != @selector( CGLayoutContext))
-      return;
-
-   mulle_thread_mutex_done( &Self._freeTypeLock);
-}
-
-
-
 - (id) init 
 {
    self = [super init];
@@ -72,25 +45,25 @@ static struct
 }
 
 
+- (void) mulleGainAccess
+{
+   [super mulleGainAccess];
+   [self mulleGainAccessToFonts];
+}
+
+
+- (void) mulleRelinquishAccess
+{
+   [self mulleRelinquishAccessToFonts];
+   [super mulleRelinquishAccess];
+}
+
+
 - (float) getTextBounds:(CGRect *) bounds
                    text:(char *) text
                  length:(NSUInteger) length
 {
-   char    *end;
-   float   values[ 4];
-   float   extent;
-
-   assert( text);
-
-   end = &text[ length == (NSUInteger) -1 ? strlen( text) : length];
-
-   extent = nvgTextBounds( _vg, 0.0f, 0.0f, text, end, bounds ? values : NULL);
-   if( bounds)
-      *bounds = CGRectMake( values[ 0],
-                            values[ 1],
-                            values[ 2] - values[ 0],
-                            values[ 3] - values[ 1]);
-   return( extent);
+   return( mvgTextBounds( _vg, CGPointZero, text, length, bounds));
 }
 
 
@@ -98,24 +71,12 @@ static struct
                         text:(char *) text
                       length:(NSUInteger) length
 {
-   char    *end;
-   float   bounds[ 6];
-
-   if( ! visualBounds)
-      return;
-
-   assert( text);
-
-   end = &text[ length == (NSUInteger) -1 ? strlen( text) : length];
-
-   nvgTextVisualBounds( _vg, 0.0f, 0.0f, text, end, bounds);
-   *visualBounds = CGRectMake( bounds[ 0],
-                               bounds[ 1],
-                               bounds[ 2] - bounds[ 0],
-                               bounds[ 3] - bounds[ 1]);
+   mvgTextVisualBounds( _vg, CGPointZero, text, length, visualBounds);
 }
 
 
+// TODO: whats the deal with UITextMetrix and MulleTextMetrics ?
+//       needs fixing!!
 - (void) getTextMetrics:(struct UITextMetrics *) metrics;
 {
    if( ! metrics)
@@ -132,18 +93,11 @@ static struct
                             text:(char *) text
                           length:(NSUInteger) length
 {
-   char   *end;
-   int    n;
-
-   assert( text);
-
-   end = &text[ length == (NSUInteger) -1 ? strlen( text) : length];
-
-   n   = nvgTextGlyphPositions( _vg, 0.0f, 0.0f,
-                                     text, end,
-                                     (NVGglyphPosition *) positions,
-                                     (int) count);
-   return( n);
+   return( mvgTextGlyphPositions( _vg, CGPointZero,
+                                       text,
+                                       length,
+                                       positions,
+                                       count));
 }
 
 
@@ -154,22 +108,11 @@ static struct
                    length:(NSUInteger) length
             breakRowWidth:(CGFloat) breakRowWidth
 {
-   char   *end;
-   int    n;
-
-   end = &text[ length == (NSUInteger) -1 ? strlen( text) : length];
-   n   = nvgTextBreakLines( _vg,
-                            text, end,
-                            breakRowWidth,
-                            (NVGtextRow *) rows,
-                            (int) count);
-//   MulleUICLog( "%.*s: %g (%d of %td)",
-//                  (int) (end - text),
-//                  text,
-//                  breakRowWidth,
-//                  n,
-//                  count);
-   return( n);
+   return( mvgTextBreakLines( _vg, text,
+                                   length,
+                                   breakRowWidth,
+                                   rows,
+                                   count));
 }
 
 
@@ -220,6 +163,57 @@ static struct
    font = [self defaultFont];
    assert( font);
    [self useFont:font];
+}
+
+
+- (CGFloat) fontSizeThatFitsIntoSize:(CGSize) size
+{
+   CGRect    fontBounds;
+   CGRect    bounds;
+   CGFloat   min;
+   CGFloat   max;
+   CGFloat   fontSize;
+   char      *s;
+
+   // default vert is larger
+   min = size.width;
+   max = size.height;
+   if( min > max)
+   {
+      min = size.height;
+      max = size.width;
+   }
+   min = floor( min);
+   max = ceil( max);
+
+   if( min < 1.0)
+      return( 0.0);
+
+   fontSize = roundf( size.height);
+
+   [self setTextAlign:NVG_ALIGN_LEFT | NVG_ALIGN_TOP];
+
+   while( fontSize > 1.0)
+   {
+      [self setFontSize:fontSize];  // calculate size for 32
+      bounds = CGRectZero;
+      s      = "|_yX`";
+      do
+      {
+         [self getTextVisualBounds:&fontBounds
+                              text:s
+                            length:1];
+         bounds = CGRectUnion( fontBounds, bounds);
+         ++s;
+      }
+      while( *s);
+
+      if( CGSizeContainsSize( size, bounds.size))
+         return( fontSize);
+      fontSize -= 0.5f;
+   }
+
+   return( 0.0);
 }
 
 @end

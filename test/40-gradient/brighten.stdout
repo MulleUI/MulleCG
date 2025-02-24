@@ -1,0 +1,53 @@
+gradient (0):
+brightened (0) (0):
+brightened (0.5) (0):
+gradient (1):
+	0: 0 = 0x8A2BE2FF
+brightened (0) (1):
+	0: 0 = 0x8A2AE2FF
+brightened (0.5) (1):
+	0: 0 = 0xFFFFFFFF
+gradient (2):
+	0: 0 = 0x808080FF
+	1: 1 = 0xFFFFFFFF
+brightened (0) (2):
+	0: 0 = 0x808080FF
+	1: 1 = 0xFFFFFFFF
+brightened (0.5) (1):
+	0: 0 = 0xFFFFFFFF
+gradient (5):
+	0: 0 = 0x000000FF
+	1: 0.25 = 0x32CD32FF
+	2: 0.5 = 0xFFE4C4FF
+	3: 0.75 = 0xDC143CFF
+	4: 1 = 0x8A2BE2FF
+brightened (0) (5):
+	0: 0 = 0x000000FF
+	1: 0.25 = 0x31CD31FF
+	2: 0.5 = 0xFFE3C3FF
+	3: 0.75 = 0xDC133CFF
+	4: 1 = 0x8A2AE2FF
+brightened (0.5) (5):
+	0: 0 = 0x7F7F7FFF
+	1: 0.25 = 0xFFFFFFFF
+	2: 0.5 = 0xFFFFFFFF
+	3: 0.75 = 0xFDF1F3FF
+	4: 1 = 0xFFFFFFFF
+gradient (5):
+	0: 0 = 0x000000FF
+	1: 0.1 = 0x32CD32FF
+	2: 0.3 = 0xFFE4C4FF
+	3: 0.5 = 0xDC143CFF
+	4: 1 = 0x8A2BE2FF
+brightened (0) (5):
+	0: 0 = 0x000000FF
+	1: 0.1 = 0x31CD31FF
+	2: 0.3 = 0xFFE3C3FF
+	3: 0.5 = 0xDC133CFF
+	4: 1 = 0x8A2AE2FF
+brightened (0.5) (5):
+	0: 0 = 0x7F7F7FFF
+	1: 0.1 = 0xFFFFFFFF
+	2: 0.3 = 0xFFFFFFFF
+	3: 0.5 = 0xFDF1F3FF
+	4: 1 = 0xFFFFFFFF

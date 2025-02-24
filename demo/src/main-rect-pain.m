@@ -372,11 +372,11 @@ static void   drawStuff0( CALayer *layer, CGContext *context)
 }
 
 
-typedef CALayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
+typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 1] =
 {
-   (CALayerDrawCallback_t *) drawStuff0
+   (CGGraphicsLayerDrawCallback_t *) drawStuff0
 };
 
 
@@ -392,17 +392,19 @@ int   main( int argc, char *argv[])
    for( i = 0; i < 1; i++)
    {
       window[ i] = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 1000, 700)];
+
       [window[ i] setDrawCallback:drawStuff[ i]];
       [window[ i] setBackgroundColor:CGColorMakeWhite()];
-      [app addWindow:window[ i]];
 
       [window[ i] setSwapInterval:0];
       [window[ i] setFrameRate:UIWindowFrameRateUnsynced];
 
       perf = [MulleUIPerf object];
       [window[ i] setFrameDelegate:perf];
+
+      [app addWindow:window[ i]];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

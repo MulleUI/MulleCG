@@ -8,7 +8,7 @@ enum
 };
 
 
-static BOOL   drawStuff( CALayer *layer, void *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
    CGRect              canvas;
@@ -113,5 +113,5 @@ int   main( int argc, char *argv[])
       [[window contentView] setDrawCallback:drawStuff];
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }

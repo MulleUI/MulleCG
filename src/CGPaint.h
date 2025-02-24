@@ -19,7 +19,7 @@
 //
 // All CGPaint classes are immutable.
 //
-@interface CGPaint : NSObject < NSCopying>
+@interface CGPaint : NSObject < NSCopying, MulleObjCValueProtocols>
 
 + (CGPaint *) paintWithColor:(CGColor) color;
 + (CGPaint *) paintWithHexColor:(CGHexColor) color;

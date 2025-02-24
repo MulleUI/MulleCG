@@ -15,7 +15,7 @@
    CGImage   *image;
 
    image = [self resolvedImage];
-   return( mvgImagePattern( vg, rect, [image rotation], [image textureID], 1.0));
+   return( mvgImagePattern( vg, rect, [image rotation], [image textureID], [image alpha]));
 }
 
 // inherit the rest from CGPaint

@@ -101,7 +101,7 @@ static void   drawStuff( CGRect canvas,
 
 - (void) setActive:(BOOL) flag
 {
-   _isActive = flag;
+   _activeThread = flag ? [NSThread currentThread] : nil;
 }
 
 @end
@@ -305,7 +305,7 @@ int   main( int argc, char *argv[])
       window[ 1] = create_window( 1, window[ 0], display_1, 60.0);
       [app addWindow:window[ 1]];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

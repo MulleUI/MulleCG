@@ -121,9 +121,7 @@ void   mvgFillRectWithPaint( NVGcontext *vg, CGRect rect, CGPaint *paint)
    mvgBeginPath( vg);
    mvgRect( vg, rect);
    fillWithBoundsAndPaint( vg, rect, paint);
-
 }
-
 
 
 void   mvgFillCircleWithPaint( NVGcontext *vg, 

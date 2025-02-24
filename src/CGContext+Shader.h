@@ -39,4 +39,13 @@
 
 - (char *) shaderHeaderUTF8String;
 
+
+//
+//
++ (void) registerShaderSources:(struct CGShaderUTF8Sources *) sources;
++ (void) registerShaderSources:(struct CGShaderUTF8Sources *) sources
+             forNameUTF8String:(char *) nameUTF8String;
+
+- (struct CGShaderUTF8Sources *)
+   registeredShaderSourcesForNameUTF8String:(char *) nameUTF8String;
 @end

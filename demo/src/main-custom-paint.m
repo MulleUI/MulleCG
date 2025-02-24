@@ -12,8 +12,8 @@
 
 @implementation CustomPaint
 
-- (instancetype) initWithPaint:(CGPaint *) paint
-                   strokeWidth:(CGFloat) strokeWidth
+- (CGPaint *) initWithPaint:(CGPaint *) paint
+                strokeWidth:(CGFloat) strokeWidth
 {
    CGPaint    *rotatedPaint;
 
@@ -32,8 +32,8 @@
 }
 
 
-+ (instancetype) paintWithPaint:(CGPaint *) paint
-                    strokeWidth:(CGFloat) strokeWidth
++ (CGPaint *) paintWithPaint:(CGPaint *) paint
+                 strokeWidth:(CGFloat) strokeWidth
 {
    return( [[[self alloc] initWithPaint:paint
                             strokeWidth:strokeWidth] autorelease]);
@@ -42,7 +42,7 @@
 
 - (void *) forward:(void *) param
 {
-   return( mulle_objc_object_call_variablemethodid_inline( _paint,
+   return( mulle_objc_object_call_variable_inline( _paint,
                                                            (mulle_objc_methodid_t) _cmd,
                                                            param));
 }
@@ -73,7 +73,7 @@
 
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
    CGRect              canvas;
@@ -107,7 +107,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 400, 300),
                                            NULL,
                                            60.0f));

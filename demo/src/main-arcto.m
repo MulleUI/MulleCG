@@ -105,7 +105,7 @@ static void   drawArcTo( CGContext *context,
 }
 
 
-static BOOL   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
    struct NVGcontext   *vg;
@@ -114,6 +114,9 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
    CGFloat             factor;
 
    vg     = CGContextGetNVGContext( context);
+   rect   = CGRectIntegral( [layer canvas]);
+   mvgFillRectWithColor( vg, rect, CGColorMake( 1.0, 1.0, 1.0, 1.0));
+
    canvas = CGSizePlaceInRect( CGSizeMake( 200, 100), [layer canvas], CGContentModeCenterPoint);
    rect   = CGRectIntegral( canvas);
    mvgStrokeRectWithColor( vg, rect, 3.0, CGColorMake( 0.0, 0.0, 0.0, 0.2));
@@ -131,7 +134,7 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
 
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 600, 400),
                                            NULL,
                                            60.0f));

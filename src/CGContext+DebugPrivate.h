@@ -19,13 +19,13 @@ enum
 
 
 
-#if ! defined( CG_CONTEXT_DEBUG_DISABLED)
+#if ! defined( CG_CONTEXT_LOG_DISABLED)
 
 #define CGContextLog( format, ...)                                          \
 do                                                                          \
 {                                                                           \
    assert( [self __isCGContext]);                                           \
-   if( self->_debugEnabled & CGContextDebug)                                \
+   if( self->_debuggingFlags & CGContextDebug)                              \
       mulleui_log_object_method( self, (char *) __PRETTY_FUNCTION__,        \
                                        (char *) format, ## __VA_ARGS__);    \
 }                                                                           \
@@ -35,7 +35,7 @@ while( 0)
 do                                                                          \
 {                                                                           \
    assert( [self __isCGContext]);                                           \
-   if( self->_debugEnabled & CGContextDebugVerbose)                         \
+   if( self->_debuggingFlags & CGContextDebugVerbose)                       \
       mulleui_log_object_method( self, (char *) __PRETTY_FUNCTION__,        \
                                        (char *) format, ## __VA_ARGS__);    \
 }                                                                           \
@@ -46,7 +46,7 @@ while( 0)
 do                                                                          \
 {                                                                           \
    assert( [self __isCGContext]);                                           \
-   if( self->_debugEnabled & CGContextDebugRender)                          \
+   if( self->_debuggingFlags & CGContextDebugRender)                        \
       mulleui_log_object_method( self, (char *) __PRETTY_FUNCTION__,        \
                                        (char *) format, ## __VA_ARGS__);    \
 }                                                                           \
@@ -56,7 +56,7 @@ while( 0)
 do                                                                          \
 {                                                                           \
    assert( [self __isCGContext]);                                           \
-   if( self->_debugEnabled & CGContextDebugRenderVerbose)                   \
+   if( self->_debuggingFlags & CGContextDebugRenderVerbose)                 \
       mulleui_log_object_method( self, (char *) __PRETTY_FUNCTION__,        \
                                        (char *) format, ## __VA_ARGS__);    \
 }                                                                           \

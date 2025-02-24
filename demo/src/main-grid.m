@@ -6,10 +6,10 @@
 
 #define drawFill 0
 
-static void   draw_texture( CGLayer *self, CGContext *context)
+static void   draw_texture( CGFramebuffer *self, CGContext *context)
 {
    struct NVGcontext          *vg;
-   struct MulleIntegerSize    bitmapSize;
+   CGPixelSize    bitmapSize;
 
    bitmapSize = [self bitmapSize];
 
@@ -36,10 +36,10 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
    unsigned int                  i, j, k;
    CGColor                       color;
    CGColor                       colors[ 4];
-   CGLayer                       *cgLayer;
-   struct MulleIntegerSize       bitmapSize;
+   CGFramebuffer                       *cgLayer;
+   CGPixelSize       bitmapSize;
    NVGpaint                      imgPaint;
-   struct CGLayerRenderInfo      memo;
+   struct CGFramebufferRenderInfo      memo;
 
    vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
@@ -50,7 +50,7 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
    wh = CGSizeMake( floorf( canvas.size.width / 100.0),
                     floorf( canvas.size.height / 70.0));
 
-   // create a CGLayer that looks like this
+   // create a CGFramebuffer that looks like this
    //  tt| t
    //  tt| t
    //  --- t
@@ -58,22 +58,22 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
    //
    // where 't' is transparent
 
-   bitmapSize = MulleIntegerSizeMake( 4, 4);
-   cgLayer    = [CGLayer layerWithBitmapSize:bitmapSize
+   bitmapSize = CGPixelSizeMake( 4, 4);
+   cgLayer    = [CGFramebuffer framebufferWithBitmapSize:bitmapSize
                                 textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
                                      context:context];
    if( ! cgLayer)
    {
-      fprintf( stderr, "No CGLayer for you\n");
+      fprintf( stderr, "No CGFramebuffer for you\n");
       return;
    }
 
 
-   [cgLayer beginLayerRenderWithBackgroundColor:CGColorMakeClear()
+   [cgLayer beginFBRenderWithBackgroundColor:CGColorMakeClear()
                                devicePixelRatio:1.0
                                 layerRenderInfo:&memo];
    draw_texture( cgLayer, context);
-   [cgLayer endLayerRender:&memo];
+   [cgLayer endFBRender:&memo];
 
 #if DEBUG_TEXTURE
    {
@@ -82,7 +82,7 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
       if( ! bitmap.bytes)
       {
          bitmap = [cgLayer RGBABytesBitmap:NULL];
-         mulle_bitmap_rgba_dump( bitmap);
+         CGBitmapDump( bitmap);
          CGBitmapDone( bitmap);
       }
    }
@@ -103,7 +103,7 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
       rect = CGRectMake( CGRectGetMinX( canvas), j * wh.height, canvas.size.width, wh.height);
       rect = CGRectMakeStrokeRect( rect, strokeWidth, CGInside);
 
-      // compensate for surrounding unused space of CGLayer
+      // compensate for surrounding unused space of CGFramebuffer
       rect.size.width  += 1.0;
       rect.size.height += 1.0;
 
@@ -118,7 +118,7 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
       rect = CGRectMake( i * wh.width, CGRectGetMinY( canvas), wh.width, canvas.size.height);
       rect = CGRectMakeStrokeRect( rect, strokeWidth, CGInside);
 
-      // compensate for surrounding unused space of CGLayer
+      // compensate for surrounding unused space of CGFramebuffer
       rect.size.width  += 1.0;
       rect.size.height += 1.0;
       nvgBeginPath( vg);
@@ -182,11 +182,11 @@ static void   drawStuff0( CALayer *layer, CGContext *context)
 }
 
 
-typedef CALayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
+typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 1] =
 {
-   (CALayerDrawCallback_t *) drawStuff0
+   (CGGraphicsLayerDrawCallback_t *) drawStuff0
 };
 
 
@@ -218,7 +218,7 @@ int   main( int argc, char *argv[])
       perf = [MulleUIPerf object];
       [window[ i] setFrameDelegate:perf];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

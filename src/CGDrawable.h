@@ -15,9 +15,9 @@
 //        |                   | CGBitmapDrawable |<---'              |
 //        |                   '------------------'                   |
 //        v                                                          |
-//   .---------.                                                     |
-//   | CGLayer |                                                     v
-//   '---------'                                           .------------------.
+//   .---------------.                                               |
+//   | CGFramebuffer |                                               v
+//   '---------------'                                     .------------------.
 //                                                         | CGVectorDrawable |
 //                                                         '------------------'
 //                 .---------.         .-------------.             ^
@@ -108,9 +108,10 @@ typedef struct CGDrawableOptions
    CGFloat             scale;         // 0.0 means scale to fit,
    struct
    {
-      unsigned int   flip        : 3;
-      unsigned int   repeat      : 3;
-      unsigned int   contentMode : 4;
+      unsigned int   flip             : 3;
+      unsigned int   repeat           : 3;
+      unsigned int   contentMode      : 4;
+      unsigned int   textureOverreach : 1;  // disables drawRect:fromRect: fix
    } flags;
 } CGDrawableOptions;
 
@@ -233,7 +234,7 @@ PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
 - (struct CGBitmapInfo) bitmapInfo;
 
 @optional
-- (struct MulleIntegerSize) bitmapSize;  // just integer value of size
+- (CGPixelSize) bitmapSize;  // just integer value of size
 
 //
 // this calls drawRect:options:context:drawableBitmapImage: after calling

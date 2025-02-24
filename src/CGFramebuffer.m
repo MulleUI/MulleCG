@@ -1,4 +1,4 @@
-#import "CGLayer.h"
+#import "CGFramebuffer.h"
 
 #import "CGContext.h"
 #import "CGContext+OpenGL.h"
@@ -8,11 +8,11 @@
 #import "import-private.h"
 
 
-@implementation CGLayer
+@implementation CGFramebuffer
 
-+ (instancetype) layerWithBitmapSize:(struct MulleIntegerSize) bitmapSize
-                        textureFlags:(NSUInteger) textureFlags
-                             context:(CGContext *) context
++ (instancetype) framebufferWithBitmapSize:(CGPixelSize) bitmapSize
+                              textureFlags:(NSUInteger) textureFlags
+                                   context:(CGContext *) context
 {
    return( [[[self alloc] initWithBitmapSize:bitmapSize
                                 textureFlags:textureFlags
@@ -20,12 +20,14 @@
 }
 
 
-- (instancetype) initWithBitmapSize:(struct MulleIntegerSize) bitmapSize
+- (instancetype) initWithBitmapSize:(CGPixelSize) bitmapSize
                        textureFlags:(NSUInteger) textureFlags
                             context:(CGContext *) context
 {
    NVGcontext   *vg;
    NSInteger    textureID;
+   int          w, h;
+   int          imageFlags;
 
    assert( context && [context isKindOfClass:[CGContext class]]);
 
@@ -35,30 +37,41 @@
       return( nil);
    }
 
-   vg           = CGContextGetNVGContext( context);
-   _framebuffer = nvgluCreateFramebuffer( vg,
-                                          bitmapSize.width,
-                                          bitmapSize.height,
-                                          textureFlags);
-   if( ! _framebuffer)
+   vg              = CGContextGetNVGContext( context);
+   _gpuFramebuffer = nvgluCreateFramebuffer( vg,
+                                            bitmapSize.width,
+                                            bitmapSize.height,
+                                            textureFlags);
+   if( ! _gpuFramebuffer)
    {
       [self release];
       return( nil);
    }
+
+   textureID = ((NVGLUframebuffer *) _gpuFramebuffer)->image;
+
+   // MEMO: nanovg adds some flags, so get em 
+   nvgImageTextureInfo( vg, textureID, &imageFlags, NULL, NULL);
+   // for completeness check if nanovg did some adaptations
+   nvgImageSize( vg, textureID, &w, &h);
+
+   textureFlags     |= imageFlags; // get FLIPY bit for example
+   bitmapSize.width  = w;
+   bitmapSize.height = h;
 
    //
    // Image is dependent on the graphics context, and can't live without it
    // TextureImage is threfore retained by the context and not the other way
    // (how long does the context live though)
    //
-   textureID = ((NVGLUframebuffer *) _framebuffer)->image;
 
    CGImageLog( "create framebuffer %p with textureID %td (GPU: %p)",
-                     _framebuffer,
+                     _gpuFramebuffer,
                      textureID,
                      [context gpuTextureForImageID:textureID]);
 
    return( [self initWithTextureID:textureID
+                        bitmapSize:bitmapSize
                       textureFlags:textureFlags
                            context:context]);
 }
@@ -68,7 +81,7 @@
                   textureFlags:(NSUInteger) textureFlags
                        context:(CGContext *) context
 {
-   struct MulleIntegerSize       bitmapSize;
+   CGPixelSize       bitmapSize;
    struct CGContextFramebuffer   old;
    struct CGFrameInfo            frameInfo;
    struct CGFrameInfo            oldFrameInfo;
@@ -103,40 +116,6 @@
 }
 
 
-- (void) contextDidAddObject:(CGContext *) context
-{
-   if( _context != context)
-   {
-      fprintf( stderr, "CGLayers can not be copied to another context. Use -shareWithContext:");
-      abort();
-   }
-}
-
-
-- (void) contextDidRemoveObject:(CGContext *) context
-{
-   if( _framebuffer && _context == context)
-   {
-      CGImageLog( "delete framebuffer %p", _framebuffer);
-      // assert( [context isActive]);
-      [context deleteFramebuffer:_framebuffer];
-      _framebuffer = NULL;
-   }
-
-   [super contextDidRemoveObject:context];
-}
-
-
-#ifdef DEBUG
-- (void) dealloc
-{
-   assert( ! _framebuffer);
-   CGImageLog( "layer deallocs");
-   [super dealloc];
-}
-#endif   
-   //
-
 - (instancetype) initWithContentsOfFileCString:(char *) filename
                                   textureFlags:(NSUInteger) textureFlags
                                        context:(CGContext *) context
@@ -156,7 +135,7 @@
 
 
 - (instancetype) initWithRGBABytes:(void *) bytes
-                        bitmapSize:(struct MulleIntegerSize) bitmapSize
+                        bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context
 {
@@ -164,6 +143,31 @@
    return( nil);
 }
 
+
+- (void) didRemoveFromContext:(CGContext *) context
+{
+   if( _gpuFramebuffer && _context == context)
+   {
+      CGImageLog( "delete framebuffer %p", _gpuFramebuffer);
+      // assert( [context isActive]);
+      [context deleteGPUFramebuffer:_gpuFramebuffer];
+      _gpuFramebuffer          = NULL;
+      _initializedFramebuffer = NO;
+   }
+
+   [super didRemoveFromContext:context];
+}
+
+
+#ifdef DEBUG
+- (void) dealloc
+{
+   assert( ! _gpuFramebuffer);
+   CGImageLog( "layer deallocs");
+   [super dealloc];
+}
+#endif   
+   
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
 {
@@ -228,32 +232,63 @@
 @end
 
 
-@implementation CGLayer( CGContentRendering)
+@implementation CGFramebuffer( CGContentRendering)
+
+// TODO: render with MSAA then resolve to regular texture ?
+//
+// That's what Cody says.
+//
+// // Create MSAA and regular FBOs
+// glGenFramebuffers(1, &msaaFBO);
+// glGenFramebuffers(1, &regularFBO);
+// 
+// // Create MSAA texture
+// glGenTextures(1, &msaaTexture);
+// glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaTexture);
+// glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA8, width, height, GL_TRUE);
+// 
+// // Create regular texture
+// glGenTextures(1, &regularTexture);
+// glBindTexture(GL_TEXTURE_2D, regularTexture);
+// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+// 
+// // Attach textures to FBOs
+// glBindFramebuffer(GL_FRAMEBUFFER, msaaFBO);
+// glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, msaaTexture, 0);
+// 
+// glBindFramebuffer(GL_FRAMEBUFFER, regularFBO);
+// glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, regularTexture, 0);
+// 
+// // Resolve MSAA to regular texture
+// glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFBO);
+// glBindFramebuffer(GL_DRAW_FRAMEBUFFER, regularFBO);
+// glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+//
 
 
-+ (instancetype) layerWithBitmapSize:(struct MulleIntegerSize) size
-                     backgroundColor:(CGColor) color
-                        drawFunction:(void (*)( CGContext *context, CGSize size, void *userinfo)) drawFunction
-                            userInfo:(void *) userInfo
-                             context:(CGContext *) context
++ (instancetype) framebufferWithBitmapSize:(CGPixelSize) size
+                           backgroundColor:(CGColor) color
+                              drawFunction:(void (*)( CGContext *context, CGSize size, void *userinfo)) drawFunction
+                                  userInfo:(void *) userInfo
+                                   context:(CGContext *) context
 {
-   CGLayer                    *cgLayer;
-   struct CGLayerRenderInfo   memo;
+   CGFramebuffer                    *cgLayer;
+   struct CGFramebufferRenderInfo   memo;
 
    assert( [context isActive]);
 
    if( size.width == 0 || size.height == 0)
       return( nil);
 
-   cgLayer = [self layerWithBitmapSize:size
-                          textureFlags:0
-                               context:context];
-   [cgLayer beginLayerRenderWithBackgroundColor:color
-                               devicePixelRatio:1.0
-                                layerRenderInfo:&memo];
+   cgLayer = [self framebufferWithBitmapSize:size
+                                textureFlags:0
+                                     context:context];
+   [cgLayer beginFBRenderWithBackgroundColor:color
+                            devicePixelRatio:1.0
+                             layerRenderInfo:&memo];
    if( drawFunction)
       (*drawFunction)( context, CGSizeMakeWithIntegerSize( size), userInfo);
-   [cgLayer endLayerRender:&memo];
+   [cgLayer endFBRender:&memo];
 
    return( cgLayer);
 }
@@ -262,7 +297,8 @@
 - (void) _bindToContext
 {
    assert( [_context isActive]);
-   nvgluBindFramebuffer( _framebuffer);
+   nvgluBindFramebuffer( _gpuFramebuffer);
+   CGContextCheckBackendError( _context, "nvgluBindFramebuffer");
 }
 
 
@@ -270,11 +306,12 @@
 {
    assert( [_context isActive]);
    nvgluBindFramebuffer( NULL);
+   CGContextCheckBackendError( _context, "nvgluBindFramebuffer");
    _initializedFramebuffer = YES;
 }
 
 
-- (void) _beginLayerRender:(struct CGLayerRenderInfo *) memo
+- (void) _beginFBRender:(struct CGFramebufferRenderInfo *) memo
 {
    assert( memo);
 
@@ -287,7 +324,7 @@
 }
 
 
-- (void) _endLayerRender:(struct CGLayerRenderInfo *) memo
+- (void) _endFBRender:(struct CGFramebufferRenderInfo *) memo
 {
    assert( memo);
 
@@ -297,16 +334,19 @@
 }
 
 
-
-- (void) beginLayerRenderWithBackgroundColor:(CGColor) color
+- (void) beginFBRenderWithBackgroundColor:(CGColor) color
                             devicePixelRatio:(CGFloat) ratio
-                             layerRenderInfo:(struct CGLayerRenderInfo *) memo
+                             layerRenderInfo:(struct CGFramebufferRenderInfo *) memo
 {
+#ifdef _CGLMACRO_H
+   CGLContextObj  cgl_ctx = CGLGetCurrentContext();
+#endif
+
    CGFloat                    rgba[ 4];
-   struct MulleIntegerSize    bitmapSize;
+   CGPixelSize                bitmapSize;
    struct NVGcontext          *vg;
 
-   [self _beginLayerRender:memo];
+   [self _beginFBRender:memo];
 
    vg = CGContextGetNVGContext( _context);
 
@@ -316,19 +356,20 @@
    glClearColor( rgba[ 0], rgba[ 1], rgba[ 2], rgba[ 3]);
    glClear( GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
    glViewport( 0, 0, bitmapSize.width, bitmapSize.height);
+   CGContextCheckBackendError( _context, "glViewport");
 
    nvgBeginFrame( vg, bitmapSize.width, bitmapSize.height, ratio);
 }
 
 
-- (void) endLayerRender:(struct CGLayerRenderInfo *) memo
+- (void) endFBRender:(struct CGFramebufferRenderInfo *) memo
 {
    struct NVGcontext   *vg;
 
    vg = CGContextGetNVGContext( _context);
    nvgEndFrame( vg);
 
-   [self _endLayerRender:memo];
+   [self _endFBRender:memo];
 }
 
 @end

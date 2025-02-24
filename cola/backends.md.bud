@@ -1,12 +1,25 @@
 ## Backends
 
-Currently MulleCG defines which backend is going to be used in
-[_MulleCGBackend.h](src/_MulleCGBackend.h). This value can be overridden at
-compile time. In your project, you can set this as
+MulleCG defines by default, which backend is going to be used (see:
+[_MulleCGBackend.h](src/_MulleCGBackend.h)). This value can be overridden at
+compile time. In your project, you can set this to "OpenGLES2" for example:
 
+``` sh
+mulle-sde environment set OTHER_CFLAGS "-DMULLE_CG_GLVERSION=2"
 ```
-mulle-sde craftinfo set MulleCG OTHER_CFLAGS "-DMULLE_CG_GLVERSION=2" # choose OpenGLES2
+
+if you want to compile old OpenGL code, use OpenGL3_2:
+
+``` sh
+mulle-sde environment set OTHER_CFLAGS "-DMULLE_CG_GLVERSION=1"
 ```
+
+| `#define`          | Value | Description                                      |
+|--------------------|-------|--------------------------------------------------|
+| `MULLE_CG_GL3_2`   | 1     | OpenGL 3.2, shaderless, deprecated code possible |
+| `MULLE_CG_GLES2`   | 2     | OpenGLES 2, needs shader                         |
+| `MULLE_CG_GLES3_2` | 3     | OpenGLES 3.2, needs shader                       |
+
 
 > #### Note
 >
@@ -14,5 +27,4 @@ mulle-sde craftinfo set MulleCG OTHER_CFLAGS "-DMULLE_CG_GLVERSION=2" # choose O
 > which resides on top of OpenGL. MulleCG/nanovg doesnt depend on MulleGLFW though,
 > so that in the future there might be a MulleSDL and MulleCG doesn't have to
 > change for it.
-
 

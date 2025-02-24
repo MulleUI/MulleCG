@@ -1,4 +1,4 @@
-#import "import-private.h"
+   #import "import-private.h"
 
 #import "CGContext.h"
 
@@ -10,7 +10,7 @@
 #import "CGContext+Shader.h"
 #import "CGContext+Texture.h"
 #import "CGImage.h"
-#import "CGLayer.h"
+#import "CGFramebuffer.h"
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -20,68 +20,10 @@
 @interface CGContext( Private)
 
 - (void) deleteTextureIDs;
+- (void) deleteGPUFramebuffers;
 - (void) deleteFramebuffers;
 
 @end
-
-
-//#define CGCONTEXT_DEBUG_ENABLED 3
-
-
-static void   *acquire_ivar_pointer( mulle_atomic_pointer_t *p)
-{
-   void   *value;
-   void   *actual;
-
-   value = _mulle_atomic_pointer_read( p);
-   if( ! value)
-      return( NULL);
-
-   for(;;)
-   {
-      // zero out _drawnLayer if its contents are "layer"
-      // don't zero on mismatch
-      // return the actual contents of _drawnLayer (before zeroing)
-      actual = __mulle_atomic_pointer_cas( p, NULL, value);
-      if( ! actual || actual == value)
-         return( actual);
-      value = actual;
-   }
-}
-
-
-static void   *acquire_ivar_object( mulle_atomic_pointer_t *p)
-{
-   id   obj;
-
-   obj = acquire_ivar_pointer( p);
-   // MulleUICLog( "Extracted %#@ from pointer %p, now nil", obj, p);
-   return( [obj autorelease]);
-}
-
-
-static inline int   recycle_ivar_pointer( mulle_atomic_pointer_t *p, void *value)
-{
-   return( _mulle_atomic_pointer_cas( p, value, NULL));
-}
-
-
-static void   recycle_ivar_object( mulle_atomic_pointer_t *p, id obj)
-{
-   if( ! obj)
-      return;
-
-   [obj retain];
-   if( ! recycle_ivar_pointer( p, obj))
-   {
-      //MulleUICLog( "Failed to store %#@ into pointer %p", obj, p);
-      [obj release];  // if it fails, undo retain
-   }
-   else
-   {
-      //MulleUICLog( "Stored %#@ in pointer %p", obj, p);
-   }
-}
 
 
 @implementation NSObject( CGContext)
@@ -109,17 +51,12 @@ static struct
    mulle_thread_mutex_t                      _freeTypeLock;
    struct mulle_container_keyvaluecallback   _gpuTextureMapCallback;
    struct mulle_container_keyvaluecallback   _shaderMapCallback;
-   struct mulle_container_keyvaluecallback   _shaderSourcesCallback;
-   struct mulle_map                          _registeredSources;
-   NSUInteger                                _debugEnabled;
+   NSUInteger                                _debuggingFlags;
 } Self;
 
 
 + (void) initialize
 {
-   struct mulle_allocator   *allocator;
-   char                     *s;
-
    // don't rerun for subclass
    if( MulleObjCClassGetID( self) != @selector( CGContext))
       return;
@@ -131,22 +68,6 @@ static struct
 
    Self._shaderMapCallback.keycallback       = mulle_container_keycallback_copied_cstring;
    Self._shaderMapCallback.valuecallback     = mulle_container_valuecallback_intptr;
-
-   Self._shaderSourcesCallback.keycallback   = mulle_container_keycallback_copied_cstring;
-   Self._shaderSourcesCallback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
-
-   allocator = MulleObjCClassGetAllocator( self);
-   mulle_map_init( &Self._registeredSources, 0, &Self._shaderSourcesCallback, allocator);
-
-   s = getenv( "CGContextDebugEnabled");
-   if( s)
-      Self._debugEnabled = strtol( s, NULL, 0);
-   else
-   {
-#ifdef CGCONTEXT_DEBUG_ENABLED
-      Self._debugEnabled = CGCONTEXT_DEBUG_ENABLED;
-#endif
-   }
 }
 
 
@@ -156,95 +77,18 @@ static struct
       return;
 
    mulle_thread_mutex_done( &Self._freeTypeLock);
-   mulle_map_done( &Self._registeredSources);
 }
 
 
-+ (void) setDebugEnabled:(NSUInteger) flag
+//
+// we change the strategy here, so another thread can acquire the layers
+// But the owning thread has to close it down, so we do change the thread
+// ownership of the
+- (MulleObjCTAOStrategy) mulleTAOStrategy
 {
-   Self._debugEnabled = flag;
+   return( MulleObjCTAOReceiverPerformsFinalize);
 }
 
-
-
-static UIGraphicsBackend   defaultBackends[] =
-{
-   UIGraphicsBackendDefault,
-   UIGraphicsBackendNone
-};
-
-
-+ (void) registerShaderSources:(struct CGShaderUTF8Sources *) sources
-             forNameUTF8String:(char *) nameUTF8String
-{
-   UIGraphicsBackend   *backends;
-   char                *key;
-   char                *prefix;
-
-   if( ! nameUTF8String)
-      nameUTF8String = sources->name;
-
-   assert( nameUTF8String);
-
-   backends = sources->backends ? sources->backends : defaultBackends;
-
-   mulle_buffer_do( buffer)
-   {
-      while( *backends != UIGraphicsBackendNone)
-      {
-         mulle_buffer_reset( buffer);
-         prefix = UIGraphicsBackendUTF8String( *backends);
-         assert( ! strcmp( prefix, "???"));
-
-         mulle_buffer_sprintf( buffer, "%s__%s", prefix, nameUTF8String);
-         key = mulle_buffer_get_string( buffer);
-         mulle_thread_mutex_do( Self._freeTypeLock)
-         {
-            mulle_map_insert( &Self._registeredSources, key, sources);
-         }
-         ++backends;
-      }
-   }
-}
-
-
-+ (void) registerShaderSources:(struct CGShaderUTF8Sources *) sources
-{
-   [self registerShaderSources:sources
-             forNameUTF8String:NULL];
-}
-
-
-- (struct CGShaderUTF8Sources *)
-   registeredShaderSourcesForNameUTF8String:(char *) nameUTF8String
-{
-   struct CGShaderUTF8Sources   *sources;
-   char                         *prefix;
-   UIGraphicsBackend            *backends;
-   auto UIGraphicsBackend       targetBackends[ 3] =
-                                {
-                                   [self backend],
-                                   UIGraphicsBackendDefault,
-                                   UIGraphicsBackendNone
-                                };
-
-   backends = targetBackends;
-   mulle_buffer_do( buffer)
-   {
-      do
-      {
-         prefix = UIGraphicsBackendUTF8String( *backends);
-         mulle_buffer_sprintf( buffer, "%s__%s", prefix, nameUTF8String);
-
-         mulle_thread_mutex_do( Self._freeTypeLock)
-         {
-            sources = mulle_map_get( &Self._registeredSources, nameUTF8String);
-         }
-      }
-      while( ! sources && *++backends != UIGraphicsBackendNone);
-   }
-   return( sources);
-}
 
 
 //
@@ -260,7 +104,9 @@ static UIGraphicsBackend   defaultBackends[] =
 
    _backend      = backend;
    _shareID      = shareID;
-   _debugEnabled = Self._debugEnabled;
+
+   // do this early
+   _debuggingFlags = [[self class] debuggingFlags];
 
    if( backend != UIGraphicsBackendNone)
    {
@@ -282,7 +128,9 @@ static UIGraphicsBackend   defaultBackends[] =
    if( self)
    {
       allocator = MulleObjCInstanceGetAllocator( self);
+      mulle_thread_mutex_init( &_deletedFramebufferLock);
       _mulle__pointerarray_init( &_deletedTextureIDs, 0, allocator);
+      _mulle__pointerarray_init( &_deletedGPUFramebuffers, 0, allocator);
       _mulle__pointerarray_init( &_deletedFramebuffers, 0, allocator);
       // this is merely there to provide a mapping, it doesn't own the CGImage
       _mulle_map_init( &_gpuTextureMap, 0, &Self._gpuTextureMapCallback, allocator);
@@ -297,6 +145,9 @@ static UIGraphicsBackend   defaultBackends[] =
 
 - (void) finalize
 {
+   CGFramebuffer   *framebuffer;
+   CGContext       *context;
+
    if( _backend != UIGraphicsBackendNone)
    { 
       if( ! _vg)  // we died super early, so nothing to do
@@ -305,7 +156,7 @@ static UIGraphicsBackend   defaultBackends[] =
          return;
       }
 
-      assert( _isActive);
+      assert( _activeThread == [NSThread currentThread]);
       assert( ! _isRendering);
    }
 
@@ -313,15 +164,32 @@ static UIGraphicsBackend   defaultBackends[] =
 
    [self _resetFontCache];
    [self _finalizeResourceStorage:&_resourceStorage];
-   [self deleteTextureIDs];
-   [self deleteFramebuffers];
-   [self deleteShaders];
 
    CGContextLog( "autorelease offScreenFramebuffer");
 
-   // by acquiring we nil and autorelease, which is what we want to do
-   acquire_ivar_object( &_drawnLayer);
-   acquire_ivar_object( &_scratchLayer);
+   framebuffer = _mulle_atomic_pointer_read( &_drawnLayer);
+   framebuffer = __mulle_atomic_pointer_cas( &_drawnLayer, NULL, framebuffer);
+   // context is probably already zeroed or ? by who ? _finalizeResourceStorage ?
+   context     = [framebuffer context];
+   assert( ! context || context == self);
+   MULLE_C_UNUSED( context);
+
+   [framebuffer mullePerformFinalize];
+   [framebuffer autorelease];
+
+   framebuffer = _mulle_atomic_pointer_read( &_scratchLayer);
+   framebuffer = __mulle_atomic_pointer_cas( &_scratchLayer, NULL, framebuffer);
+   context     = [framebuffer context];
+   assert( ! context || context == self);
+   MULLE_C_UNUSED( context);
+
+   [framebuffer mullePerformFinalize];
+   [framebuffer autorelease];
+
+   [self deleteFramebuffers];
+   [self deleteTextureIDs];
+   [self deleteGPUFramebuffers];
+   [self deleteShaders];
 
    if( _backend != UIGraphicsBackendNone)
    {
@@ -338,8 +206,17 @@ static UIGraphicsBackend   defaultBackends[] =
 - (void) dealloc
 {
    struct mulle_allocator   *allocator;
+   CGFramebuffer            *framebuffer;
 
    CGContextLog("");
+
+   // this oughta be superflous, as they should be nil because of
+   // -finalize
+   framebuffer = _mulle_atomic_pointer_read( &_drawnLayer);
+   [framebuffer release];
+
+   framebuffer = _mulle_atomic_pointer_read( &_scratchLayer);
+   [framebuffer release];
 
    // images in _gpuTextureMap aren't retained just blow map away
    mulle_map_done( &_gpuTextureMap);
@@ -347,7 +224,9 @@ static UIGraphicsBackend   defaultBackends[] =
 
    allocator = MulleObjCInstanceGetAllocator( self);
    _mulle__pointerarray_done( &_deletedFramebuffers, allocator);
+   _mulle__pointerarray_done( &_deletedGPUFramebuffers, allocator);
    _mulle__pointerarray_done( &_deletedTextureIDs, allocator);
+   mulle_thread_mutex_done( &_deletedFramebufferLock);
 
    [super dealloc];
 }
@@ -365,7 +244,7 @@ static UIGraphicsBackend   defaultBackends[] =
 
 - (BOOL) isActive
 {
-   return( _isActive);
+   return( _activeThread != nil);
 }
 
 
@@ -376,7 +255,7 @@ static UIGraphicsBackend   defaultBackends[] =
 
 
 //
-// used by CGLayer. This can hit us if no frame has been rendered, as
+// used by CGFramebuffer. This can hit us if no frame has been rendered, as
 // we might be drawing CGLayers before hand
 //
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info
@@ -437,32 +316,32 @@ static UIGraphicsBackend   defaultBackends[] =
 }
 
 
-- (CGLayer *) layerWithSize:(struct MulleIntegerSize) size
-                textureFlags:(NSUInteger) textureFlags
+- (CGFramebuffer *) framebufferWithSize:(CGPixelSize) size
+                           textureFlags:(NSUInteger) textureFlags
 {
-   CGLayer                   *layer;
-   struct MulleIntegerSize   oldSize;
+   CGFramebuffer   *framebuffer;
+   CGPixelSize     oldSize;
 
-   layer   = acquire_ivar_object( &_scratchLayer);
-   CGContextLogVerbose( "try to reuse layer %#@", layer);
-   oldSize = [layer bitmapSize];
+   framebuffer = [self acquireRecycledFramebuffer];
+   CGContextLogVerbose( "try to reuse framebuffer %#@", framebuffer);
+   oldSize     = [framebuffer bitmapSize];
 
-   if( ! MulleIntegerSizeEqualToIntegerSize( oldSize, size))
+   if( ! CGPixelSizeEqualToPixelSize( oldSize, size))
    {
-      layer = [CGLayer layerWithBitmapSize:size
-                              textureFlags:textureFlags
-                                   context:self];
-      CGContextLogVerbose( "created new layer %#@ with size %s",
-                           layer,
-                           MulleIntegerSizeUTF8String( size));
+      framebuffer = [CGFramebuffer framebufferWithBitmapSize:size
+                                                textureFlags:textureFlags
+                                                      context:self];
+      CGContextLogVerbose( "created new framebuffer %#@ with size %s",
+                           framebuffer,
+                           CGPixelSizeUTF8String( size));
    }
    else
    {
-      CGContextLogVerbose( "reused layer %#@ with size %s",
-                           layer,
-                           MulleIntegerSizeUTF8String( size));
+      CGContextLogVerbose( "reused framebuffer %#@ with size %s",
+                           framebuffer,
+                           CGPixelSizeUTF8String( size));
    }
-   return( layer);
+   return( framebuffer);
 }
 
 
@@ -475,13 +354,13 @@ static UIGraphicsBackend   defaultBackends[] =
    // not 100% sure why this is written this way
    _isRendering = YES;
 
-   assert( _isActive);
+   assert( _activeThread == [NSThread currentThread]);
    assert( info);
    assert( info->window.pixelRatio != 0.0);
 
    CGContextRenderLog( "Viewport: %s, FB: %s, Window: %s",
-                 MulleIntegerRectUTF8String( info->viewportFrame),
-                 MulleIntegerSizeUTF8String( info->window.framebufferSize),
+                 CGPixelRectUTF8String( info->viewportFrame),
+                 CGPixelSizeUTF8String( info->window.framebufferSize),
                  CGSizeUTF8String( info->window.frame.size));
 
    // not 100% sure why this is written this way
@@ -498,18 +377,20 @@ static UIGraphicsBackend   defaultBackends[] =
 
    // delete all queued for deletion framebuffers and textureIDs
    [self deleteFramebuffers];
+   [self deleteGPUFramebuffers];
    [self deleteTextureIDs];
+
    CGContextCheckBackendError( self, "delete textureIDs");
 
    // create or reuse existing offscreen framebuffer
    if( _rendersOffScreen)
    {
-      // will acquire hopefully a preexisting layer for reuse
+      // will acquire hopefully a preexisting framebuffer for reuse
       assert( ! _renderLayer);
 
       textureFlags = ( _nvgFlags & NVG_IMAGE_MSAA) ? NVG_MSAA : 0;
-      _renderLayer = [[self layerWithSize:info->window.framebufferSize
-                             textureFlags:textureFlags] retain];
+      _renderLayer = [[self framebufferWithSize:info->window.framebufferSize
+                                   textureFlags:textureFlags] retain];
       assert( _renderLayer);
 #ifdef DEBUG
       if( ! [_renderLayer debugNameUTF8String])  // keep old if present
@@ -557,7 +438,7 @@ static struct CGFrameInfo   emptyInfo;
 
 - (void) suspendRender
 {
-   assert( _isActive);
+   assert( _activeThread == [NSThread currentThread]);
 
    CGContextRenderLog( "");
    // MEMO: this also flushes the font cache, not sure if this desirable or
@@ -580,7 +461,7 @@ static struct CGFrameInfo   emptyInfo;
 
 - (void) _endRender
 {
-   CGLayer   *old;
+   CGFramebuffer   *old;
 
    assert( _isRendering);
 
@@ -592,17 +473,24 @@ static struct CGFrameInfo   emptyInfo;
    /*
     * return to default, for unbinding YES or NO makes no difference
     */
-   [self bindFramebuffer:CGContextFramebufferMakeDefault( NO)];
+   [self bindFramebuffer:CGContextFramebufferMakeDefault()];
    CGContextCheckBackendError( self, "unbind buffer");
 
    if( _rendersOffScreen)
    {
       // get rid of old "valid" framebuffer previously, if still present
-      old = acquire_ivar_object( &_drawnLayer);
+      old = _MulleObjCAcquireObjectAtomically( &_drawnLayer);
       if( old)
       {
          CGContextRenderLog( "Recycle scratch %#@ for %#@", _scratchLayer, old);
-         recycle_ivar_object( &_scratchLayer, old);
+         assert( [old context] == self);
+         if( ! _MulleObjCRecycleObjectAtomically( &_scratchLayer, old))
+         {
+            //
+            // this means old will get discarded int the context thread,
+            // which is fine
+            //
+         }
       }
 
       // by recycling it in _drawnLayer we store it there, since
@@ -613,10 +501,19 @@ static struct CGFrameInfo   emptyInfo;
       // Before making it available to other contexts
       // possibly, we need to put up a barrier to ensure, that the drawing
       // has completed. Else you get surprising empty layers on races.
+      //
       [self barrier];
-      recycle_ivar_object( &_drawnLayer, _renderLayer);
+      if( ! _MulleObjCRecycleObjectAtomically( &_drawnLayer, _renderLayer))
+      {
+         // someone produced a _drawnLayer already (but who ?)
+         // can't happen since we are single threaded and zeroed it
+         // in #573: old = _MulleObjCAcquireObjectAtomically( &_drawnLayer);
+#ifdef DEBUG
+         abort();
+#endif
+      }
 
-      if( self->_debugEnabled & CGContextDebugDumpFrameToFile)
+      if( self->_debuggingFlags & CGContextDebugDumpFrameToFile)
       {
          MulleUIWriteImageToPNGFileSequenceAsync( _renderLayer, "render-layer");
       }
@@ -667,7 +564,7 @@ static struct CGFrameInfo   emptyInfo;
 - (void) clearFramebufferWithColor:(CGColor) color
 {
    [self clearFramebufferBits:_framebufferBits
-                         color:color];
+                        color:color];
 }
 
 
@@ -688,7 +585,7 @@ static struct CGFrameInfo   emptyInfo;
 {
    struct CGContextFramebuffer   old;
 
-   assert( _isActive);
+   assert( _activeThread == [NSThread currentThread]);
 
    old = _currentFramebuffer;
    // the old layer should notice that its unbound to set its
@@ -696,7 +593,7 @@ static struct CGFrameInfo   emptyInfo;
    if( old.type == CGContextLayerFramebuffer
       || old.type == CGContextLayerMultiSampleFramebuffer)
    {
-      [(CGLayer *) old.handle _unbindFromContext];  // nvg will restore
+      [(CGFramebuffer *) old.handle _unbindFromContext];  // nvg will restore
    }
 
    switch( fb.type)
@@ -705,11 +602,12 @@ static struct CGFrameInfo   emptyInfo;
    case CGContextDefaultMultiSampleFramebuffer  :
       // this is GL on the "bottom" anyway
       nvgluBindFramebuffer( NULL);
+      CGContextCheckBackendError( self, "bind buffer");
       break;
 
    case CGContextLayerFramebuffer :
    case CGContextLayerMultiSampleFramebuffer  :
-      [(CGLayer *) fb.handle _bindToContext];  // nvg will restore
+      [(CGFramebuffer *) fb.handle _bindToContext];  // nvg will restore
       break;
 
    case CGContextOpenGLFramebuffer  :
@@ -720,7 +618,6 @@ static struct CGFrameInfo   emptyInfo;
    default :
       abort();
    }
-   CGContextCheckBackendError( self, "bind buffer");
 
    _currentFramebuffer = fb;
 
@@ -737,7 +634,7 @@ static struct CGFrameInfo   emptyInfo;
 
    case CGContextLayerFramebuffer  :
    case CGContextLayerMultiSampleFramebuffer  :
-      return( [(CGLayer *) _currentFramebuffer.handle isInitializedFramebuffer]);
+      return( [(CGFramebuffer *) _currentFramebuffer.handle isInitializedFramebuffer]);
 
    case CGContextOpenGLFramebuffer :
    case CGContextOpenGLMultiSampleFramebuffer  :
@@ -751,7 +648,7 @@ static struct CGFrameInfo   emptyInfo;
  * ## Generation
  *
  * When it's time to draw a new framebuffer, then we use the
- * _scratchLayer. If there is no _scratchLayer a new CGLayer is
+ * _scratchLayer. If there is no _scratchLayer a new CGFramebuffer is
  * generated. If there was a _scratchLayer it is now set to nil.
  * The layer once finished is moved to _drawnLayer. If there was a
  * previous _drawnLayer it is attempted to place it into
@@ -768,34 +665,49 @@ static struct CGFrameInfo   emptyInfo;
  */
 - (id) acquireOffscreenFramebuffer
 {
-   return( acquire_ivar_object( &_drawnLayer));
-}
+   id   framebuffer;
 
-
-// get a layer from an outside source back
-- (void) recycleFramebuffer:(id) layer
-{
-   recycle_ivar_object( &_scratchLayer, layer);
+   framebuffer = _MulleObjCAcquireObjectAtomically( &_drawnLayer);  // this calls -autorelease
+   return( framebuffer);
 }
 
 
 - (id) acquireRecycledFramebuffer
 {
-   return( acquire_ivar_object( &_scratchLayer));
+   id   framebuffer;
+
+   framebuffer = _MulleObjCAcquireObjectAtomically( &_scratchLayer);
+   assert( ! framebuffer || [framebuffer context] == self);
+   return( framebuffer);
 }
 
 
-static struct MulleIntegerSize
+// get a framebuffer from an outside source back
+- (void) recycleFramebuffer:(id) framebuffer
+{
+   if( ! _MulleObjCRecycleObjectAtomically( &_scratchLayer, framebuffer))
+   {
+      //
+      // scratchLayer was already occupied...
+      // the framebuffer is now autoreleased but possibly in the wrong thread
+      // the following method will relinquish the framebuffer again and
+      // queue the framebuffer for deletion
+      [self queueFramebufferForDeletion:framebuffer];
+   }
+}
+
+
+static CGPixelSize
    _CGContextBitmapSizeOfLayerFramebuffer( CGContext *self,
                                            struct CGContextFramebuffer fb)
 {
    assert( fb.type == CGContextLayerFramebuffer
            || fb.type == CGContextLayerMultiSampleFramebuffer);
-   return( [(CGLayer *) fb.handle bitmapSize]);
+   return( [(CGFramebuffer *) fb.handle bitmapSize]);
 }
 
 
-static struct MulleIntegerSize
+static CGPixelSize
    _CGContextBitmapSizeOfDefaultFramebuffer( CGContext *self,
                                              struct CGContextFramebuffer fb)
 {
@@ -808,7 +720,7 @@ static struct MulleIntegerSize
 }
 
 
-struct MulleIntegerSize
+CGPixelSize
    CGContextBitmapSizeOfFramebuffer( CGContext *self,
                                      struct CGContextFramebuffer fb)
 {
@@ -866,6 +778,18 @@ struct MulleIntegerSize
 - (NSUInteger) buttonStates
 {
    return( _inputState.buttonStates);
+}
+
+
+- (char *) UTF8String
+{
+   char   *s;
+
+   s = MulleObjC_asprintf( "<%s %p: %@>",
+                           MulleObjCInstanceGetClassNameUTF8String( self),
+                           self,
+                           _OSWindow);
+   return( s);
 }
 
 @end

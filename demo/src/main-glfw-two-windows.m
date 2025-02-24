@@ -76,7 +76,7 @@ static void   drawStuff( CGRect canvas,
 
 
 // just for debugging
-@property( assign) CGLayer      *previousLayer;
+@property( assign) CGFramebuffer      *previousLayer;
 
 @end
 
@@ -122,7 +122,7 @@ static void   drawStuff( CGRect canvas,
 
 - (void) setActive:(BOOL) flag
 {
-   _isActive = flag;
+   _activeThread = flag ? [NSThread currentThread] : nil;
 }
 
 @end
@@ -137,8 +137,8 @@ static int   display( GLFWOSWindow *window_in)
    CGRect        canvas;
    CGContext     *context;
    CGFrameInfo   frameInfo;
-   CGLayer       *layer;
-   CGLayer       *check;
+   CGFramebuffer       *layer;
+   CGFramebuffer       *check;
 
    canvas.origin = CGPointZero;
    canvas.size   = [window os_windowSize];
@@ -265,7 +265,7 @@ int   main( int argc, char *argv[])
          [app addWindow:window[ i]];
       }
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

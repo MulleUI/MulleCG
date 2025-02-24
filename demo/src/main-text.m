@@ -12,7 +12,7 @@
 
 static char   *fontFilename;
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    BOOL                 useClearType;
    CGFloat              height;
@@ -111,7 +111,7 @@ int   main( int argc, char *argv[])
 {
    if( argc > 1)
       fontFilename = argv[ 1];
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 640, 400),
                                            NULL,
                                            5.0f));

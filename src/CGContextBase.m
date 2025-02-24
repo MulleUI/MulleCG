@@ -11,7 +11,7 @@
 
 static struct
 {
-   NSUInteger    _debugEnabled;
+   NSUInteger    _debuggingFlags;
 } Self;
 
 
@@ -23,29 +23,38 @@ static struct
    if( MulleObjCClassGetID( self) != @selector( CGContextBase))
       return;
 
-   s = getenv( "CGContextDebugEnabled");
+   // use CGContext instead of CGContextBase
+   s = getenv( "CGContextDebuggingFlags");
+   if( ! s)
+      s = getenv( "UIDebuggingFlags");
    if( s)
-      Self._debugEnabled = strtol( s, NULL, 0);
-   else
-   {
-#ifdef CGCONTEXT_DEBUG_ENABLED
-      Self._debugEnabled = CGCONTEXT_DEBUG_ENABLED;
-#endif
-   }
+      Self._debuggingFlags = strtol( s, NULL, 0);
 }
 
 
-+ (void) setDebugEnabled:(NSUInteger) flag
++ (NSUInteger) debuggingFlags
 {
-   Self._debugEnabled = flag;
+   return( Self._debuggingFlags);
+}
+
+
++ (void) setDebuggingFlags:(NSUInteger) flag
+{
+    Self._debuggingFlags = flag;
+}
+
+
+- (struct MulleUIResourceStorage *) _resourceStorage
+{
+   return( &_resourceStorage);
 }
 
 
 - (instancetype) init
 {
    static SEL selectors[ 2] = {
-                                 @selector( contextDidAddObject:),
-                                 @selector( contextDidRemoveObject:)
+                                 @selector( didAddToContext:),
+                                 @selector( didRemoveFromContext:)
                               };
 
    [self _initResourceStorage:&_resourceStorage
@@ -64,7 +73,22 @@ static struct
 - (void) dealloc
 {
    [self _doneResourceStorage:&_resourceStorage];
+   MulleObjCInstanceDeallocateMemory( self, _nameUTF8String);
    [super dealloc];
+}
+
+
+- (void) mulleGainAccess
+{
+   [super mulleGainAccess];
+   [self mulleGainAccessToResources];
+}
+
+
+- (void) mulleRelinquishAccess
+{
+   [self mulleRelinquishAccessToResources];
+   [super mulleRelinquishAccess];
 }
 
 
@@ -80,10 +104,49 @@ static struct
 }
 
 
-- (struct MulleUIResourceStorage *) _resourceStorage
+- (char *) mulleNameUTF8String
 {
-   return( &_resourceStorage);
+   char  *s;
+
+   s = _mulle_atomic_pointer_read( &_nameUTF8String);
+   return( s ? s : "unnamed");
 }
 
+
+- (void) mulleSetNameUTF8String:(char *) s
+{
+   struct mulle_allocator       *allocator;
+   struct _mulle_objc_universe  *universe;
+   void                         *actual;
+   void                         *old;
+
+   // need universe allocator for abafree
+   universe  = _mulle_objc_object_get_universe( self);
+   allocator = _mulle_objc_universe_get_allocator( universe);
+   old       = _mulle_atomic_pointer_read( &_nameUTF8String);
+   if( s)
+      s = mulle_allocator_strdup( allocator, s);
+
+   actual = __mulle_atomic_pointer_cas( &_nameUTF8String, s, old);
+
+   if( actual == old)
+      mulle_allocator_abafree( allocator, old);
+   else
+      mulle_allocator_free( allocator, s);
+}
+
+
+- (char *) UTF8String
+{
+   Class   cls;
+   char    *s;
+
+   s = _mulle_atomic_pointer_read( &_nameUTF8String);
+   if( s)
+      return( s);
+
+   cls = MulleObjCObjectGetClass( self);
+   return( MulleObjC_asprintf( "<%s %p>", MulleObjCClassGetNameUTF8String( cls), self));
+}
 
 @end

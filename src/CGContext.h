@@ -5,7 +5,7 @@
 
 
 @class CGFont;
-@class CGLayer;
+@class CGFramebuffer;
 @class CGContext;
 @class CGImage;
 
@@ -40,7 +40,7 @@ struct CGShaderUTF8Sources
 // just a rename
 @protocol CGContextResource
 
-- (void) contextDidRemoveObject:(CGContext *) context;
+- (void) didRemoveFromContext:(CGContext *) context;
 
 @end
 
@@ -74,20 +74,30 @@ static inline struct CGContextFramebuffer
 
 
 static inline struct CGContextFramebuffer
-   CGContextFramebufferMakeDefault( BOOL isMultiSample)
+   CGContextFramebufferMakeDefault( void)
 {
    return( (struct CGContextFramebuffer)
            {
               .handle = NULL,
-              .type = isMultiSample
-                      ? CGContextDefaultMultiSampleFramebuffer
-                      : CGContextDefaultFramebuffer
+              .type   = CGContextDefaultFramebuffer
            });
 }
 
 
 static inline struct CGContextFramebuffer
-   CGContextFramebufferMakeWithLayer( CGLayer *layer)
+   CGContextFramebufferMakeDefaultMultiSample( void)
+{
+   return( (struct CGContextFramebuffer)
+           {
+              .handle = NULL,
+              .type   = CGContextDefaultMultiSampleFramebuffer
+           });
+}
+
+
+
+static inline struct CGContextFramebuffer
+   CGContextFramebufferMakeWithLayer( CGFramebuffer *layer)
 {
    assert( layer);
    return( (struct CGContextFramebuffer)
@@ -104,7 +114,10 @@ static inline struct CGContextFramebuffer
    CGContextFramebufferMakeWithOpenGLHandle( void *handle, BOOL isMultiSample)
 {
    if( ! handle)
-      return( CGContextFramebufferMakeDefault( isMultiSample));
+      return( isMultiSample
+              ? CGContextFramebufferMakeDefaultMultiSample()
+              : CGContextFramebufferMakeDefault());
+
    return( (struct CGContextFramebuffer)
            {
               .handle = handle,
@@ -155,12 +168,13 @@ struct CGContextItem
    struct mulle_map                 _gpuTextureMap;
    struct mulle_map                 _shaderMap;
    struct mulle__pointerarray       _deletedTextureIDs;
+   struct mulle__pointerarray       _deletedGPUFramebuffers;
    struct mulle__pointerarray       _deletedFramebuffers;
+   mulle_thread_mutex_t             _deletedFramebufferLock; // used for above two pointer arrays
+
    BOOL                             _isRendering;
-   BOOL                             _isActive;
    BOOL                             _isFreshLayer;
    CGShaderID                       _activeShader;
-
    mulle_absolutetime_t             _firstRenderTimeStamp;
 
    // its more convenient to use a private framebuffer for offscreen rendering
@@ -168,10 +182,10 @@ struct CGContextItem
    // context is tied to an offscreen window, it will/should use this
    // offScreenFramebuffer instead.
 
-   mulle_atomic_pointer_t           _drawnLayer;       // CGLayer
-   mulle_atomic_pointer_t           _scratchLayer;     // CGLayer
+   mulle_atomic_pointer_t           _drawnLayer;       // CGFramebuffer
+   mulle_atomic_pointer_t           _scratchLayer;     // CGFramebuffer
 
-   CGLayer                          *_renderLayer;     // ephemeral(!)
+   CGFramebuffer                    *_renderLayer;     // ephemeral(!)
    NSUInteger                       _renderLayerTextureFlags;
 }
 
@@ -199,12 +213,7 @@ struct CGContextItem
 @property( assign, getter=isInitializedFramebuffer) BOOL   initializedFramebuffer;
 
 @property( assign) NSUInteger                              numberOfFrames;  // counts endRenders...
-
-
-+ (void) registerShaderSources:(struct CGShaderUTF8Sources *) source
-             forNameUTF8String:(char *) nameUTF8String;
-+ (void) registerShaderSources:(struct CGShaderUTF8Sources *) source;
-- (struct CGShaderUTF8Sources *) registeredShaderSourcesForNameUTF8String:(char *) nameUTF8String;
+@property( assign) NSThread                                *activeThread;
 
 
 // the context needs to be told, what backend is being used
@@ -256,20 +265,21 @@ struct CGContextItem
 
 
 // Once acquired its yours and its gone from CGContext. Now the window has
-// contents to draw itself. It should keep the CGLayer around for the next
+// contents to draw itself. It should keep the CGFramebuffer around for the next
 // refresh. If acquireOffscreenFramebuffer returns nil (no new drawing
-// ready yet), it shold reuse that kept layer. Otherwise recycle the old
+// ready yet), it should reuse that kept layer. Otherwise recycle the old
 // and use the new.
-- (id) acquireOffscreenFramebuffer;
+//
+- (id) acquireOffscreenFramebuffer        MULLE_OBJC_THREADSAFE_METHOD;
 
 //
 // Framebuffer presumably acquired through acquireFramebuffer, should be given
-// back. For reuse ot discarding
+// back. For reuse or discarding
 //
-- (void) recycleFramebuffer:(id) layer;
+- (void) recycleFramebuffer:(id) layer    MULLE_OBJC_THREADSAFE_METHOD;
 
 // get recycled framebuffer back 
-- (id) acquireRecycledFramebuffer;
+- (id) acquireRecycledFramebuffer         MULLE_OBJC_THREADSAFE_METHOD;
 
 // support for some demos
 - (CGPoint) mouseLocation;
@@ -328,6 +338,6 @@ static inline float  CGContextGetLinearAnimationFactor( CGContext *context, NSUI
 }
 
 
-struct MulleIntegerSize
+CGPixelSize
    CGContextBitmapSizeOfFramebuffer( CGContext *self,
                                      struct CGContextFramebuffer fb);

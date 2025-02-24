@@ -1,4 +1,7 @@
 #define _GNU_SOURCE
+#ifdef __APPLE__
+# define MULLE_CG_USE_APPLE_GL2
+#endif
 
 #import "import-private.h"
 
@@ -131,7 +134,7 @@ int   main( int argc, char *argv[])
    if( bits & 4)
       [window setDidDrawCallback:drawOpenGL3];
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

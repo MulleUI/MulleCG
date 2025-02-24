@@ -71,7 +71,7 @@ static void   drawGridInRect( CGContext  *context, CGRect rect)
    CGImage   *image;
 
    image = [[[CGImage alloc] initWithRGBABytes:imagedata
-                                    bitmapSize:MulleIntegerSizeMake( 8, 8)
+                                    bitmapSize:CGPixelSizeMake( 8, 8)
                                   textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
                                        context:context] autorelease];
    [image drawRect:rect
@@ -150,7 +150,7 @@ static void   drawCirclesInRect( CGContext *context,
 
 static NSInteger   freeze;
 
-static BOOL   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
    struct NVGcontext   *vg;
@@ -270,7 +270,7 @@ found:
 
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 800, 800),
                                            NULL,
                                            60.0f));

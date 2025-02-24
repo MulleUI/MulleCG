@@ -5,6 +5,8 @@
 #include <string.h>
 
 
+static char   *fontName = "sans";
+
 static int   contentMode[] =
 {
    CGContentModeTopLeft,
@@ -120,9 +122,15 @@ static void   drawStuff1( CALayer *layer, CGContext *context)
    s    = &s[ len - [context numberOfFrames] % len];
 
    vg   = CGContextGetNVGContext( context);
-   font = [context fontWithNameUTF8String:"sans"];
-   rect = CGSizeCenterInRect( CGSizeMake( 300, 80), [layer canvas]);
+   vg   = CGContextGetNVGContext( context);
+   font = [context fontWithNameUTF8String:fontName];
+   if( ! font)
+   {
+      fprintf( stderr, "unknown font %s\n", fontName ? fontName : "NULL");
+      abort();
+   }
 
+   rect = CGSizeCenterInRect( CGSizeMake( 300, 80), [layer canvas]);
    mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
 
    mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( rect),
@@ -153,10 +161,15 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
    char                 *s;
    auto char            buf[ 256];
 
-   s      = texts[ [context numberOfFrames] % N_TEXTS];
+   s    = texts[ [context numberOfFrames] % N_TEXTS];
 
-   vg     = CGContextGetNVGContext( context);
-   font   = [context fontWithNameUTF8String:"sans"];
+   vg   = CGContextGetNVGContext( context);
+   font = [context fontWithNameUTF8String:fontName];
+   if( ! font)
+   {
+      fprintf( stderr, "unknown font %s\n", fontName ? fontName : "NULL");
+      abort();
+   }
    canvas = MulleEdgeInsetsInsetRect( MulleEdgeInsetsMake( 16, 32, 16 + 20, 32),
                                       [layer canvas]);
    CGRectPartitionIntoRowsAndColumns( CGRectInset( canvas, 32, 16),
@@ -252,7 +265,7 @@ void   setupScene( UIWindow *window)
 
    view  = [UIView viewWithFrame:frame];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
-   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff2]; // drawStuff1];
+   [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff2]; // drawStuff1];
    [[window contentView] addSubview:view];
 }
 
@@ -264,6 +277,9 @@ int   main( int argc, char *argv[])
    NSUInteger      styleMask;
 
    app = [UIApplication sharedInstance];
+
+   if( argc > 1)
+      fontName = argv[ 1];
 
    @autoreleasepool
    {
@@ -279,12 +295,13 @@ int   main( int argc, char *argv[])
       [window setBackgroundColor:CGColorMakeWhite()];
       setupScene( window);
       [window setFrameRate:UIWindowFrameRateUnsynced];
+      [window setFrameDelegate:[MulleUIPerf object]];
+
       [app addWindow:window];
    }
 
-   [window setFrameDelegate:[MulleUIPerf object]];
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

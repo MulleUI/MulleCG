@@ -32,6 +32,19 @@ src/include-private.h
 )
 
 #
+# contents selected with patternfile ??-header--project-only-headers
+#
+set( PROJECT_ONLY_HEADERS
+src/bitmap2.inc
+src/bitmap.inc
+src/blur.frag.inc
+src/draw-flag.inc
+src/rect.vert.inc
+src/simple.frag.inc
+src/texture.frag.inc
+)
+
+#
 # contents selected with patternfile ??-header--public-generated-headers
 #
 set( PUBLIC_GENERATED_HEADERS
@@ -53,14 +66,7 @@ src/include.h
 # contents selected with patternfile ??-header--public-headers
 #
 set( PUBLIC_HEADERS
-src/bitmap2.inc
-src/bitmap.inc
-src/blur.frag.inc
 src/demos-version.h
-src/draw-flag.inc
-src/rect.vert.inc
 src/reflect/_demos-include-public.h
-src/simple.frag.inc
-src/texture.frag.inc
 )
 

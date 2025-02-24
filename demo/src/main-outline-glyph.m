@@ -466,7 +466,7 @@ static CGColor   colors[ 3]       = {
 #define DRAW_HELPERS   YES
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    struct NVGcontext  *vg;
    CGRect             bbox;
@@ -579,7 +579,7 @@ void   setupScene( UIWindow *window)
 
    view  = [UIView viewWithFrame:frame];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
-   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
+   [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
 
@@ -607,7 +607,7 @@ int   main( int argc, char *argv[])
 
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 
