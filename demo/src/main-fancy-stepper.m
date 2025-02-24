@@ -362,7 +362,7 @@ void   setupScene( UIWindow *window)
 
    frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentView] setDrawCallback:(CALayerDrawCallback_t *) drawStepper];
+   [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStepper];
    [[window contentView] addSubview:view];
 }
 
@@ -384,7 +384,7 @@ int   main( int argc, char *argv[])
       setupScene( window);
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

@@ -46,6 +46,21 @@ src/CGPaint+Private.h
 )
 
 #
+# contents selected with patternfile ??-header--project-only-headers
+#
+set( PROJECT_ONLY_HEADERS
+src/_NotoEmoji-VariableFont_wght.ttf.inc
+src/_NotoSans-Bold.ttf.inc
+src/_NotoSansMono-Regular.ttf.inc
+src/_NotoSans-Regular.ttf.inc
+src/_Roboto-Regular.inc
+src/_emoji.inc
+src/_entypo.inc
+src/_entypo.ttf.inc
+src/microvg/nanovg-extensions.inc
+)
+
+#
 # contents selected with patternfile ??-header--public-generated-headers
 #
 set( PUBLIC_GENERATED_HEADERS
@@ -74,6 +89,8 @@ nanovg/src/nanovg.h
 nanovg/src/stb_image.h
 nanovg/src/stb_truetype.h
 src/CGAffineTransform+nanovg.h
+src/CGColor+MulleObjC.h
+src/CGColor+UTF8String.h
 src/CGContextBase.h
 src/CGContext+CGImage.h
 src/CGContext+Drawing.h
@@ -84,13 +101,13 @@ src/CGContext+Texture.h
 src/CGContext.h
 src/CGDrawable.h
 src/CGFont.h
+src/CGFramebuffer.h
 src/CGGradient.h
 src/CGGradient+nanovg.h
 src/CGImagePaint.h
 src/CGImagePaint+nanovg.h
 src/CGImage.h
 src/CGImage+nanovg.h
-src/CGLayer.h
 src/CGLayoutContext+CGFont.h
 src/CGLayoutContext.h
 src/CGPaint.h
@@ -100,17 +117,8 @@ src/CGPath+nanovg.h
 src/_MulleCGBackend.h
 src/MulleCG.h
 src/MulleObjCLoader+MulleCG.h
-src/_NotoEmoji-VariableFont_wght.ttf.inc
-src/_NotoSans-Bold.ttf.inc
-src/_NotoSansMono-Regular.ttf.inc
-src/_NotoSans-Regular.ttf.inc
-src/_Roboto-Regular.inc
-src/_emoji.inc
-src/_entypo.inc
-src/_entypo.ttf.inc
 src/microvg/microvg.h
 src/microvg/microvg-nanowrap.h
-src/microvg/nanovg-extensions.inc
 src/mulle-color/CGColorConstants.h
 src/mulle-color/CGColorDiff.h
 src/mulle-color/CGColorNames.h

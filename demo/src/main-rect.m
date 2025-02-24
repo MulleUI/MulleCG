@@ -140,19 +140,19 @@ static void   fillStuff3( CALayer *layer, CGContext *context)
 }
 
 
-typedef CALayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
+typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 8] =
 {
-   (CALayerDrawCallback_t *) drawStuff0,
-   (CALayerDrawCallback_t *) drawStuff1,
-   (CALayerDrawCallback_t *) drawStuff2,
-   (CALayerDrawCallback_t *) drawStuff3,
+   (CGGraphicsLayerDrawCallback_t *) drawStuff0,
+   (CGGraphicsLayerDrawCallback_t *) drawStuff1,
+   (CGGraphicsLayerDrawCallback_t *) drawStuff2,
+   (CGGraphicsLayerDrawCallback_t *) drawStuff3,
 
-   (CALayerDrawCallback_t *) fillStuff0,
-   (CALayerDrawCallback_t *) fillStuff1,
-   (CALayerDrawCallback_t *) fillStuff2,
-   (CALayerDrawCallback_t *) fillStuff3
+   (CGGraphicsLayerDrawCallback_t *) fillStuff0,
+   (CGGraphicsLayerDrawCallback_t *) fillStuff1,
+   (CGGraphicsLayerDrawCallback_t *) fillStuff2,
+   (CGGraphicsLayerDrawCallback_t *) fillStuff3
 };
 
 
@@ -171,7 +171,7 @@ int   main( int argc, char *argv[])
       [window[ i] setBackgroundColor:CGColorMakeWhite()];
       [app addWindow:window[ i]];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

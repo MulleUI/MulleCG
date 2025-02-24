@@ -9,10 +9,12 @@
  *
  *      mulle-sde environment set MULLE_MATCH_TO_C_RUN DISABLE
  */
-#ifndef mulle_c_g_export_h__
-#define mulle_c_g_export_h__
+#ifndef _mulle_c_g__export_h__
+#define _mulle_c_g__export_h__
 
 
+#import "CGColor+MulleObjC.h"
+#import "CGColor+UTF8String.h"
 #import "CGContextBase.h"
 #import "CGContext+CGImage.h"
 #import "CGContext+Drawing.h"
@@ -23,13 +25,13 @@
 #import "CGContext.h"
 #import "CGDrawable.h"
 #import "CGFont.h"
+#import "CGFramebuffer.h"
 #import "CGGradient.h"
 #import "CGGradient+nanovg.h"
 #import "CGImagePaint.h"
 #import "CGImagePaint+nanovg.h"
 #import "CGImage.h"
 #import "CGImage+nanovg.h"
-#import "CGLayer.h"
 #import "CGLayoutContext+CGFont.h"
 #import "CGLayoutContext.h"
 #import "CGPaint.h"

@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 
-static BOOL   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
    struct NVGcontext   *vg;

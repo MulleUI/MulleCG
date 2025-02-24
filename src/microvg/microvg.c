@@ -388,6 +388,10 @@ void   mvgTextInRect( struct NVGcontext *vg,
    if( length == (size_t) -1)
       length = strlen( s);
 
+   // too small to draw (could draw gray blob though, should I ?)
+   if( rect.size.width <= 2.0 || rect.size.height <= 4.0)
+      return;
+
    mvgAssertFont( vg);
 
    nvgSave( vg);
@@ -562,7 +566,7 @@ void   mvgTextInRect( struct NVGcontext *vg,
       }
       else
       {
-         mvgScissor( vg, rect);
+         mvgScissor( vg, rect); // CGRectIntegral( rect));
          mvgText( vg, origin, s, length);
       }
    }

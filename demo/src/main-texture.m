@@ -7,11 +7,11 @@
 
 #ifdef HAVE_TEXTURE
 
-static CGLayer   *texture;
+static CGFramebuffer   *texture;
 
 //
-// In this example, we use nvg to draw something into a CGLayer (aka texture).
-// Then we use this CGLayer as paint (texture) for a rectangle.
+// In this example, we use nvg to draw something into a CGFramebuffer (aka texture).
+// Then we use this CGFramebuffer as paint (texture) for a rectangle.
 // The drawing of the texture must be done outside of the main window render
 // loop. (why ? Apparently because at the time of writing this there was
 // no way to "stack" framebuffer bindings.
@@ -45,9 +45,9 @@ static void   drawTexture( CGContext *context, CGSize size)
 }
 
 
-static CGLayer  *createTexture( CGContext *context,
-                                CGFloat pixelRatio,
-                                NSUInteger textureFlags)
+static CGFramebuffer  *createTexture( CGContext *context,
+                                      CGFloat pixelRatio,
+                                      NSUInteger textureFlags)
 {
    CGFrameInfo                   *info;
    CGFloat                       radius;
@@ -55,18 +55,18 @@ static CGLayer  *createTexture( CGContext *context,
    struct CGFrameInfo            frameInfo;
    struct CGFrameInfo            oldFrameInfo;
    struct CGContextFramebuffer   oldFramebuffer;
-   CGLayer                       *texture;
+   CGFramebuffer                 *texture;
 
    assert( pixelRatio > 0.0);
 
    // we create a small 32x32 texture
 
-   texture = [[CGLayer layerWithBitmapSize:MulleIntegerSizeMake( 32, 32)
+   texture = [[CGFramebuffer framebufferWithBitmapSize:CGPixelSizeMake( 32, 32)
                               textureFlags:textureFlags
                                    context:context] retain];
    assert( texture);
 
-   frameInfo      = CGFrameInfoFBMake( MulleIntegerSizeMake( 32, 32), pixelRatio, 1.0);
+   frameInfo      = CGFrameInfoFBMake( CGPixelSizeMake( 32, 32), pixelRatio, 1.0);
 
    //
    // with the push functionality, we should be able to run this also inside
@@ -97,8 +97,8 @@ static void  drawStuff( CALayer *layer, CGContext *context)
 
    frameNumber = [context numberOfFrames];
 
-   rect  = [layer canvas];
-   shape = CGRectInset( rect, 60, 60);
+   rect     = [layer canvas];
+   shape    = CGRectInset( rect, 60, 60);
 
    vg       = CGContextGetNVGContext( context);
    rotation = (frameNumber % 360) / 360.0;
@@ -141,7 +141,7 @@ void   setupScene( UIWindow *window)
    [view setBackgroundColor:[UIColor darkGrayColor]];
    [view setBorderColor:[UIColor whiteColor]];
    [view setBorderWidth:4.0];
-   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
+   [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [contentPlane addSubview:view];
 
 #ifdef HAVE_TEXTURE
@@ -178,7 +178,7 @@ int   main( int argc, char *argv[])
    styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
    styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
 
-   [CGContext setDebugEnabled:YES];
+   [CGContext setDebuggingFlags:YES];
 
    window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 600.0f)
                              titleUTF8String:"Demo"
@@ -190,7 +190,7 @@ int   main( int argc, char *argv[])
 
    [app addWindow:window];
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

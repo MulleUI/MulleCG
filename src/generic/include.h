@@ -19,6 +19,62 @@
 # define _POSIX_SOURCE
 #endif
 
+#include "_MulleCGBackend.h"
+
+// Apple is gimped, so far no GL selection, happy anything works
+#ifdef __APPLE__
+# define GL_GLEXT_PROTOTYPES
+# define GL_SILENCE_DEPRECATION
+# if defined( MULLE_CG_USE_APPLE_MACROS)
+#  define MULLE_CG_HAVE_DEPRECATED_OPENGL 1
+#  include <OpenGL/OpenGL.h>
+#  include <OpenGL/CGLMacro.h>
+# else
+#  if defined( MULLE_CG_USE_APPLE_GL)
+#   define MULLE_CG_HAVE_DEPRECATED_OPENGL 1
+#   include <OpenGL/gl.h>
+#  endif
+#  if defined( MULLE_CG_USE_APPLE_GL_EXT)
+#   include <OpenGL/glext.h>
+#  endif
+#  if defined( MULLE_CG_USE_APPLE_GL3) || (! defined( MULLE_CG_USE_APPLE_GL) && ! defined( MULLE_CG_USE_APPLE_GL_EXT))
+#   define MULLE_CG_HAVE_MODERN_OPENGL     1
+#   include <OpenGL/gl3.h>
+#  endif
+# endif
+#else
+# if MULLE_CG_GLVERSION == MULLE_CG_GL3_2 || MULLE_CG_GLVERSION == MULLE_CG_GL3
+// GLFW_INCLUDE_... keep undefined for OpenGL3
+// see: https://www.glfw.org/docs/latest/build_guide.html
+#  define GL_GLEXT_PROTOTYPES
+#  define MULLE_CG_HAVE_DEPRECATED_OPENGL 1
+#  define MULLE_CG_HAVE_MODERN_OPENGL     1
+#  include <GL/gl.h>
+#  include <GL/glext.h>
+# elif MULLE_CG_GLVERSION == MULLE_CG_GLES2
+#  define GL_GLEXT_PROTOTYPES
+#  define MULLE_CG_HAVE_MODERN_OPENGL     1
+#  include <GLES2/gl2.h>
+#  include <GLES2/gl2ext.h>
+# elif MULLE_CG_GLVERSION == MULLE_CG_GLES3
+#  define GL_GLEXT_PROTOTYPES
+#  define MULLE_CG_HAVE_MODERN_OPENGL     1
+#  include <GLES3/gl3.h>
+#  include <GLES3/gl3ext.h>
+# elif MULLE_CG_GLVERSION == MULLE_CG_GLES3_2
+#  define GL_GLEXT_PROTOTYPES
+#  define MULLE_CG_HAVE_MODERN_OPENGL     1
+#  include <GLES3/gl32.h>
+#  include <GLES3/gl3ext.h>
+// no idea why this is not defined in GLES3/gl32.h
+#  ifndef GL_MULTISAMPLE
+#   define GL_MULTISAMPLE  0x809D
+#  endif
+# elif MULLE_CG_GLVERSION == MULLE_CG_GLES3_2
+#  error "MULLE_CG_GLVERSION is undefined or defined with unknown value"
+# endif
+#endif
+
 #include "nanovg.h"
 
 #ifdef CG_COLOR_DEFINED

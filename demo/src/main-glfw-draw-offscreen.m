@@ -8,7 +8,7 @@
 //
 // This demo shows how CGContext draws into a offscreen buffer first and
 // then uses this to draw into the window buffer. The offscreen buffer is
-// just a regular CGLayer.
+// just a regular CGFramebuffer.
 //
 
 @interface MyWindow : GLFWOSWindow
@@ -50,7 +50,7 @@
 
 - (void) setActive:(BOOL) flag
 {
-   _isActive = flag;
+   _activeThread = flag ? [NSThread currentThread] : nil;
 }
 
 @end
@@ -62,9 +62,9 @@ static int   display( GLFWOSWindow *window_in)
    CGRect           canvas;
    CGContext        *context;
    CGFrameInfo      frameInfo;
-   CGLayer          *layer;
-   CGLayer          *check;
-   static CGLayer   *previous;
+   CGFramebuffer          *layer;
+   CGFramebuffer          *check;
+   static CGFramebuffer   *previous;
 
    canvas.origin = CGPointZero;
    canvas.size   = [window os_windowSize];
@@ -155,7 +155,7 @@ int   main( int argc, char *argv[])
 
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

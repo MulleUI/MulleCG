@@ -90,12 +90,12 @@ static void   drawStuff1( CALayer *layer, CGContext *context)
 
 
 
-typedef CALayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
+typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 2] =
 {
-   (CALayerDrawCallback_t *) drawStuff0,
-   (CALayerDrawCallback_t *) drawStuff1
+   (CGGraphicsLayerDrawCallback_t *) drawStuff0,
+   (CGGraphicsLayerDrawCallback_t *) drawStuff1
 };
 
 
@@ -116,7 +116,7 @@ int   main( int argc, char *argv[])
       [window[ i] setBackgroundColor:CGColorMakeBlack()];
       [app addWindow:window[ i]];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

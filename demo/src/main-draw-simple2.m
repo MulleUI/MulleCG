@@ -1,14 +1,14 @@
 #import "import-private.h"
 
 
-static BOOL   drawStuff1( CALayer *layer, void *context);
-static BOOL   drawStuff2( CALayer *layer, void *context);
+static BOOL   drawStuff1( CGGraphicsLayer *layer, CGContext *context);
+static BOOL   drawStuff2( CGGraphicsLayer *layer, CGContext *context);
 
 
-static void    flipDraw( CALayer *layer, CGContext *context)
+static void    flipDraw( CGGraphicsLayer *layer, CGContext *context)
 {
-   NSUInteger              frames;
-   CALayerDrawCallback_t   *callback;
+   NSUInteger                      frames;
+   CGGraphicsLayerDrawCallback_t   *callback;
 
    frames = [context numberOfFrames];
    if( (frames % (100 * 3)) == 299)
@@ -19,7 +19,7 @@ static void    flipDraw( CALayer *layer, CGContext *context)
 }
 
 
-static BOOL   drawStuff1( CALayer *layer, void *context)
+static BOOL   drawStuff1( CGGraphicsLayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
    CGRect              canvas;
@@ -61,7 +61,7 @@ static BOOL   drawStuff1( CALayer *layer, void *context)
 }
 
 
-static BOOL   drawStuff2( CALayer *layer, void *context)
+static BOOL   drawStuff2( CGGraphicsLayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
    CGRect              canvas;
@@ -90,7 +90,7 @@ static BOOL   drawStuff2( CALayer *layer, void *context)
 
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff1,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff1,
                                            CGSizeMake( 200, 200),
                                            NULL, 
                                            100.f));     

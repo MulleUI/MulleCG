@@ -67,7 +67,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    c_string_to_object_callback = (struct mulle_container_keyvaluecallback)
    {
       .keycallback   = mulle_container_keycallback_copied_cstring,
-      .valuecallback = *MulleObjCContainerRetainValueCallback
+      .valuecallback = MulleObjCContainerRetainValueCallback
    };
 }
 
@@ -91,6 +91,32 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 {
    mulle_map_reset( &_fontMap);
 }
+
+
+
+- (void) mulleGainAccessToFonts
+{
+   char    *name;
+   CGFont  *font;
+
+   mulle_map_for( &_fontMap, name, font)
+   {
+      [font mulleGainAccess];
+   }
+}
+
+
+- (void) mulleRelinquishAccessToFonts
+{
+   char    *name;
+   CGFont  *font;
+
+   mulle_map_for( &_fontMap, name, font)
+   {
+      [font mulleRelinquishAccess];
+   }
+}
+
 
 
 - (CGFont *) fontWithCData:(struct mulle_data) data
@@ -219,7 +245,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
             }
 
    if( fontID == -1)
-      abort();
+      return( nil);
 
    fallbackFont = [self fallbackFont];
    if( fallbackFont)

@@ -13,13 +13,13 @@ enum
 
 
 
-#if ! defined( CG_IMAGE_DEBUG_DISABLED)
+#if ! defined( CG_IMAGE_LOG_DISABLED)
 
 #define CGImageLog( format, ...)                                             \
 do                                                                          \
 {                                                                           \
    assert( [self __isCGImage]);                                              \
-   if( self->_debugEnabled & CGImageDebug)                                   \
+   if( self->_debuggingFlags & CGImageDebug)                                   \
       mulleui_log_object_method( self, (char *) __PRETTY_FUNCTION__,        \
                                        (char *) format, ## __VA_ARGS__);    \
 }                                                                           \
@@ -29,7 +29,7 @@ while( 0)
 do                                                                          \
 {                                                                           \
    assert( [self __isCGImage]);                                              \
-   if( self->_debugEnabled & CGImageDebugVerbose)                            \
+   if( self->_debuggingFlags & CGImageDebugVerbose)                            \
       mulleui_log_object_method( self, (char *) __PRETTY_FUNCTION__,        \
                                        (char *) format, ## __VA_ARGS__);    \
 }                                                                           \

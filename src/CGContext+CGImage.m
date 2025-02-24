@@ -12,7 +12,6 @@
 
 @implementation CGContext ( CGImage)
 
-
 static CGImage  *getCachedImage( CGContext *self,
                                  NSUInteger textureFlags,
                                  MulleUIResourceStorageKey_t resourceKey)
@@ -42,14 +41,12 @@ static void   setCachedImage( CGContext *self,
 }
 
 
-
 - (CGImage *) imageWithRGBABytes:(void *) bytes
-                      bitmapSize:(struct MulleIntegerSize) bitmapSize
+                      bitmapSize:(CGPixelSize) bitmapSize
                     textureFlags:(NSUInteger) textureFlags
                      resourceKey:(MulleUIResourceStorageKey_t) resourceKey
 {
    CGImage   *image;
-
 
    image = getCachedImage( self, textureFlags, resourceKey);
    if( ! image)
@@ -62,7 +59,6 @@ static void   setCachedImage( CGContext *self,
    }
    return( image);
 }
-
 
 
 - (CGImage *) imageWithBitmap:(struct CGBitmap) bitmap
@@ -118,5 +114,6 @@ static void   setCachedImage( CGContext *self,
    }
    return( image);
 }
+
 
 @end

@@ -12,6 +12,7 @@ endif()
 #
 set( SOURCES
 nanovg/src/nanovg.c
+src/CGColor+UTF8String.m
 src/CGContextBase.m
 src/CGContext+CGImage.m
 src/CGContext+Drawing.m
@@ -22,13 +23,13 @@ src/CGContext+Texture.m
 src/CGContext.m
 src/CGDrawable.m
 src/CGFont.m
+src/CGFramebuffer.m
 src/CGGradient.m
 src/CGGradient+nanovg.m
 src/CGImagePaint.m
 src/CGImagePaint+nanovg.m
 src/CGImage.m
 src/CGImage+nanovg.m
-src/CGLayer.m
 src/CGLayoutContext+CGFont.m
 src/CGLayoutContext.m
 src/CGPaint.m

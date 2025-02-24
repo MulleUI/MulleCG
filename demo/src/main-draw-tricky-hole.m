@@ -30,7 +30,7 @@ static void   drawCheckboard( CGRect  rect, CGContext *context)
    };
 
    image = [[[CGImage alloc] initWithRGBABytes:imagedata
-                                    bitmapSize:MulleIntegerSizeMake( 8, 8)
+                                    bitmapSize:CGPixelSizeMake( 8, 8)
                                   textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
                                        context:context] autorelease];
    [image drawRect:rect
@@ -97,7 +97,7 @@ static void   drawArcHole( struct NVGcontext *vg, CGRect rect)
 
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
    CGRect              rect;
@@ -151,7 +151,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 400, 200),
                                            NULL,
                                            60.0f));

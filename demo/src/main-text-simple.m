@@ -3,7 +3,7 @@
 #import "import-private.h"
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    struct NVGcontext    *vg;
    CGRect               canvas;
@@ -15,7 +15,8 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    vg = CGContextGetNVGContext( context);
    mvgClearType( vg, 1);
    mvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-   mvgTextColor( vg, CGColorMakeIndigo());
+   mvgTextColor( vg, CGColorMakeOrange());
+   mvgTextBackgroundColor( vg, CGColorMakeBlack());
 
    vg = CGContextGetNVGContext( context);
 
@@ -31,7 +32,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
    mvgClearType( vg, 0);
    mvgTextAlign( vg, NVG_ALIGN_LEFT| NVG_ALIGN_BOTTOM);
-   mvgTextColor( vg, CGColorMakeBlack());
+   mvgTextColor( vg, CGColorMakeWhite());
    mvgFontSize( vg, 14.0f);
    mvgFormat( vg, CGPointOffset( CGRectGetBottomLeftPoint( canvas), 20, -20),
                   "fontSize: %g", fontSize);
@@ -41,7 +42,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 300, 200),
                                            NULL,
                                            60.0f));

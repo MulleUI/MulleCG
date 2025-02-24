@@ -8,7 +8,7 @@
 #include "bitmap.inc"
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGDrawableOptions     options;
    CGRect                canvas;
@@ -32,7 +32,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
    nvgStroke( vg);
 
 
-   info  = CGBitmapInfoMake( MulleIntegerSizeMake( 8, 8), 0, CGBitmapEncodingRGBABytes);
+   info  = CGBitmapInfoMake( CGPixelSizeMake( 8, 8), 0, CGBitmapEncodingRGBABytes);
    image = [UIBitmapImage imageWithBytes:bitmap
                               bitmapInfo:info
                                allocator:NULL];
@@ -104,7 +104,7 @@ void   setupScene( UIWindow *window)
 
    frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [[window contentView] setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
+   [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
 
@@ -126,7 +126,7 @@ int   main( int argc, char *argv[])
       setupScene( window);
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

@@ -1,6 +1,8 @@
 //
 // Copyright (c) 2023 Nat!, Mulle kybernetiK
 //
+#define _POSIX_C_SOURCE 200809L // for strtok_r
+
 #import "CGContext+Shader.h"
 
 #import "import-private.h"
@@ -8,9 +10,46 @@
 #import "CGContext+OpenGL.h"
 
 #include <ctype.h>
+#include <string.h>
 
 
 @implementation CGContext ( Shader)
+
+static struct
+{
+   mulle_thread_mutex_t                      _shaderSourceLock;
+   struct mulle_container_keyvaluecallback   _shaderSourcesCallback;
+   struct mulle_map                          _registeredSources;
+} Self;
+
+
+// can't use +initialize in a category
++ (void) load
+{
+   struct mulle_allocator   *allocator;
+
+   if( MulleObjCClassGetID( self) != @selector( CGContext))
+      return;
+
+   mulle_thread_mutex_init( &Self._shaderSourceLock);
+
+   Self._shaderSourcesCallback.keycallback   = mulle_container_keycallback_copied_cstring;
+   Self._shaderSourcesCallback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
+
+   allocator = MulleObjCClassGetAllocator( self);
+   mulle_map_init( &Self._registeredSources, 0, &Self._shaderSourcesCallback, allocator);
+}
+
+
++ (void) unload
+{
+   if( MulleObjCClassGetID( self) != @selector( CGContext))
+      return;
+
+   mulle_map_done( &Self._registeredSources);
+   mulle_thread_mutex_done( &Self._shaderSourceLock);
+}
+
 
 
 static char  *CGShaderTypeUTF8String( int type)
@@ -86,7 +125,6 @@ void   CGShaderUTF8SourcesParseUniforms( struct CGShaderUTF8Sources *sources,
 }
 
 
-
 static char   *parse_source_version( char *s)
 {
    char   *start;
@@ -147,6 +185,10 @@ char  *CGShaderGetSourceVersion( char *source)
 
 static BOOL   checkCompileErrors( GLuint shader, int type, char *name)
 {
+#ifdef _CGLMACRO_H
+   CGLContextObj  cgl_ctx = CGLGetCurrentContext();
+#endif
+
    GLint   success;
    GLint   logSize;
 
@@ -155,7 +197,7 @@ static BOOL   checkCompileErrors( GLuint shader, int type, char *name)
    {
       logSize = 0;
       glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
-      mulle_flexbuffer_do( tmp, 256, logSize < 16 ? 16 : logSize)
+      mulle_alloca_do( tmp, char, logSize < 16 ? 16 : logSize)
       {
          strcpy( tmp, "???");
          glGetShaderInfoLog( shader, logSize, NULL, tmp);
@@ -172,6 +214,10 @@ static BOOL   checkCompileErrors( GLuint shader, int type, char *name)
 
 static BOOL   checkLinkErrors( GLuint shader, char *name)
 {
+#ifdef _CGLMACRO_H
+   CGLContextObj  cgl_ctx = CGLGetCurrentContext();
+#endif
+
    GLint   success;
    GLint   logSize;
 
@@ -180,7 +226,7 @@ static BOOL   checkLinkErrors( GLuint shader, char *name)
    {
       logSize = 0;
       glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
-      mulle_flexbuffer_do( tmp, 256, logSize < 16 ? 16 : logSize)
+      mulle_alloca_do( tmp, char, logSize < 16 ? 16 : logSize)
       {
          strcpy( tmp, "???");
          glGetShaderInfoLog( shader, logSize, NULL, tmp);
@@ -229,6 +275,10 @@ static int   has_version_header( char *s)
 
 static GLuint   CGContextCompileShader( CGContext *self, char *source, int type, char *name)
 {
+#ifdef _CGLMACRO_H
+   CGLContextObj  cgl_ctx = CGLGetCurrentContext();
+#endif
+
    char     *headerAndSource[ 2];
    GLuint   shader;
 
@@ -247,7 +297,7 @@ static GLuint   CGContextCompileShader( CGContext *self, char *source, int type,
    glShaderSource( shader, 2, (const GLchar *const *) headerAndSource, NULL);
    CGContextCheckBackendError( self, "after glShaderSource");
 
-   if( self->_debugEnabled)
+   if( self->_debuggingFlags)
       MulleUICLog( "Compiling %s shader \"%s\" version: %s",
                   CGShaderTypeUTF8String( type),
                   name,
@@ -302,6 +352,10 @@ static GLuint   CGContextCompileShader( CGContext *self, char *source, int type,
 //
 - (CGShaderID) compileShaderWithShaderSources:(struct CGShaderUTF8Sources *) sources
 {
+#ifdef _CGLMACRO_H
+   CGLContextObj  cgl_ctx = CGLGetCurrentContext();
+#endif
+
    GLuint   vertex;
    GLuint   fragment;
    GLuint   geometry;
@@ -315,7 +369,7 @@ static GLuint   CGContextCompileShader( CGContext *self, char *source, int type,
    fragment = 0;
    geometry = 0;
 
-   if( _debugEnabled)
+   if( _debuggingFlags)
       MulleUICLog( "Default shader language version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
    if( sources->vertexSource)
@@ -412,6 +466,10 @@ static GLuint   CGContextCompileShader( CGContext *self, char *source, int type,
 
 - (void) useShader:(CGShaderID) shaderID
 {
+#ifdef _CGLMACRO_H
+   CGLContextObj  cgl_ctx = CGLGetCurrentContext();
+#endif
+
    assert( shaderID);
    glUseProgram( (GLuint) (uintptr_t) shaderID);
    CGContextCheckBackendError( self, "after glUseProgram");
@@ -484,11 +542,14 @@ static GLuint   CGContextCompileShader( CGContext *self, char *source, int type,
 
 - (void) deleteShaderWithNameUTF8String:(char *) name
 {
+#ifdef _CGLMACRO_H
+   CGLContextObj  cgl_ctx = CGLGetCurrentContext();
+#endif
    void   *shaderID;
 
    shaderID = mulle_map_get( &_shaderMap, name);
    assert( shaderID);
-   if( _debugEnabled & 0x2)
+   if( _debuggingFlags & 0x2)
       MulleUILog( "release shader \"%s\"", (NSInteger) name);
    glDeleteProgram( (GLuint) (uintptr_t) shaderID);
    CGContextCheckBackendError( self, "after glDeleteProgram");
@@ -498,12 +559,16 @@ static GLuint   CGContextCompileShader( CGContext *self, char *source, int type,
 
 - (void) deleteShaders
 {
+#ifdef _CGLMACRO_H
+   CGLContextObj  cgl_ctx = CGLGetCurrentContext();
+#endif
+
    void   *name;
    void   *shaderID;
 
    mulle_map_for( &_shaderMap, name, shaderID)
    {
-      if( _debugEnabled & 0x2)
+      if( _debuggingFlags & 0x2)
          MulleUILog( "release shader \"%s\"", name);
       glDeleteProgram( (GLuint) (uintptr_t) shaderID);
       CGContextCheckBackendError( self, "after glDeleteProgram");
@@ -511,5 +576,87 @@ static GLuint   CGContextCompileShader( CGContext *self, char *source, int type,
 
    mulle_map_reset( &_shaderMap);
 }
+
+
+
+static UIGraphicsBackend   defaultBackends[] =
+{
+   UIGraphicsBackendDefault,
+   UIGraphicsBackendNone
+};
+
+
++ (void) registerShaderSources:(struct CGShaderUTF8Sources *) sources
+             forNameUTF8String:(char *) nameUTF8String
+{
+   UIGraphicsBackend   *backends;
+   char                *key;
+   char                *prefix;
+
+   if( ! nameUTF8String)
+      nameUTF8String = sources->name;
+
+   assert( nameUTF8String);
+
+   backends = sources->backends ? sources->backends : defaultBackends;
+
+   mulle_buffer_do( buffer)
+   {
+      while( *backends != UIGraphicsBackendNone)
+      {
+         mulle_buffer_reset( buffer);
+         prefix = UIGraphicsBackendUTF8String( *backends);
+         assert( ! strcmp( prefix, "???"));
+
+         mulle_buffer_sprintf( buffer, "%s__%s", prefix, nameUTF8String);
+         key = mulle_buffer_get_string( buffer);
+         mulle_thread_mutex_do( Self._shaderSourceLock)
+         {
+            mulle_map_insert( &Self._registeredSources, key, sources);
+         }
+         ++backends;
+      }
+   }
+}
+
+
++ (void) registerShaderSources:(struct CGShaderUTF8Sources *) sources
+{
+   [self registerShaderSources:sources
+             forNameUTF8String:NULL];
+}
+
+
+- (struct CGShaderUTF8Sources *)
+   registeredShaderSourcesForNameUTF8String:(char *) nameUTF8String
+{
+   struct CGShaderUTF8Sources   *sources;
+   char                         *prefix;
+   UIGraphicsBackend            *backends;
+   auto UIGraphicsBackend       targetBackends[ 3] =
+                                {
+                                   [self backend],
+                                   UIGraphicsBackendDefault,
+                                   UIGraphicsBackendNone
+                                };
+
+   backends = targetBackends;
+   mulle_buffer_do( buffer)
+   {
+      do
+      {
+         prefix = UIGraphicsBackendUTF8String( *backends);
+         mulle_buffer_sprintf( buffer, "%s__%s", prefix, nameUTF8String);
+
+         mulle_thread_mutex_do( Self._shaderSourceLock)
+         {
+            sources = mulle_map_get( &Self._registeredSources, nameUTF8String);
+         }
+      }
+      while( ! sources && *++backends != UIGraphicsBackendNone);
+   }
+   return( sources);
+}
+
 
 @end

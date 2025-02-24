@@ -268,7 +268,7 @@ static void   _drawColoredLines( NVGcontext *vg,
 }
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect              rows[ 3];
    CGRect              columns[ 8];
@@ -435,7 +435,7 @@ void   setupScene( UIWindow *window)
    view  = [UIView viewWithFrame:frame];
    [view setMargins:insets];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
-   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
+   [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
 
@@ -547,13 +547,15 @@ int   main( int argc, char *argv[])
 
       [window setSwapInterval:swapInterval];
       [window setFrameRate:frameRate];
+
+      perf = [MulleUIPerf object];
+      [window setFrameDelegate:perf];
+
       [app addWindow:window];
    }
 
-   perf = [MulleUIPerf object];
-   [window setFrameDelegate:perf];
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

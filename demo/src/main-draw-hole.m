@@ -30,7 +30,7 @@ static void   drawCheckboard( CGRect  rect, CGContext *context)
    };
 
    image = [[[CGImage alloc] initWithRGBABytes:imagedata
-                                    bitmapSize:MulleIntegerSizeMake( 8, 8)
+                                    bitmapSize:CGPixelSizeMake( 8, 8)
                                   textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
                                        context:context] autorelease];
    [image drawRect:rect
@@ -67,7 +67,7 @@ static void   drawCircle( struct NVGcontext *vg, CGRect rect, CGFloat animation)
 }
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    struct NVGcontext   *vg;
    CGRect              rects[ 2][ 4];
@@ -155,7 +155,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 400, 200),
                                            NULL,
                                            60.0f));

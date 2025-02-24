@@ -5,7 +5,7 @@
 #include <string.h>
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CAPolarPoint        polar;
    CGColor             color;
@@ -140,7 +140,7 @@ void   setupScene( UIWindow *window)
 
    frame  = [[window contentView] contentRect];
    view   = [UIView viewWithFrame:frame];
-   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
+   [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
 
@@ -211,7 +211,7 @@ int   main( int argc, char *argv[])
       setupScene( window);
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

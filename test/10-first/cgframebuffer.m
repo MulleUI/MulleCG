@@ -3,9 +3,9 @@
 
 int   main( int argc, char *argv[])
 {
-   CGLayer   *layer;
+   CGFramebuffer   *layer;
 
-   layer = [CGLayer new];
+   layer = [CGFramebuffer new];
    [layer setDebugNameUTF8String:"Hello"];
    [layer release];
    return( 0);

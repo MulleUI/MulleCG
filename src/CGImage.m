@@ -15,7 +15,7 @@
 
 @implementation CGSharedGPUTexture : NSObject
 
-- (instancetype) initWithGPUTexture:(void *) gpuTexture
+- (instancetype) initWithGPUTexture:(CGGPUTextureID) gpuTexture
 {
    _gpuTexture = gpuTexture;
    return( self);
@@ -47,17 +47,62 @@
 
 @implementation CGContext( CGImageGPUTexture)
 
-- (CGImage *) imageWithGPUTextureRGBA:(void *) gpuTexture
-                     sharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
-                           bitmapSize:(struct MulleIntegerSize) size
-                         textureFlags:(NSUInteger) textureFlags
+- (CGImage *) imageWithGPUTexture:(CGGPUTextureID) gpuTexture
+                       bitmapSize:(CGPixelSize) bitmapSize
+                     textureFlags:(NSUInteger) textureFlags
 {
-   CGImage   *image;
+   CGImage              *image;
+   CGSharedGPUTexture   *sharedGPUTexture;
 
    if( ! gpuTexture)
       return( nil);
 
    image = mulle_map_get( &_gpuTextureMap, gpuTexture);
+   if( image)
+   {
+      if( [image textureFlags] == textureFlags
+           && CGPixelSizeEqualToPixelSize( [image bitmapSize], bitmapSize))
+      {
+         return( image);
+      }
+
+      sharedGPUTexture = [image sharedGPUTexture];
+      if( ! sharedGPUTexture)
+         return( nil);
+
+      image = [[[CGImage alloc] initWithSharedGPUTexture:sharedGPUTexture
+                                              bitmapSize:bitmapSize
+                                            textureFlags:textureFlags
+                                                 context:self] autorelease];
+      return( image);
+   }
+
+   image = [[[CGImage alloc] initWithGPUTexture:gpuTexture
+                                     bitmapSize:bitmapSize
+                                   textureFlags:textureFlags
+                                        context:self] autorelease];
+
+   if( image)
+   {
+      CGContextLog( "remember %#@ for gpuTexture %p", image, gpuTexture);
+      mulle_map_insert( &_gpuTextureMap, gpuTexture, image);
+   }
+   return( image);
+}
+
+
+- (CGImage *) imageWithSharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
+                             bitmapSize:(CGPixelSize) size
+                           textureFlags:(NSUInteger) textureFlags
+{
+   CGImage          *image;
+   CGGPUTextureID   gpuTexture;
+
+   if( ! sharedGPUTexture)
+      return( nil);
+
+   gpuTexture = [sharedGPUTexture gpuTexture];
+   image      = mulle_map_get( &_gpuTextureMap, gpuTexture);
    if( image)
    {
       CGContextLog( "reuse %#@ for gpuTexture %p", image, gpuTexture);
@@ -66,26 +111,26 @@
       return( [image textureFlags] == textureFlags ? image : nil);
    }
 
-   image = [[[CGImage alloc] initWithGPUTextureRGBA:gpuTexture
-                                   sharedGPUTexture:sharedGPUTexture
-                                         bitmapSize:size
-                                       textureFlags:textureFlags
-                                            context:self] autorelease];
-   CGContextLog( "remember %#@ for gpuTexture %p", image, gpuTexture);
+   image = [[[CGImage alloc] initWithSharedGPUTexture:sharedGPUTexture
+                                           bitmapSize:size
+                                         textureFlags:textureFlags
+                                              context:self] autorelease];
 
-   mulle_map_insert( &_gpuTextureMap, gpuTexture, image);
+   if( image)
+   {
+      CGContextLog( "remember %#@ for gpuTexture %p", image, gpuTexture);
+      mulle_map_insert( &_gpuTextureMap, gpuTexture, image);
+   }
    return( image);
 }
 
 
 - (void) removeFromSharedGPUTextureMap:(CGImage *) image
 {
-   void   *gpuTexture;
+   CGGPUTextureID   gpuTexture;
 
    gpuTexture = [[image sharedGPUTexture] gpuTexture];
-   CGContextLog( "forget %#@ for gpuTexture %p",
-                  image,
-                  [[image sharedGPUTexture] gpuTexture]);
+   CGContextLog( "forget %#@ for gpuTexture %p", image, gpuTexture);
    // if key is NULL its no problem
    mulle_map_remove( &_gpuTextureMap, gpuTexture);
 }
@@ -115,10 +160,13 @@
 
 
 - (instancetype) initWithTextureID:(NSInteger) textureID
+                        bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context
 {
-   if( ! textureID)
+   CGGPUTextureID   gpuTexture;
+
+   if( ! textureID || ! bitmapSize.width || ! bitmapSize.height)
    {
       [self release];
       return( nil);
@@ -127,6 +175,14 @@
    _context      = context;
    _textureID    = textureID;
    _textureFlags = textureFlags;
+   _bitmapSize   = bitmapSize;
+   _alpha        = 1.0f;
+
+   if( [_context shareID])
+   {
+      gpuTexture        = [_context gpuTextureForTextureID:textureID];
+      _sharedGPUTexture = [[CGSharedGPUTexture alloc] initWithGPUTexture:gpuTexture];
+   }
 
    [_context assignResource:self
                      forKey:(MulleUIResourceStorageKey_t) self];
@@ -135,52 +191,99 @@
 }
 
 
-- (instancetype) initWithGPUTextureRGBA:(void *) gpuTexture
-                       sharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
-                             bitmapSize:(struct MulleIntegerSize) size
-                           textureFlags:(NSUInteger) textureFlags
-                                context:(CGContext *) context
+- (instancetype) initWithGPUTexture:(CGGPUTextureID) gpuTexture
+                         bitmapSize:(CGPixelSize) bitmapSize
+                       textureFlags:(NSUInteger) textureFlags
+                            context:(CGContext *) context
 {
    NSUInteger   textureID;
 
-   textureID = [context textureIDWithGPUTextureRGBA:gpuTexture
-                                         bitmapSize:size
-                                        textureFlags:textureFlags];
-
-   self = [self initWithTextureID:textureID
-                     textureFlags:textureFlags
-                          context:context];
-   if( self)
+   if( ! gpuTexture || ! bitmapSize.width || ! bitmapSize.height)
    {
-      if( ! sharedGPUTexture)
-         _sharedGPUTexture = [[CGSharedGPUTexture alloc] initWithGPUTexture:gpuTexture];
-      else
-         _sharedGPUTexture = [sharedGPUTexture retain];
+      [self release];
+      return( nil);
    }
+
+   textureID     = [context textureIDWithGPUTexture:gpuTexture
+                                         bitmapSize:bitmapSize
+                                       textureFlags:textureFlags];
+   _context      = context;
+   _textureID    = textureID;
+   _textureFlags = textureFlags;
+   _bitmapSize   = bitmapSize;
+   _alpha        = 1.0f;
+
+   if( [context shareID])
+      _sharedGPUTexture = [[CGSharedGPUTexture alloc] initWithGPUTexture:gpuTexture];
+
+   [_context assignResource:self
+                     forKey:(MulleUIResourceStorageKey_t) self];
+
    return( self);
 }
 
 
-- (void) contextDidAddObject:(CGContext *) context
+- (instancetype) initWithSharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
+                               bitmapSize:(CGPixelSize) bitmapSize
+                             textureFlags:(NSUInteger) textureFlags
+                                  context:(CGContext *) context
 {
-   if( _context != context)
+   CGGPUTextureID   gpuTexture;
+   NSUInteger       textureID;
+
+   if( ! sharedGPUTexture || ! bitmapSize.width || ! bitmapSize.height)
    {
-      fprintf( stderr, "CGImages should only belong to one context. Use -shareWithContext: to share an image with another context.");
-      abort();
+      [self release];
+      return( nil);
    }
+   assert( [context shareID]);
+
+   gpuTexture = [sharedGPUTexture gpuTexture];
+   textureID  = [context textureIDWithGPUTexture:gpuTexture
+                                      bitmapSize:bitmapSize
+                                    textureFlags:textureFlags];
+   _context          = context;
+   _textureID        = textureID;
+   _textureFlags     = textureFlags;
+   _bitmapSize       = bitmapSize;
+   _alpha            = 1.0f;
+   _sharedGPUTexture = [sharedGPUTexture retain];
+
+   [_context assignResource:self
+                     forKey:(MulleUIResourceStorageKey_t) self];
+
+   return( self);
 }
 
 
-- (void) contextDidRemoveObject:(CGContext *) context
+- (void) didAddToContext:(CGContext *) context
 {
-   if( _textureID && context == _context)
+   if( _context != context)
+   {
+      mulle_fprintf( stderr, "A %s can only belong to one context. "
+                             "Use -sharedGPUTexture and create an image "
+                             "with it in another context.\n",
+                             MulleObjCObjectGetClassNameUTF8String( self));
+      abort();
+   }
+
+   _context = context;
+}
+
+
+- (void) didRemoveFromContext:(CGContext *) context
+{
+   assert( context == _context);
+
+   if( _textureID)
    {
       // the gpuTexture may have been nil-ed out by finalize
       // assert( [context isActive]);
       // the context NEED NOT be active! (check deleteTextureID: code)
-      [context deleteTextureID:_textureID];
+      [_context deleteTextureID:_textureID];
       _textureID = 0;
    }
+
    _context = nil;
 }
 
@@ -190,14 +293,12 @@
 //
 - (void) finalize
 {
-   [_context removeFromSharedGPUTextureMap:self];
-
    if( [_sharedGPUTexture retainCount] > 1)
    {
       //
       // nvg should forget the texture. So it wont get "really" deleted
       // as other context may still want to access it.
-      // We only patch a struct and don't hit OpenGL here so use
+      // We only patch a struct and don't hit OpenGL here so no need to use
       // _CGContextGetNVGContext( _context);
       //
       [_context forgetTextureID:_textureID];
@@ -206,8 +307,9 @@
    [_sharedGPUTexture release];
    _sharedGPUTexture = nil;
 
-   // this will call contextDidRemoveObject: eventually
+   // this will call didRemoveFromContext: eventually
    [_context removeResourceForKey:(MulleUIResourceStorageKey_t) self];
+   [_context removeFromSharedGPUTextureMap:self];
 
    [super finalize];
 }
@@ -220,6 +322,7 @@
    [super dealloc];
 }
 
+
 - (void) setDebugNameUTF8String:(char *) s
 {
    MulleObjCObjectSetDuplicatedUTF8String( self, &_debugNameUTF8String, s);
@@ -231,7 +334,8 @@
 {
    if( [context shareID] != [_context shareID])
    {
-      CGImageLog( "ImageID requested for context %#@ is in non-sharable context %#@",
+      CGImageLog( "ImageID requested for context %#@ "
+                  "is in non-sharable context %#@",
                   context, _context);
       assert( 0);
       return( nil);
@@ -239,7 +343,8 @@
 
    if( textureFlags != _textureFlags)
    {
-      CGImageLog( "Non standard textureFlags 0x%tx (0x%x) requested. Use UIBitmapImage instead (for now)", textureFlags, _textureFlags);
+      CGImageLog( "Non standard textureFlags 0x%tx (0x%x) requested. "
+                  "Use UIBitmapImage instead (for now)", textureFlags, _textureFlags);
       // would need to construct a new CGImage, but CGImage is too low level
       // use UIBitmapImage instead
       assert( 0);
@@ -254,14 +359,16 @@
                                   textureFlags:(NSUInteger) textureFlags
                                        context:(CGContext *) context
 {
-   NSInteger   textureID;
+   NSInteger                 textureID;
+   CGPixelSize   bitmapSize;
 
    assert( [context isActive]);
 
-   textureID = [context textureIDWithContentsOfFileCString:filename
-                                              textureFlags:textureFlags & 0x3F];
-
+   textureID  = [context textureIDWithContentsOfFileCString:filename
+                                               textureFlags:textureFlags & 0x3F];
+   bitmapSize = [context bitmapSizeForTextureID:textureID];
    return( [self initWithTextureID:textureID
+                        bitmapSize:bitmapSize
                       textureFlags:textureFlags
                            context:context]);
 }
@@ -271,25 +378,28 @@
                       textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context
 {
-   NSInteger   textureID;
+   NSInteger                 textureID;
+   CGPixelSize   bitmapSize;
 
    assert( [context isActive]);
 
-   // bounce to CGContext kind unneccessary now
-   // this was used to generate debug output, but this now done
+   // bounce to CGContext kinda unnecessary now
+   // this was used to generate debug output, but this now done in
    // addImageToResources.
    // Another theory is to isolate nvgCalls in CGContext, but really why ?
    // They are isolated in this library already
    textureID = [context textureIDWithFileCData:fileCData
                                   textureFlags:textureFlags & 0x3F];
+   bitmapSize = [context bitmapSizeForTextureID:textureID];
    return( [self initWithTextureID:textureID
+                        bitmapSize:bitmapSize
                       textureFlags:textureFlags
                            context:context]);
 }
 
 
 - (instancetype) initWithRGBABytes:(void *) bytes
-                        bitmapSize:(struct MulleIntegerSize) bitmapSize
+                        bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context
 {
@@ -307,10 +417,11 @@
    assert( [context isActive]);
 
    // bounce to context for debugging output of CGContext
-   textureID = [context textureIDWithBytes:bytes
-                                bitmapSize:bitmapSize
-                              textureFlags:textureFlags & 0x3F];
+   textureID = [context textureIDWithRGBABytes:bytes
+                                    bitmapSize:bitmapSize
+                                  textureFlags:textureFlags & 0x3F];
    return( [self initWithTextureID:textureID
+                        bitmapSize:bitmapSize
                       textureFlags:textureFlags
                            context:context]);
 }
@@ -320,12 +431,12 @@
                    textureFlags:(NSUInteger) textureFlags
                         context:(CGContext *) context
 {
+   BOOL                  isFlipped;
+   CGBitmapEncoding      convertedEncoding;
+   CGBitmapEncoding      encoding;
    NSInteger             textureID;
    struct CGBitmap       convertedBitmap;
    struct CGBitmapInfo   convertedBitmapInfo;
-   BOOL                  isFlipped;
-   CGBitmapEncoding      encoding;
-   CGBitmapEncoding      convertedEncoding;
 
    if( ! bitmap.bytes)
    {
@@ -357,17 +468,18 @@
          [self release];
          return( nil);
       }
-      textureID = [context textureIDWithBytes:convertedBitmap.bytes
+      textureID = [context textureIDWithRGBABytes:convertedBitmap.bytes
                                    bitmapSize:convertedBitmap.info.size
                                  textureFlags:textureFlags];
       CGBitmapDone( convertedBitmap);
    }  
    else
-      textureID = [context textureIDWithBytes:bitmap.bytes
+      textureID = [context textureIDWithRGBABytes:bitmap.bytes
                                    bitmapSize:bitmap.info.size
                                  textureFlags:textureFlags];
 
    return( [self initWithTextureID:textureID
+                        bitmapSize:bitmap.info.size
                       textureFlags:textureFlags
                            context:context]);
 }
@@ -392,7 +504,7 @@
 //
 // If a texture in OpenGL gets deleted and a new one is created, this texture
 // ID will be reused. Unfortunately we will not be able to share this across
-// contexts until the other context have also deleted their textures and
+// contexts until the other contexts have also deleted their textures and
 // haven't created a new texture.
 //
 // Now the CGImage NanoVG textureID is different and local to each context.
@@ -423,113 +535,12 @@
 //        allocation algorithm, and I am not sure anymore that this is 
 //        an expected property]
 //
-// can change behind our backs, when shared for sure!
+// Question, can the size of a texture change behind our backs ?
 //
-- (struct MulleIntegerSize) bitmapSize
-{
-   int   w, h;
-
-   nvgImageSize( CGContextGetNVGContext( _context), _textureID, &w, &h);
-   return( MulleIntegerSizeMake( w, h));
-}
-
 
 - (struct CGBitmapInfo) bitmapInfo
 {
    return( CGBitmapInfoMake( [self bitmapSize], 0, CGBitmapEncodingRGBABytes));
-}
-
-
-- (void) setBytes:(void *) bytes
-{
-   assert( [_context isActive]);
-
-   nvgUpdateImage( CGContextGetNVGContext( _context), _textureID, bytes);
-}
-
-
-- (void *) gpuTexture
-{
-   NVGcontext   *vg;
-   void         *gpuTexture;
-
-   if( _sharedGPUTexture)
-      return( [_sharedGPUTexture gpuTexture]);
-
-   vg = CGContextGetNVGContext( _context);
-   nvgImageTextureInfo( vg, _textureID, NULL, NULL, &gpuTexture);
-   return( gpuTexture);
-}
-
-
-- (id) shareWithContext:(id) otherContext
-{
-   NVGcontext   *vg;
-   CGContext    *context;
-   CGImage      *image;
-   void         *gpuTexture;
-   int          w, h;
-   int          type;
-   int          textureFlags;
-
-   context = [self context];
-   if( context == otherContext)
-      return( self);
-
-   if( ! otherContext)
-   {
-      errno = EINVAL;
-      return( nil);
-   }
-
-   //
-   // We would like to put up a barrier here, so that "we" know we are done
-   // drawing the image and the other context doesn't get possibly an empty
-   // buffer.
-   // We can't be _really_ sure, that we are the active context though,
-   // as all these commands don't touch OpenGL, but remain in MulleCG and
-   // nanovg.
-   // [context barrier]; // too expensive to do willy nilly
-
-   // context need not be active, as we are just reading some internal
-   // info
-   vg = _CGContextGetNVGContext( context);
-
-   //
-   // if we can not copy from the original CGImage, we fail. This usually
-   // means that the image is not in a sharing configuration
-   //
-   nvgImageSize( vg, _textureID, &w, &h);
-   nvgImageTextureInfo( vg, _textureID, &textureFlags, &type, &gpuTexture);
-
-   //
-   // if this texture is already defined in the other context, we
-   // get a CGImage back. If it wasn't its defined now, so we are done
-   // As the context keeps track of this, we often get a cached image
-   // back. We don't want to up the retainCount then, as we are already
-   // sharing!
-   //
-   image = [otherContext imageWithGPUTextureRGBA:gpuTexture
-                                sharedGPUTexture:_sharedGPUTexture
-                                      bitmapSize:MulleIntegerSizeMake( w, h)
-                                    textureFlags:textureFlags];
-
-   // We now share a OpenGL texture with a different context
-   // To keep track on who has to delete the OpenGL texture, we use a small
-   // _sharedGPUTexture to keep the retainCount (and the OpenGL texture ID).
-   //
-   // -sharedGPUTexture will create a sharedGPUTexture if there isn't one yet
-   //
-   if( ! _sharedGPUTexture)
-   {
-      _sharedGPUTexture = [[image sharedGPUTexture] retain];
-
-      if( [_context debugEnabled] || _debugEnabled)
-         CGImageLog( "shared gpuTexture=%p in context %#@ with %#@ of %#@",
-                     [_sharedGPUTexture gpuTexture], _context, image, otherContext);
-   }
-
-   return( image);
 }
 
 
@@ -544,6 +555,23 @@
 - (BOOL) isMultiSample
 {
    return( (_textureFlags & NVG_IMAGE_MSAA) ? YES : NO);
+}
+
+
+- (instancetype) shareWithContext:(CGContext *) context
+                     textureFlags:(NSUInteger) textureFlags
+{
+   Class     cls;
+   CGImage   *image;
+
+   cls   = MulleObjCObjectGetClass( self);
+   image = [cls alloc];
+   image = [image initWithSharedGPUTexture:[self sharedGPUTexture]
+                                bitmapSize:[self bitmapSize]
+                              textureFlags:textureFlags
+                                   context:context];
+   image = [image autorelease];
+   return( image);
 }
 
 
@@ -571,6 +599,15 @@
    assert( ! [self isMultiSample]);
 
    return( self);
+}
+
+
+//
+// CGPaint overrides
+//
+- (BOOL) isTexture
+{
+   return( YES);
 }
 
 

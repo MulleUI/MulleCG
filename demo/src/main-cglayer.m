@@ -8,14 +8,14 @@
 
 //
 // this demo does the simple stripes stuff, except that
-// we render into a CGLayer first. Then draw that into the original
+// we render into a CGFramebuffer first. Then draw that into the original
 // layer. Technically that makes little sense, but it shows
-// CGLayer working...
+// CGFramebuffer working...
 //
-static BOOL   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                     *context = _context;
-   CGLayer                       *cgLayer;
+   CGFramebuffer                       *cgLayer;
    CGRect                        canvas;
    CGRect                        originalCanvas;
    CGRect                        rect;
@@ -42,30 +42,30 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
       nvgFillColor( vg, nvgRGBAf( 0.7, 0.5, 0.7, 1.0));
       nvgFill( vg);
 
-      // we want to draw the flag four times. We render it once into a CGLayer
-      // and then draw the CGLayer. This may or may not be better than drawing
+      // we want to draw the flag four times. We render it once into a CGFramebuffer
+      // and then draw the CGFramebuffer. This may or may not be better than drawing
       // the flags immediately, but this is just a demo to show how its done.
 
       // 1. remember current drawing environment
       [context getCurrentFrameInfo:&oldFrameInfo];
       cgLayer = nil;
       //
-      // 2. create a CGLayer where we want to draw to. Size is fairly arbitrary.
+      // 2. create a CGFramebuffer where we want to draw to. Size is fairly arbitrary.
       //    as it will be used as texture.
       //
       canvas.origin = CGPointZero;
       canvas.size   = CGSizeMake( originalCanvas.size.height / 2.0, originalCanvas.size.width / 2.0);
-      cgLayer        = [CGLayer layerWithBitmapSize:MulleIntegerSizeMakeWithSize( canvas.size)
+      cgLayer        = [CGFramebuffer framebufferWithBitmapSize:CGPixelSizeMakeWithSize( canvas.size)
                                        textureFlags:0
                                             context:context];
       // 3. flush drawings so they don't appear in our framebuffer
       [context flushRender];
 
-      // 4. now set the drawing destination to the CGLayer framebuffer
+      // 4. now set the drawing destination to the CGFramebuffer framebuffer
       previous = [context bindFramebuffer:CGContextFramebufferMakeWithLayer( cgLayer)];
 
       // 5. tell CGContext about the new dimensions
-      frameInfo = CGFrameInfoFBMake( MulleIntegerSizeMakeWithSize( canvas.size), 1.0, 1.0);
+      frameInfo = CGFrameInfoFBMake( CGPixelSizeMakeWithSize( canvas.size), 1.0, 1.0);
       [context changeRender:&frameInfo];
       drawRedWhiteBlueFlag( vg, canvas);
 
@@ -95,7 +95,7 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
             nvgStroke( vg);
          }
 
-      // CGLayer must remain until actual render end or flush
+      // CGFramebuffer must remain until actual render end or flush
       [context flushRender];
    }
 //   [UIApp requestTerminate];

@@ -25,26 +25,26 @@
 //       |
 //       v
 //  .---------.
-//  | CGLayer |
+//  | CGFramebuffer |
 //  '---------'
 //
 
 
 //
-// Container for the OpenGL textureID, it's merely used for retain
-// counting. Therefore it must never be autoreleased!
+// Container for the OpenGL textureID, it's used for sharing textures across
+// multiple contexts and threads.
 //
-@interface CGSharedGPUTexture : NSObject
+@interface CGSharedGPUTexture : NSObject < MulleObjCThreadSafe >
 
-@property( readonly, assign) void  *gpuTexture;
+@property( readonly, assign) CGGPUTextureID  gpuTexture;
 
-- (instancetype) initWithGPUTexture:(void *) gpuTexture;
+- (instancetype) initWithGPUTexture:(CGGPUTextureID) gpuTexture;
 
 @end
 
 
 // Generally try to create CGImages with the functionality found in
-// CGContext+CGImage, as you then don't have to worry about creating to many
+// CGContext+CGImage, as you then don't have to worry about creating too many
 // textures.
 // -------
 // This is a wrapper for all the nanovg image functionality. Because we use
@@ -75,21 +75,40 @@
 @property( readonly, assign) CGTextureID          textureID;
 @property( readonly, assign) NSUInteger           textureFlags;
 @property( readonly, assign) CGContext            *context;
+
+//
+// CGImage size is not mutable, if the bitmap size changes
+// you need to create a new CGImage. The bytes can be freed by the
+// caller afterwards. The bytes are pushed to the GPU immediately.
+// This will affect all copies(!) of this CGImage!
+//
+@property( readonly, assign) CGPixelSize          bitmapSize;
+
+// this will be nil, if the context has no shareID
 @property( readonly, retain) CGSharedGPUTexture   *sharedGPUTexture;
-@property NSUInteger                              debugEnabled;
+@property( assign) CGFloat                        alpha;  // this is hacky (should be readonly)
+@property( assign) NSUInteger                     debuggingFlags     MULLE_OBJC_THREADSAFE_PROPERTY;
 @property char                                    *debugNameUTF8String;  // useful for debugging
 
 // textureFlags in this call is "informative", it will not affect the image
 // as it has been created already
 - (instancetype) initWithTextureID:(CGTextureID) textureID
+                        bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context;
 
-- (instancetype) initWithGPUTextureRGBA:(void *) gpuTexture
-                       sharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
-                             bitmapSize:(struct MulleIntegerSize) size
-                           textureFlags:(NSUInteger) textureFlags
-                                context:(CGContext *) context;
+// use this for contexts with no sharing enabled. If sharing is enabled
+// you can access a -sharedGPUTexture if sharing is enabled by the context
+- (instancetype) initWithGPUTexture:(CGGPUTextureID) gpuTexture
+                         bitmapSize:(CGPixelSize) size
+                       textureFlags:(NSUInteger) textureFlags
+                            context:(CGContext *) context;
+
+// use this for contexts to share textures with another image
+- (instancetype) initWithSharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
+                               bitmapSize:(CGPixelSize) size
+                             textureFlags:(NSUInteger) textureFlags
+                                  context:(CGContext *) context;
 
 // these methods are germane to CGImage, subclasses may not support this
 // I wanted to avoid inserting another class here
@@ -105,7 +124,7 @@
 
 // bytes are not retained, you can free them after init
 - (instancetype) initWithRGBABytes:(void *) bytes
-                        bitmapSize:(struct MulleIntegerSize) bitmapSize
+                        bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context;
 
@@ -114,34 +133,18 @@
                    textureFlags:(NSUInteger) textureFlags
                         context:(CGContext *) context;
 
-//
-// CGImage size is not mutable, if the bitmap size changes
-// you need to create a new CGImage. The bytes can be freed by the
-// caller afterwards. The bytes are pushed to the GPU immediately.
-// This will affect all copies(!) of this CGImage!
-//
-- (void) setBytes:(void *) bytes;
-
-- (struct MulleIntegerSize)  bitmapSize;
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
 
-- (void *) gpuTexture;
-
 // multisample images can not be used as paint, use resolvedImage
-- (BOOL) isMultiSample;
+- (BOOL) isMultiSample        MULLE_OBJC_THREADSAFE_METHOD;
 
 // always self, unless isMultiSample is set in which case this will abort
-// only CGLayer actually has resolvedImage
+// only CGFramebuffer actually has resolvedImage
 - (CGImage *) resolvedImage;
 
-//
-// If otherContext is sharing textures with the CGImage context, we can
-// share the texture by creating a nvg image copy in otherContext. otherContext
-// needs to be active. May return nil, if the copying is not possible.
-//
-// Make sure that image is completely drawn by the GPU before calling this.
-// (use [CGContext barrier])
-- (id) shareWithContext:(id) otherContext;
+- (instancetype) shareWithContext:(CGContext *) context
+                     textureFlags:(NSUInteger) textureFlags;
+
 
 @end

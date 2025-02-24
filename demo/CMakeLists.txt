@@ -19,6 +19,7 @@ list( INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake/share")
 list( INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake/reflect")
 list( INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake")
 
+add_compile_definitions( -DMULLE_CG_GLVERSION=1)
 
 include( Environment)
 
@@ -70,8 +71,11 @@ add_custom_target( "shaders"
    COMMENT "Target to build shaders"
 )
 
-set_source_files_properties( "src/main-shader.m"
+# not sure why this dont work on my mac, but its not super important
+if( NOT APPLE)
+   set_source_files_properties( "src/main-shader.m"
                               PROPERTIES OBJECT_DEPENDS "${INC_FILES}")
+endif()
 
 
 include( Dependencies OPTIONAL)

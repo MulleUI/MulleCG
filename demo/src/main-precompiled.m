@@ -27,7 +27,7 @@ void   drawSplitRectWithHole( NVGcontext* vg, CGRect rect, CGFloat x, CGFloat ra
 }
 
 
-static BOOL   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                  *context = _context;
    struct NVGcontext          *vg;
@@ -147,11 +147,11 @@ int   main( int argc, char *argv[])
                             styleMask:styleMask];
    [[window contentView] setDrawCallback:drawStuff];
    [window setFrameRateHz:60.0f];
+   [window setFrameDelegate:[MulleUIPerf object]];
    [app addWindow:window];
 
-   [window setFrameDelegate:[MulleUIPerf object]];
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

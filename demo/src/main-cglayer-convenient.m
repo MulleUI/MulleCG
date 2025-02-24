@@ -7,15 +7,18 @@
 
 
 //
-// this demo does the simple stripes stuff, except that
-// we render into a CGLayer first. Then draw that into the original
-// layer. Technically that makes little sense, but it shows
-// CGLayer working...
+// A somewhat more conveniently coded version of main-cglayer.m
+// using: -beginFBRenderWithBackgroundColor: / -endFBRender:
 //
-static BOOL   drawStuff( CALayer *layer, void *_context)
+// this demo does the simple stripes stuff, except that
+// we render into a CGFramebuffer first. Then draw that into the original
+// layer. Technically that makes little sense, but it shows
+// CGFramebuffer working...
+//
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                     *context = _context;
-   CGLayer                       *cgLayer;
+   CGFramebuffer                       *cgLayer;
    CGRect                        canvas;
    CGRect                        originalCanvas;
    CGRect                        rect;
@@ -23,7 +26,7 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
    CGRect                        rects[ 2][ 2];
    NSUInteger                    i, j;
    NVGpaint                      paint;
-   struct CGLayerRenderInfo      memo;
+   struct CGFramebufferRenderInfo      memo;
 
    @autoreleasepool
    {
@@ -39,24 +42,24 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
       nvgFillColor( vg, nvgRGBAf( 0.7, 0.5, 0.7, 1.0));
       nvgFill( vg);
 
-      // we want to draw the flag four times. We render it once into a CGLayer
-      // and then draw the CGLayer. This may or may not be better than drawing
+      // we want to draw the flag four times. We render it once into a CGFramebuffer
+      // and then draw the CGFramebuffer. This may or may not be better than drawing
       // the flags immediately, but this is just a demo to show how its done.
 
       //
-      // 2. create a CGLayer where we want to draw to. Size is fairly arbitrary.
+      // 2. create a CGFramebuffer where we want to draw to. Size is fairly arbitrary.
       //    as it will be used as texture.
       //
       canvas.origin = CGPointZero;
       canvas.size   = CGSizeMake( originalCanvas.size.height / 2.0, originalCanvas.size.width / 2.0);
-      cgLayer       = [CGLayer layerWithBitmapSize:MulleIntegerSizeMakeWithSize( canvas.size)
+      cgLayer       = [CGFramebuffer framebufferWithBitmapSize:CGPixelSizeMakeWithSize( canvas.size)
                                       textureFlags:0
                                            context:context];
-      [cgLayer beginLayerRenderWithBackgroundColor:CGColorMakeWhite()
+      [cgLayer beginFBRenderWithBackgroundColor:CGColorMakeWhite()
                                   devicePixelRatio:1.0
                                    layerRenderInfo:&memo];
       drawRedWhiteBlueFlag( vg, canvas);
-      [cgLayer endLayerRender:&memo];
+      [cgLayer endFBRender:&memo];
 
       CGRectPartition2x2( originalCanvas, CGSizeMake( 8.0, 8.0), rects);
       for( i = 0; i < 2; i++)
@@ -74,7 +77,7 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
             nvgStroke( vg);
          }
 
-      // CGLayer must remain until actual render end or flush
+      // CGFramebuffer must remain until actual render end or flush
       [context flushRender];
    }
    return( YES);

@@ -3,14 +3,20 @@
 //
 #define DEFINE_NANOVG_GL_IMPLEMENTATION
 
+//
+// so to actually compile nanovg on Apple we needs to tweak stuff
+//
+#define MULLE_CG_USE_APPLE_GL2
+
 #import "CGContext+OpenGL.h"
 
 #import "import-private.h"
 
 #import "CGContext+Drawing.h"
+#import "CGContext+CGImage.h"
 #import "CGLayoutContext.h"
 #import "CGImage.h"
-#import "CGLayer.h"
+#import "CGFramebuffer.h"
 #import "CGColor.h"
 #include <ctype.h>
 
@@ -98,7 +104,7 @@ char   *_CGNVGBackendErrorShortUTF8String( void *error)
    case GL_INVALID_VALUE     : return( "GL_INVALID_VALUE");
    case GL_INVALID_OPERATION : return( "GL_INVALID_OPERATION");
    case GL_NO_ERROR          : return( "GL_NO_ERROR");
-#if ! defined( NANOVG_GLES2_IMPLEMENTATION) && ! defined( NANOVG_GLES3_IMPLEMENTATION)
+#if ! defined( NANOVG_GLES2_IMPLEMENTATION) && ! defined( NANOVG_GLES3_IMPLEMENTATION)  && ! defined( __APPLE__)
    case GL_STACK_OVERFLOW    : return( "GL_STACK_OVERFLOW");
    case GL_STACK_UNDERFLOW   : return( "GL_STACK_UNDERFLOW");
 #endif
@@ -116,7 +122,7 @@ char   *_CGNVGBackendErrorUTF8String( void *error)
    case GL_INVALID_VALUE     : return( "A numeric argument was out of range");
    case GL_INVALID_OPERATION : return( "The specified operation is not allowed in the current state");
    case GL_NO_ERROR          : return( NULL);
-#if ! defined( NANOVG_GLES2_IMPLEMENTATION) && ! defined( NANOVG_GLES3_IMPLEMENTATION)
+#if ! defined( NANOVG_GLES2_IMPLEMENTATION) && ! defined( NANOVG_GLES3_IMPLEMENTATION) && ! defined( __APPLE__)
    case GL_STACK_OVERFLOW    : return( "This function caused a stack overflow");
    case GL_STACK_UNDERFLOW   : return( "This function caused a stack underflow");
 #endif
@@ -180,6 +186,14 @@ void   _CGContextCheckBackendError( CGContext *ctxt, char *str)
    GLenum       err;
    static int   counter;
    char         *s;
+
+   //
+   // is that even possible to get called with a UIGraphicsBackendNone when
+   // ctxt is non-NULL ? ctxt may be NULL (at least thats how it has been
+   // coded in one demo, for some reason, that escapes me now)
+   //
+   if( ctxt && ctxt->_backend == UIGraphicsBackendNone)
+      return;
 
    err = glGetError();
    if( err != GL_NO_ERROR)
@@ -325,12 +339,11 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 }
 
 
-
 //#define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX   0x9048
 //#define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
 - (void) changeRender:(struct CGFrameInfo *) info
 {
-   assert( _isActive);
+   assert( _activeThread == [NSThread currentThread]);
    assert( info);
 
    _currentFrameInfo = *info;
@@ -358,7 +371,7 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 
 - (void) resumeRender
 {
-   assert( _isActive);
+   assert( _activeThread == [NSThread currentThread]);
    assert( _isRendering);
 
    CGContextCheckBackendError( self, "before resumeRender");
@@ -407,7 +420,7 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 //
 // void   glDrawTexiOES( int, int, int, int, int);
 //
-// - (void) blitRect:(struct MulleIntegerRect) rect
+// - (void) blitRect:(CGPixelRect) rect
 //             image:(CGImage *) image
 // {
 //    void   *gpuTexture;
@@ -458,7 +471,7 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 // https://stackoverflow.com/questions/3073796/how-to-use-glcopyimage2d
 //
 // glGetTexImage doesn’t exist in OpenGL ES 1.1 or 2.0. This means, if we
-// have GLES we need to create a temporary CGLayer
+// have GLES we need to create a temporary CGFramebuffer
 //
 #if defined( NANOVG_GLES2_IMPLEMENTATION) || defined( NANOVG_GLES3_IMPLEMENTATION)
 
@@ -471,13 +484,13 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
    struct CGBitmap               bitmap;
    struct CGContextFramebuffer   next;
    struct CGContextFramebuffer   previous;
-   struct MulleIntegerSize       bitmapSize;
+   CGPixelSize       bitmapSize;
    size_t                        size;
    BOOL                          isMultiSample;
 #if defined( NANOVG_GLES3_IMPLEMENTATION)
    NVGLUframebuffer              *nvgResultFramebuffer;
 #endif
-   assert( _isActive);
+   assert( _activeThread == [NSThread currentThread]);
 
    bitmapSize       = [image bitmapSize];
    size             = bitmapSize.width * bitmapSize.height * 4;
@@ -500,7 +513,6 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
    // interpose this, if we restore the bound framebuffer
    //
 
-   gpuTexture  = [image gpuTexture];
 
    glGenFramebuffers( 1, &tmpFramebuffer);
    CGContextCheckBackendError( self, "glGenFramebuffers");
@@ -509,8 +521,8 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
    next          = CGContextFramebufferMakeWithOpenGLHandle( (void *) (uintptr_t) tmpFramebuffer,
                                                              isMultiSample);
    samplerType   = isMultiSample ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
-
-   previous = [self bindFramebuffer:next];
+   gpuTexture    = [self gpuTextureForTextureID:[image textureID]];
+   previous      = [self bindFramebuffer:next];
    {
       glFramebufferTexture2D( GL_FRAMEBUFFER,
                               GL_COLOR_ATTACHMENT0,
@@ -568,7 +580,7 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
                                  allocator:(struct mulle_allocator *) allocator
 {
    struct CGBitmap           bitmap;
-   struct MulleIntegerSize   bitmapSize;
+   CGPixelSize   bitmapSize;
    CGBitmapEncoding          encoding;
    GLenum                    format;
    GLenum                    type;
@@ -577,7 +589,7 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
    NSUInteger                textureID;
    void                      *gpuTexture;
 
-   assert( _isActive);
+   assert( _activeThread == [NSThread currentThread]);
 
    encoding = CGBitmapEncodingFlipYRGBABytes;
    format   = GL_RGBA;
@@ -624,7 +636,7 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 /*
  * Read framebuffer information from GPU to CPU
  */
-- (struct CGBitmap) readFramebufferBitmap:(struct MulleIntegerRect) rect
+- (struct CGBitmap) readFramebufferBitmap:(CGPixelRect) rect
                     framebufferBitmapType:(CGFramebufferBitmapType) fType
                                 allocator:(struct mulle_allocator *) allocator
 {
@@ -672,7 +684,7 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
    }
 
    bitmap.info      = CGBitmapInfoMake( rect.size, 0, encoding);
-   size             = CGBitmapInfoGetAllocationSize( bitmap.info);
+   size             = CGBitmapInfoGetAllocationLength( bitmap.info);
    bitmap.allocator = allocator ? allocator : &mulle_default_allocator;
    // nvidia seemingly has problems if rect has some off values(guess)
    // so we add something for safety (valgrinds better)
@@ -694,11 +706,11 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 {
    struct CGBitmap          bitmap;
    struct CGFrameInfo       frameInfo;
-   struct MulleIntegerRect  rect;
+   CGPixelRect  rect;
 
    [self getCurrentFrameInfo:&frameInfo];
 
-   rect  = MulleIntegerRectMake( 0,
+   rect  = CGPixelRectMake( 0,
                                  0,
                                  frameInfo.window.framebufferSize.width,
                                  frameInfo.window.framebufferSize.height);
@@ -793,7 +805,7 @@ void
 }
 
 
-struct MulleIntegerSize
+CGPixelSize
    _CGContextBitmapSizeOfOpenGLFramebuffer( CGContext *self,
                                             struct CGContextFramebuffer fb)
 {
@@ -831,7 +843,7 @@ struct MulleIntegerSize
    glBindFramebuffer( GL_FRAMEBUFFER, defaultFBO);
 
    CGContextCheckBackendError( self, "glBindTexture");
-   return( MulleIntegerSizeMake( width, height));
+   return( CGPixelSizeMake( width, height));
 #else
    abort();
 #endif
@@ -849,6 +861,7 @@ void   _CGContextBindFramebuffer( CGContext *self,
                               GL_DRAW_FRAMEBUFFER
                              };
    GLuint   handle;
+   void     *gpuTexture;
 
    assert( type >= 0 && type <= 2);
 
@@ -863,7 +876,8 @@ void   _CGContextBindFramebuffer( CGContext *self,
 
    case CGContextLayerFramebuffer :
    case CGContextLayerMultiSampleFramebuffer :
-      handle = (GLuint) (uintptr_t) [(CGLayer *) fb.handle gpuTexture];
+      gpuTexture = [self gpuTextureForTextureID:[(CGFramebuffer *) fb.handle textureID]];
+      handle     = (GLuint) (uintptr_t) gpuTexture;
       break;
    }
 
@@ -882,14 +896,14 @@ void   _CGContextBlitFramebufferFramebuffer( CGContext *self,
                                              BOOL interpolate)
 {
 #if defined( GL_ES_VERSION_3_0) || defined( GL_VERSION_3_0)
-   struct MulleIntegerSize   srcSize;
-   struct MulleIntegerSize   dstSize;
+   CGPixelSize   srcSize;
+   CGPixelSize   dstSize;
 
    srcSize = CGContextBitmapSizeOfFramebuffer( self, src);
    dstSize = CGContextBitmapSizeOfFramebuffer( self, dst);
 
    // maybe overzealous
-   if( MulleIntegerSizeEqualToIntegerSize( srcSize, dstSize))
+   if( CGPixelSizeEqualToPixelSize( srcSize, dstSize))
       interpolate = NO;
 
    /* When using glBlitFramebuffer, it is not a problem to specify attachments
@@ -937,8 +951,7 @@ void   _CGContextBlitFramebufferImage( CGContext *self,
    tmpfb          = CGContextFramebufferMakeWithOpenGLHandle( (void *) (uintptr_t) tmpFramebuffer,
                                                               isMultiSample);
    samplerType = isMultiSample ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
-
-   gpuTexture = [src gpuTexture];
+   gpuTexture  = [self gpuTextureForTextureID:[src textureID]];
 
    _CGContextBindFramebuffer( self, CGContextFramebufferModeDefault, tmpfb);
    glFramebufferTexture2D( GL_FRAMEBUFFER,
@@ -961,13 +974,13 @@ void   _CGContextBlitFramebufferImage( CGContext *self,
 - (CGImage *) resolveMultiSampleImage:(CGImage *) image
 {
    NSUInteger                    textureFlags;
-   CGLayer                       *layer;
+   CGFramebuffer                       *layer;
    struct CGContextFramebuffer   previous;
 
    assert( [image isMultiSample]);
 
    textureFlags  = [image textureFlags] & ~NVG_IMAGE_MSAA;
-   layer         = [CGLayer layerWithBitmapSize:[image bitmapSize]
+   layer         = [CGFramebuffer framebufferWithBitmapSize:[image bitmapSize]
                                    textureFlags:textureFlags
                                         context:self];
 

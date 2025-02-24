@@ -21,6 +21,7 @@ src/texture.frag
 # contents selected with patternfile ??-source--sources
 #
 set( SOURCES
+src/main-aaa-demo.m
 src/main-arc-cw.m
 src/main-arc.m
 src/main-arcto.m
@@ -39,7 +40,6 @@ src/main-cgimage-section.m
 src/main-cgimage-write.m
 src/main-cglayer-convenient.m
 src/main-cglayer.m
-src/main-cglayoutcontext.m
 src/main-circle-hole.m
 src/main-composite.m
 src/main-custom-paint.m
@@ -53,7 +53,9 @@ src/main-dropshadow.m
 src/main-fancy-button.m
 src/main-fancy-stepper.m
 src/main-feather.m
+src/main-font-bug.m
 src/main-fonts.m
+src/main-framebuffer-simple.m
 src/main-glfw-cglayer.m
 src/main-glfw-draw-offscreen.m
 src/main-glfw-draw-simple.m
@@ -76,6 +78,8 @@ src/main-rect.m
 src/main-rect-pain.m
 src/main-rotate-rect.m
 src/main-rotate-stroke.m
+src/main-rotate-triangle2.m
+src/main-rotate-triangle.m
 src/main-rounded-rect.m
 src/main-rounded-stroke.m
 src/main-scissor.m
@@ -89,6 +93,7 @@ src/main-text-bounds.m
 src/main-text-contentmode.m
 src/main-text-draw.m
 src/main-text-extent.m
+src/main-text-fps.m
 src/main-text.m
 src/main-text-simple.m
 src/main-texture.m

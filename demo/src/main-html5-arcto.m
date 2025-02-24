@@ -9,7 +9,7 @@
 //
 // Tangential lines
 //
-static BOOL   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
    struct NVGcontext   *vg;
@@ -51,24 +51,24 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
 
 // Arc
    mvgBeginPath( vg);
-   mvgStrokeColor( vg, CGColorMakeBlack());
+   mvgStrokeColor( vg, CGColorMakeWhite());
    mvgMoveTo( vg, p0);
    mvgArcTo( vg, p1, p2, r);
    mvgStrokeWidth( vg, 5.0);
    mvgStroke( vg);
 
    mvgBeginPath( vg);
+   mvgCircle( vg, CACircleMake( p0, 5));
    mvgFillColor( vg, CGColorMakeBlue());
-   mvgArc( vg, CACircleMake( p0, 5), CARadiansToAngle( 0), CARadiansToAngle( CA_2xPI), NVG_CW);
    mvgFill( vg);
 
    mvgBeginPath( vg);
+   mvgCircle( vg, CACircleMake( p1, 5));
    mvgFillColor( vg, CGColorMakeRed());
-   mvgArc( vg, CACircleMake( p1, 5), CARadiansToAngle( 0), CARadiansToAngle( CA_2xPI), NVG_CW);
    mvgFill( vg);
 
    mvgBeginPath( vg);
-   mvgArc( vg, CACircleMake( p2, 5), CARadiansToAngle( 0), CARadiansToAngle( CA_2xPI), NVG_CW);
+   mvgCircle( vg, CACircleMake( p2, 5));
    mvgFill( vg);
 
    return( YES);
@@ -78,7 +78,7 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
 
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 600, 400),
                                            NULL,
                                            60.0f));

@@ -3,15 +3,16 @@
 #import "import-private.h"
 #include <mulle-testallocator/mulle-testallocator.h>
 
+// Run this with: MULLE_OBJC_EPHEMERAL_SINGLETON=YES otherwise it fails.
+//
 // This demo creates an invisible window to get an OpenGL context. This OpenGL
-// context is "wrapped" into a CGContext (it isn't really, it's an implicit
-// relationship. There is no OpenGL context pointer in CGContext, as this is
-// a thread local variable most likely).
-// Once we have to context, a offscreen framebuffer is created, drawn to
+// context is "wrapped" into a CGContext #1#.
+// Once we have a context, an offscreen framebuffer is created, drawn to
 // (single color) and the result written to BMP file.
 //
 // It's very low level. In a UIWindow based setting you wouldn't use different
 // code to manage CGLayers.
+//
 // That's it folks!
 
 #define W   64
@@ -36,6 +37,9 @@
 
 static void   draw( struct NVGcontext *vg)
 {
+#ifdef _CGLMACRO_H
+   CGLContextObj  cgl_ctx = CGLGetCurrentContext();
+#endif
    // clearing the framebuffer is usually done by -[CGContext clearFramebuffer]
    // which uses the backgroundColor of the context
    glClearColor( 0.85, 0.0, 0.0, 1.0);
@@ -65,7 +69,7 @@ int   main( int argc, char *argv[])
 {
    GLFWOSWindow     *window;
    CGContext        *context;
-   CGLayer          *cgLayer;
+   CGFramebuffer          *cgLayer;
    void             *bytes;
    struct CGBitmap  bitmap;
 
@@ -110,16 +114,16 @@ int   main( int argc, char *argv[])
          [context setActive:YES];
 
          //
-         // create a CGLayer of a certain size. This creates a bitmap on the
-         // GPU, where we can draw into (a framebuffer). A CGLayer is a CGImage
+         // create a CGFramebuffer of a certain size. This creates a bitmap on the
+         // GPU, where we can draw into (a framebuffer). A CGFramebuffer is a CGImage
          // so it can act as a texture
          //
-         cgLayer = [CGLayer layerWithBitmapSize:MulleIntegerSizeMake( W, H)
+         cgLayer = [CGFramebuffer framebufferWithBitmapSize:CGPixelSizeMake( W, H)
                                   textureFlags:0
                                        context:context];
          if( ! cgLayer)
          {
-            fprintf( stderr, "No CGLayer for you\n");
+            fprintf( stderr, "No CGFramebuffer for you\n");
             return( 1);
          }
 
@@ -133,9 +137,9 @@ int   main( int argc, char *argv[])
          // mulle_rgba_dump into a BMP file named dump-0000.bmp
 
          bitmap = [cgLayer RGBABytesBitmap:NULL];
-         mulle_bitmap_rgba_dump( bitmap);
+         CGBitmapDump( bitmap);
          CGBitmapDone( bitmap);
-         fprintf( stderr, "Check \"dump-????.bmp\" file for resultant drawing\n");
+         fprintf( stderr, "Check \"dump-????.bmp\" file for a white circle on red background\n");
          [cgLayer _unbindFromContext];
       }
 
@@ -185,3 +189,9 @@ int   main( int argc, char *argv[])
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
 
+
+
+// #1#
+// it isn't really, it's an implicit
+// relationship. There is no OpenGL context pointer in CGContext, as this is
+// a thread local variable most likely

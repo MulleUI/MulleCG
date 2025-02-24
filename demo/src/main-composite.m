@@ -76,7 +76,7 @@ static void   drawGridInRect( CGContext  *context, CGRect rect)
    CGImage   *image;
 
    image = [context imageWithRGBABytes:imagedata
-                            bitmapSize:MulleIntegerSizeMake( 8, 8)
+                            bitmapSize:CGPixelSizeMake( 8, 8)
                           textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
                            resourceKey:MulleUIResourceStorageKey( grid)];
    assert( image);
@@ -148,7 +148,7 @@ static void   drawCirclesInRect( CGContext *context,
 }
 
 
-static BOOL   drawStuff( CALayer *layer, void *_context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
    struct NVGcontext   *vg;
@@ -163,6 +163,7 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
    vg = CGContextGetNVGContext( context);
 
    canvas = [layer canvas];
+   mvgFillRectWithColor( vg, canvas, CGColorMake( 0.5, 0.5, 0.5, 1.0));
 //   MulleUICLog( "f: %s b: %s c: %s",
 //                     CGRectUTF8String( [layer frame]),
 //                     CGRectUTF8String( [layer bounds]),
@@ -205,7 +206,7 @@ static BOOL   drawStuff( CALayer *layer, void *_context)
 
 int   main( int argc, char *argv[])
 {
-   return( UIApplicationRunDrawCallbackHz( (CALayerDrawCallback_t *) drawStuff,
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 800, 800),
                                            NULL,
                                            60.0f));

@@ -17,7 +17,7 @@
 @interface CGContext( CGImage)
 
 - (CGImage *) imageWithRGBABytes:(void *) bytes
-                      bitmapSize:(struct MulleIntegerSize) bitmapSize
+                      bitmapSize:(CGPixelSize) bitmapSize
                     textureFlags:(NSUInteger) textureFlags
                      resourceKey:(MulleUIResourceStorageKey_t) resourceKey;
 
@@ -33,5 +33,6 @@
 - (CGImage *) imageWithFileCData:(struct mulle_data) fileCData
                     textureFlags:(NSUInteger) textureFlags
                      resourceKey:(MulleUIResourceStorageKey_t) resourceKey;
+
 
 @end

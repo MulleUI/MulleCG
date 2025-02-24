@@ -25,12 +25,24 @@ export MULLE_SDE_CLEAN_DEFAULT="MulleCG"
 #
 #
 #
-export MULLE_SOURCETREE_CONFIG_NAMES_MULLE_GLFW="wayland"
+
 
 
 #
 #
 #
 export MULLE_MATCH_FILENAMES="*.aam:*.c:*.cmake:*.frag:*.h:*.inc:*.m:*.vert:CMakeLists.txt:config*"
+
+
+#
+#
+#
+
+
+
+#
+#
+#
+export OTHER_CFLAGS="-DMULLE_CG_GLVERSION=1"
 
 

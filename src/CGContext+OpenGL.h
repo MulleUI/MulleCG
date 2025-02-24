@@ -34,7 +34,7 @@
 // framebuffer needs to be bound here, and context must be active
 // you need to free the returned bitmap bytes
 //
-- (struct CGBitmap) readFramebufferBitmap:(struct MulleIntegerRect) rect
+- (struct CGBitmap) readFramebufferBitmap:(CGPixelRect) rect
                     framebufferBitmapType:(CGFramebufferBitmapType) type
                                 allocator:(struct mulle_allocator *) allocator;
 
@@ -147,6 +147,6 @@ void   _CGContextBlitFramebufferFramebuffer( CGContext *self,
                                              struct CGContextFramebuffer src,
                                              BOOL interpolate);
 
-struct MulleIntegerSize
+CGPixelSize
    _CGContextBitmapSizeOfOpenGLFramebuffer( CGContext *self,
                                             struct CGContextFramebuffer fb);

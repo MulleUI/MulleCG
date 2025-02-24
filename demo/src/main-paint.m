@@ -11,7 +11,7 @@
 #define ROWS  4
 
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    struct NVGcontext    *vg;
    CGRect               canvas;
@@ -40,7 +40,7 @@ static BOOL   drawStuff( CALayer *layer, CGContext *context)
 
       case 1 :
          paint = [[[CGImage alloc] initWithRGBABytes:bitmap2
-                                          bitmapSize:MulleIntegerSizeMake( 32, 32)
+                                          bitmapSize:CGPixelSizeMake( 32, 32)
                                         textureFlags:0  // NVG_IMAGE_REPEATX
                                              context:context] autorelease];
          break;
@@ -112,12 +112,12 @@ int   main( int argc, char *argv[])
    app = [UIApplication sharedInstance];
 
    window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 150, 150)];
-   [window setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
+   [window setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [window setBackgroundColor:CGColorMakeWhite()];
    [window setFrameRateHz:0.5];
    [app addWindow:window];
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

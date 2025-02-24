@@ -21,10 +21,6 @@
 - (CGFont *) fontWithNameUTF8String:(char *) s;
 - (CGFont *) defaultFont;
 
-- (void) _initFontCache;
-- (void) _doneFontCache;
-- (void) _resetFontCache;
-
 /*
  * Fill fontCache with fonts, preferably don't use during draws as it does I/O
  * though once loaded the font is cached by the CGContext
@@ -42,6 +38,14 @@
 //
 - (void *) internalFontHandle;  // current font if set
 - (void *) internalFontHandleOfFont:(CGFont *) font;
+
+
+- (void) _initFontCache;
+- (void) _doneFontCache;
+- (void) _resetFontCache;
+
+- (void) mulleGainAccessToFonts           MULLE_OBJC_THREADSAFE_METHOD;
+- (void) mulleRelinquishAccessToFonts     MULLE_OBJC_THREADSAFE_METHOD;
 
 @end
 

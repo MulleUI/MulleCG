@@ -72,7 +72,7 @@ static int   display( GLFWOSWindow *window_in)
 
 - (void) setActive:(BOOL) flag
 {
-   _isActive = flag;
+   _activeThread = flag ? [NSThread currentThread] : nil;
 }
 
 @end
@@ -119,7 +119,7 @@ int   main( int argc, char *argv[])
 
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

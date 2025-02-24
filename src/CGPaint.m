@@ -6,6 +6,7 @@
 #import "import-private.h"
 
 #import "CGContext.h"
+#import "CGColor+UTF8String.h"
 #import "CGImage.h"
 #import "CGGradient.h"
 #import "CGPaint+Private.h"

@@ -9,7 +9,7 @@
 
 #define DISTANCE   40
 
-static BOOL   drawStuff( CALayer *layer, CGContext *context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect               canvas;
    CGRect               rect;
@@ -203,7 +203,7 @@ int   main( int argc, char *argv[])
    app = [UIApplication sharedInstance];
 
    window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 800, 600)];
-   [window setDrawCallback:(CALayerDrawCallback_t *) drawStuff];
+   [window setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [window setBackgroundColor:CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0)];
    [window setFrameRateHz:0.5];
    return( [app runWindow:window]);

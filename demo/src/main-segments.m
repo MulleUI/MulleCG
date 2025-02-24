@@ -394,7 +394,7 @@ static void   CGDrawSegmentedButton( CGContext *context, struct MulleUISegmented
    CADirection                          direction;
    NVGcontext                           *vg;
 
-   mulle_flexarray_do( rects, CGRect, 16, p->nSegments)
+   mulle_alloca_do( rects, CGRect, p->nSegments)
    {
       vg = CGContextGetNVGContext( context);
 
@@ -585,11 +585,11 @@ void   setupScene( UIWindow *window)
    UIView   *view;
 
    view  = [UIView viewWithFrame:CGRectMake( 20, 20, 300, 100)];
-   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff2];
+   [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff2];
    [[window contentView] addSubview:view];
 
    view  = [UIView viewWithFrame:CGRectMake( 340, 20, 300, 100)];
-   [view setDrawCallback:(CALayerDrawCallback_t *) drawStuff1];
+   [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff1];
    [[window contentView] addSubview:view];
 }
 
@@ -618,7 +618,7 @@ int   main( int argc, char *argv[])
       [window setFrameRate:2.0];
       [app addWindow:window];
    }
-   return( [app run]);
+   return( [app runApp]);
 }
 
 

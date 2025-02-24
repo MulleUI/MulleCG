@@ -1,6 +1,8 @@
 #ifndef _mulle_cg_backend_h__
 #define _mulle_cg_backend_h__
 
+// MEMO: do not include other files in here
+
 // TODO: unify with CG_GLES et al-
 // currently we support GL3.2+ and GLES3.2+ as well as GLES2, which can't do
 // MSAA
@@ -9,9 +11,13 @@
 #define MULLE_CG_GLES3_2 3
 //#define MULLE_CG_VULKAN  4
 
-// this the baseline
+// this the baseline, unless set by compile directives
 #ifndef MULLE_CG_GLVERSION
-# define MULLE_CG_GLVERSION   MULLE_CG_GLES2
+# ifdef __APPLE__
+#  define MULLE_CG_GLVERSION   MULLE_CG_GL3_2
+# else
+#  define MULLE_CG_GLVERSION   MULLE_CG_GLES2
+# endif
 #endif
 
 
@@ -36,5 +42,6 @@
 #  define NANOVG_GL3_IMPLEMENTATION
 # endif
 #endif
+
 
 #endif

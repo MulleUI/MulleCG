@@ -189,7 +189,7 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
 }
 
 
-@interface ParticlesLayer : CALayer
+@interface ParticlesLayer : CGGraphicsLayer
 {
    struct Particle   *_particles;
 }
@@ -278,7 +278,7 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
    }
 
    color = CGColorMakeWithRGB( 0, 0, 0);
-   range = NSMakeRange( 0, 0);
+   range = NSRangeMake( 0, 0);
 
    for( i = 0; i < _numberOfParticles; i++)
    {
@@ -330,15 +330,15 @@ int   main()
    window     = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
                           titleUTF8String:"Demo"
                                 styleMask:styleMask];
-   [app addWindow:window];
 
    [window setBackgroundColor:CGColorMakeWithRGBA( 0.0, 0.0, 0.0, 1.0)];
    [window setFrameRate:UIWindowFrameRateSynced];
    setupSceneInView( [window contentView]);
 
    [window setFrameDelegate:[MulleUIPerf object]];
+   [app addWindow:window];
 
-   return( [app run]);
+   return( [app runApp]);
 }
 
 
