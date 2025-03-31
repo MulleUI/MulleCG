@@ -13,17 +13,9 @@
 @implementation CustomPaint
 
 - (CGPaint *) initWithPaint:(CGPaint *) paint
+               rotatedPaint:(CGPaint *) rotatedPaint
                 strokeWidth:(CGFloat) strokeWidth
 {
-   CGPaint    *rotatedPaint;
-
-   rotatedPaint = [paint rotatedPaint:0.5];
-   if( rotatedPaint == paint)
-   {
-      [self release];
-      return( paint);
-   }
-
    _paint        = [paint retain];
    _rotatedPaint = [rotatedPaint retain];
    _strokeWidth  = strokeWidth;
@@ -35,8 +27,19 @@
 + (CGPaint *) paintWithPaint:(CGPaint *) paint
                  strokeWidth:(CGFloat) strokeWidth
 {
-   return( [[[self alloc] initWithPaint:paint
-                            strokeWidth:strokeWidth] autorelease]);
+   CGPaint        *rotatedPaint;
+   CustomPaint    *obj;
+
+   rotatedPaint = [paint rotatedPaint:0.5];
+   if( rotatedPaint == paint)
+      return( paint);
+
+   obj = [self alloc];
+   obj = [obj initWithPaint:paint
+               rotatedPaint:rotatedPaint
+                strokeWidth:strokeWidth];
+   obj = [obj autorelease];
+   return( obj);
 }
 
 

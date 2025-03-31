@@ -19,19 +19,23 @@
 - (CGImage *) imageWithRGBABytes:(void *) bytes
                       bitmapSize:(CGPixelSize) bitmapSize
                     textureFlags:(NSUInteger) textureFlags
+                  nameUTF8String:(char *) nameUTF8String
                      resourceKey:(MulleUIResourceStorageKey_t) resourceKey;
 
 - (CGImage *) imageWithBitmap:(struct CGBitmap) bitmap
                  textureFlags:(NSUInteger) textureFlags
+               nameUTF8String:(char *) nameUTF8String
                   resourceKey:(MulleUIResourceStorageKey_t) resourceKey;
 
 - (CGImage *) imageWithContentsOfFileCString:(char *) filename
                                 textureFlags:(NSUInteger) textureFlags
+                              nameUTF8String:(char *) nameUTF8String
                                  resourceKey:(MulleUIResourceStorageKey_t) resourceKey;
 
 // data can be discarded after init
 - (CGImage *) imageWithFileCData:(struct mulle_data) fileCData
                     textureFlags:(NSUInteger) textureFlags
+                  nameUTF8String:(char *) nameUTF8String
                      resourceKey:(MulleUIResourceStorageKey_t) resourceKey;
 
 

@@ -56,6 +56,16 @@ typedef NS_ENUM( NSUInteger, CGContextFramebufferType)
 };
 
 
+
+
+struct CGContextItem
+{
+   void   *key;
+   void   *value;
+   void   (*release)( struct CGContextItem *item, CGContext *context);
+};
+
+
 struct CGContextFramebuffer
 {
    void         *handle;
@@ -97,15 +107,15 @@ static inline struct CGContextFramebuffer
 
 
 static inline struct CGContextFramebuffer
-   CGContextFramebufferMakeWithLayer( CGFramebuffer *layer)
+   CGContextFramebufferMakeWithFramebuffer( CGFramebuffer *layer)
 {
    assert( layer);
    return( (struct CGContextFramebuffer)
            {
                .handle = layer,
-               .type = [layer isMultiSample]
-                       ? CGContextLayerMultiSampleFramebuffer
-                       : CGContextLayerFramebuffer
+               .type   = [layer isMultiSample]
+                         ? CGContextLayerMultiSampleFramebuffer
+                         : CGContextLayerFramebuffer
            });
 }
 
@@ -136,14 +146,6 @@ static inline int
 }
 
 
-struct CGContextItem
-{
-   void   *key;
-   void   *value;
-   void   (*release)( struct CGContextItem *item, CGContext *context);
-};
-
-
 //
 // for OpenGL we have one context per OpenGL, to keep fonts and
 // other textures around. Each frame is encloded in a
@@ -169,8 +171,9 @@ struct CGContextItem
    struct mulle_map                 _shaderMap;
    struct mulle__pointerarray       _deletedTextureIDs;
    struct mulle__pointerarray       _deletedGPUFramebuffers;
+   mulle_thread_mutex_t             _deletedGPUFramebuffersLock; // used for above pointer array
    struct mulle__pointerarray       _deletedFramebuffers;
-   mulle_thread_mutex_t             _deletedFramebufferLock; // used for above two pointer arrays
+   mulle_thread_mutex_t             _deletedFramebuffersLock; // used for above pointer array
 
    BOOL                             _isRendering;
    BOOL                             _isFreshLayer;
@@ -184,6 +187,7 @@ struct CGContextItem
 
    mulle_atomic_pointer_t           _drawnLayer;       // CGFramebuffer
    mulle_atomic_pointer_t           _scratchLayer;     // CGFramebuffer
+   mulle_atomic_pointer_t           _atomicInitializedFramebuffer;
 
    CGFramebuffer                    *_renderLayer;     // ephemeral(!)
    NSUInteger                       _renderLayerTextureFlags;
@@ -205,56 +209,36 @@ struct CGContextItem
 //
 
 @property( assign) NSUInteger                              framebufferBits;
-@property( assign) id                                      OSWindow;
 
 @property( assign, readonly) UIGraphicsBackend             backend;
 
+// the contextID is just for debugging, each context gets a number we use
+// it to differentiate textureIDs so we write contextID.textureID to make
+// it clear that textureIDs can be reused by different contexts
+@property( readonly) NSUInteger                            contextID;  // counts endRenders...
+
 @property( assign) struct UIInputState                     inputState;
-@property( assign, getter=isInitializedFramebuffer) BOOL   initializedFramebuffer;
+
+@property( dynamic, getter=isInitializedFramebuffer) BOOL  initializedFramebuffer  MULLE_OBJC_THREADSAFE_PROPERTY;
 
 @property( assign) NSUInteger                              numberOfFrames;  // counts endRenders...
-@property( assign) NSThread                                *activeThread;
 
+// designated:
+- (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) os_context
+                            nameUTF8String:(char *) nameUTF8String
+                                   shareID:(NSUInteger) shareID
+                                  options:(UIGraphicsOptions) options;
 
-// the context needs to be told, what backend is being used
-- (id) initWithBackend:(UIGraphicsBackend) backend
-               shareID:(NSUInteger) shareID
-               options:(UIGraphicsOptions) options;
+- (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) os_context
+                                   shareID:(NSUInteger) shareID
+                                   options:(UIGraphicsOptions) options;
 
-- (void) beginRender:(struct CGFrameInfo *) info;
-- (struct CGFrameInfo) bindRender:(struct CGFrameInfo *) info;
-- (void) endRender;
-
-- (void) _endRender; // does not call suspendRender
-
-//
-// used to intermix OpenGL or other commands, this flushes commands
-// cleans some font state and sets the viewport.
-// (resumeRender is in OpenGL)
-- (void) suspendRender;  // flushes and resets
-- (void) flushRender;    // suspends and resumes
 
 // default is NULL until MulleUIOS comes into play
 - (char *) backendUTF8String;
 
-// to return to the "default" framebuffer, either the offscreen or the window
-// one, if no offscreen exists
-- (void) clearFramebuffer;
-- (void) clearFramebufferWithHexColor:(NSUInteger) color;
-- (void) clearFramebufferWithColor:(CGColor) color;
-
-- (struct CGContextFramebuffer) bindFramebuffer:(struct CGContextFramebuffer) framebuffer;
-
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info;
 - (struct CGFrameInfo *) currentFrameInfo;
-
-// betweenbeginRender: and endRender:
-- (BOOL) isRendering;
-
-// it has a nvgContext and the openGL context is connected
-// to the window. If isActive is no, you can/must not do any graphics
-// calls for example.
-- (BOOL) isActive;
 
 - (NSUInteger) numberOfFrames;
 - (mulle_relativetime_t) secondsSinceFirstRender;
@@ -263,23 +247,6 @@ struct CGContextItem
 
 - (CGShaderID) activeShader;
 
-
-// Once acquired its yours and its gone from CGContext. Now the window has
-// contents to draw itself. It should keep the CGFramebuffer around for the next
-// refresh. If acquireOffscreenFramebuffer returns nil (no new drawing
-// ready yet), it should reuse that kept layer. Otherwise recycle the old
-// and use the new.
-//
-- (id) acquireOffscreenFramebuffer        MULLE_OBJC_THREADSAFE_METHOD;
-
-//
-// Framebuffer presumably acquired through acquireFramebuffer, should be given
-// back. For reuse or discarding
-//
-- (void) recycleFramebuffer:(id) layer    MULLE_OBJC_THREADSAFE_METHOD;
-
-// get recycled framebuffer back 
-- (id) acquireRecycledFramebuffer         MULLE_OBJC_THREADSAFE_METHOD;
 
 // support for some demos
 - (CGPoint) mouseLocation;
@@ -294,9 +261,16 @@ struct CGContextItem
 
 typedef CGContext   *CGContextRef;
 
+
+static inline BOOL   CGContextIsActiveInCurrentThread( CGContextRef self)
+{
+   return( [self activeThread] == [NSThread currentThread]);
+}
+
+
 static inline struct NVGcontext   *CGContextGetNVGContext( CGContextRef self)
 {
-   assert( [self isActive]);
+   assert( CGContextIsActiveInCurrentThread( self));
 
    return( ((struct{ @defs( CGContext); } *) self)->_vg);
 }
@@ -306,6 +280,7 @@ static inline struct NVGcontext   *_CGContextGetNVGContext( CGContextRef self)
 {
    return( ((struct{ @defs( CGContext); } *) self)->_vg);
 }
+
 
 
 // we want to produce (excepting the quadratic) for a rate of 4
@@ -338,6 +313,4 @@ static inline float  CGContextGetLinearAnimationFactor( CGContext *context, NSUI
 }
 
 
-CGPixelSize
-   CGContextBitmapSizeOfFramebuffer( CGContext *self,
-                                     struct CGContextFramebuffer fb);
+

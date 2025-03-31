@@ -9,6 +9,7 @@
 #include "microvg.h"
 
 #import "CGGradient.h"
+#import "CGImage.h"
 #import "CGPaint+Private.h"
 
 // why is this good ?
@@ -43,11 +44,41 @@
 
 @implementation CGPaint( nanovg)
 
+#ifndef NDEBUG
+static void   assertImageInNVGcontext( CGImage *self, NVGcontext *vg)
+{
+   CGContext   *otherContext;
+   NVGcontext  *otherVG;
+
+   if( ! self)
+      return;
+
+   otherContext = [self context];
+   // circumvent otherContext assert with underscpre function, because we want
+   // our more descriptive text
+   otherVG      = _CGContextGetNVGContext( otherContext);
+   assert( vg == otherVG && "paint image should belong to same context");
+}
+
+
+static void   assertPaintInNVGcontext( CGPaint *self, NVGcontext *vg)
+{
+   assertImageInNVGcontext( [self image], vg);
+   assertImageInNVGcontext( [self otherImage], vg);
+}
+#else
+# define assertImageInNVGcontext( self, vg)
+# define assertPaintInNVGcontext( self, vg)
+#endif
+
+
 - (void) strokeWithBounds:(CGRect) rect
               strokeWidth:(CGFloat) strokeWidth
                NVGcontext:(NVGcontext *) vg
 {
    NVGpaint     paint;
+
+   assertPaintInNVGcontext( self, vg);
 
    if( strokeWidth <= 0.0f)
       return;
@@ -65,6 +96,8 @@
              NVGcontext:(NVGcontext *) vg
 {
    NVGpaint     paint;
+
+   assertPaintInNVGcontext( self, vg);
 
    paint = [self NVGpaintWithBounds:rect
                          NVGcontext:vg];
@@ -88,7 +121,7 @@ static void   fillWithBoundsAndPaint( NVGcontext *vg,
    }
 #endif
    [paint fillWithBounds:rect
-             NVGcontext:vg];
+              NVGcontext:vg];
 
 }
 

@@ -130,12 +130,14 @@
 
       image = [[[CGImage alloc] initWithBitmap:convertedFb
                                   textureFlags:0
+                                nameUTF8String:NULL
                                        context:self] autorelease];
       CGBitmapDone( convertedFb);
    }
    else
       image = [[[CGImage alloc] initWithBitmap:fb
                                   textureFlags:0
+                                nameUTF8String:NULL
                                        context:self] autorelease];
 
    options = scale ? &CGDrawableOptionsScaleToFit :

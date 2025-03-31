@@ -56,9 +56,4 @@ typedef void    CGGPUFramebuffer;
 
 - (CGPixelSize) bitmapSizeForTextureID:(CGTextureID) textureID;
 
-
-// this is for transfer of unused framebuffers from the main thread back
-// to our context
-- (void) queueFramebufferForDeletion:(CGFramebuffer *) framebuffer   MULLE_OBJC_THREADSAFE_METHOD;
-
 @end

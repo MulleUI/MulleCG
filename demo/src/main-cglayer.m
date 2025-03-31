@@ -62,7 +62,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       [context flushRender];
 
       // 4. now set the drawing destination to the CGFramebuffer framebuffer
-      previous = [context bindFramebuffer:CGContextFramebufferMakeWithLayer( cgLayer)];
+      previous = [context bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( cgLayer)];
 
       // 5. tell CGContext about the new dimensions
       frameInfo = CGFrameInfoFBMake( CGPixelSizeMakeWithSize( canvas.size), 1.0, 1.0);

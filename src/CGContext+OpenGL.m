@@ -12,8 +12,10 @@
 
 #import "import-private.h"
 
+#import "CGContext+DebugPrivate.h"
 #import "CGContext+Drawing.h"
 #import "CGContext+CGImage.h"
+#import "CGContext+CGFramebuffer.h"
 #import "CGLayoutContext.h"
 #import "CGImage.h"
 #import "CGFramebuffer.h"
@@ -233,7 +235,6 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 }
 
 
-
 + (NVGcontext *) createPathContext
 {
    struct NVGcontext  *pathContext;
@@ -325,7 +326,7 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
                         color:(CGColor) color
 {
    if( bits & GL_COLOR_BUFFER_BIT)
-      glClearColor( color.r, color.b, color.g, color.a);
+      glClearColor( color.r, color.g, color.b, color.a);
 
    glClear( bits);
    CGContextCheckBackendError( self, "clear framebuffer");
@@ -339,58 +340,29 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 }
 
 
-//#define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX   0x9048
-//#define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
-- (void) changeRender:(struct CGFrameInfo *) info
+- (void) _changeRenderOpenGL:(struct CGFrameInfo *) info
 {
-   assert( _activeThread == [NSThread currentThread]);
-   assert( info);
-
-   _currentFrameInfo = *info;
-   // wasn't initialized before so ignore
-   if( _currentFrameInfo.window.pixelRatio == 0.0)
-      return;
-
-   assert( _isRendering);
-
-   CGContextCheckBackendError( self, "before nvgChangeFrame");
-
-   // MEMO: the gLViewPort should be done afterwards
-   nvgChangeFrame( _vg, _currentFrameInfo.window.frame.size.width,
-                        _currentFrameInfo.window.frame.size.height,
-                        _currentFrameInfo.window.pixelRatio);
-   CGContextCheckBackendError( self, "nvgChangeFrame");
-
-   glViewport( _currentFrameInfo.viewportFrame.origin.x,
-               _currentFrameInfo.viewportFrame.origin.y,
-               _currentFrameInfo.viewportFrame.size.width,
-               _currentFrameInfo.viewportFrame.size.height);
+   glViewport( info->viewportFrame.origin.x,
+               info->viewportFrame.origin.y,
+               info->viewportFrame.size.width,
+               info->viewportFrame.size.height);
    CGContextCheckBackendError( self, "glViewport");
 }
 
 
-- (void) resumeRender
+- (void) bindDefaultOpenGLFramebuffer
 {
-   assert( _activeThread == [NSThread currentThread]);
-   assert( _isRendering);
+   CGContextRenderLog( "");
 
-   CGContextCheckBackendError( self, "before resumeRender");
-
-   glViewport( _currentFrameInfo.viewportFrame.origin.x,
-               _currentFrameInfo.viewportFrame.origin.y,
-               _currentFrameInfo.viewportFrame.size.width,
-               _currentFrameInfo.viewportFrame.size.height);
-   CGContextCheckBackendError( self, "glViewPort");
-
-   nvgBeginFrame( _vg, _currentFrameInfo.window.frame.size.width,
-                       _currentFrameInfo.window.frame.size.height,
-                       _currentFrameInfo.window.pixelRatio);
-   CGContextCheckBackendError( self, "nvgBeginFrame");
+   nvgluBindFramebuffer( NULL);
+   CGContextCheckBackendError( self, "bind buffer");
 }
 
 
 - (void) bindOpenGLFramebuffer:(void *) framebuffer
 {
+   CGContextRenderLog( "");
+
    glBindFramebuffer( GL_FRAMEBUFFER, (GLuint) (uintptr_t) framebuffer);
    CGContextCheckBackendError( self, "glBindFramebuffer");
 }
@@ -490,7 +462,6 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 #if defined( NANOVG_GLES3_IMPLEMENTATION)
    NVGLUframebuffer              *nvgResultFramebuffer;
 #endif
-   assert( _activeThread == [NSThread currentThread]);
 
    bitmapSize       = [image bitmapSize];
    size             = bitmapSize.width * bitmapSize.height * 4;
@@ -588,8 +559,6 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
    size_t                    size;
    NSUInteger                textureID;
    void                      *gpuTexture;
-
-   assert( _activeThread == [NSThread currentThread]);
 
    encoding = CGBitmapEncodingFlipYRGBABytes;
    format   = GL_RGBA;
@@ -727,6 +696,8 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 {
    void   *gpuTexture;
 
+   CGContextRenderLog( "%#@ texture unit: %tu", image, index);
+
    gpuTexture = [self gpuTextureForImageID:[image textureID]];
 
    assert( GL_TEXTURE15 == GL_TEXTURE0 + 15);
@@ -785,20 +756,21 @@ struct CGContextFramebuffer
    glGetIntegerv( GL_FRAMEBUFFER_BINDING, &defaultFBO);
    CGContextCheckBackendError( self, "glGetIntegerv");
 
-
    isMultiSample = _CGContextCurrentContextIsMultiSample( self, defaultFBO);
    return( CGContextFramebufferMakeWithOpenGLHandle( (void *) (intptr_t) defaultFBO,
                                                       isMultiSample));
 }
 
 
-void
-   CGContextSetCurrentOpenGLFramebuffer( CGContext *self, struct CGContextFramebuffer fb)
+void   CGContextSetCurrentOpenGLFramebuffer( CGContext *self,
+                                             struct CGContextFramebuffer fb)
 {
    assert( fb.type == CGContextOpenGLFramebuffer
            || fb.type == CGContextDefaultFramebuffer
            || fb.type == CGContextOpenGLMultiSampleFramebuffer
            || fb.type == CGContextDefaultMultiSampleFramebuffer);
+
+   CGContextRenderLog( "");
 
    glBindFramebuffer(GL_FRAMEBUFFER, (GLuint) (uintptr_t) fb.handle);
    CGContextCheckBackendError( self, "glBindFramebuffer");
@@ -864,6 +836,7 @@ void   _CGContextBindFramebuffer( CGContext *self,
    void     *gpuTexture;
 
    assert( type >= 0 && type <= 2);
+   CGContextRenderLog( "");
 
    switch( fb.type)
    {
@@ -898,6 +871,8 @@ void   _CGContextBlitFramebufferFramebuffer( CGContext *self,
 #if defined( GL_ES_VERSION_3_0) || defined( GL_VERSION_3_0)
    CGPixelSize   srcSize;
    CGPixelSize   dstSize;
+
+   CGContextRenderLog( "");
 
    srcSize = CGContextBitmapSizeOfFramebuffer( self, src);
    dstSize = CGContextBitmapSizeOfFramebuffer( self, dst);
@@ -944,6 +919,8 @@ void   _CGContextBlitFramebufferImage( CGContext *self,
    void                          *gpuTexture;
    BOOL                          isMultiSample;
 
+   CGContextRenderLog( "");
+
    glGenFramebuffers( 1, &tmpFramebuffer);
    CGContextCheckBackendError( self, "glGenFramebuffers");
 
@@ -977,14 +954,17 @@ void   _CGContextBlitFramebufferImage( CGContext *self,
    CGFramebuffer                       *layer;
    struct CGContextFramebuffer   previous;
 
+   CGContextRenderLog( "");
+
    assert( [image isMultiSample]);
 
    textureFlags  = [image textureFlags] & ~NVG_IMAGE_MSAA;
    layer         = [CGFramebuffer framebufferWithBitmapSize:[image bitmapSize]
-                                   textureFlags:textureFlags
-                                        context:self];
+                                               textureFlags:textureFlags
+                                             nameUTF8String:[image nameUTF8String]
+                                                    context:self];
 
-   previous = [self bindFramebuffer:CGContextFramebufferMakeWithLayer( layer)];
+   previous = [self bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( layer)];
    [self blitRect:CGRectMakeWithOriginAndSize( CGPointZero, [layer size])
             image:image
             scale:NO];

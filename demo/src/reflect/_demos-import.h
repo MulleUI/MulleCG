@@ -12,21 +12,6 @@
  */
 
 // To remove the following dependency (headers and library) completely:
-//   `mulle-sde dependency remove MulleUIGraphicsImage`
-// (Use CF9097D5-D1E2-4E0C-89FC-D45E62111C70 instead of MulleUIGraphicsImage, if there are duplicate entries)
-//
-// You can tweak the following #import with these commands:
-//    remove #import      : `mulle-sde dependency mark MulleUIGraphicsImage no-header`
-//    rename              : `mulle-sde dependency|library set MulleUIGraphicsImage include whatever.h`
-//    reorder             : `mulle-sde dependency move MulleUIGraphicsImage <up|down>`
-//    toggle #import      : `mulle-sde dependency mark MulleUIGraphicsImage [no-]import`
-//    toggle public       : `mulle-sde dependency mark MulleUIGraphicsImage [no-]public`
-//    toggle optional     : `mulle-sde dependency mark MulleUIGraphicsImage [no-]require`
-//    remove for platform : `mulle-sde dependency mark MulleUIGraphicsImage no-platform-<uname>`
-//        (use `mulle-sourcetree-to-c --unames` to list known values)
-#import <MulleUIGraphicsImage/MulleUIGraphicsImage.h>   // MulleUIGraphicsImage
-
-// To remove the following dependency (headers and library) completely:
 //   `mulle-sde dependency remove MulleUI`
 // (Use E006D74A-0A52-40DD-BA3F-40427AA218C8 instead of MulleUI, if there are duplicate entries)
 //
@@ -40,6 +25,21 @@
 //    remove for platform : `mulle-sde dependency mark MulleUI no-platform-<uname>`
 //        (use `mulle-sourcetree-to-c --unames` to list known values)
 #import <MulleUI/MulleUI.h>   // MulleUI
+
+// To remove the following dependency (headers and library) completely:
+//   `mulle-sde dependency remove MulleGraphicsImage`
+// (Use 43047DA0-4786-4C43-9010-ECB7D961853F instead of MulleGraphicsImage, if there are duplicate entries)
+//
+// You can tweak the following #import with these commands:
+//    remove #import      : `mulle-sde dependency mark MulleGraphicsImage no-header`
+//    rename              : `mulle-sde dependency|library set MulleGraphicsImage include whatever.h`
+//    reorder             : `mulle-sde dependency move MulleGraphicsImage <up|down>`
+//    toggle #import      : `mulle-sde dependency mark MulleGraphicsImage [no-]import`
+//    toggle public       : `mulle-sde dependency mark MulleGraphicsImage [no-]public`
+//    toggle optional     : `mulle-sde dependency mark MulleGraphicsImage [no-]require`
+//    remove for platform : `mulle-sde dependency mark MulleGraphicsImage no-platform-<uname>`
+//        (use `mulle-sourcetree-to-c --unames` to list known values)
+#import <MulleGraphicsImage/MulleGraphicsImage.h>   // MulleGraphicsImage
 
 // To remove the following dependency (headers and library) completely:
 //   `mulle-sde dependency remove MulleUIPerf`

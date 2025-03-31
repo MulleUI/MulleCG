@@ -14,6 +14,7 @@ set( SOURCES
 nanovg/src/nanovg.c
 src/CGColor+UTF8String.m
 src/CGContextBase.m
+src/CGContext+CGFramebuffer.m
 src/CGContext+CGImage.m
 src/CGContext+Drawing.m
 src/CGContext+OpenGL.m

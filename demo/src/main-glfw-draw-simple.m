@@ -38,10 +38,9 @@
 
 
 
-static int   display( GLFWOSWindow *window_in)
+static UIWindowDisplayBits   display( id <UIOSWindow> window_in)
 {
-#if 0
-   MyWindow      *window = (MyWindow *) window_in;
+   MyWindow      *window = MULLE_OBJC_CLASS_CAST( MyWindow, window_in);
    CGRect        canvas;
    CGContext     *context;
    CGFrameInfo   frameInfo;
@@ -54,36 +53,18 @@ static int   display( GLFWOSWindow *window_in)
    frameInfo = CGFrameInfoSFMake( canvas, [window os_framebufferSize], 1.0);
    [context beginRender:&frameInfo];
    {
-      drawStuff( canvas, context);
+      drawRedWhiteBlueFlag( CGContextGetNVGContext( context), canvas);
    }
    [context endRender];
-#endif
-   [UIApp requestTerminate];
    return( 0);
 }
 
 
-//
-// This needs to be implemented by the context owner. This is not a bug.
-// setActive: is not supposed to be seen outside of the window setting this
-// context active. (Locking is done in GLFWOSWindow with the implicit context!)
-//
-@implementation CGContext( MyWindow)
-
-- (void) setActive:(BOOL) flag
-{
-   _activeThread = flag ? [NSThread currentThread] : nil;
-}
-
-@end
-
-
-
 int   main( int argc, char *argv[])
 {
-   UIApplication           *app;
-   MyWindow                *window;
-   CGContext               *context;
+   UIApplication      *app;
+   MyWindow           *window;
+   CGContext          *context;
    GLFWGraphicsHints  hints;
 
    app = [UIApplication sharedInstance];
@@ -106,10 +87,10 @@ int   main( int argc, char *argv[])
       assert( window);
 
       [window os_activateGraphicsContext];
-      context = [[[CGContext alloc] initWithBackend:[window backend]
-                                            shareID:[window shareID]
-                                            options:UIGraphicsDefaultOptions] autorelease];       // have to do this manually, because the context is created manually
-      [context setActive:YES];
+      context = [[[CGContext alloc] initWithOSGraphicsContext:window
+                                                      shareID:[window shareID]
+                                                      options:UIGraphicsDefaultOptions] autorelease];      // have to do this manually, because the context is created manually
+
       [window os_deactivateGraphicsContext];
 
       // remember context for "display" callback

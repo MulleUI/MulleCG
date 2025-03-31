@@ -22,4 +22,23 @@
 //
 - (void) drawObjects:(struct mulle_pointerarray *) layers;
 
+- (void) beginRender:(struct CGFrameInfo *) info;
+- (struct CGFrameInfo) bindRender:(struct CGFrameInfo *) info;
+- (void) endRender;
+
+- (void) _endRender; // does not call suspendRender
+
+- (void) changeRender:(struct CGFrameInfo *) info;
+
+//
+// used to intermix OpenGL or other commands, this flushes commands
+// cleans some font state and sets the viewport.
+// (resumeRender is in OpenGL)
+- (void) suspendRender;  // flushes and resets
+- (void) flushRender;    // suspends and resumes
+- (void) resumeRender;
+
+// betweenbeginRender: and endRender:
+- (BOOL) isRendering;
+
 @end

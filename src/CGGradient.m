@@ -506,3 +506,18 @@ static CGColor   alphizer( CGColor color, void *alpha_p)
 
 
 @end
+
+
+CGGradient  *CGGradientCreateWithRotation( CGColor startColor,
+                                           CGColor endColor,
+                                           CARotation rotation)
+{
+   CGGradient   *gradient;
+
+   gradient = CGGradientNewWithStartColorAndEndColor( startColor,
+                                                      endColor,
+                                                      rotation);   
+   gradient = [gradient autorelease];
+   return( gradient);
+}
+

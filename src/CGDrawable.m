@@ -405,7 +405,10 @@ static NSInteger   CGBitmapDrawableGetImageID( id <CGBitmapDrawable> self,
                        textureFlags:textureFlags];
 
    if( ! image)
+   {
+      assert( ! self);
       return( -1);
+   }
 
    textureID = [image textureID];
 
@@ -603,7 +606,7 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self,
    if( ! options)
       options = &CGDrawableOptionsScaleToFit;
 
-   assert( options->scale             == CGScaleToFit);
+   assert( options->scale             == CGScaleToFit || CGSizeEqualToSize( rect.size, fromRect.size));
    assert( options->flags.repeat      == CGRepeatNone || options->flags.repeat == CGRepeatAsIs);
    assert( options->flags.contentMode == CGContentModeCenterPoint);
 

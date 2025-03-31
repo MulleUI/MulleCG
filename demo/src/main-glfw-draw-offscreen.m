@@ -41,27 +41,19 @@
 @end
 
 
+
 //
 // This needs to be implemented by the context owner. This is not a bug.
 // setActive: is not supposed to be seen outside of the window setting this
 // context active. (Locking is done in GLFWOSWindow with the implicit context!)
 //
-@implementation CGContext( MyWindow)
 
-- (void) setActive:(BOOL) flag
+static UIWindowDisplayBits   display( id <UIOSWindow> window_in)
 {
-   _activeThread = flag ? [NSThread currentThread] : nil;
-}
-
-@end
-
-
-static int   display( GLFWOSWindow *window_in)
-{
-   MyWindow         *window = (MyWindow *) window_in;
-   CGRect           canvas;
-   CGContext        *context;
-   CGFrameInfo      frameInfo;
+   MyWindow               *window = MULLE_OBJC_CLASS_CAST( MyWindow, window_in);
+   CGRect                 canvas;
+   CGContext              *context;
+   CGFrameInfo            frameInfo;
    CGFramebuffer          *layer;
    CGFramebuffer          *check;
    static CGFramebuffer   *previous;
@@ -141,11 +133,9 @@ int   main( int argc, char *argv[])
                                   graphicsHints:hints] autorelease];
       [window os_activateGraphicsContext];
       {
-         context = [[[CGContext alloc] initWithBackend:[window backend]
-                                               shareID:[window shareID]
-                                               options:UIGraphicsDefaultOptions] autorelease];    // have to do this manually
-         [context setActive:YES];
-
+         context = [[[CGContext alloc] initWithOSGraphicsContext:window
+                                                         shareID:[window shareID]
+                                                         options:UIGraphicsDefaultOptions] autorelease];
          // remember context for "display" callback
          [window setContext:context];
          [window setFrameCallback:display];

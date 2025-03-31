@@ -13,7 +13,10 @@
 
 
 
-
+//
+// this is still low-level nanovg, if you want to use a rotated image
+// for your paint, good luck. (Preferably use [CGImage drawRect:options:context])
+//
 @interface CGPaint( nanovg)
 
 - (void) strokeWithBounds:(CGRect) rect

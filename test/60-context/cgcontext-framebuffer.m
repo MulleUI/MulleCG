@@ -1,5 +1,24 @@
 #import <MulleCG/MulleCG.h>
 
+
+@interface FakeOSContext :NSObject <UIOSGraphicsContext>
+@end
+
+@implementation FakeOSContext
+
+- (UIGraphicsBackend) backend
+{
+   return( UIGraphicsBackendNone);
+}
+
+- (NSThread *) activeThread
+{
+   return( [NSThread currentThread]);
+}
+
+@end
+
+
 @interface CGFakeFramebuffer : CGFramebuffer
 @end
 
@@ -27,16 +46,19 @@ int   main( int argc, char *argv[])
    CGContext       *context;
    CGFramebuffer   *framebuffer;
    CGFramebuffer   *other;
+   FakeOSContext   *window;
 
    @autoreleasepool
    {
-      context = [[[CGContext alloc] initWithBackend:UIGraphicsBackendNone
-                                            shareID:0
-                                            options:0] autorelease];
+      window  = [FakeOSContext object];
+      context = [[[CGContext alloc] initWithOSGraphicsContext:window
+                                                      shareID:0
+                                                      options:0] autorelease];
 
       framebuffer = [[[CGFakeFramebuffer alloc] initWithTextureID:(CGTextureID) 0x1848
                                                        bitmapSize:CGPixelSizeMake( 128, 128)
                                                      textureFlags:0
+                                                   nameUTF8String:"test"
                                                           context:context] autorelease];
       [context recycleFramebuffer:framebuffer];
       other = [context acquireRecycledFramebuffer];

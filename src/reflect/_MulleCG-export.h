@@ -16,6 +16,7 @@
 #import "CGColor+MulleObjC.h"
 #import "CGColor+UTF8String.h"
 #import "CGContextBase.h"
+#import "CGContext+CGFramebuffer.h"
 #import "CGContext+CGImage.h"
 #import "CGContext+Drawing.h"
 #import "CGContext+OpenGL.h"

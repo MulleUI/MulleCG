@@ -60,8 +60,8 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
 
    bitmapSize = CGPixelSizeMake( 4, 4);
    cgLayer    = [CGFramebuffer framebufferWithBitmapSize:bitmapSize
-                                textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
-                                     context:context];
+                                            textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
+                                                 context:context];
    if( ! cgLayer)
    {
       fprintf( stderr, "No CGFramebuffer for you\n");
