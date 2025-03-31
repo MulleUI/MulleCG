@@ -11,12 +11,12 @@ endif()
 # contents are derived from the file locations
 
 set( INCLUDE_DIRS
-nanovg/src
-src
+src/reflect
 src/generic
+src
 src/microvg
 src/mulle-color
-src/reflect
+nanovg/src
 )
 
 #
@@ -92,6 +92,7 @@ src/CGAffineTransform+nanovg.h
 src/CGColor+MulleObjC.h
 src/CGColor+UTF8String.h
 src/CGContextBase.h
+src/CGContext+CGFramebuffer.h
 src/CGContext+CGImage.h
 src/CGContext+Drawing.h
 src/CGContext+OpenGL.h

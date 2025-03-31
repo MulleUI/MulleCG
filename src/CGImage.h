@@ -88,13 +88,17 @@
 @property( readonly, retain) CGSharedGPUTexture   *sharedGPUTexture;
 @property( assign) CGFloat                        alpha;  // this is hacky (should be readonly)
 @property( assign) NSUInteger                     debuggingFlags     MULLE_OBJC_THREADSAFE_PROPERTY;
-@property char                                    *debugNameUTF8String;  // useful for debugging
+
+// this is only truely threadsafe if you set it just after init
+// it can only be set once
+@property( readonly) char                         *nameUTF8String  MULLE_OBJC_THREADSAFE_PROPERTY;  // useful for debugging
 
 // textureFlags in this call is "informative", it will not affect the image
 // as it has been created already
 - (instancetype) initWithTextureID:(CGTextureID) textureID
                         bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
+                    nameUTF8String:(char *) nameUTF8String
                            context:(CGContext *) context;
 
 // use this for contexts with no sharing enabled. If sharing is enabled
@@ -102,12 +106,14 @@
 - (instancetype) initWithGPUTexture:(CGGPUTextureID) gpuTexture
                          bitmapSize:(CGPixelSize) size
                        textureFlags:(NSUInteger) textureFlags
+                     nameUTF8String:(char *) nameUTF8String
                             context:(CGContext *) context;
 
 // use this for contexts to share textures with another image
 - (instancetype) initWithSharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
                                bitmapSize:(CGPixelSize) size
                              textureFlags:(NSUInteger) textureFlags
+                           nameUTF8String:(char *) nameUTF8String
                                   context:(CGContext *) context;
 
 // these methods are germane to CGImage, subclasses may not support this
@@ -115,20 +121,38 @@
 // textureFlags will affect the texture
 - (instancetype) initWithContentsOfFileCString:(char *) filename
                                   textureFlags:(NSUInteger) textureFlags
+                                nameUTF8String:(char *) nameUTF8String
+                                       context:(CGContext *) context;
+
+- (instancetype) initWithContentsOfFileCString:(char *) filename
+                                  textureFlags:(NSUInteger) textureFlags
                                        context:(CGContext *) context;
 
 // data can be discarded after init
 - (instancetype) initWithFileCData:(struct mulle_data) fileCData
                       textureFlags:(NSUInteger) textureFlags
+                    nameUTF8String:(char *) nameUTF8String
                            context:(CGContext *) context;
 
 // bytes are not retained, you can free them after init
 - (instancetype) initWithRGBABytes:(void *) bytes
                         bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
+                    nameUTF8String:(char *) nameUTF8String
+                           context:(CGContext *) context;
+
+- (instancetype) initWithRGBABytes:(void *) bytes
+                        bitmapSize:(CGPixelSize) bitmapSize
+                      textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context;
 
 // bitmap bytes are not retained, you can free them after init
+- (instancetype) initWithBitmap:(struct CGBitmap) bitmap
+                   textureFlags:(NSUInteger) textureFlags
+                 nameUTF8String:(char *) nameUTF8String
+                        context:(CGContext *) context;
+
+// convenience for many old demos
 - (instancetype) initWithBitmap:(struct CGBitmap) bitmap
                    textureFlags:(NSUInteger) textureFlags
                         context:(CGContext *) context;

@@ -46,16 +46,16 @@ static void   usage( void)
 
 @end
 
-@implementation CustomContext
 
+@implementation CustomContext
 
 - (id <UIWindow>) parentWindow
 {
    id <UIOSWindow>   window;
    id <UIWindow>     parent;
 
-   window = [self OSWindow];
-   parent = [window parentWindow];
+   window = MULLE_OBJC_PROTOCOL_CAST( UIOSWindow, [self OSWindow]);
+   parent = MULLE_OBJC_PROTOCOL_CAST( UIWindow, [window parentWindow]);
    return( parent);
 }
 
@@ -66,7 +66,7 @@ static void   usage( void)
    id <UIWindow>     parent;
    id <UIScreen>     screen;
 
-   window = [self OSWindow];
+   window = MULLE_OBJC_PROTOCOL_CAST( UIOSWindow, [self OSWindow]);
    screen = [window screen];
    if( ! screen)
    {

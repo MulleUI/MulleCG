@@ -7,7 +7,7 @@ enum
    CGContextDebugRender           = 0x000002,
    CGContextDebugRenderVerbose    = 0x002000,
 
-   CGContextDebugDumpFrameToFile   = 0x08000000  // same bit as UIWindow
+   CGContextDebugDumpFrameToFile  = 0x08000000  // same bit as UIWindow
 };
 
 
@@ -42,6 +42,16 @@ do                                                                          \
 while( 0)
 
 
+#define _CGContextRenderLog( self, format, ...)                             \
+do                                                                          \
+{                                                                           \
+   assert( [self __isCGContext]);                                           \
+   if( [self debuggingFlags] & CGContextDebugRender)                        \
+      mulleui_log_object_method( self, (char *) __PRETTY_FUNCTION__,        \
+                                       (char *) format, ## __VA_ARGS__);    \
+}                                                                           \
+while( 0)
+
 #define CGContextRenderLog( format, ...)                                    \
 do                                                                          \
 {                                                                           \
@@ -66,6 +76,7 @@ while( 0)
 
 #define CGContextLog( format, ...)                  do {} while( 0)
 #define CGContextLogVerbose( format, ...)           do {} while( 0)
+#define _CGContextRenderLog( self, format, ...)     do {} while( 0)
 #define CGContextRenderLog( format, ...)            do {} while( 0)
 #define CGContextRenderLogVerbose( format, ...)     do {} while( 0)
 

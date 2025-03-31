@@ -30,7 +30,7 @@
 #endif
 
 
-- (char *) UTF8String
+- (char *) threadSafeUTF8String
 {
    char   *s;
 
@@ -50,6 +50,7 @@
 - (CGImage *) imageWithGPUTexture:(CGGPUTextureID) gpuTexture
                        bitmapSize:(CGPixelSize) bitmapSize
                      textureFlags:(NSUInteger) textureFlags
+                   nameUTF8String:(char *) nameUTF8String
 {
    CGImage              *image;
    CGSharedGPUTexture   *sharedGPUTexture;
@@ -73,6 +74,7 @@
       image = [[[CGImage alloc] initWithSharedGPUTexture:sharedGPUTexture
                                               bitmapSize:bitmapSize
                                             textureFlags:textureFlags
+                                          nameUTF8String:nameUTF8String
                                                  context:self] autorelease];
       return( image);
    }
@@ -80,6 +82,7 @@
    image = [[[CGImage alloc] initWithGPUTexture:gpuTexture
                                      bitmapSize:bitmapSize
                                    textureFlags:textureFlags
+                                 nameUTF8String:nameUTF8String
                                         context:self] autorelease];
 
    if( image)
@@ -94,6 +97,7 @@
 - (CGImage *) imageWithSharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
                              bitmapSize:(CGPixelSize) size
                            textureFlags:(NSUInteger) textureFlags
+                         nameUTF8String:(char *) nameUTF8String
 {
    CGImage          *image;
    CGGPUTextureID   gpuTexture;
@@ -114,6 +118,7 @@
    image = [[[CGImage alloc] initWithSharedGPUTexture:sharedGPUTexture
                                            bitmapSize:size
                                          textureFlags:textureFlags
+                                       nameUTF8String:nameUTF8String
                                               context:self] autorelease];
 
    if( image)
@@ -159,9 +164,44 @@
 }
 
 
+static struct
+{
+   NSUInteger   _debuggingFlags;
+} Self;
+
+
++ (void) initialize
+{
+   char   *s;
+
+   // don't rerun for subclass
+   if( MulleObjCClassGetID( self) != @selector( CGImage))
+      return;
+
+   s = getenv( MULLE_C_STRINGIFY( CGImage) "DebuggingFlags");
+   if( ! s)
+      s = getenv( "UIDebuggingFlags");
+   if( s)
+      Self._debuggingFlags = strtol( s, NULL, 0);
+}
+
+
++ (void) deinitialize
+{
+}
+
+
++ (void) setDebuggingFlags:(NSUInteger) flag    MULLE_OBJC_THREADSAFE_METHOD
+{
+   Self._debuggingFlags = flag;
+}
+
+
+
 - (instancetype) initWithTextureID:(NSInteger) textureID
                         bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
+                    nameUTF8String:(char *) nameUTF8String
                            context:(CGContext *) context
 {
    CGGPUTextureID   gpuTexture;
@@ -172,11 +212,14 @@
       return( nil);
    }
 
-   _context      = context;
-   _textureID    = textureID;
-   _textureFlags = textureFlags;
-   _bitmapSize   = bitmapSize;
-   _alpha        = 1.0f;
+   _context        = context;
+   _textureID      = textureID;
+   _textureFlags   = textureFlags;
+   _bitmapSize     = bitmapSize;
+   _alpha          = 1.0f;
+   _debuggingFlags = Self._debuggingFlags;
+
+   MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, nameUTF8String);
 
    if( [_context shareID])
    {
@@ -187,6 +230,8 @@
    [_context assignResource:self
                      forKey:(MulleUIResourceStorageKey_t) self];
 
+   CGImageLog( "");
+
    return( self);
 }
 
@@ -194,6 +239,7 @@
 - (instancetype) initWithGPUTexture:(CGGPUTextureID) gpuTexture
                          bitmapSize:(CGPixelSize) bitmapSize
                        textureFlags:(NSUInteger) textureFlags
+                     nameUTF8String:(char *) nameUTF8String
                             context:(CGContext *) context
 {
    NSUInteger   textureID;
@@ -204,20 +250,25 @@
       return( nil);
    }
 
-   textureID     = [context textureIDWithGPUTexture:gpuTexture
-                                         bitmapSize:bitmapSize
-                                       textureFlags:textureFlags];
-   _context      = context;
-   _textureID    = textureID;
-   _textureFlags = textureFlags;
-   _bitmapSize   = bitmapSize;
-   _alpha        = 1.0f;
+   textureID       = [context textureIDWithGPUTexture:gpuTexture
+                                           bitmapSize:bitmapSize
+                                         textureFlags:textureFlags];
+   _context        = context;
+   _textureID      = textureID;
+   _textureFlags   = textureFlags;
+   _bitmapSize     = bitmapSize;
+   _alpha          = 1.0f;
+   _debuggingFlags = Self._debuggingFlags;
+
+   MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, nameUTF8String);
 
    if( [context shareID])
       _sharedGPUTexture = [[CGSharedGPUTexture alloc] initWithGPUTexture:gpuTexture];
 
    [_context assignResource:self
                      forKey:(MulleUIResourceStorageKey_t) self];
+
+   CGImageLog( "");
 
    return( self);
 }
@@ -226,6 +277,7 @@
 - (instancetype) initWithSharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
                                bitmapSize:(CGPixelSize) bitmapSize
                              textureFlags:(NSUInteger) textureFlags
+                           nameUTF8String:(char *) nameUTF8String
                                   context:(CGContext *) context
 {
    CGGPUTextureID   gpuTexture;
@@ -247,10 +299,15 @@
    _textureFlags     = textureFlags;
    _bitmapSize       = bitmapSize;
    _alpha            = 1.0f;
+   _debuggingFlags   = Self._debuggingFlags;
    _sharedGPUTexture = [sharedGPUTexture retain];
+
+   MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, nameUTF8String);
 
    [_context assignResource:self
                      forKey:(MulleUIResourceStorageKey_t) self];
+
+   CGImageLog( "");
 
    return( self);
 }
@@ -258,16 +315,18 @@
 
 - (void) didAddToContext:(CGContext *) context
 {
+   CGImageLogVerbose( "%#@", context);
+
    if( _context != context)
    {
-      mulle_fprintf( stderr, "A %s can only belong to one context. "
+      mulle_fprintf( stderr, "A %s can only belong to one context (once). "
                              "Use -sharedGPUTexture and create an image "
                              "with it in another context.\n",
                              MulleObjCObjectGetClassNameUTF8String( self));
       abort();
    }
 
-   _context = context;
+   // _context = context;
 }
 
 
@@ -275,10 +334,12 @@
 {
    assert( context == _context);
 
+   CGImageLogVerbose( "%#@", context);
+
    if( _textureID)
    {
       // the gpuTexture may have been nil-ed out by finalize
-      // assert( [context isActive]);
+      // assert( [self state] & UIGraphicsContextActive);
       // the context NEED NOT be active! (check deleteTextureID: code)
       [_context deleteTextureID:_textureID];
       _textureID = 0;
@@ -293,6 +354,8 @@
 //
 - (void) finalize
 {
+   CGImageLog( "finalizing");
+
    if( [_sharedGPUTexture retainCount] > 1)
    {
       //
@@ -317,15 +380,9 @@
 
 - (void) dealloc
 {
-   MulleObjCObjectSetDuplicatedUTF8String( self, &_debugNameUTF8String, NULL);
+   MulleObjCInstanceDeallocateMemory( self, _nameUTF8String);
 
    [super dealloc];
-}
-
-
-- (void) setDebugNameUTF8String:(char *) s
-{
-   MulleObjCObjectSetDuplicatedUTF8String( self, &_debugNameUTF8String, s);
 }
 
 
@@ -357,12 +414,13 @@
 
 - (instancetype) initWithContentsOfFileCString:(char *) filename
                                   textureFlags:(NSUInteger) textureFlags
+                                nameUTF8String:(char *) nameUTF8String
                                        context:(CGContext *) context
 {
    NSInteger                 textureID;
    CGPixelSize   bitmapSize;
 
-   assert( [context isActive]);
+   assert( CGContextIsActiveInCurrentThread( context));
 
    textureID  = [context textureIDWithContentsOfFileCString:filename
                                                textureFlags:textureFlags & 0x3F];
@@ -370,18 +428,31 @@
    return( [self initWithTextureID:textureID
                         bitmapSize:bitmapSize
                       textureFlags:textureFlags
+                    nameUTF8String:nameUTF8String
                            context:context]);
+}
+
+
+- (instancetype) initWithContentsOfFileCString:(char *) filename
+                                  textureFlags:(NSUInteger) textureFlags
+                                       context:(CGContext *) context
+{
+   return( [self initWithContentsOfFileCString:filename
+                                  textureFlags:textureFlags
+                                nameUTF8String:NULL
+                                       context:context]);
 }
 
 
 - (instancetype) initWithFileCData:(struct mulle_data) fileCData
                       textureFlags:(NSUInteger) textureFlags
+                    nameUTF8String:(char *) nameUTF8String
                            context:(CGContext *) context
 {
-   NSInteger                 textureID;
+   NSInteger     textureID;
    CGPixelSize   bitmapSize;
 
-   assert( [context isActive]);
+   assert( CGContextIsActiveInCurrentThread( context));
 
    // bounce to CGContext kinda unnecessary now
    // this was used to generate debug output, but this now done in
@@ -394,6 +465,7 @@
    return( [self initWithTextureID:textureID
                         bitmapSize:bitmapSize
                       textureFlags:textureFlags
+                    nameUTF8String:nameUTF8String
                            context:context]);
 }
 
@@ -401,6 +473,7 @@
 - (instancetype) initWithRGBABytes:(void *) bytes
                         bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
+                    nameUTF8String:(char *) nameUTF8String
                            context:(CGContext *) context
 {
    NSInteger   textureID;
@@ -414,7 +487,7 @@
    assert( bitmapSize.width >= 1);
    assert( bitmapSize.height >= 1);
 
-   assert( [context isActive]);
+   assert( CGContextIsActiveInCurrentThread( context));
 
    // bounce to context for debugging output of CGContext
    textureID = [context textureIDWithRGBABytes:bytes
@@ -423,12 +496,27 @@
    return( [self initWithTextureID:textureID
                         bitmapSize:bitmapSize
                       textureFlags:textureFlags
+                    nameUTF8String:nameUTF8String
+                           context:context]);
+}
+
+
+- (instancetype) initWithRGBABytes:(void *) bytes
+                        bitmapSize:(CGPixelSize) bitmapSize
+                      textureFlags:(NSUInteger) textureFlags
+                           context:(CGContext *) context
+{
+   return( [self initWithRGBABytes:bytes
+                        bitmapSize:bitmapSize
+                      textureFlags:textureFlags
+                    nameUTF8String:NULL
                            context:context]);
 }
 
 
 - (instancetype) initWithBitmap:(struct CGBitmap) bitmap
                    textureFlags:(NSUInteger) textureFlags
+                 nameUTF8String:(char *) nameUTF8String
                         context:(CGContext *) context
 {
    BOOL                  isFlipped;
@@ -444,7 +532,7 @@
       return( nil);
    }
 
-   assert( [context isActive]);
+   assert( CGContextIsActiveInCurrentThread( context));
 
    // we flip textureFlags on encoding, it allows more control for the
    // user, who will usually set this to 0
@@ -464,7 +552,7 @@
       convertedBitmap = CGBitmapConvert( bitmap, convertedBitmapInfo, NULL);
       if( CGBitmapIsNull( convertedBitmap))
       {
-         fprintf( stderr, "unsupported CGImage format\n");
+         mulle_fprintf( stderr, "unsupported CGImage format\n");
          [self release];
          return( nil);
       }
@@ -481,8 +569,21 @@
    return( [self initWithTextureID:textureID
                         bitmapSize:bitmap.info.size
                       textureFlags:textureFlags
+                    nameUTF8String:nameUTF8String
                            context:context]);
 }
+
+
+- (instancetype) initWithBitmap:(struct CGBitmap) bitmap
+                   textureFlags:(NSUInteger) textureFlags
+                        context:(CGContext *) context
+{
+   return( [self initWithBitmap:bitmap
+                   textureFlags:textureFlags
+                 nameUTF8String:NULL
+                        context:context]);
+}
+
 
 // MEMO: A texture id can be reused. So the referencing image textureID can
 //       eventually deviate between contexts. The sharing of a textureID
@@ -569,13 +670,14 @@
    image = [image initWithSharedGPUTexture:[self sharedGPUTexture]
                                 bitmapSize:[self bitmapSize]
                               textureFlags:textureFlags
+                                      nameUTF8String:NULL
                                    context:context];
    image = [image autorelease];
    return( image);
 }
 
 
-- (char *) UTF8String
+- (char *) threadSafeUTF8String
 {
    char   *s;
 
@@ -583,11 +685,11 @@
    {
       s = MulleObjCClassGetNameUTF8String( NSClassFromObject( self));
       mulle_buffer_sprintf( buffer, "<%s %p", s, self);
-      if( _debugNameUTF8String)
-         mulle_buffer_sprintf( buffer, " \"%s\"", self->_debugNameUTF8String);
-      mulle_buffer_sprintf( buffer, " textureID=%td", self->_textureID);
+      if( _nameUTF8String)
+         mulle_buffer_sprintf( buffer, " \"%s\"", self->_nameUTF8String);
+      mulle_buffer_sprintf( buffer, " ID=%td", self->_textureID);
       if( self->_sharedGPUTexture)
-         mulle_buffer_sprintf( buffer, " %#@", self->_sharedGPUTexture);
+         mulle_buffer_sprintf( buffer, " GPUID=%td", (intptr_t) [self->_sharedGPUTexture gpuTexture]);
       mulle_buffer_add_string( buffer, ">");
    }
    return( s);
@@ -608,6 +710,12 @@
 - (BOOL) isTexture
 {
    return( YES);
+}
+
+
+- (CGImage *) image
+{
+   return( self);
 }
 
 

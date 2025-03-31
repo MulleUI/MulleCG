@@ -118,8 +118,9 @@
 {
    CGGPUFramebuffer   *gpuFramebuffer;
 
-   // no callbacks in the locked code so no need to copy
-   mulle_thread_mutex_do( _deletedFramebufferLock)
+   // no callbacks in the locked code so no need to copy, we need a second
+   // lock here to not deadlock in CGImage finalize
+   mulle_thread_mutex_do( _deletedGPUFramebuffersLock)
    {
       mulle__pointerarray_for( &_deletedGPUFramebuffers, gpuFramebuffer)
       {
@@ -149,54 +150,13 @@
    if( _debuggingFlags & 0x2)
       MulleUILog( "queuing release of GPU framebuffer %p", gpuFramebuffer);
 
-   mulle_thread_mutex_do( _deletedFramebufferLock)
+   mulle_thread_mutex_do( _deletedGPUFramebuffersLock)
    {
       _mulle__pointerarray_add( &_deletedGPUFramebuffers,
                                 gpuFramebuffer,
                                 MulleObjCInstanceGetAllocator( self));
    }
 }
-
-
-- (void) deleteFramebuffers
-{
-   CGFramebuffer   *framebuffer;
-
-   // no callbacks in the locked code so no need to copy
-   mulle_thread_mutex_do( _deletedFramebufferLock)
-   {
-      mulle__pointerarray_for( &_deletedFramebuffers, framebuffer)
-      {
-         if( _debuggingFlags & 0x2)
-            MulleUILog( "release framebuffer %@", framebuffer);
-         [framebuffer mulleGainAccess];
-      }
-
-      _mulle__pointerarray_reset( &_deletedFramebuffers);
-   }
-}
-
-
-//
-// This can be called by another thread. So we can't autorelease anything
-// be activated and it could be tricky to ascertain, that it isn't in use
-// by another thread. So we queue these delete requests up
-//
-- (void) queueFramebufferForDeletion:(CGFramebuffer *) framebuffer
-{
-
-   if( _debuggingFlags & 0x2)
-      MulleUILog( "queuing release of framebuffer %@", framebuffer);
-
-   mulle_thread_mutex_do( _deletedFramebufferLock)
-   {
-      [framebuffer mulleRelinquishAccess];
-      _mulle__pointerarray_add( &_deletedFramebuffers,
-                                framebuffer,
-                                MulleObjCInstanceGetAllocator( self));
-   }
-}
-
 
 
 - (CGGPUTextureID) gpuTextureForTextureID:(CGTextureID) textureID
@@ -213,7 +173,7 @@
 - (void) setRGBABytes:(void *) bytes
          forTextureID:(CGTextureID) textureID
 {
-   assert( [self isActive]);
+   assert( CGContextIsActiveInCurrentThread( self));
 
    nvgUpdateImage( CGContextGetNVGContext( self), textureID, bytes);
 }

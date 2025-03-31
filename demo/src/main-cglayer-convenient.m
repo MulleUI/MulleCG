@@ -53,11 +53,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       canvas.origin = CGPointZero;
       canvas.size   = CGSizeMake( originalCanvas.size.height / 2.0, originalCanvas.size.width / 2.0);
       cgLayer       = [CGFramebuffer framebufferWithBitmapSize:CGPixelSizeMakeWithSize( canvas.size)
-                                      textureFlags:0
-                                           context:context];
+                                                  textureFlags:0
+                                                       context:context];
       [cgLayer beginFBRenderWithBackgroundColor:CGColorMakeWhite()
-                                  devicePixelRatio:1.0
-                                   layerRenderInfo:&memo];
+                               devicePixelRatio:1.0
+                                layerRenderInfo:&memo];
       drawRedWhiteBlueFlag( vg, canvas);
       [cgLayer endFBRender:&memo];
 

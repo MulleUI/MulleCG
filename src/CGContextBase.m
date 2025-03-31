@@ -50,7 +50,8 @@ static struct
 }
 
 
-- (instancetype) init
+- (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) os_context
+                            nameUTF8String:(char *) name
 {
    static SEL selectors[ 2] = {
                                  @selector( didAddToContext:),
@@ -59,8 +60,28 @@ static struct
 
    [self _initResourceStorage:&_resourceStorage
             callbackSelectors:selectors];
+   // MEMO: the layout context will have NULL _OSWindow (!)
+   _OSWindow = os_context; // sic, not retained
+
+   MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, name);
+
    return( self);
 }
+
+
+- (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) os_context
+{
+   return( [self initWithOSGraphicsContext:os_context
+                                      nameUTF8String:NULL]);
+}
+
+
+- (instancetype) init
+{
+   abort();
+   return( nil);
+}
+
 
 
 - (void) finalize
@@ -74,6 +95,7 @@ static struct
 {
    [self _doneResourceStorage:&_resourceStorage];
    MulleObjCInstanceDeallocateMemory( self, _nameUTF8String);
+
    [super dealloc];
 }
 
@@ -92,6 +114,24 @@ static struct
 }
 
 
+- (NSUInteger) state
+{
+   return( (NSUInteger) (uintptr_t) _mulle_atomic_pointer_read( &_atomicState));
+}
+
+
+- (void) setState:(NSUInteger) state
+{
+   _mulle_atomic_pointer_write( &_atomicState, (void *) (uintptr_t) state);
+}
+
+
+- (NSThread *) activeThread
+{
+   return( [_OSWindow activeThread]);
+}
+
+
 - (struct NVGcontext *) nvgContext
 {
    return( _vg);
@@ -104,49 +144,19 @@ static struct
 }
 
 
-- (char *) mulleNameUTF8String
+- (char *) threadSafeUTF8String
 {
-   char  *s;
+   char   *s;
 
-   s = _mulle_atomic_pointer_read( &_nameUTF8String);
-   return( s ? s : "unnamed");
-}
-
-
-- (void) mulleSetNameUTF8String:(char *) s
-{
-   struct mulle_allocator       *allocator;
-   struct _mulle_objc_universe  *universe;
-   void                         *actual;
-   void                         *old;
-
-   // need universe allocator for abafree
-   universe  = _mulle_objc_object_get_universe( self);
-   allocator = _mulle_objc_universe_get_allocator( universe);
-   old       = _mulle_atomic_pointer_read( &_nameUTF8String);
-   if( s)
-      s = mulle_allocator_strdup( allocator, s);
-
-   actual = __mulle_atomic_pointer_cas( &_nameUTF8String, s, old);
-
-   if( actual == old)
-      mulle_allocator_abafree( allocator, old);
-   else
-      mulle_allocator_free( allocator, s);
-}
-
-
-- (char *) UTF8String
-{
-   Class   cls;
-   char    *s;
-
-   s = _mulle_atomic_pointer_read( &_nameUTF8String);
-   if( s)
-      return( s);
-
-   cls = MulleObjCObjectGetClass( self);
-   return( MulleObjC_asprintf( "<%s %p>", MulleObjCClassGetNameUTF8String( cls), self));
+   mulle_buffer_do_autoreleased_string( buffer, NULL, s)
+   {
+      s = MulleObjCClassGetNameUTF8String( NSClassFromObject( self));
+      mulle_buffer_sprintf( buffer, "<%s %p", s, self);
+      if( _nameUTF8String)
+         mulle_buffer_sprintf( buffer, " \"%s\"", self->_nameUTF8String);
+      mulle_buffer_add_string( buffer, ">");
+   }
+   return( s);
 }
 
 @end

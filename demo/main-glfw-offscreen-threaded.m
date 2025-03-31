@@ -92,24 +92,9 @@ static void   drawStuff( CGRect canvas,
 @end
 
 
-//
-// This needs to be implemented by the context owner. This is not a bug.
-// setActive: is not supposed to be seen outside of the window[ 0] setting this
-// context active. (Locking is done in GLFWOSWindow with the implicit context!)
-//
-@implementation CGContext( MyWindow)
-
-- (void) setActive:(BOOL) flag
+static UIWindowDisplayBits   display_0( id <UIOSWindow> *window_in)
 {
-   _activeThread = flag ? [NSThread currentThread] : nil;
-}
-
-@end
-
-
-static void   display_0( GLFWOSWindow *window_in)
-{
-   MyWindow         *window = (MyWindow *) window_in;
+   MyWindow         *window = MULLE_OBJC_CLASS_CAST( MyWindow, window_in);
    CGRect           canvas;
    CGContext        *context;
    CGFrameInfo      frameInfo;
@@ -122,7 +107,6 @@ static void   display_0( GLFWOSWindow *window_in)
    context       = [window context];
 
    [window os_activateGraphicsContext];
-   [context setActive:YES];
    {
       frameInfo = CGFrameInfoSFMake( canvas, [window os_framebufferSize], 1.0);
 
@@ -170,13 +154,13 @@ static void   display_0( GLFWOSWindow *window_in)
       previous = layer;
    }
    [window os_deactivateGraphicsContext];
-   [context setActive:NO];
+   return( 1);
 }
 
 
-static void   display_1( GLFWOSWindow *window_in)
+static UIWindowDisplayBits  display_1( id <UIOSWindow> *window_in)
 {
-   MyWindow         *window = (MyWindow *) window_in;
+   MyWindow         *window = MULLE_OBJC_CLASS_CAST( MyWindow, window_in);
    CGRect           canvas;
    CGContext        *context;
    CGFrameInfo      frameInfo;
@@ -189,7 +173,6 @@ static void   display_1( GLFWOSWindow *window_in)
    context       = [window context];
 
    [window os_activateGraphicsContext];
-   [context setActive:YES];
    {
       frameInfo = CGFrameInfoSFMake( canvas, [window os_framebufferSize], 1.0);
 
@@ -236,8 +219,9 @@ static void   display_1( GLFWOSWindow *window_in)
       // remember it, and check next time that it's been reused
       previous = layer;
    }
-   [context setActive:NO];
    [window os_deactivateGraphicsContext];
+
+   retuzrn( 1);
 }
 
 
@@ -268,11 +252,9 @@ static MyWindow   *create_window( unsigned int i,
 
    [window os_activateGraphicsContext];
    {
-      context = [[[CGContext alloc] initWithBackend:[window backend]
-                                            shareID:[window shareID]
-                                            options:UIGraphicsDefaultOptions] autorelease];
-      [context setActive:YES];
-      // have to do this manually
+      context = [[[CGContext alloc] initWithOSGraphicsContext:window
+                                                      shareID:[window shareID]
+                                                      options:UIGraphicsDefaultOptions] autorelease];      // have to do this manually, because the context is created manually
 
       // remember context for "display" callback
       [window setContext:context];
@@ -282,8 +264,6 @@ static MyWindow   *create_window( unsigned int i,
       [window setLeftColor:CGColorMakeWithHexColor( 0x008C45FF)];
       [window setMiddleColor:CGColorMakeWithHexColor( 0xF4F5F0FF)];
       [window setRightColor:CGColorMakeWithHexColor( 0xCD212AFF)];
-
-      [context setActive:NO];
    }
    [window os_deactivateGraphicsContext];
 

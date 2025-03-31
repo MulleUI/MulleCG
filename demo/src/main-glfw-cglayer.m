@@ -19,22 +19,6 @@
 #define H   64
 #define S   4     // stroke width of circle
 
-//
-// -[CGContext setActive:] needs to be implemented by the context owner.
-// This is not a bug.
-// setActive: is not supposed to be seen outside of the windoW, Hho sets this
-// context active. (Locking is done in GLFWOSWindow with the implicit context!)
-//
-@implementation CGContext( MyWindow)
-
-- (void) setActive:(BOOL) flag
-{
-   _isActive = flag;
-}
-
-@end
-
-
 static void   draw( struct NVGcontext *vg)
 {
 #ifdef _CGLMACRO_H
@@ -63,6 +47,7 @@ static void   draw( struct NVGcontext *vg)
    // it flushes the accumulated draw commands into the framebuffer
    nvgEndFrame( vg);
 }
+
 
 
 int   main( int argc, char *argv[])
@@ -103,15 +88,14 @@ int   main( int argc, char *argv[])
          [window os_activateGraphicsContext];
 
          // CGContext can now use the "OS" context
-         context = [[[CGContext alloc] initWithBackend:[window backend]
-                                               shareID:[window shareID]
-                                               options:UIGraphicsDefaultOptions] autorelease];
+         context = [[[CGContext alloc] initWithOSGraphicsContext:window
+                                                         shareID:[window shareID]
+                                                         options:UIGraphicsDefaultOptions] autorelease];
          if( ! context)
          {
             fprintf( stderr, "No CGContext for you\n");
             return( 1);
          }
-         [context setActive:YES];
 
          //
          // create a CGFramebuffer of a certain size. This creates a bitmap on the

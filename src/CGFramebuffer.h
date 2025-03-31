@@ -31,20 +31,27 @@ struct CGFrameInfo;
 // the image will be kept.
 @property( readonly, retain) CGImage   *resolvedImage;
 
+// as long as noone has drawn to it, this will be NO
 @property( assign, getter=isInitializedFramebuffer) BOOL   initializedFramebuffer;
 
-
 + (instancetype) framebufferWithBitmapSize:(CGPixelSize) size
+                              textureFlags:(NSUInteger) textureFlags
+                            nameUTF8String:(char *) nameUTF8String
+                                   context:(CGContext *) context;
+
++ (instancetype) framebufferWithBitmapSize:(CGPixelSize) bitmapSize
                               textureFlags:(NSUInteger) textureFlags
                                    context:(CGContext *) context;
 
 - (instancetype) initWithBitmapSize:(CGPixelSize) size
                        textureFlags:(NSUInteger) textureFlags
+                     nameUTF8String:(char *) nameUTF8String
                             context:(CGContext *) context;
 
 // more or less for completeness... probably makes no sense
 - (instancetype) initWithImage:(CGImage *) image
                   textureFlags:(NSUInteger) textureFlags
+                nameUTF8String:(char *) nameUTF8String
                        context:(CGContext *) context;
 
 
@@ -77,6 +84,7 @@ typedef void   CGFramebufferDrawFunction_t( CGContext *context,
                            backgroundColor:(CGColor) color
                               drawFunction:(CGFramebufferDrawFunction_t *) drawFunction
                                   userInfo:(void *) userInfo
+                            nameUTF8String:(char *) nameUTF8String
                                    context:(CGContext *) context;
 
 
@@ -91,8 +99,8 @@ typedef void   CGFramebufferDrawFunction_t( CGContext *context,
 // Convenience routine clears and sets up the viewport and starts nvg frame.
 // Feed the memo to endFBRender when done
 - (void) beginFBRenderWithBackgroundColor:(CGColor) color
-                            devicePixelRatio:(CGFloat) ratio
-                             layerRenderInfo:(struct CGFramebufferRenderInfo *) memo;
+                         devicePixelRatio:(CGFloat) ratio
+                          layerRenderInfo:(struct CGFramebufferRenderInfo *) memo;
 
 - (void) endFBRender:(struct CGFramebufferRenderInfo *) memo;
 

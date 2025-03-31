@@ -13,9 +13,11 @@
 @implementation CGLayoutContext
 
 
-- (id) init 
+- (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) context
+                            nameUTF8String:(char *) nameUTF8String
 {
-   self = [super init];
+   self = [super initWithOSGraphicsContext:context
+                            nameUTF8String:nameUTF8String];
    if( self)
    {
       // if _vg is already set, then we are a subclass so don't
@@ -35,6 +37,13 @@
    }
 
    return( self);
+}
+
+
+- (instancetype) init
+{
+   return( [self initWithOSGraphicsContext:nil
+                            nameUTF8String:NULL]);
 }
 
 

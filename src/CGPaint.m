@@ -93,10 +93,11 @@
    *locations = 0.0;  // or what ?
 }
 
-- (char *) UTF8String
+- (char *) threadSafeUTF8String
 {
    return( CGColorUTF8String( _color));
 }
+
 
 @end
 
@@ -207,6 +208,18 @@
 - (CGFloat) overdraw
 {
    return( 0.0);
+}
+
+
+- (CGImage *) image
+{
+   return( nil);
+}
+
+
+- (CGImage *) otherImage
+{
+   return( nil);
 }
 
 

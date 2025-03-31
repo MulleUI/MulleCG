@@ -27,6 +27,12 @@
                          blend:(CGFloat) blend
                       rotation:(CGFloat) rotation
  {
+   if( ! image && ! otherImage)
+   {
+      [self release];
+      return( nil);
+   }
+
    _image = [image copy];
 
    // for "rotation" only animation, this isn't unlikely
@@ -48,6 +54,12 @@
    [_otherImage release];
 
    [super dealloc];
+}
+
+
+- (id) copy
+{
+   return( [self retain]);
 }
 
 

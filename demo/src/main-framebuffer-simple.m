@@ -5,35 +5,46 @@
 #include "draw-flag.inc"
 
 #define DEBUG_WRITE_IMAGE_PNG
+//#define NO_FRAMEBUFFER
+
+
 //
 // This demo shows basic CGFramebuffer usage - create a framebuffer,
 // draw into it, and display it on screen
 //
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CGFramebuffer        *framebuffer;
-   CGRect               canvas;
-   CGRect               rect;
-   struct CGFrameInfo   frameInfo;
-   struct CGFrameInfo   oldFrameInfo;
-   
-   canvas      = [layer canvas];
-   
+   CGFramebuffer                 *framebuffer;
+   CGRect                        canvas;
+   CGRect                        rect;
+   struct CGFrameInfo            frameInfo;
+   struct CGFrameInfo            oldFrameInfo;
+   struct CGContextFramebuffer   oldFramebuffer;
+   canvas = [layer canvas];
+   rect   = CGRectInset( canvas, 20, 20);
+
+   MulleUICLog( "****** >>>>>> ****** >>>>>> *******");
+#ifndef NO_FRAMEBUFFER
    // Create a framebuffer matching our canvas size
+
    framebuffer = [CGFramebuffer framebufferWithBitmapSize:CGPixelSizeMakeWithSize( canvas.size)
-                                            textureFlags:0
-                                                 context:context];
-   
-   // Draw into framebuffer
-   frameInfo = CGFrameInfoFBMake( CGPixelSizeMakeWithSize( canvas.size), 1.0, 1.0);
-   oldFrameInfo = [context bindRender:&frameInfo];
+                                             textureFlags:0
+                                                  context:context];
+   assert( framebuffer);
+
+   oldFramebuffer = [context bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( framebuffer)];
    {
-      [context bindFramebuffer:CGContextFramebufferMakeWithLayer( framebuffer)];
-      [context clearFramebufferWithColor:CGColorMakeWithRGBA( 0.2, 0.3, 0.3, 1.0)];
-      drawRedWhiteBlueFlag( CGContextGetNVGContext( context), canvas);
+      // Draw into framebuffer
+      frameInfo    = CGFrameInfoFBMake( CGPixelSizeMakeWithSize( canvas.size), 1.0, 1.0);
+      oldFrameInfo = [context bindRender:&frameInfo];
+      {
+         [context clearFramebufferWithColor:CGColorMakeOrange()];
+         drawRedWhiteBlueFlag( CGContextGetNVGContext( context), rect);
+      }
+      // restore old frameinfo
+      [context bindRender:&oldFrameInfo];
    }
-   [context bindRender:&oldFrameInfo];
-   [context bindFramebuffer:CGContextFramebufferMakeDefault( NO)];
+   [context bindFramebuffer:oldFramebuffer];
 
 #ifdef DEBUG_WRITE_IMAGE_PNG
    {
@@ -46,16 +57,18 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       }
    }
 #endif
-   // Draw framebuffer to screen
-   rect = CGRectInset( canvas, 20, 20);
-   [framebuffer drawRect:rect
-                options:NULL
-                context:context];
-
+   [framebuffer drawRect:canvas
+                 options:NULL
+                 context:context];
+#else
+   drawRedWhiteBlueFlag( CGContextGetNVGContext( context), rect);
+#endif
+   MulleUICLog( "****** <<<<<< ****** <<<<<<< *******");
    return( YES);
 }
 
 
+#if 1
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -63,3 +76,37 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            0.0f));
 }
+#else
+void   setupScene( UIWindow *window)
+{
+   UIView   *view;
+   CGRect   frame;
+
+   frame  = [[window contentView] contentRect];
+   view   = [UIView viewWithFrame:frame];
+   [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
+   [[window contentView] addSubview:view];
+}
+
+
+int   main( int argc, char *argv[])
+{
+   UIWindow         *window;
+   UIApplication    *app;
+
+   app = [UIApplication sharedInstance];
+   @autoreleasepool
+   {
+      window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 200, 200)
+                                   titleUTF8String:"Demo"
+                                         styleMask:UIWindowStyleMaskDefault & ~UIWindowStyleRetained] autorelease];
+
+      assert( window);
+      [window setBackgroundColor:CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0)];
+      setupScene( window);
+      [app addWindow:window];
+   }
+   return( [app runApp]);
+}
+
+#endif

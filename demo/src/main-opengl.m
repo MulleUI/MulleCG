@@ -22,9 +22,9 @@
 // In this demo, there are no "real" nanovg calls, so it doesn't matter
 //
 
-void   drawOpenGL1( UIWindow *window,
-                    id <UIGraphicsContext> context,
-                    struct CGFrameInfo *info)
+void   drawOpenGL_blue( UIWindow *window,
+                        id <UIGraphicsContext> context,
+                        struct CGFrameInfo *info)
 {
    glColor3f( 0.0f, 0.0f, 1.0f ); // blue color
 
@@ -39,9 +39,9 @@ void   drawOpenGL1( UIWindow *window,
 }
 
 
-void  drawOpenGL2( UIWindow *window,
-                   id <UIGraphicsContext> context,
-                   struct CGFrameInfo *info)
+void  drawOpenGL_yellow( UIWindow *window,
+                         id <UIGraphicsContext> context,
+                         struct CGFrameInfo *info)
 {
    glColor3f( 1.0f, 1.0f, 0.0f ); // yellow color
 
@@ -56,9 +56,10 @@ void  drawOpenGL2( UIWindow *window,
 }
 
 
-void  drawOpenGL3( UIWindow *window,
-                   id <UIGraphicsContext> context,
-                   struct CGFrameInfo *info)
+UIWindowDisplayBits  drawOpenGL_magenta( UIPureWindow *window,
+                                         id <UIGraphicsContext> context,
+                                         struct CGFrameInfo *info,
+                                         unsigned long displayBits)
 {
    glColor3f( 1.0f, 0.0f, 1.0f ); // magenta color
 
@@ -70,6 +71,8 @@ void  drawOpenGL3( UIWindow *window,
    glEnd();
 
    glFlush();
+
+   return( displayBits);
 }
 
 
@@ -126,13 +129,13 @@ int   main( int argc, char *argv[])
 
    bits = 7;
    if( argc == 2)
-      bits= atoi( argv[ 1]);
+      bits = atoi( argv[ 1]);
    if( bits & 1)
-      [window setWillDrawCallback:drawOpenGL1];
+      [window setWillDrawViewsCallback:drawOpenGL_blue];
    if( bits & 2)
-      [window setDidDrawObjectsCallback:drawOpenGL2];
+      [window setDidDrawViewsCallback:drawOpenGL_yellow];
    if( bits & 4)
-      [window setDidDrawCallback:drawOpenGL3];
+      [window setDidRenderFrameCallback:drawOpenGL_magenta];
 
    return( [app runApp]);
 }

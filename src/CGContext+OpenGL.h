@@ -50,11 +50,6 @@
 // pixels, set flag to NO
 - (NSUInteger) framebufferBitsWithColorBit:(BOOL) flag;
 
-
-
-- (void) changeRender:(struct CGFrameInfo *) info;
-- (void) resumeRender;
-
 // called by -init / -finalize
 - (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options;
 
@@ -62,6 +57,8 @@
 - (void) assertNoBackendError:(char *) str;
 
 - (void) bindOpenGLFramebuffer:(void *) framebuffer;
+- (void) bindDefaultOpenGLFramebuffer;
+
 - (void) bindImage:(CGImage *) image
      toTextureUnit:(NSUInteger) index;
 - (void) barrier;

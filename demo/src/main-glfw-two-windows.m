@@ -92,12 +92,8 @@ static void   drawStuff( CGRect canvas,
 {
    [self os_activateGraphicsContext];
    {
-      [_context setActive:YES];
       // have to do this manually
-
       [_context mullePerformFinalize];
-
-      [_context setActive:NO];
    }
    [self os_deactivateGraphicsContext];
 
@@ -114,29 +110,14 @@ static void   drawStuff( CGRect canvas,
 
 
 //
-// This needs to be implemented by the context owner. This is not a bug.
-// setActive: is not supposed to be seen outside of the window[ 0] setting this
-// context active. (Locking is done in GLFWOSWindow with the implicit context!)
-//
-@implementation CGContext( MyWindow)
-
-- (void) setActive:(BOOL) flag
-{
-   _activeThread = flag ? [NSThread currentThread] : nil;
-}
-
-@end
-
-
-//
 // window will already have activated the os_activateGraphicsContext
 //
-static int   display( GLFWOSWindow *window_in)
+static UIWindowDisplayBits   display( id <UIOSWindow> window_in)
 {
-   MyWindow      *window = (MyWindow *) window_in;
-   CGRect        canvas;
-   CGContext     *context;
-   CGFrameInfo   frameInfo;
+   MyWindow            *window = MULLE_OBJC_CLASS_CAST( MyWindow, window_in);
+   CGRect              canvas;
+   CGContext           *context;
+   CGFrameInfo         frameInfo;
    CGFramebuffer       *layer;
    CGFramebuffer       *check;
 
@@ -144,57 +125,16 @@ static int   display( GLFWOSWindow *window_in)
    canvas.size   = [window os_windowSize];
    context       = [window context];
 
-   [context setActive:YES];
+   frameInfo = CGFrameInfoSFMake( canvas, [window os_framebufferSize], 1.0);
+   [context beginRender:&frameInfo];
    {
-      frameInfo = CGFrameInfoSFMake( canvas, [window os_framebufferSize], 1.0);
-
-      // tell the context to render offscreen
-      [context setRendersOffScreen:NO];
-      [context beginRender:&frameInfo];
-      {
-         drawStuff( canvas, [window incrementCounter],
-                            [window leftColor],
-                            [window middleColor],
-                            [window rightColor],
-                            context);
-      }
-      [context endRender];
-
-// for this demo we don't need the offscreen stuff
-#if 0
-      // now we should have it
-      layer = [context acquireOffscreenFramebuffer];
-      assert( layer);
-
-      // should be gone from context
-      check = [context acquireOffscreenFramebuffer];
-      assert( ! check);
-
-      if( [window previousLayer] != layer)
-         fprintf( stderr, "%p: new offscreen framebuffer (should only be seen on init and resize)\n", window);
-
-      // draw layer in window[ 0] framebuffer
-      [context setRendersOffScreen:NO];
-      [context beginRender:&frameInfo];
-      {
-         [context clearFramebuffer];
-         [layer drawRect:CGRectInset( canvas, 10, 10)
-                 options:NULL
-                 context:context];
-      }
-      [context endRender];
-
-      [context recycleFramebuffer:layer];
-
-      // should still be gone, since we don't pick the trashcan
-      check = [context acquireOffscreenFramebuffer];
-      assert( ! check);
-
-      // remember it, and check next time that it's been reused
-      [window setPreviousLayer:layer];
-#endif
+      drawStuff( canvas, [window incrementCounter],
+                         [window leftColor],
+                         [window middleColor],
+                         [window rightColor],
+                         context);
    }
-   [context setActive:NO];
+   [context endRender];
 
    return( 0);
 }
@@ -226,10 +166,9 @@ static MyWindow   *create_window( unsigned int i,
 
    [window os_activateGraphicsContext];
    {
-      context = [[[CGContext alloc] initWithBackend:[window backend]
-                                            shareID:[window shareID]
-                                            options:UIGraphicsDefaultOptions] autorelease];
-      [context setActive:YES];
+      context = [[[CGContext alloc] initWithOSGraphicsContext:window
+                                                      shareID:[window shareID]
+                                                      options:UIGraphicsDefaultOptions] autorelease];      // have to do this manually, because the context is created manually
       // have to do this manually
 
       // remember context for "display" callback
@@ -240,8 +179,6 @@ static MyWindow   *create_window( unsigned int i,
       [window setLeftColor:CGColorMakeWithHexColor( 0x008C45FF)];
       [window setMiddleColor:CGColorMakeWithHexColor( 0xF4F5F0FF)];
       [window setRightColor:CGColorMakeWithHexColor( 0xCD212AFF)];
-
-      [context setActive:NO];
    }
    [window os_deactivateGraphicsContext];
 

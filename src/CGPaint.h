@@ -6,6 +6,7 @@
 
 
 @class CGContext;
+@class CGImage;
 
 
 // In UIViews and UILayers it's convenient to abstract CGColor, CGGradient *
@@ -53,12 +54,15 @@
 // overdraw on a fill! (default 0)
 - (CGFloat) overdraw;
 
+- (CGImage *) image;
+- (CGImage *) otherImage;
+
 @end
 
 
 // subclasses must implement these
 @interface CGPaint( Subclasses)
 
-- (CGFloat) rotation;  // default 0.0
+@property( readonly) CGFloat   rotation;
 
 @end

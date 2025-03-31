@@ -72,7 +72,7 @@ static CGFramebuffer  *createTexture( CGContext *context,
    // with the push functionality, we should be able to run this also inside
    // an active render.
    //
-   oldFramebuffer = [context bindFramebuffer:CGContextFramebufferMakeWithLayer( texture)];
+   oldFramebuffer = [context bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( texture)];
    oldFrameInfo   = [context bindRender:&frameInfo];
    {
       drawTexture( context, CGFrameInfoGetFrameSize( &frameInfo));

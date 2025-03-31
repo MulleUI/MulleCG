@@ -28,8 +28,13 @@
 + (instancetype) fontWithNameUTF8String:(char *) name
                                  fontID:(CGFontID) fontID
 {
-   return( [[[self alloc] initWithNameUTF8String:name
-                                          fontID:fontID] autorelease]);
+   CGFont   *obj;
+
+   obj = [self alloc];
+   obj = [obj initWithNameUTF8String:name
+                              fontID:fontID];
+   obj = [obj autorelease];
+   return( obj);
 }
 
 

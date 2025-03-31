@@ -44,6 +44,7 @@ static void   setCachedImage( CGContext *self,
 - (CGImage *) imageWithRGBABytes:(void *) bytes
                       bitmapSize:(CGPixelSize) bitmapSize
                     textureFlags:(NSUInteger) textureFlags
+                  nameUTF8String:(char *) nameUTF8String
                      resourceKey:(MulleUIResourceStorageKey_t) resourceKey
 {
    CGImage   *image;
@@ -54,6 +55,7 @@ static void   setCachedImage( CGContext *self,
       image = [[[CGImage alloc] initWithRGBABytes:bytes
                                        bitmapSize:bitmapSize
                                      textureFlags:textureFlags
+                                   nameUTF8String:nameUTF8String
                                           context:self] autorelease];
       setCachedImage( self, image, resourceKey);
    }
@@ -61,8 +63,10 @@ static void   setCachedImage( CGContext *self,
 }
 
 
+
 - (CGImage *) imageWithBitmap:(struct CGBitmap) bitmap
                  textureFlags:(NSUInteger) textureFlags
+               nameUTF8String:(char *) nameUTF8String
                   resourceKey:(MulleUIResourceStorageKey_t) resourceKey
 {
    CGImage   *image;
@@ -72,6 +76,7 @@ static void   setCachedImage( CGContext *self,
    {
       image = [[[CGImage alloc] initWithBitmap:bitmap
                                   textureFlags:textureFlags
+                                nameUTF8String:nameUTF8String
                                        context:self] autorelease];
       setCachedImage( self, image, resourceKey);
    }
@@ -81,6 +86,7 @@ static void   setCachedImage( CGContext *self,
 
 - (CGImage *) imageWithContentsOfFileCString:(char *) filename
                                 textureFlags:(NSUInteger) textureFlags
+                              nameUTF8String:(char *) nameUTF8String
                                  resourceKey:(MulleUIResourceStorageKey_t) resourceKey
 {
    CGImage   *image;
@@ -90,6 +96,7 @@ static void   setCachedImage( CGContext *self,
    {
       image = [[[CGImage alloc] initWithContentsOfFileCString:filename
                                                  textureFlags:textureFlags
+                                               nameUTF8String:nameUTF8String
                                                       context:self] autorelease];
       setCachedImage( self, image, resourceKey);
    }
@@ -100,6 +107,7 @@ static void   setCachedImage( CGContext *self,
 // data can be discarded after init
 - (CGImage *) imageWithFileCData:(struct mulle_data) fileCData
                     textureFlags:(NSUInteger) textureFlags
+                  nameUTF8String:(char *) nameUTF8String
                      resourceKey:(MulleUIResourceStorageKey_t) resourceKey
 {
    CGImage   *image;
@@ -109,6 +117,7 @@ static void   setCachedImage( CGContext *self,
    {
       image = [[[CGImage alloc] initWithFileCData:fileCData
                                      textureFlags:textureFlags
+                                   nameUTF8String:nameUTF8String
                                           context:self] autorelease];
       setCachedImage( self, image, resourceKey);
    }

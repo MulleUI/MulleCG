@@ -108,6 +108,7 @@ static MulleUIResourceStorageKeyDefine( test_image);
    image = [context imageWithRGBABytes:bitmap2
                             bitmapSize:CGPixelSizeMake( 32, 32)
                           textureFlags:0
+                        nameUTF8String:NULL
                            resourceKey:MulleUIResourceStorageKey( test_image)];
    assert( image);
    [context bindImage:image
@@ -173,11 +174,11 @@ static void   usage( void)
 
 int   main( int argc, char *argv[])
 {
-   UIWindow       *window;
-   UIApplication  *app;
-   CALayer        *layer;
-   NSUInteger     styleMask;
-   int            i;
+   UIWindow          *window;
+   UIApplication     *app;
+   CGGraphicsLayer   *layer;
+   NSUInteger        styleMask;
+   int               i;
 
    styleMask = UIWindowStyleMaskDefault;
 

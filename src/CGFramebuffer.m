@@ -1,8 +1,11 @@
 #import "CGFramebuffer.h"
 
 #import "CGContext.h"
-#import "CGContext+OpenGL.h"
 #import "CGContext+Drawing.h"
+#import "CGContext+DebugPrivate.h"
+#import "CGContext+OpenGL.h"
+#import "CGContext+Render.h"
+#import "CGContext+CGFramebuffer.h"
 #import "CGImage+DebugPrivate.h"
 
 #import "import-private.h"
@@ -11,17 +14,38 @@
 @implementation CGFramebuffer
 
 + (instancetype) framebufferWithBitmapSize:(CGPixelSize) bitmapSize
-                              textureFlags:(NSUInteger) textureFlags
-                                   context:(CGContext *) context
-{
-   return( [[[self alloc] initWithBitmapSize:bitmapSize
-                                textureFlags:textureFlags
-                                     context:context] autorelease]);
+                             textureFlags:(NSUInteger) textureFlags
+                           nameUTF8String:(char *) nameUTF8String
+                                  context:(CGContext *) context {
+    CGFramebuffer *obj;
+
+    obj = [self alloc];
+    obj = [obj initWithBitmapSize:bitmapSize
+                     textureFlags:textureFlags
+                   nameUTF8String:nameUTF8String
+                          context:context];
+    obj = [obj autorelease];
+    return(obj);
 }
 
 
++ (instancetype) framebufferWithBitmapSize:(CGPixelSize) bitmapSize
+                             textureFlags:(NSUInteger) textureFlags
+                                  context:(CGContext *) context {
+    CGFramebuffer *obj;
+
+    obj = [self alloc];
+    obj = [obj initWithBitmapSize:bitmapSize
+                     textureFlags:textureFlags
+                   nameUTF8String:NULL
+                          context:context];
+    obj = [obj autorelease];
+    return(obj);
+}
+
 - (instancetype) initWithBitmapSize:(CGPixelSize) bitmapSize
                        textureFlags:(NSUInteger) textureFlags
+                     nameUTF8String:(char *) nameUTF8String
                             context:(CGContext *) context
 {
    NVGcontext   *vg;
@@ -73,15 +97,17 @@
    return( [self initWithTextureID:textureID
                         bitmapSize:bitmapSize
                       textureFlags:textureFlags
+                    nameUTF8String:nameUTF8String
                            context:context]);
 }
 
 
 - (instancetype) initWithImage:(CGImage *) image
                   textureFlags:(NSUInteger) textureFlags
+                nameUTF8String:(char *) nameUTF8String
                        context:(CGContext *) context
 {
-   CGPixelSize       bitmapSize;
+   CGPixelSize                   bitmapSize;
    struct CGContextFramebuffer   old;
    struct CGFrameInfo            frameInfo;
    struct CGFrameInfo            oldFrameInfo;
@@ -93,6 +119,7 @@
    bitmapSize = [image bitmapSize];
    self = [self initWithBitmapSize:bitmapSize
                       textureFlags:textureFlags
+                    nameUTF8String:nameUTF8String
                            context:context];
    if( ! self)
       return( self);
@@ -101,7 +128,7 @@
    // use nanovg to draw the bitmap, using OpenGL portably is just pain
    //
    frameInfo    = CGFrameInfoFBMake( bitmapSize, 1.0, 1.0);
-   old          = [context bindFramebuffer:CGContextFramebufferMakeWithLayer( self)];
+   old          = [context bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( self)];
    oldFrameInfo = [context bindRender:&frameInfo];
    {
       rect = CGRectMake( 0.0f, 0.0f, bitmapSize.width, bitmapSize.height);
@@ -112,12 +139,17 @@
    [context bindRender:&oldFrameInfo];
    [context bindFramebuffer:old];
 
+   CGImageLog( "create framebuffer %p with textureID %td (GPU: %p)",
+                     _gpuFramebuffer,
+                     [self textureID],
+                     [context gpuTextureForImageID:[self textureID]]);
    return( self);
 }
 
 
 - (instancetype) initWithContentsOfFileCString:(char *) filename
                                   textureFlags:(NSUInteger) textureFlags
+                                nameUTF8String:(char *) nameUTF8String
                                        context:(CGContext *) context
 {
    abort();
@@ -127,6 +159,7 @@
 
 - (instancetype) initWithFileCData:(struct mulle_data) fileCData
                       textureFlags:(NSUInteger) textureFlags
+                    nameUTF8String:(char *) nameUTF8String
                            context:(CGContext *) context
 {
    abort();
@@ -137,6 +170,7 @@
 - (instancetype) initWithRGBABytes:(void *) bytes
                         bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
+                    nameUTF8String:(char *) nameUTF8String
                            context:(CGContext *) context
 {
    abort();
@@ -149,7 +183,7 @@
    if( _gpuFramebuffer && _context == context)
    {
       CGImageLog( "delete framebuffer %p", _gpuFramebuffer);
-      // assert( [context isActive]);
+      // assert( [self state] & UIGraphicsContextActive);
       [context deleteGPUFramebuffer:_gpuFramebuffer];
       _gpuFramebuffer          = NULL;
       _initializedFramebuffer = NO;
@@ -163,7 +197,7 @@
 - (void) dealloc
 {
    assert( ! _gpuFramebuffer);
-   CGImageLog( "layer deallocs");
+   CGImageLog( "framebuffer deallocs");
    [super dealloc];
 }
 #endif   
@@ -183,7 +217,7 @@
    uintptr_t   hash;
    int         color;
 
-   s = _debugNameUTF8String;
+   s = _nameUTF8String;
    if( s)
       hash = _mulle_string_hash( s);
    else
@@ -270,18 +304,20 @@
                            backgroundColor:(CGColor) color
                               drawFunction:(void (*)( CGContext *context, CGSize size, void *userinfo)) drawFunction
                                   userInfo:(void *) userInfo
+                            nameUTF8String:(char *) nameUTF8String
                                    context:(CGContext *) context
 {
    CGFramebuffer                    *cgLayer;
    struct CGFramebufferRenderInfo   memo;
 
-   assert( [context isActive]);
+   assert( CGContextIsActiveInCurrentThread( context));
 
    if( size.width == 0 || size.height == 0)
       return( nil);
 
    cgLayer = [self framebufferWithBitmapSize:size
                                 textureFlags:0
+                              nameUTF8String:nameUTF8String
                                      context:context];
    [cgLayer beginFBRenderWithBackgroundColor:color
                             devicePixelRatio:1.0
@@ -296,7 +332,10 @@
 
 - (void) _bindToContext
 {
-   assert( [_context isActive]);
+   assert( CGContextIsActiveInCurrentThread( _context));
+
+   _CGContextRenderLog( _context, "->%p", _gpuFramebuffer);
+
    nvgluBindFramebuffer( _gpuFramebuffer);
    CGContextCheckBackendError( _context, "nvgluBindFramebuffer");
 }
@@ -304,10 +343,13 @@
 
 - (void) _unbindFromContext
 {
-   assert( [_context isActive]);
+   assert( CGContextIsActiveInCurrentThread( _context));
+
+   _CGContextRenderLog( _context, "%p->NULL", _gpuFramebuffer);
+
    nvgluBindFramebuffer( NULL);
    CGContextCheckBackendError( _context, "nvgluBindFramebuffer");
-   _initializedFramebuffer = YES;
+   [self setInitializedFramebuffer:YES];
 }
 
 
@@ -320,7 +362,7 @@
 
    [_context flushRender];
    [_context getCurrentFrameInfo:&memo->frameInfo];
-   memo->framebuffer = [_context bindFramebuffer:CGContextFramebufferMakeWithLayer( self)];
+   memo->framebuffer = [_context bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( self)];
 }
 
 
@@ -335,16 +377,15 @@
 
 
 - (void) beginFBRenderWithBackgroundColor:(CGColor) color
-                            devicePixelRatio:(CGFloat) ratio
-                             layerRenderInfo:(struct CGFramebufferRenderInfo *) memo
+                         devicePixelRatio:(CGFloat) ratio
+                          layerRenderInfo:(struct CGFramebufferRenderInfo *) memo
 {
 #ifdef _CGLMACRO_H
    CGLContextObj  cgl_ctx = CGLGetCurrentContext();
 #endif
-
-   CGFloat                    rgba[ 4];
-   CGPixelSize                bitmapSize;
-   struct NVGcontext          *vg;
+   CGFloat             rgba[ 4];
+   CGPixelSize         bitmapSize;
+   struct NVGcontext   *vg;
 
    [self _beginFBRender:memo];
 
@@ -355,20 +396,27 @@
    bitmapSize = [self bitmapSize];
    glClearColor( rgba[ 0], rgba[ 1], rgba[ 2], rgba[ 3]);
    glClear( GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+
+// this here is a little suspicious
    glViewport( 0, 0, bitmapSize.width, bitmapSize.height);
+
    CGContextCheckBackendError( _context, "glViewport");
 
+// this here is also a little suspicious
    nvgBeginFrame( vg, bitmapSize.width, bitmapSize.height, ratio);
 }
 
 
 - (void) endFBRender:(struct CGFramebufferRenderInfo *) memo
 {
-   struct NVGcontext   *vg;
+//   struct NVGcontext   *vg;
+//
+//   vg = CGContextGetNVGContext( _context);
+//
+   // if we do just nvgFlushFrame here, then we don't torch font maps
+   // nvgEndFrame( vg);
 
-   vg = CGContextGetNVGContext( _context);
-   nvgEndFrame( vg);
-
+   // this will reset the viewport and call nvgFlushFrame
    [self _endFBRender:memo];
 }
 

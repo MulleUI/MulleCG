@@ -18,20 +18,19 @@ typedef NS_ENUM( NSUInteger, CGImagePaintBlendStyle)
 
 @class CGImage;
 
+
 //
 // this paint exists for the sake of animation, you have two images and
 // can interpolate between both with "blend". Currently only alpha blending
 // is supported.
 //
 @interface CGImagePaint : CGPaint
-{
-   CGImage   *_image;
-   CGImage   *_otherImage;
-}
 
 @property( readonly) CGFloat   blend;
 //@property( assign) CGImagePaintBlendStyle   blendStyle;
 @property( readonly) CGFloat   rotation;
+@property( readonly) CGImage   *image;
+@property( readonly) CGImage   *otherImage;
 
 + (instancetype) imagePaintWithImage:(CGImage *) image
                           otherImage:(CGImage *) otherImage
