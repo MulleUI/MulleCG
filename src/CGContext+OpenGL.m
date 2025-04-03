@@ -673,16 +673,13 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 
 - (struct CGBitmap) framebufferBitmap
 {
-   struct CGBitmap          bitmap;
-   struct CGFrameInfo       frameInfo;
-   CGPixelRect  rect;
+   struct CGBitmap      bitmap;
+   struct CGFrameInfo   frameInfo;
+   CGPixelRect          rect;
 
    [self getCurrentFrameInfo:&frameInfo];
 
-   rect  = CGPixelRectMake( 0,
-                                 0,
-                                 frameInfo.window.framebufferSize.width,
-                                 frameInfo.window.framebufferSize.height);
+   rect   = CGPixelRectMakeWithPixelSize( frameInfo.window.framebufferSize);
    bitmap = [self readFramebufferBitmap:rect
                   framebufferBitmapType:CGFramebufferRGBABytes
                               allocator:NULL];

@@ -14,6 +14,17 @@
 #include "CGColorDiff.h"
 
 
+@implementation NSObject( CGGradient)
+
+- (BOOL) __isCGGradient
+{
+   return( NO);
+}
+
+@end 
+
+
+
 @implementation _CGTwoColorGradient
 
 + (instancetype) newWithStartColor:(CGColor) startColor
@@ -227,6 +238,11 @@
 
 
 @implementation CGGradient
+
+- (BOOL) __isCGGradient 
+{
+   return( YES);
+}
 
 static id   CGGradientNewWithStartColorAndEndColor(
                                         CGColor startColor,

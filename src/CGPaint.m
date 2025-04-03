@@ -93,11 +93,10 @@
    *locations = 0.0;  // or what ?
 }
 
-- (char *) threadSafeUTF8String
+- (char *) UTF8String
 {
    return( CGColorUTF8String( _color));
 }
-
 
 @end
 

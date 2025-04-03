@@ -21,6 +21,15 @@
 
 - (void) strokeWithBounds:(CGRect) rect
               strokeWidth:(CGFloat) strokeWidth
+                    alpha:(CGFloat) alpha
+               NVGcontext:(NVGcontext *) context;
+
+- (void) fillWithBounds:(CGRect) rect
+                    alpha:(CGFloat) alpha
+             NVGcontext:(NVGcontext *) context;
+
+- (void) strokeWithBounds:(CGRect) rect
+              strokeWidth:(CGFloat) strokeWidth
                NVGcontext:(NVGcontext *) context;
 
 - (void) fillWithBounds:(CGRect) rect
@@ -33,6 +42,7 @@
 
 // a linear gradient if a gradient
 - (NVGpaint) NVGpaintWithBounds:(CGRect) rect
+                          alpha:(CGFloat) alpha
                      NVGcontext:(NVGcontext *) vg;
 
 @end

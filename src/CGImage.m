@@ -30,7 +30,7 @@
 #endif
 
 
-- (char *) threadSafeUTF8String
+- (char *) UTF8String
 {
    char   *s;
 
@@ -411,18 +411,132 @@ static struct
    return( self);
 }
 
++ (instancetype) imageWithTextureID:(CGTextureID) textureID
+                         bitmapSize:(CGPixelSize) bitmapSize
+                       textureFlags:(NSUInteger) textureFlags
+                            context:(CGContext *) context
+{
+    CGImage   *image;
 
-- (instancetype) initWithContentsOfFileCString:(char *) filename
-                                  textureFlags:(NSUInteger) textureFlags
-                                nameUTF8String:(char *) nameUTF8String
-                                       context:(CGContext *) context
+    image = [self alloc];
+    image = [image initWithTextureID:textureID
+                         bitmapSize:bitmapSize
+                       textureFlags:textureFlags
+                     nameUTF8String:NULL
+                            context:context];
+    image = [image autorelease];
+    return( image );
+}
+
++ (instancetype) imageWithGPUTexture:(CGGPUTextureID) gpuTexture
+                         bitmapSize:(CGPixelSize) size
+                       textureFlags:(NSUInteger) textureFlags
+                            context:(CGContext *) context
+{
+    CGImage   *image;
+
+    image = [self alloc];
+    image = [image initWithGPUTexture:gpuTexture
+                           bitmapSize:size
+                         textureFlags:textureFlags
+                       nameUTF8String:NULL
+                              context:context];
+    image = [image autorelease];
+    return( image );
+}
+
++ (instancetype) imageWithSharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
+                               bitmapSize:(CGPixelSize) size
+                             textureFlags:(NSUInteger) textureFlags
+                                  context:(CGContext *) context
+{
+    CGImage   *image;
+
+    image = [self alloc];
+    image = [image initWithSharedGPUTexture:sharedGPUTexture
+                                 bitmapSize:size
+                               textureFlags:textureFlags
+                             nameUTF8String:NULL
+                                    context:context];
+    image = [image autorelease];
+    return( image );
+}
+
++ (instancetype) imageWithContentsOfFileUTF8String:(char *) filename
+                                      textureFlags:(NSUInteger) textureFlags
+                                           context:(CGContext *) context
+{
+    CGImage   *image;
+
+    image = [self alloc];
+    image = [image initWithContentsOfFileUTF8String:filename
+                                    textureFlags:textureFlags
+                                  nameUTF8String:NULL
+                                         context:context];
+    image = [image autorelease];
+    return( image );
+}
+
++ (instancetype) imageWithFileCData:(struct mulle_data) fileCData
+                      textureFlags:(NSUInteger) textureFlags
+                           context:(CGContext *) context
+{
+    CGImage   *image;
+
+    image = [self alloc];
+    image = [image initWithFileCData:fileCData
+                        textureFlags:textureFlags
+                      nameUTF8String:NULL
+                             context:context];
+    image = [image autorelease];
+    return( image );
+}
+
++ (instancetype) imageWithRGBABytes:(void *) bytes
+                         bitmapSize:(CGPixelSize) bitmapSize
+                       textureFlags:(NSUInteger) textureFlags
+                            context:(CGContext *) context
+{
+    CGImage   *image;
+
+    image = [self alloc];
+    image = [image initWithRGBABytes:bytes
+                          bitmapSize:bitmapSize
+                        textureFlags:textureFlags
+                      nameUTF8String:NULL
+                             context:context];
+    image = [image autorelease];
+    return( image );
+}
+
++ (instancetype) imageWithBitmap:(struct CGBitmap) bitmap
+                   textureFlags:(NSUInteger) textureFlags
+                        context:(CGContext *) context
+{
+    CGImage   *image;
+
+    image = [self alloc];
+    image = [image initWithBitmap:bitmap
+                     textureFlags:textureFlags
+                   nameUTF8String:NULL
+                          context:context];
+    image = [image autorelease];
+    return( image );
+}
+
+
+
+- (instancetype) initWithContentsOfFileUTF8String:(char *) filename
+                                     textureFlags:(NSUInteger) textureFlags
+                                   nameUTF8String:(char *) nameUTF8String
+                                          context:(CGContext *) context
 {
    NSInteger                 textureID;
    CGPixelSize   bitmapSize;
 
    assert( CGContextIsActiveInCurrentThread( context));
 
-   textureID  = [context textureIDWithContentsOfFileCString:filename
+   textureID  = [context textureIDWithContentsOfFileUTF8String:filename
                                                textureFlags:textureFlags & 0x3F];
    bitmapSize = [context bitmapSizeForTextureID:textureID];
    return( [self initWithTextureID:textureID
@@ -433,11 +547,11 @@ static struct
 }
 
 
-- (instancetype) initWithContentsOfFileCString:(char *) filename
-                                  textureFlags:(NSUInteger) textureFlags
-                                       context:(CGContext *) context
+- (instancetype) initWithContentsOfFileUTF8String:(char *) filename
+                                     textureFlags:(NSUInteger) textureFlags
+                                          context:(CGContext *) context
 {
-   return( [self initWithContentsOfFileCString:filename
+   return( [self initWithContentsOfFileUTF8String:filename
                                   textureFlags:textureFlags
                                 nameUTF8String:NULL
                                        context:context]);
@@ -677,7 +791,7 @@ static struct
 }
 
 
-- (char *) threadSafeUTF8String
+- (char *) UTF8String
 {
    char   *s;
 

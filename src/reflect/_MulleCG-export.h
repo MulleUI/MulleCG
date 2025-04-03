@@ -13,6 +13,8 @@
 #define _mulle_c_g__export_h__
 
 
+#import "CGBlendedPaint.h"
+#import "CGBlendedPaint+nanovg.h"
 #import "CGColor+MulleObjC.h"
 #import "CGColor+UTF8String.h"
 #import "CGContextBase.h"

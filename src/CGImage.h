@@ -93,6 +93,45 @@
 // it can only be set once
 @property( readonly) char                         *nameUTF8String  MULLE_OBJC_THREADSAFE_PROPERTY;  // useful for debugging
 
+
+// Convenience constructors for texture ID initialization
++ (instancetype) imageWithTextureID:(CGTextureID) textureID
+                         bitmapSize:(CGPixelSize) bitmapSize
+                       textureFlags:(NSUInteger) textureFlags
+                             context:(CGContext *) context;
+
+// Convenience constructors for GPU texture initialization
++ (instancetype) imageWithGPUTexture:(CGGPUTextureID) gpuTexture
+                          bitmapSize:(CGPixelSize) size
+                        textureFlags:(NSUInteger) textureFlags
+                             context:(CGContext *) context;
+
++ (instancetype) imageWithSharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
+                                bitmapSize:(CGPixelSize) size
+                              textureFlags:(NSUInteger) textureFlags
+                                    context:(CGContext *) context;
+
+// Convenience constructors for file-based initialization
++ (instancetype) imageWithContentsOfFileUTF8String:(char *) filename
+                                      textureFlags:(NSUInteger) textureFlags
+                                           context:(CGContext *) context;
+
+// Convenience constructors for data-based initialization
++ (instancetype) imageWithFileCData:(struct mulle_data) fileCData
+                       textureFlags:(NSUInteger) textureFlags
+                            context:(CGContext *) context;
+
+// Convenience constructors for byte-based initialization
++ (instancetype) imageWithRGBABytes:(void *) bytes
+                        bitmapSize:(CGPixelSize) bitmapSize
+                      textureFlags:(NSUInteger) textureFlags
+                            context:(CGContext *) context;
+
+// Convenience constructors for bitmap-based initialization
++ (instancetype) imageWithBitmap:(struct CGBitmap) bitmap
+                    textureFlags:(NSUInteger) textureFlags
+                         context:(CGContext *) context;
+
 // textureFlags in this call is "informative", it will not affect the image
 // as it has been created already
 - (instancetype) initWithTextureID:(CGTextureID) textureID
@@ -119,14 +158,14 @@
 // these methods are germane to CGImage, subclasses may not support this
 // I wanted to avoid inserting another class here
 // textureFlags will affect the texture
-- (instancetype) initWithContentsOfFileCString:(char *) filename
-                                  textureFlags:(NSUInteger) textureFlags
-                                nameUTF8String:(char *) nameUTF8String
-                                       context:(CGContext *) context;
+- (instancetype) initWithContentsOfFileUTF8String:(char *) filename
+                                     textureFlags:(NSUInteger) textureFlags
+                                   nameUTF8String:(char *) nameUTF8String
+                                          context:(CGContext *) context;
 
-- (instancetype) initWithContentsOfFileCString:(char *) filename
-                                  textureFlags:(NSUInteger) textureFlags
-                                       context:(CGContext *) context;
+- (instancetype) initWithContentsOfFileUTF8String:(char *) filename
+                                     textureFlags:(NSUInteger) textureFlags
+                                          context:(CGContext *) context;
 
 // data can be discarded after init
 - (instancetype) initWithFileCData:(struct mulle_data) fileCData
