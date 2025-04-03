@@ -18,23 +18,58 @@
 
 @implementation _CGMonoColor( nanovg)
 
+// inherit NVGpaintWithBounds from CGGradient
+
 - (void) strokeWithBounds:(CGRect) rect
               strokeWidth:(CGFloat) strokeWidth
                NVGcontext:(NVGcontext *) vg
 {
-   if( strokeWidth <= 0.0f)
-      return;
-
-   mvgStrokeColor( vg, _color);
-   mvgStrokeWidth( vg, strokeWidth);
-   mvgStroke( vg);
+   // convenience for subclasses
+   [self strokeWithBounds:rect
+              strokeWidth:strokeWidth
+                    alpha:1.0f
+               NVGcontext:vg];
 }
 
 
 - (void) fillWithBounds:(CGRect) rect
              NVGcontext:(NVGcontext *) vg
 {
-   mvgFillColor( vg, _color);
+   // convenience for subclasses
+   [self fillWithBounds:rect
+                  alpha:1.0f
+             NVGcontext:vg];
+}
+
+
+- (void) strokeWithBounds:(CGRect) rect
+              strokeWidth:(CGFloat) strokeWidth
+                    alpha:(CGFloat) alpha
+               NVGcontext:(NVGcontext *) vg
+{
+   CGColor   color;
+
+   if( strokeWidth <= 0.0f || alpha <= 0.0)
+      return;
+
+   color = alpha >= 1.0 ? _color : CGColorMultiplyAlpha( _color, alpha);
+   mvgStrokeColor( vg, color);
+   mvgStrokeWidth( vg, strokeWidth);
+   mvgStroke( vg);
+}
+
+
+- (void) fillWithBounds:(CGRect) rect
+                  alpha:(CGFloat) alpha
+             NVGcontext:(NVGcontext *) vg
+{
+   CGColor   color;
+
+   if( alpha <= 0.0)
+      return;
+
+   color = alpha >= 1.0 ? _color : CGColorMultiplyAlpha( _color, alpha);
+   mvgFillColor( vg, color);
    mvgFill( vg);
 }
 
@@ -85,6 +120,7 @@ static void   assertPaintInNVGcontext( CGPaint *self, NVGcontext *vg)
 
    rect  = CGRectExtrude( rect, strokeWidth / 2.0f, strokeWidth / 2.0f);
    paint = [self NVGpaintWithBounds:rect
+                              alpha:1.0
                          NVGcontext:vg];
    mvgStrokePaint( vg, paint);
    mvgStrokeWidth( vg, strokeWidth);
@@ -100,10 +136,50 @@ static void   assertPaintInNVGcontext( CGPaint *self, NVGcontext *vg)
    assertPaintInNVGcontext( self, vg);
 
    paint = [self NVGpaintWithBounds:rect
+                              alpha:1.0
                          NVGcontext:vg];
    mvgFillPaint( vg, paint);
    mvgFill( vg);
 }
+
+
+- (void) strokeWithBounds:(CGRect) rect
+              strokeWidth:(CGFloat) strokeWidth
+                    alpha:(CGFloat) alpha
+               NVGcontext:(NVGcontext *) vg
+{
+   NVGpaint     paint;
+
+   assertPaintInNVGcontext( self, vg);
+
+   if( strokeWidth <= 0.0f)
+      return;
+
+   rect  = CGRectExtrude( rect, strokeWidth / 2.0f, strokeWidth / 2.0f);
+   paint = [self NVGpaintWithBounds:rect
+                              alpha:alpha
+                         NVGcontext:vg];
+   mvgStrokePaint( vg, paint);
+   mvgStrokeWidth( vg, strokeWidth);
+   mvgStroke( vg);
+}
+
+
+- (void) fillWithBounds:(CGRect) rect
+                  alpha:(CGFloat) alpha
+             NVGcontext:(NVGcontext *) vg
+{
+   NVGpaint     paint;
+
+   assertPaintInNVGcontext( self, vg);
+
+   paint = [self NVGpaintWithBounds:rect
+                              alpha:alpha
+                         NVGcontext:vg];
+   mvgFillPaint( vg, paint);
+   mvgFill( vg);
+}
+
 
 @end
 

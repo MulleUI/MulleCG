@@ -12,6 +12,8 @@ endif()
 #
 set( SOURCES
 nanovg/src/nanovg.c
+src/CGBlendedPaint.m
+src/CGBlendedPaint+nanovg.m
 src/CGColor+UTF8String.m
 src/CGContextBase.m
 src/CGContext+CGFramebuffer.m

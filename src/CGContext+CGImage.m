@@ -84,7 +84,7 @@ static void   setCachedImage( CGContext *self,
 }
 
 
-- (CGImage *) imageWithContentsOfFileCString:(char *) filename
+- (CGImage *) imageWithContentsOfFileUTF8String:(char *) filename
                                 textureFlags:(NSUInteger) textureFlags
                               nameUTF8String:(char *) nameUTF8String
                                  resourceKey:(MulleUIResourceStorageKey_t) resourceKey
@@ -94,7 +94,7 @@ static void   setCachedImage( CGContext *self,
    image = getCachedImage( self, textureFlags, resourceKey);
    if( ! image)
    {
-      image = [[[CGImage alloc] initWithContentsOfFileCString:filename
+      image = [[[CGImage alloc] initWithContentsOfFileUTF8String:filename
                                                  textureFlags:textureFlags
                                                nameUTF8String:nameUTF8String
                                                       context:self] autorelease];

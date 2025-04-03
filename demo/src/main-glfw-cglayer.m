@@ -80,7 +80,7 @@ int   main( int argc, char *argv[])
          // CGContext
          window = [GLFWOSWindow windowWithFrame:CGRectMake( 0, 0, 200, 200)
                               titleUTF8String:"Demo"
-                                    styleMask:UIWindowStyleInvisible
+                                    styleMask:UIWindowStyleHidden
                               graphicsHints:0];
 
          // need to explicitly activate the "OS" context, it will be locked and

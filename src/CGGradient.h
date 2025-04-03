@@ -63,6 +63,8 @@
 - (CGGradient *) gradientByChangingColorsWithFunction:(CGColor (*)( CGColor, void *)) f
                                              userInfo:(void *) userInfo;
 
+- (BOOL) __isCGGradient;
+
 @end
 
 //

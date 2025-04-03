@@ -222,6 +222,19 @@ static struct CGFrameInfo   emptyInfo;
 }
 
 
+
+// flushes drawings doesn't reset glViewport or reset internal caches
+- (void) flushRender
+{
+   assert( CGContextIsActiveInCurrentThread( self));
+
+   CGContextRenderLog( "");
+
+   // if there are no draw commands, this does nothing
+   nvgFlushFrame( _vg);
+}
+
+
 - (void) suspendRender
 {
    assert( CGContextIsActiveInCurrentThread( self));
@@ -256,18 +269,6 @@ static struct CGFrameInfo   emptyInfo;
 // surrounded by a green rectangle on swap
    [self suspendRender];
    [self _endRender];
-}
-
-
-// flushes drawings doesn't reset glViewport or reset internal caches
-- (void) flushRender
-{
-   assert( CGContextIsActiveInCurrentThread( self));
-
-   CGContextRenderLog( "");
-
-   // if there are no draw commands, this does nothing
-   nvgFlushFrame( _vg);
 }
 
 

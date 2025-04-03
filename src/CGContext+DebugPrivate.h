@@ -4,8 +4,8 @@ enum
    CGContextDebug                 = 0x000001,
    CGContextDebugVerbose          = 0x001000,
 
-   CGContextDebugRender           = 0x000002,
-   CGContextDebugRenderVerbose    = 0x002000,
+   CGContextDebugRender           = 0x000008,  // like UIWindowDebugRender
+   CGContextDebugRenderVerbose    = 0x008000,
 
    CGContextDebugDumpFrameToFile  = 0x08000000  // same bit as UIWindow
 };

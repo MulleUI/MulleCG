@@ -41,7 +41,7 @@
 }
 
 
-- (CGTextureID) textureIDWithContentsOfFileCString:(char *) filename
+- (CGTextureID) textureIDWithContentsOfFileUTF8String:(char *) filename
                                       textureFlags:(NSUInteger) textureFlags
 {
    CGTextureID   textureID;

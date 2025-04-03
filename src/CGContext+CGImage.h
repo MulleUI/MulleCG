@@ -27,7 +27,7 @@
                nameUTF8String:(char *) nameUTF8String
                   resourceKey:(MulleUIResourceStorageKey_t) resourceKey;
 
-- (CGImage *) imageWithContentsOfFileCString:(char *) filename
+- (CGImage *) imageWithContentsOfFileUTF8String:(char *) filename
                                 textureFlags:(NSUInteger) textureFlags
                               nameUTF8String:(char *) nameUTF8String
                                  resourceKey:(MulleUIResourceStorageKey_t) resourceKey;

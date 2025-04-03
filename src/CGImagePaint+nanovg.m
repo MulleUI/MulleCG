@@ -12,12 +12,13 @@
 @implementation CGImagePaint ( nanovg)
 
 - (NVGpaint) NVGpaintWithBounds:(CGRect) rect
+                          alpha:(CGFloat) alpha
                      NVGcontext:(NVGcontext *) vg
 {
    CGFloat   blend;
 
-   blend   = (_image == _otherImage) ? 0.0f : [self blend];
-   return( mvgImagePattern( vg, rect, _rotation, [_image textureID], 1.0f - blend));
+   blend  = (_image == _otherImage) ? 0.0f : [self blend];
+   return( mvgImagePattern( vg, rect, _rotation, [_image textureID], (1.0f - blend) * alpha));
 }
 
 

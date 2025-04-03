@@ -144,7 +144,7 @@ static struct
 }
 
 
-- (char *) threadSafeUTF8String
+- (char *) UTF8String
 {
    char   *s;
 

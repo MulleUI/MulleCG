@@ -147,7 +147,7 @@
 }
 
 
-- (instancetype) initWithContentsOfFileCString:(char *) filename
+- (instancetype) initWithContentsOfFileUTF8String:(char *) filename
                                   textureFlags:(NSUInteger) textureFlags
                                 nameUTF8String:(char *) nameUTF8String
                                        context:(CGContext *) context
@@ -323,7 +323,7 @@
                             devicePixelRatio:1.0
                              layerRenderInfo:&memo];
    if( drawFunction)
-      (*drawFunction)( context, CGSizeMakeWithIntegerSize( size), userInfo);
+      (*drawFunction)( context, CGSizeMakeWithPixelSize( size), userInfo);
    [cgLayer endFBRender:&memo];
 
    return( cgLayer);

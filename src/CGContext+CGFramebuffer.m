@@ -281,7 +281,7 @@ CGPixelSize
 
 
 
-// - (MulleTextureImage *) framebufferImageWithIntegerSize:(struct CGBitmapInfo) size
+// - (MulleTextureImage *) framebufferImageWithPixelSize:(struct CGBitmapInfo) size
 //                                                options:(NSUInteger) options
 // {
 //    MulleTextureImage   *image;

@@ -1,5 +1,7 @@
       { @selector( MulleObjCLoader), @selector( MulleUIBase) },      // 47a9beb6;MulleObjCLoader;3ebba954;MulleUIBase
       { @selector( CGBitmapDrawable), MULLE_OBJC_NO_CATEGORYID },      // ac0569ab;CGBitmapDrawable;;
+      { @selector( CGBlendedPaint), @selector( nanovg) },      // f164885b;CGBlendedPaint;df06d543;nanovg
+      { @selector( CGBlendedPaint), MULLE_OBJC_NO_CATEGORYID },      // f164885b;CGBlendedPaint;;
       { @selector( CGColorLoader), MULLE_OBJC_NO_CATEGORYID },      // dd5a2891;CGColorLoader;;
       { @selector( CGContext), @selector( CGFramebuffer) },      // 80b7b568;CGContext;ef762cef;CGFramebuffer
       { @selector( CGContext), @selector( CGImage) },      // 80b7b568;CGContext;6ec55940;CGImage
@@ -24,11 +26,13 @@
       { @selector( CGLayoutContext), @selector( CGFont) },      // ca9fd8c1;CGLayoutContext;1881416f;CGFont
       { @selector( CGLayoutContext), @selector( OpenGL) },      // ca9fd8c1;CGLayoutContext;b5858523;OpenGL
       { @selector( CGLayoutContext), MULLE_OBJC_NO_CATEGORYID },      // ca9fd8c1;CGLayoutContext;;
+      { @selector( CGPaint), @selector( CGBlendedPaint) },      // df22fbd2;CGPaint;f164885b;CGBlendedPaint
       { @selector( CGPaint), @selector( nanovg) },      // df22fbd2;CGPaint;df06d543;nanovg
       { @selector( CGPaint), MULLE_OBJC_NO_CATEGORYID },      // df22fbd2;CGPaint;;
       { @selector( CGSharedGPUTexture), MULLE_OBJC_NO_CATEGORYID },      // e7d245f1;CGSharedGPUTexture;;
       { @selector( CGVectorDrawable), MULLE_OBJC_NO_CATEGORYID },      // e5ec3a2e;CGVectorDrawable;;
       { @selector( NSObject), @selector( CGContext) },      // b3a66256;NSObject;80b7b568;CGContext
+      { @selector( NSObject), @selector( CGGradient) },      // b3a66256;NSObject;37670335;CGGradient
       { @selector( NSObject), @selector( CGImage) },      // b3a66256;NSObject;6ec55940;CGImage
       { @selector( _CGMonoColor), @selector( nanovg) },      // da7e8e68;_CGMonoColor;df06d543;nanovg
       { @selector( _CGMonoColor), MULLE_OBJC_NO_CATEGORYID },      // da7e8e68;_CGMonoColor;;

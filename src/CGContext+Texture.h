@@ -34,7 +34,7 @@ typedef void    CGGPUFramebuffer;
                       textureFlags:(NSUInteger) textureFlags;
 - (CGTextureID) textureIDWithFileCData:(struct mulle_data) fileCData
                           textureFlags:(NSUInteger) textureFlags;
-- (CGTextureID) textureIDWithContentsOfFileCString:(char *) filename
+- (CGTextureID) textureIDWithContentsOfFileUTF8String:(char *) filename
                                     textureFlags:(NSUInteger) textureFlags;
 - (CGTextureID) textureIDWithGPUTexture:(CGGPUTextureID) gpuTexture
                              bitmapSize:(CGPixelSize) size
