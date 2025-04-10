@@ -18,30 +18,6 @@
 
 @implementation _CGMonoColor( nanovg)
 
-// inherit NVGpaintWithBounds from CGGradient
-
-- (void) strokeWithBounds:(CGRect) rect
-              strokeWidth:(CGFloat) strokeWidth
-               NVGcontext:(NVGcontext *) vg
-{
-   // convenience for subclasses
-   [self strokeWithBounds:rect
-              strokeWidth:strokeWidth
-                    alpha:1.0f
-               NVGcontext:vg];
-}
-
-
-- (void) fillWithBounds:(CGRect) rect
-             NVGcontext:(NVGcontext *) vg
-{
-   // convenience for subclasses
-   [self fillWithBounds:rect
-                  alpha:1.0f
-             NVGcontext:vg];
-}
-
-
 - (void) strokeWithBounds:(CGRect) rect
               strokeWidth:(CGFloat) strokeWidth
                     alpha:(CGFloat) alpha
@@ -109,42 +85,6 @@ static void   assertPaintInNVGcontext( CGPaint *self, NVGcontext *vg)
 
 - (void) strokeWithBounds:(CGRect) rect
               strokeWidth:(CGFloat) strokeWidth
-               NVGcontext:(NVGcontext *) vg
-{
-   NVGpaint     paint;
-
-   assertPaintInNVGcontext( self, vg);
-
-   if( strokeWidth <= 0.0f)
-      return;
-
-   rect  = CGRectExtrude( rect, strokeWidth / 2.0f, strokeWidth / 2.0f);
-   paint = [self NVGpaintWithBounds:rect
-                              alpha:1.0
-                         NVGcontext:vg];
-   mvgStrokePaint( vg, paint);
-   mvgStrokeWidth( vg, strokeWidth);
-   mvgStroke( vg);
-}
-
-
-- (void) fillWithBounds:(CGRect) rect
-             NVGcontext:(NVGcontext *) vg
-{
-   NVGpaint     paint;
-
-   assertPaintInNVGcontext( self, vg);
-
-   paint = [self NVGpaintWithBounds:rect
-                              alpha:1.0
-                         NVGcontext:vg];
-   mvgFillPaint( vg, paint);
-   mvgFill( vg);
-}
-
-
-- (void) strokeWithBounds:(CGRect) rect
-              strokeWidth:(CGFloat) strokeWidth
                     alpha:(CGFloat) alpha
                NVGcontext:(NVGcontext *) vg
 {
@@ -181,6 +121,28 @@ static void   assertPaintInNVGcontext( CGPaint *self, NVGcontext *vg)
 }
 
 
+- (void) strokeWithBounds:(CGRect) rect
+              strokeWidth:(CGFloat) strokeWidth
+               NVGcontext:(NVGcontext *) vg
+{
+   // convenience for subclasses
+   [self strokeWithBounds:rect
+              strokeWidth:strokeWidth
+                    alpha:1.0f
+               NVGcontext:vg];
+}
+
+
+- (void) fillWithBounds:(CGRect) rect
+             NVGcontext:(NVGcontext *) vg
+{
+   // convenience for subclasses
+   [self fillWithBounds:rect
+                  alpha:1.0f
+             NVGcontext:vg];
+}
+
+
 @end
 
 
@@ -197,6 +159,7 @@ static void   fillWithBoundsAndPaint( NVGcontext *vg,
    }
 #endif
    [paint fillWithBounds:rect
+                   alpha:1.0f
               NVGcontext:vg];
 
 }
@@ -266,6 +229,7 @@ static void   strokeWithBoundsAndPaint( NVGcontext *vg,
 
    [paint strokeWithBounds:rect
                strokeWidth:strokeWidth
+                     alpha:1.0f
                 NVGcontext:vg];
 }
 

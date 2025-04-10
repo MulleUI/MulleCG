@@ -23,16 +23,19 @@ struct CGFrameInfo;
 // The CGContext keeps track of all texture images, but doesn't retain them.
 // When the time comes, it calls -finalize on all texture images.
 //
-@interface CGFramebuffer : CGImage
+// Where as the CGImage is immutable, the CGFramebuffer isn't
+//
+@interface CGFramebuffer : CGImage < NSCopying, MulleObjCThreadUnsafe>
 
 @property( readonly, assign) CGGPUFramebuffer   *gpuFramebuffer;
 // if the layer is multisample, it will be resolved into another
 // image and this will be returned, otherwise it will just return self
 // the image will be kept.
-@property( readonly, retain) CGImage   *resolvedImage;
+@property( readonly, retain) CGImage            *resolvedImage;
 
 // as long as noone has drawn to it, this will be NO
 @property( assign, getter=isInitializedFramebuffer) BOOL   initializedFramebuffer;
+@property( assign) CGFloat                                 alpha;
 
 + (instancetype) framebufferWithBitmapSize:(CGPixelSize) size
                               textureFlags:(NSUInteger) textureFlags
@@ -56,6 +59,7 @@ struct CGFrameInfo;
 
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
+
 
 @end
 

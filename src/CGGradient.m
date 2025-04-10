@@ -360,13 +360,6 @@ static id   CGGradientNewWithColors( CGColor *colors,
 }
 
 
-
-- (id) copy 
-{
-   return( [self retain]);
-}
-
-
 - (CGColor) mainColor
 {
    return( CGColorInterpolate( [self startColor], [self endColor], 0.5));
@@ -490,6 +483,22 @@ static CGColor   dimmer( CGColor color, void *dim_p)
 }
 
 
+static CGColor   saturator( CGColor color, void *factor_p)
+{
+   CGFloat   factor = *(CGFloat *) factor_p;
+
+   return( CGColorSaturate( color, factor));
+}
+
+
+static CGColor   desaturator( CGColor color, void *factor_p)
+{
+   CGFloat   factor = *(CGFloat *) factor_p;
+
+   return( CGColorDesaturate( color, factor));
+}
+
+
 - (CGGradient *) brightenedGradient:(CGFloat) brighten
 {
    brighten = -brighten;
@@ -502,6 +511,20 @@ static CGColor   dimmer( CGColor color, void *dim_p)
 {
    return( [self gradientByChangingColorsWithFunction:dimmer
                                              userInfo:&dim]);
+}
+
+
+- (CGGradient *) saturatedGradient:(CGFloat) factor
+{
+   return( [self gradientByChangingColorsWithFunction:saturator
+                                             userInfo:&factor]);
+}
+
+
+- (CGGradient *) desaturatedGradient:(CGFloat) factor
+{
+   return( [self gradientByChangingColorsWithFunction:desaturator
+                                             userInfo:&factor]);
 }
 
 

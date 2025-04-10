@@ -24,9 +24,16 @@
 
 - (void) beginRender:(struct CGFrameInfo *) info;
 - (struct CGFrameInfo) bindRender:(struct CGFrameInfo *) info;
+
+// if you do an offscreen render, the framebuffer will be stored via
+// provideRenderedBuffer as a "in limbo" framebuffer to gotten either
+// by acquire or repossess
 - (void) endRender;
 
-- (void) _endRender; // does not call suspendRender
+// if the context renders to an offscreen (custom) buffer, you will get
+// the rendered framebuffer back here. Otherwise and usually nil
+//
+- (CGFramebuffer *) _endRender; // does not call suspendRender
 
 - (void) changeRender:(struct CGFrameInfo *) info;
 

@@ -103,13 +103,12 @@ static struct
 - (void) mulleGainAccess
 {
    [super mulleGainAccess];
-   [self mulleGainAccessToResources];
+   [self mulleGainAccessToResources];  // -> CGContext+CGFramebuffer
 }
-
 
 - (void) mulleRelinquishAccess
 {
-   [self mulleRelinquishAccessToResources];
+   [self mulleRelinquishAccessToResources]; // -> CGContext+CGFramebuffer
    [super mulleRelinquishAccess];
 }
 

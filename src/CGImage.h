@@ -69,7 +69,7 @@
 // (readonly) and to clone CGImages for different flags. The actual image
 // data can be shared w/o a problem. The default is 0:
 //
-@interface CGImage : CGPaint <CGBitmapDrawable, CGContextResource>
+@interface CGImage : CGPaint <CGBitmapDrawable, CGContextResource, MulleUINamedObject>
 
 // usually don't use textureID, use nvgImageWithContext:textureFlags:
 @property( readonly, assign) CGTextureID          textureID;
@@ -86,8 +86,7 @@
 
 // this will be nil, if the context has no shareID
 @property( readonly, retain) CGSharedGPUTexture   *sharedGPUTexture;
-@property( assign) CGFloat                        alpha;  // this is hacky (should be readonly)
-@property( assign) NSUInteger                     debuggingFlags     MULLE_OBJC_THREADSAFE_PROPERTY;
+@property( readonly, assign) NSUInteger           debuggingFlags   MULLE_OBJC_THREADSAFE_PROPERTY;
 
 // this is only truely threadsafe if you set it just after init
 // it can only be set once
@@ -196,6 +195,12 @@
                    textureFlags:(NSUInteger) textureFlags
                         context:(CGContext *) context;
 
+// just retains if CGImage
+- (id) copy;
+
+// creates a CGFramebuffer from CGImage
+- (id) mutableCopy;
+
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
 
@@ -207,7 +212,7 @@
 - (CGImage *) resolvedImage;
 
 - (instancetype) shareWithContext:(CGContext *) context
-                     textureFlags:(NSUInteger) textureFlags;
+                     textureFlags:(NSUInteger) textureFlags  MULLE_OBJC_THREADSAFE_METHOD;
 
 
 @end

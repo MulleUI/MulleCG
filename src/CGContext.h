@@ -56,8 +56,6 @@ typedef NS_ENUM( NSUInteger, CGContextFramebufferType)
 };
 
 
-
-
 struct CGContextItem
 {
    void   *key;
@@ -172,8 +170,6 @@ static inline int
    struct mulle__pointerarray       _deletedTextureIDs;
    struct mulle__pointerarray       _deletedGPUFramebuffers;
    mulle_thread_mutex_t             _deletedGPUFramebuffersLock; // used for above pointer array
-   struct mulle__pointerarray       _deletedFramebuffers;
-   mulle_thread_mutex_t             _deletedFramebuffersLock; // used for above pointer array
 
    BOOL                             _isRendering;
    BOOL                             _isFreshLayer;
@@ -184,13 +180,19 @@ static inline int
    // than the default framebuffer of a offscreen window. So even if this
    // context is tied to an offscreen window, it will/should use this
    // offScreenFramebuffer instead.
-
-   mulle_atomic_pointer_t           _drawnLayer;       // CGFramebuffer
-   mulle_atomic_pointer_t           _scratchLayer;     // CGFramebuffer
    mulle_atomic_pointer_t           _atomicInitializedFramebuffer;
 
-   CGFramebuffer                    *_renderLayer;     // ephemeral(!)
+   CGFramebuffer                    *_renderFramebuffer;     // ephemeral(!)
    NSUInteger                       _renderLayerTextureFlags;
+
+// these "rendered" Framebuffers are special, they are not a resource anymore
+// and they have no thread ownership, they are "in limbo".
+// Basically: Do not touch.
+@private
+   mulle_atomic_pointer_t           _drawnRenderedFramebuffer;   // CGFramebuffer
+   mulle_atomic_pointer_t           _scratchRenderedFramebuffer; // CGFramebuffer
+   struct mulle__pointerarray       _deletedFramebuffers;        // reycled framebuffers that are in limbo
+   mulle_thread_mutex_t             _deletedFramebuffersLock;    // used for above pointer array
 }
 
 @property( assign, readonly) BOOL   shareID;

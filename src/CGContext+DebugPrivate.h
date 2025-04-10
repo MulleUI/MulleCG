@@ -13,7 +13,7 @@ enum
 
 @interface NSObject ( CGContext)
 
-- (BOOL) __isCGContext;
+- (BOOL) __isCGContext     MULLE_OBJC_THREADSAFE_METHOD;
 
 @end
 

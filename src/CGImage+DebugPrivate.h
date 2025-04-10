@@ -7,7 +7,7 @@ enum
 
 @interface NSObject ( CGImage)
 
-- (BOOL) __isCGImage;
+- (BOOL) __isCGImage       MULLE_OBJC_THREADSAFE_METHOD;
 
 @end
 
@@ -64,7 +64,7 @@ while( 0)
 
 #define _CGImageLog( image, format, ...)          do {} while( 0)
 #define CGImageLog( format, ...)                  do {} while( 0)
-#define _CGImageLogVerbose( format, ...)           do {} while( 0)
+#define _CGImageLogVerbose( format, ...)          do {} while( 0)
 #define CGImageLogVerbose( format, ...)           do {} while( 0)
 
 #endif

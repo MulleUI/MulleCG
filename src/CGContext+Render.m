@@ -21,7 +21,7 @@
 
 - (void) deleteTextureIDs;
 - (void) deleteGPUFramebuffers;
-- (void) deleteFramebuffers;
+- (void) deleteRenderedFramebuffers;
 
 @end
 
@@ -87,7 +87,7 @@ static struct CGFrameInfo   emptyInfo;
    // now vg calls can happen
 
    // delete all queued for deletion framebuffers and textureIDs
-   [self deleteFramebuffers];
+   [self deleteRenderedFramebuffers];
    [self deleteGPUFramebuffers]; // after framebuffers
    [self deleteTextureIDs];
 
@@ -97,10 +97,10 @@ static struct CGFrameInfo   emptyInfo;
    if( _rendersOffScreen)
    {
       // will acquire hopefully a preexisting framebuffer for reuse
-      assert( ! _renderLayer);
+      assert( ! _renderFramebuffer);
 
       textureFlags   = ( _nvgFlags & NVG_IMAGE_MSAA) ? NVG_MSAA : 0;
-#ifdef DEBUG
+#if defined( DEBUG) || defined( MULLE_TEST)
       {
          static uintptr_t   counter;
 
@@ -109,16 +109,19 @@ static struct CGFrameInfo   emptyInfo;
 #else
       nameUTF8String = NULL;
 #endif
-      _renderLayer   = [[self framebufferWithSize:info->window.framebufferSize
-                                     textureFlags:textureFlags
-                                   nameUTF8String:nameUTF8String] retain];
-      assert( _renderLayer);
-      CGContextRenderLog( "Begin render into layer %#@", _renderLayer);
-      [self bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( _renderLayer)];
+      _renderFramebuffer   = [[self framebufferWithSize:info->window.framebufferSize
+                                           textureFlags:textureFlags
+                                         nameUTF8String:nameUTF8String] retain];
+      assert( _renderFramebuffer);
+      CGContextRenderLog( "Begin render into layer %#@", _renderFramebuffer);
+      [self bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( _renderFramebuffer)];
    }
 }
 
 
+/*
+ *
+ */
 - (struct CGFrameInfo) bindRender:(struct CGFrameInfo *) info
 {
    struct CGFrameInfo   old;
@@ -148,9 +151,9 @@ static struct CGFrameInfo   emptyInfo;
 
 
 
-- (void) _endRender
+- (CGFramebuffer *) _endRender
 {
-   CGFramebuffer   *old;
+   CGFramebuffer   *framebuffer;
 
    assert( _isRendering);
 
@@ -165,60 +168,20 @@ static struct CGFrameInfo   emptyInfo;
    [self bindFramebuffer:CGContextFramebufferMakeDefault()];
    CGContextCheckBackendError( self, "unbind buffer");
 
-   if( _rendersOffScreen)
-   {
-      // get rid of old "valid" framebuffer previously, if still present
-      old = _MulleObjCAcquireObjectAtomically( &_drawnLayer);
-      if( old)
-      {
-         CGContextRenderLog( "Recycle scratch %#@ for %#@", _scratchLayer, old);
-         assert( [old context] == self);
-         if( ! _MulleObjCRecycleObjectAtomically( &_scratchLayer, old))
-         {
-            //
-            // this means old will get discarded int the context thread,
-            // which is fine
-            //
-         }
-      }
-
-      // by recycling it in _drawnLayer we store it there, since
-      // CGContext is the only one who is _supposed_ to write any NON-NULL value
-      // into _drawnLayer, this can't fail, and if it does it gets
-      // harmlessly reaped.
-      //
-      // Before making it available to other contexts
-      // possibly, we need to put up a barrier to ensure, that the drawing
-      // has completed. Else you get surprising empty layers on races.
-      //
-      [self barrier];
-      if( ! _MulleObjCRecycleObjectAtomically( &_drawnLayer, _renderLayer))
-      {
-         // someone produced a _drawnLayer already (but who ?)
-         // can't happen since we are single threaded and zeroed it
-         // in #573: old = _MulleObjCAcquireObjectAtomically( &_drawnLayer);
-#ifdef DEBUG
-         abort();
-#endif
-      }
-
-      if( self->_debuggingFlags & CGContextDebugDumpFrameToFile)
-      {
-         MulleUIWriteImageToPNGFileSequenceAsync( _renderLayer, "render-layer");
-      }
-
-      CGContextRenderLog( "End render into layer %#@", _renderLayer);
-
-      [_renderLayer autorelease];
-      _renderLayer = nil;
-   }
-
    // so if we rendered to the "window" framebuffer mark it as initialized
    if( _currentFramebuffer.type == CGContextDefaultFramebuffer ||
        _currentFramebuffer.type == CGContextDefaultMultiSampleFramebuffer)
    {
       [self setInitializedFramebuffer:YES];
    }
+
+   // just so you know, we usually don't return _renderFramebuffer
+   assert( ! _renderFramebuffer || _rendersOffScreen);
+
+   framebuffer = [_renderFramebuffer autorelease];
+   _renderFramebuffer = nil;
+
+   return( framebuffer);
 }
 
 
@@ -260,6 +223,8 @@ static struct CGFrameInfo   emptyInfo;
 
 - (void) endRender
 {
+   CGFramebuffer   *framebuffer;
+
    assert( CGContextIsActiveInCurrentThread( self));
    assert( _isRendering);
 
@@ -268,7 +233,19 @@ static struct CGFrameInfo   emptyInfo;
 // draw a rectangle when in offscreen for debugging, this will be
 // surrounded by a green rectangle on swap
    [self suspendRender];
-   [self _endRender];
+
+   framebuffer = [self _endRender];
+
+   if( framebuffer)
+   {
+      if( self->_debuggingFlags & CGContextDebugDumpFrameToFile)
+      {
+         MulleUIWriteImageToPNGFileSequenceAsync( framebuffer, "render-layer");
+      }
+
+      CGContextRenderLog( "End render into layer %#@", framebuffer);
+      [self provideRenderedFramebuffer:framebuffer];
+   }
 }
 
 

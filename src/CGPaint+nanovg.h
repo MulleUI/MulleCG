@@ -25,9 +25,10 @@
                NVGcontext:(NVGcontext *) context;
 
 - (void) fillWithBounds:(CGRect) rect
-                    alpha:(CGFloat) alpha
+                  alpha:(CGFloat) alpha
              NVGcontext:(NVGcontext *) context;
 
+// conveniences, preferably use alpha methods..
 - (void) strokeWithBounds:(CGRect) rect
               strokeWidth:(CGFloat) strokeWidth
                NVGcontext:(NVGcontext *) context;

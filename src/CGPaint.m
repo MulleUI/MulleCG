@@ -128,7 +128,8 @@
                          endColor:(CGColor) endColor
 {
    if( CGColorEqualToColor( startColor, endColor))
-      return( [self paintWithColor:startColor]);
+      return( [[_CGMonoColor newWithColor:startColor] autorelease]);
+
    return( [CGGradient gradientWithStartColor:startColor
                                      endColor:endColor]);
 }
@@ -138,11 +139,19 @@
                          rotation:(CGFloat) rotation
 {
    if( rotation == 0.0 && CGColorEqualToColor( startColor, endColor))
-      return( [self paintWithColor:startColor]);
+      return( [[_CGMonoColor newWithColor:startColor] autorelease]);
+
    return( [CGGradient gradientWithStartColor:startColor
                                      endColor:endColor
                                      rotation:rotation]);
 }
+
+
+//// avoid warning, this is actually superflous
+//- (id) copy 
+//{
+//   return( [self retain]);
+//}
 
 
 - (CGColor) mainColor
@@ -178,12 +187,6 @@
 - (BOOL) isOpaque
 {
    return( [self alpha] == 1.0);
-}
-
-
-- (id) copy
-{
-   return( [self retain]);
 }
 
 
