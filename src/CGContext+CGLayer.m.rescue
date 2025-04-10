@@ -71,7 +71,7 @@
 
    assert( ! _isRendering);  // bad bad bad
 
-   if( ! _drawnLayer)
+   if( ! _drawnRenderedFramebuffer)
    {
       memset( &fb, 0, sizeof( fb));
       return( fb);

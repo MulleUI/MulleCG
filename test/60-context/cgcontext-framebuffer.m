@@ -60,8 +60,21 @@ int   main( int argc, char *argv[])
                                                      textureFlags:0
                                                    nameUTF8String:"test"
                                                           context:context] autorelease];
-      [context recycleFramebuffer:framebuffer];
-      other = [context acquireRecycledFramebuffer];
+      mulle_fprintf( stderr, "%td %td\n", [framebuffer retainCount], [NSAutoreleasePool mulleCountObject:framebuffer]);
+      [context provideRenderedFramebuffer:framebuffer];
+      mulle_fprintf( stderr, "%td %td\n", [framebuffer retainCount], [NSAutoreleasePool mulleCountObject:framebuffer]);
+      other = [context acquireRenderedFramebuffer];
+      if( other != framebuffer)
+      {
+         mulle_fprintf( stderr, "Bummer\n");
+         return( 1);
+      }
+
+      [context recycleAcquiredRenderedFramebuffer:framebuffer];
+      mulle_fprintf( stderr, "%td %td\n", [framebuffer retainCount], [NSAutoreleasePool mulleCountObject:framebuffer]);
+      other = [context repossessRenderedFramebuffer];
+      mulle_fprintf( stderr, "%td %td\n", [framebuffer retainCount], [NSAutoreleasePool mulleCountObject:framebuffer]);
+
       if( other != framebuffer)
       {
          mulle_fprintf( stderr, "Bummer\n");

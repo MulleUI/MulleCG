@@ -3,6 +3,7 @@
 #import "import-private.h"
 
 #import "CGImage+DebugPrivate.h"
+#import "CGFramebuffer.h"
 #import "CGContext+DebugPrivate.h"
 #import "CGContext.h"
 #import "CGContext+OpenGL.h"
@@ -197,7 +198,6 @@ static struct
 }
 
 
-
 - (instancetype) initWithTextureID:(NSInteger) textureID
                         bitmapSize:(CGPixelSize) bitmapSize
                       textureFlags:(NSUInteger) textureFlags
@@ -216,7 +216,6 @@ static struct
    _textureID      = textureID;
    _textureFlags   = textureFlags;
    _bitmapSize     = bitmapSize;
-   _alpha          = 1.0f;
    _debuggingFlags = Self._debuggingFlags;
 
    MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, nameUTF8String);
@@ -227,10 +226,11 @@ static struct
       _sharedGPUTexture = [[CGSharedGPUTexture alloc] initWithGPUTexture:gpuTexture];
    }
 
+   CGImageLog( "");
+
    [_context assignResource:self
                      forKey:(MulleUIResourceStorageKey_t) self];
 
-   CGImageLog( "");
 
    return( self);
 }
@@ -257,7 +257,6 @@ static struct
    _textureID      = textureID;
    _textureFlags   = textureFlags;
    _bitmapSize     = bitmapSize;
-   _alpha          = 1.0f;
    _debuggingFlags = Self._debuggingFlags;
 
    MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, nameUTF8String);
@@ -265,10 +264,11 @@ static struct
    if( [context shareID])
       _sharedGPUTexture = [[CGSharedGPUTexture alloc] initWithGPUTexture:gpuTexture];
 
+   CGImageLog( "");
+
    [_context assignResource:self
                      forKey:(MulleUIResourceStorageKey_t) self];
 
-   CGImageLog( "");
 
    return( self);
 }
@@ -298,31 +298,33 @@ static struct
    _textureID        = textureID;
    _textureFlags     = textureFlags;
    _bitmapSize       = bitmapSize;
-   _alpha            = 1.0f;
    _debuggingFlags   = Self._debuggingFlags;
    _sharedGPUTexture = [sharedGPUTexture retain];
 
    MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, nameUTF8String);
 
-   [_context assignResource:self
-                     forKey:(MulleUIResourceStorageKey_t) self];
-
    CGImageLog( "");
+
+   [_context assignResource:self];
 
    return( self);
 }
 
 
+// since we are moving framebuffers in and out of a context, this can be
+// called more than once now.
 - (void) didAddToContext:(CGContext *) context
 {
    CGImageLogVerbose( "%#@", context);
 
+   assert( _context);  // should already be set
    if( _context != context)
    {
-      mulle_fprintf( stderr, "A %s can only belong to one context (once). "
+      mulle_fprintf( stderr, "A %s can only belong to one context (%@) Once. "
                              "Use -sharedGPUTexture and create an image "
-                             "with it in another context.\n",
-                             MulleObjCObjectGetClassNameUTF8String( self));
+                             "with it in another context (%@).\n",
+                             MulleObjCObjectGetClassNameUTF8String( self),
+                             _context, context);
       abort();
    }
 
@@ -334,17 +336,34 @@ static struct
 {
    assert( context == _context);
 
-   CGImageLogVerbose( "%#@", context);
-
-   if( _textureID)
+   if( [_sharedGPUTexture retainCount] > 1)
    {
-      // the gpuTexture may have been nil-ed out by finalize
-      // assert( [self state] & UIGraphicsContextActive);
-      // the context NEED NOT be active! (check deleteTextureID: code)
-      [_context deleteTextureID:_textureID];
-      _textureID = 0;
+      //
+      // nvg should forget the texture. So it wont get "really" deleted
+      // as other context may still want to access it.
+      // We only patch a struct and don't hit OpenGL here so no need to use
+      // _CGContextGetNVGContext( _context);
+      //
+      [_context forgetTextureID:_textureID];
+   }
+   else
+   {
+      if( _textureID)
+      {
+         // the gpuTexture may have been nil-ed out by finalize
+         // assert( [self state] & UIGraphicsContextActive);
+         // the context NEED NOT be active! (check deleteTextureID: code)
+         [_context deleteTextureID:_textureID];
+         _textureID = 0;
+      }
    }
 
+   [_sharedGPUTexture release];  // sic!
+   _sharedGPUTexture = nil;
+
+   CGImageLogVerbose( "%#@", context);
+
+   // once removed we can't do anything anymore
    _context = nil;
 }
 
@@ -356,23 +375,14 @@ static struct
 {
    CGImageLog( "finalizing");
 
-   if( [_sharedGPUTexture retainCount] > 1)
-   {
-      //
-      // nvg should forget the texture. So it wont get "really" deleted
-      // as other context may still want to access it.
-      // We only patch a struct and don't hit OpenGL here so no need to use
-      // _CGContextGetNVGContext( _context);
-      //
-      [_context forgetTextureID:_textureID];
-   }
-
-   [_sharedGPUTexture release];
-   _sharedGPUTexture = nil;
+   [_context removeFromSharedGPUTextureMap:self];
 
    // this will call didRemoveFromContext: eventually
    [_context removeResourceForKey:(MulleUIResourceStorageKey_t) self];
-   [_context removeFromSharedGPUTextureMap:self];
+
+#ifdef DEBUG
+   _context = (void *) 0xDEADFACE;
+#endif
 
    [super finalize];
 }
@@ -383,6 +393,26 @@ static struct
    MulleObjCInstanceDeallocateMemory( self, _nameUTF8String);
 
    [super dealloc];
+}
+
+
+- (id) copy
+{
+   return( [self retain]);
+}
+
+
+- (id) mutableCopy
+{
+   CGFramebuffer   *framebuffer;
+
+   framebuffer = [[self class] alloc];
+   framebuffer = [framebuffer initWithImage:self
+                               textureFlags:self->_textureFlags
+                             nameUTF8String:NULL
+                                    context:self->_context];
+   framebuffer = [framebuffer autorelease];
+   return( framebuffer);
 }
 
 

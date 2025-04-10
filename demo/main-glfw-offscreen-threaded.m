@@ -123,11 +123,11 @@ static UIWindowDisplayBits   display_0( id <UIOSWindow> *window_in)
       [context endRender];
 
       // now we should have it
-      layer = [context acquireOffscreenFramebuffer];
+      layer = [context acquireRenderedFramebuffer];
       assert( layer);
 
       // should be gone from context
-      check = [context acquireOffscreenFramebuffer];
+      check = [context acquireRenderedFramebuffer];
       assert( ! check);
 
       if( previous != layer)
@@ -144,10 +144,10 @@ static UIWindowDisplayBits   display_0( id <UIOSWindow> *window_in)
       }
       [context endRender];
 
-      [context recycleFramebuffer:layer];
+      [context recycleAcquiredRenderedFramebuffer:layer];
 
       // should still be gone, since we don't pick the trashcan
-      check = [context acquireOffscreenFramebuffer];
+      check = [context acquireRenderedFramebuffer];
       assert( ! check);
 
       // remember it, and check next time that it's been reused
@@ -189,11 +189,11 @@ static UIWindowDisplayBits  display_1( id <UIOSWindow> *window_in)
       [context endRender];
 
       // now we should have it
-      layer = [context acquireOffscreenFramebuffer];
+      layer = [context acquireRenderedFramebuffer];
       assert( layer);
 
       // should be gone from context
-      check = [context acquireOffscreenFramebuffer];
+      check = [context acquireRenderedFramebuffer];
       assert( ! check);
 
       if( previous != layer)
@@ -210,10 +210,10 @@ static UIWindowDisplayBits  display_1( id <UIOSWindow> *window_in)
       }
       [context endRender];
 
-      [context recycleFramebuffer:layer];
+      [context recycleAcquiredRenderedFramebuffer:layer];
 
       // should still be gone, since we don't pick the trashcan
-      check = [context acquireOffscreenFramebuffer];
+      check = [context acquireRenderedFramebuffer];
       assert( ! check);
 
       // remember it, and check next time that it's been reused

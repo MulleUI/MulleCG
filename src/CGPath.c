@@ -31,6 +31,21 @@ struct CGPath   *CGPathCreate( struct mulle_allocator *allocator)
 }
 
 
+struct CGPath   *CGPathCopy( struct CGPath *path, struct mulle_allocator *allocator)
+{
+   struct CGPath   *copy;
+
+   if( ! path)
+      return( path);
+
+   copy = mulle_allocator_malloc( allocator, sizeof( struct CGPath));
+   _CGPathInitWithCapacity( copy, mulle_floatarray_get_count( &path->_floats), allocator);
+   copy->_bbox = path->_bbox;
+   mulle_floatarray_copy( &copy->_floats, &path->_floats);
+   return( copy);
+}
+
+
 void   _CGPathDone( struct CGPath *path)
 {
    _mulle_floatarray_done( &path->_floats);
@@ -48,7 +63,6 @@ void CGPathDestroy( struct CGPath *path)
    _CGPathDone( path);
    mulle_allocator_free( allocator, path);
 }
-
 
 
 CGRect   CGPathComputeCoarseBounds( CGPathRef path)

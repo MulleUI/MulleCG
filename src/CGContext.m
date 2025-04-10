@@ -23,7 +23,8 @@
 
 - (void) deleteTextureIDs;
 - (void) deleteGPUFramebuffers;
-- (void) deleteFramebuffers;
+- (void) deleteRenderedFramebuffers;
+- (void) queueScratchAndDrawnRenderedFramebuffersForDeletion;
 
 @end
 
@@ -168,16 +169,14 @@ static struct
 
 - (void) finalize
 {
-   CGFramebuffer   *framebuffer;
-   CGContext       *context;
+   // do this first as it releases resource, which still want
+   // nanovg arounf
+   [super finalize];
 
    if( _backend != UIGraphicsBackendNone)
    { 
       if( ! _vg)  // we died super early, so nothing to do
-      {
-         [super finalize];
          return;
-      }
 
       assert( ! _isRendering);
    }
@@ -185,36 +184,14 @@ static struct
    CGContextLog("");
 
    [self _resetFontCache];
-   [self _finalizeResourceStorage:&_resourceStorage];
 
-   framebuffer = _mulle_atomic_pointer_read( &_drawnLayer);
-   framebuffer = __mulle_atomic_pointer_cas( &_drawnLayer, NULL, framebuffer);
-
-   // context is probably already zeroed or ? by who ? _finalizeResourceStorage ?
-   context     = [framebuffer context];
-   assert( ! context || context == self);
-   MULLE_C_UNUSED( context);
-
-   _CGImageLog( framebuffer, "finalize drawnLayer");
-   [framebuffer mullePerformFinalize];
-   [framebuffer autorelease];
-
-   framebuffer = _mulle_atomic_pointer_read( &_scratchLayer);
-   framebuffer = __mulle_atomic_pointer_cas( &_scratchLayer, NULL, framebuffer);
-
-   context     = [framebuffer context];
-   assert( ! context || context == self);
-   MULLE_C_UNUSED( context);
-
-   _CGImageLog( framebuffer, "finalize scratchLayer");
-   [framebuffer mullePerformFinalize];
-   [framebuffer autorelease];
-
-   [self deleteFramebuffers];
+   [self queueScratchAndDrawnRenderedFramebuffersForDeletion];
+   [self deleteRenderedFramebuffers];
    [self deleteTextureIDs];
    [self deleteGPUFramebuffers];
    [self deleteShaders];
 
+   // so the problem here is, we are rele
    if( _backend != UIGraphicsBackendNone)
    {
       mulle_thread_mutex_do( Self._freeTypeLock)
@@ -222,27 +199,17 @@ static struct
          [self _finalizeNanoVG];
       }
    }
-
-   [super finalize];
 }
 
 
 - (void) dealloc
 {
    struct mulle_allocator   *allocator;
-   CGFramebuffer            *framebuffer;
 
    CGContextLog("");
 
-   // this oughta be superflous, as they should be nil because of
-   // -finalize
-   framebuffer = _mulle_atomic_pointer_read( &_drawnLayer);
-   _CGImageLog( framebuffer, "release drawnLayer");
-   [framebuffer release];
-
-   framebuffer = _mulle_atomic_pointer_read( &_scratchLayer);
-   _CGImageLog( framebuffer, "release scratchLayer");
-   [framebuffer release];
+   assert( ! _mulle_atomic_pointer_read( &_drawnRenderedFramebuffer));
+   assert( ! _mulle_atomic_pointer_read( &_scratchRenderedFramebuffer));
 
    // images in _gpuTextureMap aren't retained just blow map away
    mulle_map_done( &_gpuTextureMap);
@@ -257,6 +224,25 @@ static struct
 
    [super dealloc];
 }
+
+
+
+#ifdef DEBUG
+- (void) mulleGainAccess
+{
+   [super mulleGainAccess];
+
+   // renderedFramebuffers are in limbo, let them stay like these
+}
+
+
+- (void) mulleRelinquishAccess
+{
+   // renderedFramebuffers are in limbo, let them stay like these
+
+   [super mulleRelinquishAccess];
+}
+#endif
 
 
 /*

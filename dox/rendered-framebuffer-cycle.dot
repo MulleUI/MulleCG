@@ -1,0 +1,137 @@
+digraph FramebufferLifecycle {
+    rankdir=TB;
+    // compound=true;
+    node [fontname="Arial", fontsize=12];
+    edge [fontname="Arial", fontsize=10];
+
+    anchor_row_1 -> anchor_row_2 [style=invis];
+    anchor_row_2 -> anchor_row_3 [style=invis];
+
+    subgraph row_1
+    {
+        rankdir=LR;
+
+        anchor_row_1 [ style=invis ];
+
+        // Row 1: Steps 1 and 2
+        // Step 1: Creation
+        subgraph cluster_1 {
+            label = "Step 1: Framebuffer Creation";
+            color = blue;
+            style = filled;
+            fillcolor = aliceblue;
+
+            context_1 [label="Context", shape=box, color=blue, style=filled, fillcolor=lightblue];
+            framebuffer_1 [label="Framebuffer", shape=box, color=blue ];
+
+            context_1 -> framebuffer_1 [label="resource", color=red, style=dashed];
+            framebuffer_1 -> context_1 [label="context", color=blue];
+        }
+
+        // Step 2: Provided
+        subgraph cluster_2 {
+            label = "Step 2: Framebuffer Provided";
+            color = blue;
+            style = filled;
+            fillcolor = aliceblue;
+
+            context_2 [label="Context", shape=box, color=blue, style=filled, fillcolor=lightblue];
+            framebuffer_2 [label="Framebuffer", shape=box, color=gray];
+
+            context_2 -> framebuffer_2 [label="drawn", color=blue, style=bold];
+            framebuffer_2 -> context_2 [label="context", color=blue];
+        }
+        context_1 -> context_2 [style=invis];
+    }
+
+    subgraph row_2
+    {
+        rankdir=LR;
+
+        anchor_row_2 [ style=invis ];
+
+        // Row 2: Steps 3 and 4
+        // Step 3: Acquired
+        subgraph cluster_3 {
+            label = "Step 3: Framebuffer Acquired";
+            color = green;
+            style = filled;
+            fillcolor = honeydew;
+
+            context_3 [label="Context", shape=box, color=blue, style=filled, fillcolor=lightblue];
+            framebuffer_3 [label="Framebuffer", shape=box, color=green ];
+            consumer [label="Consumer\nThread", shape=box, color=green, style=filled, fillcolor=palegreen];
+
+            consumer -> framebuffer_3 [label="acquired", color=green, style=bold];
+            framebuffer_3 -> context_3 [label="context", color=blue];
+        }
+
+
+        // Step 4: Recycled - Now with green border and fill
+        subgraph cluster_4 {
+            label = "Step 4: Framebuffer Recycled";
+            color = green;
+            style = filled;
+            fillcolor = honeydew;
+
+            context_4 [label="Context", shape=box, color=blue, style=filled, fillcolor=lightblue];
+            framebuffer_4 [label="Framebuffer", shape=box, color=gray];
+
+            context_4 -> framebuffer_4 [label="scratch", color=blue];
+            framebuffer_4 -> context_4 [label="context", color=blue];
+        }
+        context_3 -> context_4 [style=invis];
+    }
+
+    subgraph row_3
+    {
+        rankdir=LR;
+
+        anchor_row_3 [ style=invis ];
+
+        // Row 3: Step 5 and Deletion
+        // Step 5: Repossessed - Framebuffer back in limbo
+        subgraph cluster_5 {
+            label = "Step 5: Framebuffer Repossessed";
+            color = blue;
+            style = filled;
+            fillcolor = aliceblue;
+
+            context_5 [label="Context", shape=box, color=blue, style=filled, fillcolor=lightblue];
+            framebuffer_5 [label="Framebuffer", shape=box, color=blue];
+
+            context_5 -> framebuffer_5 [label="resource", color=red, style=dashed];
+            framebuffer_5 -> context_5 [label="context", color=blue];
+        }
+
+        // Deletion alternative
+        subgraph cluster_deletion {
+            label = "Alternate: Framebuffer Deletion";
+            color = blue;
+            style = filled;
+            fillcolor = aliceblue;
+
+            context_d [label="Context", shape=box, color=blue, style=filled, fillcolor=lightblue];
+            deletion_queue [label="Deletion\nQueue", shape=box, color=blue, style=filled, fillcolor=lightblue];
+            framebuffer_d [label="Framebuffer", shape=box, color=gray];
+
+            context_d -> deletion_queue [label="", color=blue];
+            deletion_queue -> framebuffer_d [label="queued", color=blue];
+            framebuffer_d -> context_d [label="context", color=blue];
+        }
+        context_5-> context_d [style=invis];
+    }
+
+
+
+//    // Invisible edges for row connections
+//    context_1 -> context_2 [style=invis];
+//    context_2 -> context_3 [style=invis];
+//
+//    context_5 -> context_d [style=invis];
+//
+////    // Horizontal connections
+//    context_1 -> context_2 [style=invis];
+//    context_3 -> context_4 [style=invis];
+//    context_5 -> context_d [style=invis];
+}

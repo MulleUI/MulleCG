@@ -18,9 +18,19 @@
 // but its kind of convenient to have this as a base class for CGGradient
 // and CGImage as it involves less typing.
 //
-// All CGPaint classes are immutable.
+// There is no paintWithCGImage: as CGImage is a CGPaint.
+// 
+// Never transfer a CGPaint in mulleGainAccess or mulleRelinquishAccess as
+// it's either threadsafe anyway or already a resource which will have been
+// transferred already (or will be)
 //
-@interface CGPaint : NSObject < NSCopying, MulleObjCValueProtocols>
+// TODO:
+// All CGPaint classes are supposed to be immutable. Exception is CGFramebuffer 
+// which is a CGImage and therefore the assumption falls flat... We probably 
+// should derive an immutable CGImage from CGFramebuffer instead and put the 
+// base CGImage stuff into a separate base class or protocolclass ?
+//
+@interface CGPaint : NSObject < MulleObjCValueProtocols>
 
 + (CGPaint *) paintWithColor:(CGColor) color;
 + (CGPaint *) paintWithHexColor:(CGHexColor) color;

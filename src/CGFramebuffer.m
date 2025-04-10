@@ -178,6 +178,35 @@
 }
 
 
+#ifdef DEBUG
+- (void) dealloc
+{
+   assert( ! _gpuFramebuffer);
+   CGImageLog( "framebuffer deallocs");
+   [super dealloc];
+}
+#endif   
+   
+
+//
+// so technically we return a CGFramebuffer its actually considered as
+// read only, due to us also supporting mutableCopy. I.e. the receivers
+// expectation must be to receive a CGImage
+//
+- (id) copy  
+{
+   CGFramebuffer   *framebuffer;
+
+   framebuffer = [[self class] alloc];
+   framebuffer = [framebuffer initWithImage:self
+                               textureFlags:self->_textureFlags
+                             nameUTF8String:NULL
+                                    context:self->_context];
+   framebuffer = [framebuffer autorelease];
+   return( framebuffer);
+}
+
+
 - (void) didRemoveFromContext:(CGContext *) context
 {
    if( _gpuFramebuffer && _context == context)
@@ -193,15 +222,15 @@
 }
 
 
-#ifdef DEBUG
-- (void) dealloc
+//
+// as we share the GPU we use this scheme, its cheaper as the object is
+// not evicted from autoreleasepools
+//
+- (MulleObjCTAOStrategy) mulleTAOStrategy
 {
-   assert( ! _gpuFramebuffer);
-   CGImageLog( "framebuffer deallocs");
-   [super dealloc];
+   return( MulleObjCTAOReceiverPerformsFinalize);
 }
-#endif   
-   
+
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
 {

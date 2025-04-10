@@ -70,15 +70,10 @@ static UIWindowDisplayBits   display( id <UIOSWindow> window_in)
    {
       drawRedWhiteBlueFlag( CGContextGetNVGContext( context), canvas);
    }
-   [context endRender];
 
-   // now we should have it
-   layer = [context acquireOffscreenFramebuffer];
-   assert( layer);
-
-   // should be gone from context
-   check = [context acquireOffscreenFramebuffer];
-   assert( ! check);
+   // do what endRender does, but get the offscreen framebuffer
+   [context suspendRender];
+   layer = [context _endRender];
 
    if( previous != layer)
       fprintf( stderr, "new offscreen framebuffer (should only be seen on init and resize)\n");
@@ -94,11 +89,9 @@ static UIWindowDisplayBits   display( id <UIOSWindow> window_in)
    }
    [context endRender];
 
-   [context recycleFramebuffer:layer];
-
-   // should still be gone, since we don't pick the trashcan
-   check = [context acquireOffscreenFramebuffer];
-   assert( ! check);
+   // we could just let the layer, die but we want to reuse it next time
+   // so we recycle it
+   [context recycleRenderedFramebuffer:layer];
 
    // remember it, and check next time that it's been reused
    previous = layer;

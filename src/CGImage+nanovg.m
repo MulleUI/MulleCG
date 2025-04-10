@@ -16,7 +16,6 @@
    CGImage   *image;
 
    image  = [self resolvedImage];
-   alpha *= [image alpha];
    return( mvgImagePattern( vg, rect, [image rotation], [image textureID], alpha));
 }
 

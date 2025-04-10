@@ -57,6 +57,9 @@ void   _CGPathInit( struct CGPath *path, struct mulle_allocator *allocator);
 void   _CGPathDone( struct CGPath *path);
 void   CGPathDestroy( struct CGPath *path);
 
+struct CGPath   *CGPathCopy( struct CGPath *path, struct mulle_allocator *allocator);
+
+
 static inline struct mulle_allocator  *_CGPathGetAllocator( struct CGPath *path)
 {
    return( mulle_floatarray_get_allocator( &path->_floats)); 
@@ -188,9 +191,6 @@ static inline void  CGPathAddArcWithCenterPoint( CGPathRef path,
    _mulle_floatarray_add_guaranteed( &path->_floats, CAAngleToRadians( a1));
    _mulle_floatarray_add_guaranteed( &path->_floats, (float) direction);
 }
-
-
-
 
 
 static inline void  CGPathAddWinding( CGPathRef path, int value)

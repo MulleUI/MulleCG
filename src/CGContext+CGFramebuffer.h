@@ -37,27 +37,28 @@
                            textureFlags:(NSUInteger) textureFlags
                          nameUTF8String:(char *) nameUTF8String;
 
-
-// Once acquired its yours and its gone from CGContext. Now the window has
-// contents to draw itself. It should keep the CGFramebuffer around for the next
-// refresh. If acquireOffscreenFramebuffer returns nil (no new drawing
-// ready yet), it should reuse that kept layer. Otherwise recycle the old
-// and use the new.
 //
-- (id) acquireOffscreenFramebuffer        MULLE_OBJC_THREADSAFE_METHOD;
-
+// Once acquired its yours but its still only usable in the old CGContext.
+// Now you can get at the shared GPUtexture and use this to create an image
+// in your context. You should keep the CGFramebuffer around until your
+// drawing has completed, because as soon as you return it, the framebuffer
+// may be reused (and contents overwritten).
+// If acquireRenderedFramebuffer returns nil (no new drawing ready yet) and
+// you use it for refresh, you should reuse the kept layer. Otherwise recycle
+// the old and use the new. Return after use with -recycleAcquiredRenderedFramebuffer:
+// These methods are NOT to be called from the context active thread
 //
-// Framebuffer presumably acquired through acquireFramebuffer, should be given
-// back. For reuse or discarding
-//
-- (void) recycleFramebuffer:(id) layer    MULLE_OBJC_THREADSAFE_METHOD;
+- (id) acquireRenderedFramebuffer                         MULLE_OBJC_THREADSAFE_METHOD;
+- (void) recycleAcquiredRenderedFramebuffer:(id) layer    MULLE_OBJC_THREADSAFE_METHOD;
 
-// get recycled framebuffer back
-- (id) acquireRecycledFramebuffer         MULLE_OBJC_THREADSAFE_METHOD;
+// these are to be called from the context active thread only
+- (id) repossessRenderedFramebuffer;
+- (void) provideRenderedFramebuffer:(CGFramebuffer *) framebuffer;
+- (void) recycleRenderedFramebuffer:(CGFramebuffer *) framebuffer;
 
-// don't use these, use the methods above
-- (void) queueFramebufferForDeletion:(CGFramebuffer *) framebuffer   MULLE_OBJC_THREADSAFE_METHOD;
-- (void) deleteFramebuffers                                          MULLE_OBJC_THREADSAFE_METHOD;
+// don't use these methods, use the methods above
+- (void) queueRenderedFramebufferForDeletion:(CGFramebuffer *) framebuffer   MULLE_OBJC_THREADSAFE_METHOD;
+- (void) deleteRenderedFramebuffers;
 
 @end
 

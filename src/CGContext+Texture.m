@@ -124,10 +124,10 @@
    {
       mulle__pointerarray_for( &_deletedGPUFramebuffers, gpuFramebuffer)
       {
-         assert( ! _mulle_atomic_pointer_read( &_drawnLayer)
-                 || gpuFramebuffer != [(id) _mulle_atomic_pointer_read( &_drawnLayer) gpuFramebuffer]);
-         assert( ! _mulle_atomic_pointer_read( &_scratchLayer)
-                 || gpuFramebuffer != [(id) _mulle_atomic_pointer_read( &_scratchLayer) gpuFramebuffer]);
+         assert( ! _mulle_atomic_pointer_read( &_drawnRenderedFramebuffer)
+                 || gpuFramebuffer != [(id) _mulle_atomic_pointer_read( &_drawnRenderedFramebuffer) gpuFramebuffer]);
+         assert( ! _mulle_atomic_pointer_read( &_scratchRenderedFramebuffer)
+                 || gpuFramebuffer != [(id) _mulle_atomic_pointer_read( &_scratchRenderedFramebuffer) gpuFramebuffer]);
 
          if( _debuggingFlags & 0x2)
             MulleUILog( "release framebuffer %p", gpuFramebuffer);
