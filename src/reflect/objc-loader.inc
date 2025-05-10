@@ -21,10 +21,13 @@
       { @selector( CGImage), @selector( OpenGL) },      // 6ec55940;CGImage;b5858523;OpenGL
       { @selector( CGImage), @selector( nanovg) },      // 6ec55940;CGImage;df06d543;nanovg
       { @selector( CGImage), MULLE_OBJC_NO_CATEGORYID },      // 6ec55940;CGImage;;
+      { @selector( CGImagePaint), @selector( nanovg) },      // 3e23b783;CGImagePaint;df06d543;nanovg
+      { @selector( CGImagePaint), MULLE_OBJC_NO_CATEGORYID },      // 3e23b783;CGImagePaint;;
       { @selector( CGLayoutContext), @selector( CGFont) },      // ca9fd8c1;CGLayoutContext;1881416f;CGFont
       { @selector( CGLayoutContext), @selector( OpenGL) },      // ca9fd8c1;CGLayoutContext;b5858523;OpenGL
       { @selector( CGLayoutContext), MULLE_OBJC_NO_CATEGORYID },      // ca9fd8c1;CGLayoutContext;;
       { @selector( CGPaint), @selector( CGBlendedPaint) },      // df22fbd2;CGPaint;f164885b;CGBlendedPaint
+      { @selector( CGPaint), @selector( CGImagePaint) },      // df22fbd2;CGPaint;3e23b783;CGImagePaint
       { @selector( CGPaint), @selector( nanovg) },      // df22fbd2;CGPaint;df06d543;nanovg
       { @selector( CGPaint), MULLE_OBJC_NO_CATEGORYID },      // df22fbd2;CGPaint;;
       { @selector( CGSharedGPUTexture), MULLE_OBJC_NO_CATEGORYID },      // e7d245f1;CGSharedGPUTexture;;

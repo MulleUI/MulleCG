@@ -67,6 +67,7 @@ src/main-grid.m
 src/main-html5-arc.m
 src/main-html5-arcto.m
 src/main-huge-font.m
+src/main-line-nanovg.m
 src/main-opengl.m
 src/main-outline-glyph.m
 src/main-paint.m
@@ -95,6 +96,8 @@ src/main-text-draw.m
 src/main-text-extent.m
 src/main-text-fps.m
 src/main-text.m
+src/main-text-multiline.m
+src/main-text-nanovg.m
 src/main-text-simple.m
 src/main-texture.m
 src/parse_uniform.c

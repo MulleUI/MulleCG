@@ -28,6 +28,8 @@
    if( strokeWidth <= 0.0f || alpha <= 0.0)
       return;
 
+   // So in CGColor the alpha is already in the alpha channel
+   // we are doing additional alpha here on request, maybe to fade in/out
    color = alpha >= 1.0 ? _color : CGColorMultiplyAlpha( _color, alpha);
    mvgStrokeColor( vg, color);
    mvgStrokeWidth( vg, strokeWidth);

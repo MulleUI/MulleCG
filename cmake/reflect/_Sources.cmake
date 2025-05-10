@@ -29,6 +29,8 @@ src/CGFont.m
 src/CGFramebuffer.m
 src/CGGradient.m
 src/CGGradient+nanovg.m
+src/CGImagePaint.m
+src/CGImagePaint+nanovg.m
 src/CGImage.m
 src/CGImage+nanovg.m
 src/CGLayoutContext+CGFont.m

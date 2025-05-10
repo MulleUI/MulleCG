@@ -1,53 +1,68 @@
 #define _GNU_SOURCE
 
-#import <MulleCG/MulleCG.h>
+#import "import-private.h"
+
+//
+// just shows that the pixel center is 0.5
+//
+
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
+{
+   struct NVGcontext   *vg;
+   CGRect              canvas;
+   CGRect              rect;
+   CGPoint             point;
+
+   vg = CGContextGetNVGContext( context);
+
+   canvas = [layer canvas];
+   mvgFillRectWithColor( vg, canvas, CGColorMakeBlack());
+
+   // inviso
+   mvgStrokeLineHWithColor( vg, CGPointMake( 0 * canvas.size.width / 3, -1.0), canvas.size.width / 3, 2.0, CGColorMakeRed());
+
+   // semiviso
+   mvgStrokeLineHWithColor( vg, CGPointMake( 1 * canvas.size.width / 3, -0.0), canvas.size.width / 3, 2.0, CGColorMakeGreen());
+
+   // viso
+   mvgStrokeLineHWithColor( vg, CGPointMake( 2 * canvas.size.width / 3, +1.0), canvas.size.width / 3, 2.0, CGColorMakeBlue());
+
+   rect = CGRectInset( canvas, 50, 50);
+
+   mvgShapeAntiAlias( vg, YES);
+   point = CGPointMake( rect.origin.x + 0 * (rect.size.width / 4), rect.origin.y);
+   mvgStrokeLineHWithColor( vg, point, rect.size.width / 4, 1.0, CGColorMakeWhite());
+   point = CGPointMake( rect.origin.x + 1 * (rect.size.width / 4), rect.origin.y + 0.5);
+   mvgStrokeLineHWithColor( vg, point, rect.size.width / 4, 1.0, CGColorMakeWhite());
+
+   mvgShapeAntiAlias( vg, NO);
+   point = CGPointMake( rect.origin.x + 2 * (rect.size.width / 4), rect.origin.y);
+   mvgStrokeLineHWithColor( vg, point, rect.size.width / 4, 1.0, CGColorMakeWhite());
+   point = CGPointMake( rect.origin.x + 3 * (rect.size.width / 4), rect.origin.y + 0.5);
+   mvgStrokeLineHWithColor( vg, point, rect.size.width / 4, 1.0, CGColorMakeWhite());
+
+   mvgShapeAntiAlias( vg, YES);
+   point = CGPointMake( rect.origin.x, rect.origin.y + 0 * (rect.size.height / 4));
+   mvgStrokeLineVWithColor( vg, point, rect.size.height / 4, 1.0, CGColorMakeWhite());
+   point = CGPointMake( rect.origin.x + 0.5, rect.origin.x + 1 * (rect.size.height / 4));
+   mvgStrokeLineVWithColor( vg, point, rect.size.height / 4, 1.0, CGColorMakeWhite());
+
+   mvgShapeAntiAlias( vg, NO);
+   point = CGPointMake( rect.origin.x, rect.origin.y + 2 * (rect.size.height / 4));
+   mvgStrokeLineVWithColor( vg, point, rect.size.height / 4, 1.0, CGColorMakeWhite());
+   point = CGPointMake( rect.origin.x + 0.5, rect.origin.x + 3 * (rect.size.height / 4));
+   mvgStrokeLineVWithColor( vg, point, rect.size.height / 4, 1.0, CGColorMakeWhite());
+
+   return( NO);
+}
 
 
 int   main( int argc, char *argv[])
 {
-   CGLayoutContext          *context;
-   CGRect                   bounds;
-   CGRect                   vbounds;
-   struct UITextMetrics     metrics;
-   struct UIGlyphPosition   positions[ 32];
-   NSUInteger               i, n;
-   char                     *text;
-
-   @autoreleasepool
-   {
-      context = [CGLayoutContext object];
-
-      text    = "Vfl Bochum 1848";
-      [context useDefaultFont];
-      [context setFontSize:16.0f];
-      [context setTextAlign:NVG_ALIGN_MIDDLE];
-
-      [context getTextBounds:&bounds
-                        text:text
-                      length:(NSUInteger) -1];
-      printf( "%s\n", CGRectUTF8String( bounds));
-
-      [context getTextVisualBounds:&vbounds
-                              text:text
-                            length:(NSUInteger) -1];
-      printf( "%s\n", CGRectUTF8String( vbounds));
-
-      n = [context getGlyphPositions:positions
-                               count:32
-                               text:text
-                             length:(NSUInteger) -1];
-
-      printf( "%tu:\n", n);
-      for( i = 0; i < n; i++)
-         printf( "\t['%c' %g %g/%g %g/%g]\n",
-                     *positions[ i].str,
-                     positions[ i].x,
-                     positions[ i].minx,
-                     positions[ i].maxx,
-                     positions[ i].miny,
-                     positions[ i].maxy);
-   }
-   return( 0);
+   return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
+                                           CGSizeMake( 400, 300),
+                                           NULL,
+                                           0.0f));
 }
 
 
@@ -86,3 +101,4 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+

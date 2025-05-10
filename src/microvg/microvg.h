@@ -45,6 +45,22 @@ static inline struct MulleTextMetrics
 
 // Returns the vertical metrics based on the current text style.
 // Measured values are returned in local coordinate space.
+// When you call nvgFontSize(ctx, 12):
+//
+// *  NanoVG stores 12 as the font size
+// *  When text needs to be rendered, it scales this by the transformation and
+//    device pixel ratio
+// *  With unity transformation and standard DPI, it passes 12 to fontstash
+// *  Fontstash calls FT_Set_Char_Size(font, 0, 12*64, 0, 0)
+// *  FreeType renders each glyph at 12 points (which is 12 pixels at 72 DPI)
+// *  The resulting bitmap dimensions are in pixels
+// *  These bitmaps are copied into the atlas texture
+// *  When rendering text, NanoVG uses the glyph metrics to position each
+//    character
+//
+// The mvgTextLineHeight, which is used to vertically space lines when using
+// multiline text output, is not part of the font metric lineHeight.
+//
 static inline struct MulleTextMetrics   mvgTextMetrics( NVGcontext *vg)
 {
    float   ascender;

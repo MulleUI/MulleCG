@@ -25,6 +25,9 @@ typedef NSInteger    CGFontID;      // -1 == invalid
 #define CGTextureIDInvalid   0
 
 
+struct UIGlyphPosition;
+struct UITextRow;
+
 
 // Begin drawing a new frame
 // Calls to nanovg drawing API should be wrapped in nvgBeginFrame() & nvgEndFrame()

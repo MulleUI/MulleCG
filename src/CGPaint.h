@@ -54,7 +54,7 @@
 - (BOOL) isGradient;  // default: NO (mono color gradient says also NO)
 - (BOOL) isMonochrome;
 - (BOOL) isOpaque;
-- (CGFloat) alpha;   // default: 1.0
+- (CGFloat) alpha;    // default: 1.0
 - (BOOL) needsBounds;  // mono color, does not need it others do
 
 // for mono colors, this will return just self (guaranteed)
