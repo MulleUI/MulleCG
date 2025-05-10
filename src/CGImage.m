@@ -492,6 +492,7 @@ static struct
     return( image );
 }
 
+
 + (instancetype) imageWithContentsOfFileUTF8String:(char *) filename
                                       textureFlags:(NSUInteger) textureFlags
                                            context:(CGContext *) context
@@ -507,6 +508,7 @@ static struct
     return( image );
 }
 
+
 + (instancetype) imageWithFileCData:(struct mulle_data) fileCData
                       textureFlags:(NSUInteger) textureFlags
                            context:(CGContext *) context
@@ -521,6 +523,7 @@ static struct
     image = [image autorelease];
     return( image );
 }
+
 
 + (instancetype) imageWithRGBABytes:(void *) bytes
                          bitmapSize:(CGPixelSize) bitmapSize
@@ -539,6 +542,7 @@ static struct
     return( image );
 }
 
+
 + (instancetype) imageWithBitmap:(struct CGBitmap) bitmap
                    textureFlags:(NSUInteger) textureFlags
                         context:(CGContext *) context
@@ -553,7 +557,6 @@ static struct
     image = [image autorelease];
     return( image );
 }
-
 
 
 - (instancetype) initWithContentsOfFileUTF8String:(char *) filename
@@ -861,6 +864,5 @@ static struct
 {
    return( self);
 }
-
 
 @end

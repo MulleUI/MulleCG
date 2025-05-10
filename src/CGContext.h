@@ -249,8 +249,8 @@ static inline int
 
 - (CGShaderID) activeShader;
 
-
 // support for some demos
+// UIWindow needs to be set with UIWindowStyleMousePolling to get values
 - (CGPoint) mouseLocation;
 - (NSUInteger) keyModifiers;
 - (NSUInteger) buttonStates;

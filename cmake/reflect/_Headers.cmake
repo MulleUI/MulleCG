@@ -107,6 +107,8 @@ src/CGFont.h
 src/CGFramebuffer.h
 src/CGGradient.h
 src/CGGradient+nanovg.h
+src/CGImagePaint.h
+src/CGImagePaint+nanovg.h
 src/CGImage.h
 src/CGImage+nanovg.h
 src/CGLayoutContext+CGFont.h

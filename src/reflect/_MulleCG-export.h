@@ -31,6 +31,8 @@
 #import "CGFramebuffer.h"
 #import "CGGradient.h"
 #import "CGGradient+nanovg.h"
+#import "CGImagePaint.h"
+#import "CGImagePaint+nanovg.h"
 #import "CGImage.h"
 #import "CGImage+nanovg.h"
 #import "CGLayoutContext+CGFont.h"

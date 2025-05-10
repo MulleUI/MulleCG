@@ -34,7 +34,7 @@
 }
 
 
-- (void) drawObjects:(struct mulle_pointerarray *) objects
+- (void) renderObjects:(struct mulle_pointerarray *) objects
 {
    id <CGRenderObject>   obj;
 
@@ -150,7 +150,6 @@ static struct CGFrameInfo   emptyInfo;
 }
 
 
-
 - (CGFramebuffer *) _endRender
 {
    CGFramebuffer   *framebuffer;
@@ -183,7 +182,6 @@ static struct CGFrameInfo   emptyInfo;
 
    return( framebuffer);
 }
-
 
 
 // flushes drawings doesn't reset glViewport or reset internal caches
@@ -291,6 +289,5 @@ static struct CGFrameInfo   emptyInfo;
                        _currentFrameInfo.window.pixelRatio);
    CGContextCheckBackendError( self, "nvgBeginFrame");
 }
-
 
 @end

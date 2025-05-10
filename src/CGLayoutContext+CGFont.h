@@ -16,7 +16,6 @@
 
 @interface CGLayoutContext( CGFont)
 
-
 - (CGFont *) fallbackFont;
 - (CGFont *) fontWithNameUTF8String:(char *) s;
 - (CGFont *) defaultFont;

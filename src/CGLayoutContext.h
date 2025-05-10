@@ -10,6 +10,8 @@
 #import "import.h"
 
 
+@class CGFont;
+
 @interface CGLayoutContext : CGContextBase < UILayoutContext>
 {
    struct mulle_map   _fontMap;
@@ -20,6 +22,8 @@
 - (BOOL) hasLoadedFont;
 
 - (CGFloat) fontSizeThatFitsIntoSize:(CGSize) size;
+
+- (struct UITextMetrics) visualTextMetrics;
 
 @end
 
@@ -36,3 +40,4 @@ static inline struct NVGcontext   *_CGLayoutContextGetNVGContext( CGLayoutContex
 {
    return( ((struct{ @defs( CGLayoutContext); } *) self)->_vg);
 }
+

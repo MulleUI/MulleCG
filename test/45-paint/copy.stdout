@@ -1,0 +1,16 @@
+Color Paint (Red) (_CGMonoColor):
+copy (_CGMonoColor):
+	IsEqual: YES
+
+Gradient Paint (Blue to White) (_CGTwoColorGradient):
+copy (_CGTwoColorGradient):
+	IsEqual: YES
+
+Gradient Paint (Multi-color) (_CGMultiColorGradient):
+copy (_CGMultiColorGradient):
+	IsEqual: YES
+
+Image Paint (CGImage):
+copy (CGImage):
+	IsEqual: YES
+

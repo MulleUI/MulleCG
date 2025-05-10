@@ -309,6 +309,13 @@ static struct
 
 
 // support for some demos
+// UIWindow needs styleMask | UIWindowStyleMousePolling set to fill this
+// property
+- (struct UIInputState) inputState
+{
+   return( _inputState);
+}
+
 - (CGPoint) mouseLocation
 {
    return( _inputState.locationInWindow);
