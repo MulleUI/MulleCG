@@ -11,16 +11,26 @@
 
 // prefixed with '_' so they don't show up as public headers
 
-unsigned char   NotoSans_Regular_ttf[] =
-#include "_NotoSans-Regular.ttf.inc"
+unsigned char   NotoSans_ttf[] =
+#include "_NotoSans-VariableFont_wdth,wght.ttf.inc"
 ;
-#define s_NotoSans_Regular_ttf   (sizeof( NotoSans_Regular_ttf) - 1)
+#define s_NotoSans_ttf   (sizeof( NotoSans_ttf) - 1)
+
+unsigned char   NotoSans_Italic_ttf[] =
+#include "_NotoSans-Italic-VariableFont_wdth,wght.ttf.inc"
+;
+#define s_NotoSans_Italic_ttf   (sizeof( NotoSans_Italic_ttf) - 1)
+
+unsigned char   Noto_Symbols_ttf[] =
+#include "_NotoSansSymbols-VariableFont_wght.ttf.inc"
+;
+#define s_Noto_Symbols_ttf   (sizeof( Noto_Symbols_ttf) - 1)
 
 
-unsigned char   NotoSans_Bold_ttf[] =
-#include "_NotoSans-Bold.ttf.inc"
+unsigned char   Noto_Symbols2_ttf[] =
+#include "_NotoSansSymbols2-Regular.ttf.inc"
 ;
-#define s_NotoSans_Bold_ttf  (sizeof( NotoSans_Bold_ttf) - 1)
+#define s_Noto_Symbols2_ttf   (sizeof( Noto_Symbols2_ttf) - 1)
 
 
 unsigned char   Noto_Emoji_ttf[] =
@@ -41,21 +51,48 @@ unsigned char   NotoSansMono_Regular_ttf[] =
 #define s_NotoSansMono_Regular_ttf   (sizeof( NotoSansMono_Regular_ttf) - 1)
 
 
-#define sans_font_ttf         NotoSans_Regular_ttf
-#define s_sans_font_ttf       s_NotoSans_Regular_ttf
+#define sans_font_ttf             NotoSans_ttf
+#define s_sans_font_ttf           s_NotoSans_ttf
 
-#define sans_bold_font_ttf    NotoSans_Bold_ttf
-#define s_sans_bold_font_ttf  s_NotoSans_Bold_ttf
+// as above, freetype should weight it
+#define sans_bold_font_ttf        NotoSans_ttf
+#define s_sans_bold_font_ttf      s_NotoSans_ttf  
 
-#define emoji_font_ttf        Noto_Emoji_ttf
-#define s_emoji_font_ttf      s_Noto_Emoji_ttf
+#define sans_italic_font_ttf      NotoSans_Italic_ttf
+#define s_sans_italic_font_ttf    s_NotoSans_Italic_ttf
 
-#define icons_font_ttf        entypo_ttf
-#define s_icons_font_ttf      s_entypo_ttf
+#define symbols_font_ttf          Noto_Symbols_ttf
+#define s_symbols_font_ttf        s_Noto_Symbols_ttf
 
-#define mono_font_ttf         NotoSansMono_Regular_ttf
-#define s_mono_font_ttf       s_NotoSansMono_Regular_ttf
+#define symbols2_font_ttf         Noto_Symbols2_ttf
+#define s_symbols2_font_ttf       s_Noto_Symbols2_ttf
 
+#define emoji_font_ttf            Noto_Emoji_ttf
+#define s_emoji_font_ttf          s_Noto_Emoji_ttf
+
+#define icons_font_ttf            entypo_ttf
+#define s_icons_font_ttf          s_entypo_ttf
+
+#define mono_font_ttf             NotoSansMono_Regular_ttf
+#define s_mono_font_ttf           s_NotoSansMono_Regular_ttf
+
+
+
+static struct 
+{
+   char                *name;
+   struct mulle_data   data;
+} 
+font_by_name[] = 
+{
+   { .name = "sans",        { .bytes = sans_font_ttf,        .length =  s_sans_font_ttf }},
+   { .name = "sans-bold",   { .bytes = sans_bold_font_ttf,   .length =  s_sans_bold_font_ttf }},
+   { .name = "sans-italic", { .bytes = sans_italic_font_ttf, .length =  s_sans_italic_font_ttf }},
+   { .name = "mono",        { .bytes = mono_font_ttf,        .length =  s_mono_font_ttf }},
+   { .name = "symbols",     { .bytes = symbols_font_ttf,     .length =  s_symbols_font_ttf }},
+   { .name = "symbols2",    { .bytes = symbols2_font_ttf,    .length =  s_symbols2_font_ttf }},
+   { .name = "icons",       { .bytes = icons_font_ttf,       .length =  s_icons_font_ttf }},
+};
 
 
 @implementation CGLayoutContext ( CGFont)
@@ -193,12 +230,12 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 }
 
 
-
 - (CGFont *) fontWithNameUTF8String:(char *) s
 {
-   CGFont   *font;
-   CGFont   *fallbackFont;
-   CGFontID fontID;
+   CGFont       *font;
+   CGFont       *fallbackFont;
+   CGFontID     fontID;
+   NSUInteger   i, n;
 
    if( ! s)
       s = _defaultFontName;
@@ -208,41 +245,20 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
       return( font);
 
    fontID = -1;
-   if( ! strcmp( s, "sans"))
+   n      = sizeof( font_by_name) / sizeof( font_by_name[ 0]);
+
+   for( i = 0; i < n; i++)
    {
-      fontID = mvgCreateFontMem( _vg,
-                                 s,
-                                 sans_font_ttf,
-                                 (int) s_sans_font_ttf,
-                                 0);
-   }
-   else
-      if( ! strcmp( s, "sans-bold"))
+      if( ! strcmp( font_by_name[ i].name, s))
       {
          fontID = mvgCreateFontMem( _vg,
                                     s,
-                                    sans_bold_font_ttf,
-                                    (int) s_sans_bold_font_ttf,
+                                    font_by_name[ i].data.bytes,
+                                    (int) font_by_name[ i].data.length,
                                     0);
+         break;
       }
-      else
-         if( ! strcmp( s, "mono"))
-         {
-            fontID = mvgCreateFontMem( _vg,
-                                       s,
-                                       mono_font_ttf,
-                                       (int) s_mono_font_ttf,
-                                       0);
-         }
-         else
-            if( ! strcmp( s, "icons"))
-            {
-               fontID = mvgCreateFontMem( _vg,
-                                          s,
-                                          icons_font_ttf,
-                                          (int) s_icons_font_ttf,
-                                          0);
-            }
+   }
 
    if( fontID == -1)
       return( nil);
@@ -257,6 +273,22 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    mulle_map_insert( &_fontMap, s, font);
 
    return( font);
+}
+
+
+- (BOOL) useFontWithNameUTF8String:(char *) name
+{
+   CGFont   *font;
+
+   font = [self fontWithNameUTF8String:name];      
+   if( ! font)
+   {
+      nvgFontFace( _vg, _defaultFontName);
+      return( NO);
+   }
+
+   nvgFontFace( _vg, name);
+   return( YES);
 }
 
 

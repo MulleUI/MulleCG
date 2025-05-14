@@ -50,9 +50,11 @@ src/CGPaint+Private.h
 #
 set( PROJECT_ONLY_HEADERS
 src/_NotoEmoji-VariableFont_wght.ttf.inc
-src/_NotoSans-Bold.ttf.inc
+src/_NotoSans-Italic-VariableFont_wdth,wght.ttf.inc
 src/_NotoSansMono-Regular.ttf.inc
-src/_NotoSans-Regular.ttf.inc
+src/_NotoSansSymbols2-Regular.ttf.inc
+src/_NotoSansSymbols-VariableFont_wght.ttf.inc
+src/_NotoSans-VariableFont_wdth,wght.ttf.inc
 src/_Roboto-Regular.inc
 src/_emoji.inc
 src/_entypo.inc
