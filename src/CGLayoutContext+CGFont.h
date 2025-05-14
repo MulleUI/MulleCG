@@ -29,6 +29,8 @@
 - (CGFont *) fontWithCData:(struct mulle_data) data
         fontNameUTF8String:(char *) name;
 
+- (BOOL) useFontWithNameUTF8String:(char *) name;
+
 // useFont: is obsolete
 - (void) useFont:(CGFont *) font;
 
