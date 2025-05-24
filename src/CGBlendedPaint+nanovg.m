@@ -1,66 +1,37 @@
 //
 // Copyright (c) <|YEAR|> Nat!, Mulle kybernetiK
 //
-#import "CGBlendedPaint+nanovg.h"
+#import "CGBlendedPaint.h"
 
 #import "import-private.h"
 
 #import "CGPaint+nanovg.h"
+#import "CGPaint+Drawing.h"
 #import "CGImage.h"
 #import "microvg.h"
 
 
-@implementation CGBlendedPaint ( nanovg)
-
+@interface CGPaint( nanovg_Subclasses)
 
 - (NVGpaint) NVGpaintWithBounds:(CGRect) rect
-                          alpha:(CGFloat) alpha
-                     NVGcontext:(NVGcontext *) vg
+                   paintOptions:(struct CGPaintOptions *) options
+                        context:(CGContext *) context;
+
+@end
+
+
+@implementation CGBlendedPaint ( nanovg)
+
+// we cant do much good here, because we need to paint our paint twice,
+// which the user is circumventing, we could also abort here...
+
+- (NVGpaint) NVGpaintWithBounds:(CGRect) rect
+                   paintOptions:(struct CGPaintOptions *) options
+                        context:(CGContext *) context
 {
-//   CGFloat   blend;
-//
-//   blend = (_paint == _otherPaint) ? 0.0f : _blend;
    return( [_otherPaint NVGpaintWithBounds:rect
-                                     alpha:1.0 * alpha
-                                NVGcontext:vg]);
-}
-
-
-- (void) strokeWithBounds:(CGRect) rect
-              strokeWidth:(CGFloat) strokeWidth
-                   alpha:(CGFloat) alpha
-               NVGcontext:(NVGcontext *) vg
-{
-   CGFloat    blend;
-
-   if( strokeWidth <= 0.0f)
-      return;
-
-   blend = (_paint == _otherPaint) ? 0.0f : _blend;
-   [_paint strokeWithBounds:rect
-                strokeWidth:strokeWidth
-                      alpha:(1.0f - blend) * alpha
-                 NVGcontext:vg];
-   [_otherPaint strokeWithBounds:rect
-                     strokeWidth:strokeWidth
-                           alpha:blend * alpha
-                      NVGcontext:vg];
-}
-
-
-- (void) fillWithBounds:(CGRect) rect
-                  alpha:(CGFloat) alpha
-             NVGcontext:(NVGcontext *) vg
-{
-   CGFloat    blend;
-
-   blend = (_paint == _otherPaint) ? 0.0f : _blend;
-   [_paint fillWithBounds:rect
-                    alpha:(1.0f - blend) * alpha
-               NVGcontext:vg];
-   [_otherPaint fillWithBounds:rect
-                         alpha:blend * alpha
-                    NVGcontext:vg];
+                              paintOptions:options
+                                   context:context]);
 }
 
 @end

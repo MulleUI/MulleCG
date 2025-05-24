@@ -324,8 +324,8 @@ int   main()
    app        = [UIApplication sharedInstance];
 
    styleMask  = UIWindowStyleMaskDefault;
-   styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
-   styleMask  = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleAntiAlias, EDGE_ANTIALIAS);
+   styleMask  = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+   styleMask  = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleAntiAlias, EDGE_ANTIALIAS);
 
    window     = [UIWindow windowWithFrame:CGRectMake( 0.0f, 0.0f, 640.0f, 400.0f)
                           titleUTF8String:"Demo"

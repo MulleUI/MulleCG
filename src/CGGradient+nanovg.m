@@ -9,18 +9,19 @@
 #include <math.h>
 
 #import "CGContext.h"
+#import "CGContext+Drawing.h"
 
 
 @implementation CGGradient ( nanovg)
 
 static NVGpaint
    _NVGpaintWithGradientValues( CGColor startColor,
-                               CGColor endColor,
-                               CGRect rect,
-                               CARotation rotation,
-                               CGFloat smoothness,
-                               BOOL isRectangular,
-                               NVGcontext *vg)
+                                CGColor endColor,
+                                CGRect rect,
+                                CARotation rotation,
+                                CGFloat smoothness,
+                                BOOL isRectangular,
+                                NVGcontext *vg)
 {
    CGFloat      radians;
    CGFloat      w, h;
@@ -29,6 +30,8 @@ static NVGpaint
    CGPoint      center;
    NVGpaint     paint;
    CGFloat      size;
+
+   assert( vg);
 
    radians  = CARotationToRadians( rotation);
    if( isRectangular)
@@ -64,17 +67,16 @@ static inline NVGpaint
    CGColor   startColor;
    CGColor   endColor;
 
+   assert( vg);
+
    startColor = [self startColor];
    endColor   = [self endColor];
 
    if( alpha < 0.0)
       alpha = 0.0;
 
-   if( alpha < 1.0)
-   {
-      startColor = CGColorMultiplyAlpha( startColor, alpha);
-      endColor   = CGColorMultiplyAlpha( endColor, alpha);
-   }
+   startColor = CGColorMultiplyAlpha( startColor, alpha);
+   endColor   = CGColorMultiplyAlpha( endColor, alpha);
 
    return( _NVGpaintWithGradientValues( startColor, endColor, rect, rotation, smoothness, isRectangular, vg));
 }
@@ -82,77 +84,62 @@ static inline NVGpaint
 
 
 - (NVGpaint) NVGpaintWithBounds:(CGRect) rect
-                          alpha:(CGFloat) alpha
-                     NVGcontext:(NVGcontext *) vg
+                   paintOptions:(struct CGPaintOptions *) options
+                        context:(CGContext *) context
 {
    NVGpaint   paint;
 
-   paint = CGGradientNVGpaintForRect( self, rect, [self rotation], 1.0f, alpha, YES, vg);
+   assert( options);
+
+   paint = CGGradientNVGpaintForRect( self,
+                                      rect,
+                                      options->rotation,
+                                      options->smoothness,
+                                      options->alpha,
+                                      YES,
+                                      CGContextGetNVGContext( context));
    return( paint);
 }
 
+@end
 
-- (NVGpaint) linearGradientNVGpaintWithBounds:(CGRect) rect
-                                   NVGcontext:(NVGcontext *) vg
+
+@implementation CGLinearGradient ( nanovg)
+
+- (NVGpaint) NVGpaintWithBounds:(CGRect) bounds
+                   paintOptions:(struct CGPaintOptions *) options
+                        context:(CGContext *) context
 {
-   NVGpaint   paint;
+   NVGpaint     paint;
+   NVGcontext   *vg;
+   CGColor      startColor;
+   CGColor      endColor;
+   CGFloat      rotation;
 
-   paint = CGGradientNVGpaintForRect( self, rect, [self rotation], 1.0f, 1.0f, YES, vg);
-   return( paint);
-}
+   assert( options);
+   assert( options->alpha >= 0.0 && options->alpha <= 1.0);
 
+   startColor = CGColorMultiplyAlpha( _startColor, options->alpha);
+   endColor   = CGColorMultiplyAlpha( _endColor, options->alpha);
 
-- (NVGpaint) linearGradientNVGpaintWithBounds:(CGRect) rect
-                                   smoothness:(CGFloat) smoothness
-                                   NVGcontext:(NVGcontext *) vg
-{
-   NVGpaint   paint;
+   // we ignore the incoming rect as we have a rect already
 
-   paint = CGGradientNVGpaintForRect( self, rect, [self rotation], smoothness, 1.0f, YES, vg);
-   return( paint);
-}
+   vg       = CGContextGetNVGContext( context);
+   rotation = options->rotation + _rotation;
+   if( ! CGPointIsNull( _startPoint))
+   {
+      if( rotation == 0.0)
+      {
+         paint  = mvgLinearGradient( vg, _startPoint, startColor,
+                                         _endPoint, endColor);
+         return( paint);
+      }
+      bounds = CGRectMakeWithOriginAndOpposite( _startPoint, _endPoint);
+   }
 
-
-- (NVGpaint) rectangularLinearGradientNVGpaintWithBounds:(CGRect) rect
-                                              smoothness:(CGFloat) smoothness
-                                              NVGcontext:(NVGcontext *) vg
-{
-   NVGpaint   paint;
-
-   paint = CGGradientNVGpaintForRect( self, rect, [self rotation], smoothness, 1.0f, NO, vg);
-   return( paint);
-}
-
-
-
-- (NVGpaint) boxGradientNVGpaintWithBounds:(CGRect) rect
-                              cornerRadius:(CGFloat) radius
-                                   feather:(CGFloat) feather
-                                NVGcontext:(NVGcontext *) vg
-{
-   NVGpaint   paint;
-
-   paint = mvgBoxGradient( vg,
-                           rect,
-                           [self endColor],
-                           radius,
-                           feather,
-                           [self startColor]);
-   return( paint);
-}
-
-
-- (NVGpaint) radialGradientNVGpaintWithCircle:(CACircle) circle
-                                  innerRadius:(CGFloat) innerRadius
-                                   NVGcontext:(NVGcontext *) vg
-{
-   NVGpaint   paint;
-
-   paint = mvgRadialGradient( vg,
-                              circle,
-                              [self startColor],
-                              innerRadius,
-                              [self endColor]);
+   bounds = CGRectRotate( bounds, rotation);
+   paint  = mvgLinearGradient( vg, CGRectGetOriginPoint( bounds), startColor,
+                                   CGRectGetOppositePoint( bounds), endColor);
    return( paint);
 }
 
@@ -160,158 +147,168 @@ static inline NVGpaint
 
 
 
-void   mvgFillCircleWithGradient( NVGcontext *vg,
-                                  CACircle circle,
-                                  CGGradient *gradient)
-{
-   mvgBeginPath( vg);
-   {
-      mvgCircle( vg, circle);
-      mvgFillPaint( vg, [gradient radialGradientNVGpaintWithCircle:circle
-                                                       innerRadius:0.0
-                                                        NVGcontext:vg]);
-   }
-   mvgFill( vg);
-}
+@implementation CGBoxGradient ( nanovg)
 
-
-
-void   mvgStrokeCircleWithGradient( NVGcontext *vg,
-                                    CACircle circle,
-                                    CGFloat strokeWidth,
-                                    CGGradient *gradient)
-{
-   if( strokeWidth <= 0.0f)
-      return;
-
-   mvgBeginPath( vg);
-   {
-      mvgCircle( vg, circle);
-      circle = CACircleExtrude( circle, strokeWidth / 2.0);
-      mvgStrokePaint( vg, [gradient radialGradientNVGpaintWithCircle:circle
-                                                         innerRadius:0.0
-                                                          NVGcontext:vg]);
-      mvgStrokeWidth( vg, strokeWidth);
-   }
-   mvgStroke( vg);
-}
-
-
-void   mvgFillRoundedRectWithLinearGradient( NVGcontext *vg,
-                                             CGRect rect,
-                                             CGFloat cornerRadius,
-                                             CGFloat smoothness,
-                                             CGGradient *gradient)
+- (NVGpaint) NVGpaintWithBounds:(CGRect) bounds
+                   paintOptions:(struct CGPaintOptions *) options
+                        context:(CGContext *) context
 {
    NVGpaint     paint;
+   NVGcontext   *vg;
+   CGColor      startColor;
+   CGColor      endColor;
 
-   mvgBeginPath( vg);
-   mvgRoundedRect( vg, rect, cornerRadius);
+   assert( options);
+   assert( options->alpha >= 0.0 && options->alpha <= 1.0);
 
-#ifdef NIL_PAINT_DRAWS_BLACK
-   if( ! gradient)
-   {
-      mvgFillColor( vg, CGColorMakeBlack());
-      mvgFill( vg);
-      return;
-   }
-#endif
+   startColor = CGColorMultiplyAlpha( _startColor, options->alpha);
+   endColor   = CGColorMultiplyAlpha( _endColor, options->alpha);
 
-   paint = CGGradientNVGpaintForRect( gradient, rect, [gradient rotation], smoothness, 1.0f, YES, vg);
+   if( ! CGRectIsNull( _rect))
+      bounds = _rect;
 
-   mvgFillPaint( vg, paint);
-   mvgFill( vg);
+   vg    = CGContextGetNVGContext( context);
+   paint = mvgBoxGradient( vg, bounds,
+                               _cornerRadius,
+                               startColor,
+                               _feather,
+                               endColor);
+   return( paint);
 }
 
+@end
 
-void   mvgFillRoundedRectWithRectangularLinearGradient( NVGcontext *vg,
-                                                        CGRect rect,
-                                                        CGFloat cornerRadius,
-                                                        CGFloat smoothness,
-                                                        CGGradient *gradient)
+
+@implementation CGRadialGradient( nanovg)
+
+- (NVGpaint) NVGpaintWithBounds:(CGRect) bounds
+                   paintOptions:(struct CGPaintOptions *) options
+                        context:(CGContext *) context
 {
    NVGpaint     paint;
+   NVGcontext   *vg;
+   CACircle     circle;
+   CGColor      startColor;
+   CGColor      endColor;
 
-   mvgBeginPath( vg);
-   mvgRoundedRect( vg, rect, cornerRadius);
+   assert( options);
+   assert( options->alpha >= 0.0 && options->alpha <= 1.0);
 
-#ifdef NIL_PAINT_DRAWS_BLACK
-   if( ! gradient)
-   {
-      mvgFillColor( vg, CGColorMakeBlack());
-      mvgFill( vg);
-      return;
-   }
-#endif
+   startColor = CGColorMultiplyAlpha( _startColor, options->alpha);
+   endColor   = CGColorMultiplyAlpha( _endColor, options->alpha);
 
-   paint = CGGradientNVGpaintForRect( gradient, rect, [gradient rotation], smoothness, 1.0f, NO, vg);
+   if( CACircleIsNull( _circle))
+      circle = CGRectGetOuterCircle( bounds);
+   else
+      circle = _circle;
 
-   mvgFillPaint( vg, paint);
-   mvgFill( vg);
+   vg     = CGContextGetNVGContext( context);
+   paint  = nvgRadialGradient( vg, circle.center.x,
+                                   circle.center.y,
+                                   _innerRadius,
+                                   circle.radius,
+                                   startColor,
+                                   endColor);
+   return( paint);
 }
 
+@end
 
 
-void   mvgStrokeRoundedRectWithLinearGradient( NVGcontext *vg,
-                                               CGRect rect,
-                                               CGFloat cornerRadius,
-                                               CGFloat strokeWidth,
-                                               CGFloat smoothness,
-                                               CGGradient *gradient)
+// will use radialGradient!
+void   CGContextFillCircleWithGradientColors( CGContext *context,
+                                              CACircle circle,
+                                              CGColor outerColor,
+                                              CGColor innerColor)
 {
-   NVGpaint     paint;
+   NVGpaint     nvgPaint;
+   NVGcontext   *vg;
 
-   if( strokeWidth <= 0.0f)
-      return;
-
-   mvgBeginPath( vg);
-   mvgRoundedRect( vg, rect, cornerRadius);
-
-#ifdef NIL_PAINT_DRAWS_BLACK
-   if( ! gradient)
-   {
-      mvgStrokeColor( vg, CGColorMakeBlack());
-      mvgStroke( vg);
-      return;
-   }
-#endif
-
-   paint = CGGradientNVGpaintForRect( gradient, rect, [gradient rotation], smoothness, 1.0f, YES, vg);
-
-   mvgStrokePaint( vg, paint);
-   mvgStrokeWidth( vg, strokeWidth);
-   mvgStroke( vg);
+   vg        = CGContextGetNVGContext( context);
+   nvgPaint  = nvgRadialGradient( vg, circle.center.x,
+                                      circle.center.y,
+                                      0.0,
+                                      circle.radius,
+                                      outerColor,
+                                      innerColor);
+   nvgFillPaint( vg, nvgPaint);
+   nvgFill( vg);
 }
 
 
-void   mvgStrokeRoundedRectWithRectangularLinearGradient( NVGcontext *vg,
-                                                          CGRect rect,
-                                                          CGFloat cornerRadius,
-                                                          CGFloat strokeWidth,
-                                                          CGFloat smoothness,
-                                                          CGGradient *gradient)
+void   CGContextStrokeCircleWithGradientColors( CGContext *context,
+                                                CACircle circle,
+                                                CGFloat strokeWidth,
+                                                CGColor outerColor,
+                                                CGColor innerColor)
 {
-   NVGpaint     paint;
+   NVGpaint     nvgPaint;
+   NVGcontext   *vg;
 
-   if( strokeWidth <= 0.0f)
+   if( strokeWidth <= 0.0)
       return;
 
-   mvgBeginPath( vg);
-   mvgRoundedRect( vg, rect, cornerRadius);
-
-#ifdef NIL_PAINT_DRAWS_BLACK
-   if( ! gradient)
-   {
-      mvgStrokeColor( vg, CGColorMakeBlack());
-      mvgStroke( vg);
-      return;
-   }
-#endif
-
-   paint = CGGradientNVGpaintForRect( gradient, rect, [gradient rotation], smoothness, 1.0f, NO, vg);
-
-   mvgStrokePaint( vg, paint);
-   mvgStrokeWidth( vg, strokeWidth);
-   mvgStroke( vg);
+   vg        = CGContextGetNVGContext( context);
+   nvgPaint  = nvgRadialGradient( vg, circle.center.x,
+                                      circle.center.y,
+                                      0.0,
+                                      circle.radius - strokeWidth / 2.0,  // guess
+                                      outerColor,
+                                      innerColor);
+   nvgStrokePaint( vg, nvgPaint);
+   nvgStrokeWidth( vg, strokeWidth);
+   nvgStroke( vg);
 }
+
+
+
+void   CGContextFillRoundedRectWithGradientColors( CGContext *context,
+                                                   CGRect rect,
+                                                   CGFloat cornerRadius,
+                                                   CGFloat feather,
+                                                   CGColor startColor,
+                                                   CGColor endColor,
+                                                   CGFloat rotation)
+{
+   NVGpaint     nvgPaint;
+   NVGcontext   *vg;
+
+   vg       = CGContextGetNVGContext( context);
+   nvgPaint = _NVGpaintWithGradientValues( startColor, endColor,
+                                           rect,
+                                           rotation,
+                                           1.0f,
+                                           YES,
+                                           vg);
+   nvgFillPaint( vg, nvgPaint);
+   nvgFill( vg);
+}
+
+
+void   CGContextStrokeRectWithGradientColors( CGContext *context,
+                                              CGRect rect,
+                                              CGFloat strokeWidth,
+                                              CGColor startColor,
+                                              CGColor endColor,
+                                              CGFloat rotation)
+{
+   NVGpaint     nvgPaint;
+   NVGcontext   *vg;
+
+   if( strokeWidth <= 0.0)
+      return;
+
+   rect     = CGRectMakeStrokeRect( rect, strokeWidth, CGOutside);
+   vg       = CGContextGetNVGContext( context);
+   nvgPaint = _NVGpaintWithGradientValues( startColor, endColor,
+                                           rect,
+                                           rotation,
+                                           1.0f,
+                                           YES,
+                                           vg);
+   nvgStrokePaint( vg, nvgPaint);
+   nvgStrokeWidth( vg, strokeWidth);
+   nvgStroke( vg);
+}
+
 

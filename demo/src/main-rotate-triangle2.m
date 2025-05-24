@@ -9,7 +9,7 @@
 #include "bitmap2.inc"
 
 
-static void   draw_triangle_with_centroid( NVGcontext *vg,
+static void   draw_triangle_with_centroid( CGContext *context,
                                            CGPoint center,
                                            CGSize  size,
                                            CARotation rotation,
@@ -30,46 +30,46 @@ static void   draw_triangle_with_centroid( NVGcontext *vg,
    CGPoint  massCenter;
 
    scale = CGSizeGetMinimum( size);
-   mvgSave( vg);
+   CGContextSave( context);
    {
       massCenter = CGPointTriangleGetCentroid( points[ 0], points[ 1], points[ 2]);
 
       if( rotateAroundCentroid)
-         mvgTranslate( vg, CGPointMake( massCenter.x * scale,
-                                        massCenter.y * scale));
+      CGContextTranslate( context, CGPointMake( massCenter.x * scale,
+                massCenter.y * scale));
 
-      mvgTranslate( vg, center);
-      mvgRotate( vg, rotation);
+      CGContextTranslate( context, center);
+      CGContextRotate( context, rotation);
 
       if( rotateAroundCentroid)
-         mvgTranslate( vg, CGPointMake( -massCenter.x * scale,
-                                        -massCenter.y * scale));
-      mvgScale( vg, CGVectorMake( scale, scale));
+      CGContextTranslate( context, CGPointMake( -massCenter.x * scale,
+                -massCenter.y * scale));
+      CGContextScale( context, CGVectorMake( scale, scale));
 
 
-      mvgBeginPath( vg);
-      mvgMoveTo( vg, points[ 0]);
-      mvgLineTo( vg, points[ 1]);
-      mvgLineTo( vg, points[ 2]);
-      mvgClosePath( vg);
+      CGContextBeginPath( context);
+      CGContextMoveTo( context, points[ 0]);
+      CGContextLineTo( context, points[ 1]);
+      CGContextLineTo( context, points[ 2]);
+      CGContextClosePath( context);
 
       rect = CGRectMakeWithCenterPointAndSize( CGPointZero, CGSizeMake( 1.0, 1.0));
       [paint fillWithBounds:rect
-                 NVGcontext:vg];
+                    context:context];
 
-      mvgFillCircleWithPaint( vg, CACircleMake( massCenter, centroidRadius / scale), centroidPaint);
+      CGContextFillCircleWithPaint( context, CACircleMake( massCenter, centroidRadius / scale), centroidPaint);
    }
-   mvgRestore( vg);
+   CGContextRestore( context);
 }
 
 
-static inline void   draw_triangle( NVGcontext *vg,
+static inline void   draw_triangle( CGContext *context,
                                     CGPoint center,
                                     CGSize  size,
                                     CARotation rotation,
                                     CGPaint *paint)
 {
-   draw_triangle_with_centroid( vg, center, size, rotation, paint, 0.0, nil, YES);
+   draw_triangle_with_centroid( context, center, size, rotation, paint, 0.0, nil, YES);
 }
 
 
@@ -122,19 +122,19 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
          if( i == 0)
          {
-            draw_triangle( vg, center, size, rotation, paint);
+            draw_triangle( context, center, size, rotation, paint);
          }
          else
-            draw_triangle_with_centroid( vg, center,
-                                             size,
-                                             rotation,
-                                             paint,
-                                             3.0,
-                                             [CGPaint paintWithColor:CGColorMakeWhite()],
-                                             i == 1);
+            draw_triangle_with_centroid( context, center,
+                  size,
+                  rotation,
+                  paint,
+                  3.0,
+                  [CGPaint paintWithColor:CGColorMakeWhite()],
+                  i == 1);
 
-         mvgFillCircleWithColor( vg, CACircleMake( center, 5.0), CGColorMakeOrange());
-         mvgStrokeRectWithColor( vg, CGRectMakeWithCenterPointAndSize( center, size), 1.0, CGColorMakeOrange());
+         CGContextFillCircleWithColor( context, CACircleMake( center, 5.0), CGColorMakeOrange());
+         CGContextStrokeRectWithColor( context, CGRectMakeWithCenterPointAndSize( center, size), 1.0, CGColorMakeOrange());
 
       }
    }

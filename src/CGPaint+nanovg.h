@@ -10,99 +10,36 @@
 
 // we want "import.h" always anyway
 #import "import.h"
+#import "CGTypes.h"
 
 
+void   CGContextFillPaintWithOptions( CGContext *context,
+                                      CGPaint *paint,
+                                      CGRect  bounds,
+                                      CGFillOptions *options);
 
-//
-// this is still low-level nanovg, if you want to use a rotated image
-// for your paint, good luck. (Preferably use [CGImage drawRect:options:context])
-//
-@interface CGPaint( nanovg)
-
-- (void) strokeWithBounds:(CGRect) rect
-              strokeWidth:(CGFloat) strokeWidth
-                    alpha:(CGFloat) alpha
-               NVGcontext:(NVGcontext *) context;
-
-- (void) fillWithBounds:(CGRect) rect
-                  alpha:(CGFloat) alpha
-             NVGcontext:(NVGcontext *) context;
-
-// conveniences, preferably use alpha methods..
-- (void) strokeWithBounds:(CGRect) rect
-              strokeWidth:(CGFloat) strokeWidth
-               NVGcontext:(NVGcontext *) context;
-
-- (void) fillWithBounds:(CGRect) rect
-             NVGcontext:(NVGcontext *) context;
-
-@end
+void   CGContextStrokePaintWithOptions( CGContext *context,
+                                        CGPaint *paint,
+                                        CGRect  bounds,
+                                        CGFloat strokeWidth,
+                                        CGStrokeOptions *options);
 
 
-@interface CGPaint( nanovg_Subclasses)
-
-// a linear gradient if a gradient
-- (NVGpaint) NVGpaintWithBounds:(CGRect) rect
-                          alpha:(CGFloat) alpha
-                     NVGcontext:(NVGcontext *) vg;
-
-@end
-
-
-void   mvgFillRoundedRectVaryingWithPaint( NVGcontext *vg,
-                                           CGRect rect,
-                                           MulleCornerInsets cornerInsets,
-                                           CGPaint *paint);
-
-void   mvgFillRoundedRectWithPaint( NVGcontext *vg,
-                                    CGRect rect,
-                                    CGFloat cornerRadius,
-                                    CGPaint *paint);
-void   mvgFillRectWithPaint( NVGcontext *vg, CGRect rect, CGPaint *paint);
-// will use linear Gradient!
-void   mvgFillCircleWithPaint( NVGcontext *vg,
-                               CACircle circle,
-                               CGPaint *paint);
-void   mvgFillLineWithPaint( NVGcontext *vg,
-                             CGPoint start,
-                             CGPoint end,
-                             CGPaint *paint);
+static inline void   CGContextFillPaint( CGContext *context, CGPaint *paint)
+{
+   CGContextFillPaintWithOptions( context,
+                                  paint,
+                                  CGRectMake( -INFINITY, -INFINITY, INFINITY, INFINITY),
+                                  NULL);
+}
 
 
-void   mvgStrokeRoundedRectVaryingWithPaint( NVGcontext *vg,
-                                             CGRect rect,
-                                             MulleCornerInsets cornerInsets,
-                                             CGFloat strokeWidth,
-                                             CGPaint *paint);
+static inline void   CGContextStrokePaint( CGContext *context, CGPaint *paint, CGFloat strokeWidth)
+{
+   CGContextStrokePaintWithOptions( context,
+                                    paint,
+                                    CGRectMake( -INFINITY, -INFINITY, INFINITY, INFINITY),
+                                    strokeWidth,
+                                    NULL);
+}
 
-void   mvgStrokeRoundedRectWithPaint( NVGcontext *vg,
-                                      CGRect rect,
-                                      CGFloat cornerRadius,
-                                      CGFloat strokeWidth,
-                                      CGPaint *paint);
-void   mvgStrokeRectWithPaint( NVGcontext *vg,
-                               CGRect rect,
-                               CGFloat strokeWidth,
-                               CGPaint *paint);
-// will use linear Gradient!
-void   mvgStrokeCircleWithPaint( NVGcontext *vg,
-                                 CACircle circle,
-                                 CGFloat strokeWidth,
-                                 CGPaint *paint);
-void   mvgStrokeLineWithPaint( NVGcontext *vg,
-                               CGPoint start,
-                               CGPoint end,
-                               CGFloat strokeWidth,
-                               CGPaint *paint);
-
-void   mvgStrokeLineHWithPaint( NVGcontext *vg,
-                                CGPoint point,
-                                CGFloat width,
-                                CGFloat strokeWidth,
-                                CGPaint *paint);
-
-void   mvgStrokeLineVWithPaint( NVGcontext *vg,
-                                CGPoint start,
-                                CGFloat height,
-                                CGFloat strokeWidth,
-                                CGPaint *paint);

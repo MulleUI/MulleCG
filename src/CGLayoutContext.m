@@ -6,12 +6,13 @@
 #import "import-private.h"
 
 #import "CGContext+OpenGL.h"
+#import "CGContext+nanovg.h"
+#import "CGContext+Drawing.h"
 #import "CGLayoutContext+CGFont.h"
 #import "_MulleCGBackend.h"
 
 
 @implementation CGLayoutContext
-
 
 - (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) context
                             nameUTF8String:(char *) nameUTF8String
@@ -73,25 +74,25 @@
 
 - (void) setFontSize:(float) size
 {
-   nvgFontSize( _vg, size);
+   CGContextFontSize( self, size);
 }
 
 
 - (void) setTextAlign:(NSUInteger) align
 {
-   nvgTextAlign( _vg, align);
+   CGContextTextAlign( self, align);
 }
 
 
 - (void) setTextLetterSpacing:(float) spacing
 {
-   nvgTextLetterSpacing( _vg, spacing);
+   CGContextTextLetterSpacing( self, spacing);
 }
 
 
 - (void) setTextLineHeight:(float) lineHeight
 {
-   nvgTextLineHeight( _vg, lineHeight);
+   CGContextTextLineHeight( self, lineHeight);
 }
 
 
@@ -106,17 +107,6 @@
 {
    return( _hasLoadedFont);
 }
-
-
-- (void) useFontWithNameUTF8String:(char *) name
-{
-   CGFont   *font;
-
-   font = [self fontWithNameUTF8String:name];
-   if( font)
-      [self useFont:font];
-}
-
 
 - (void) useDefaultFont
 {
@@ -181,6 +171,14 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
 }
 
 
+- (BOOL) useFontWithNameUTF8String:(char *) name
+{
+   CGFont   *font;
+
+   font = CGLayoutContextUseFontWithNameUTF8String( self, name);
+   return( font ? YES : NO);
+}
+
 //
 // So long story.  nanovg asks freetype font, gimme a glyph of '|' for
 // fontSize: 10. freetype gives you a pixmap of say 5/11 back. This will
@@ -205,21 +203,21 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
       return( metrics);
 
    bounds = CGRectZero;
-   nvgSave( _vg);
+   CGContextSave( self);
    {
       // we can not do scaled conversion
       //nvgResetTransform( _vg);
-      nvgTextAlign( _vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
+      CGContextTextAlign( self, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
       // MEMO: text alignment is used
 
       mulle_alloca_do( positions, struct UIGlyphPosition, length)
       {
-         n = mvgTextGlyphPositions( _vg,
-                                    CGPointZero,
-                                    s,
-                                    length,
-                                    positions,
-                                    length);
+         n = CGContextTextGlyphPositions( self,
+                                          CGPointZero,
+                                          s,
+                                          length,
+                                          positions,
+                                          length);
          for( i = 0; i < n; i++)
          {
             rect   = UIGlyphPositionGetVisualBoundsWithBlurAndScale( &positions[ i], blur, scale);
@@ -227,7 +225,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
          }
       }
    }
-   nvgRestore( _vg);
+   CGContextRestore( self);
 
    metrics.ascender   = -bounds.origin.y;
    metrics.descender  = -(bounds.size.height - metrics.ascender);
@@ -255,12 +253,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
 //
 - (struct UITextMetrics) textMetrics
 {
-   struct UITextMetrics   metrics;
-
-   nvgTextMetrics( _vg, &metrics.ascender,
-                        &metrics.descender,
-                        &metrics.lineHeight);
-   return( metrics);
+   return( CGContextTextMetrics( self));
 }
 
 
@@ -272,7 +265,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
                    text:(char *) text
                  length:(NSUInteger) length
 {
-   return( mvgTextBounds( _vg, CGPointZero, text, length, bounds));
+   return( CGContextTextBounds( self, CGPointZero, text, length, bounds));
 }
 
 
@@ -280,7 +273,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
                         text:(char *) text
                       length:(NSUInteger) length
 {
-   mvgTextVisualBounds( _vg, CGPointZero, text, length, visualBounds);
+   CGContextTextVisualBounds( self, CGPointZero, text, length, visualBounds);
 }
 
 
@@ -289,11 +282,11 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
                             text:(char *) text
                           length:(NSUInteger) length
 {
-   return( mvgTextGlyphPositions( _vg, CGPointZero,
-                                       text,
-                                       length,
-                                       positions,
-                                       count));
+   return( CGContextTextGlyphPositions( self, CGPointZero,
+                                              text,
+                                              length,
+                                              positions,
+                                              count));
 }
 
 
@@ -305,11 +298,11 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
 {
    //assert( mode == NSLineBreakByWordWrapping);
 
-   return( mvgTextBreakLines( _vg, text,
-                                   length,
-                                   breakRowWidth,
-                                   rows,
-                                   count));
+   return( CGContextTextBreakLines( self, text,
+                                          length,
+                                          breakRowWidth,
+                                          rows,
+                                          count));
 }
 
 
@@ -327,9 +320,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
    if( ! rows || ! count)
       return( CGRectZero);
 
-   nvgTextMetrics( _vg, &metrics.ascender,
-                        &metrics.descender,
-                        &metrics.lineHeight);
+   metrics = CGContextTextMetrics( self);
 
    // usually nanovg leaves a one pixel border around everything
    // so we pre-adjust our line height and y as well

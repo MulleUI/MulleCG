@@ -6,6 +6,7 @@
 #import "import-private.h"
 
 #import "CGContext+OpenGL.h"
+#import "CGContext+nanovg.h"
 #import "CGImage.h"
 #import "CGFramebuffer.h"
 

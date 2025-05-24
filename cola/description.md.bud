@@ -23,3 +23,15 @@ handle events.
 TODO: dFdx not supported by OpenGLES2 (steal from shader compiler or
 wherever)
 ```
+
+> #### Memo
+>
+> It's still too big. Need to split this into:
+>
+>  * MulleCG (abstract)  or live somewhere else
+>  * MulleCG+nanovg
+>  * MulleCG+OpenGL
+>
+
+
+

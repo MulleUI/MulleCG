@@ -1,4 +1,5 @@
 #import "CGLayoutContext.h"
+#import "CGLayoutContext+CGFont.h"
 
 #import "CGColor.h"
 #include "microvg.h"
@@ -270,6 +271,7 @@ static inline BOOL   CGContextIsActiveInCurrentThread( CGContextRef self)
 }
 
 
+MULLE_C_CONST_RETURN
 static inline struct NVGcontext   *CGContextGetNVGContext( CGContextRef self)
 {
    assert( CGContextIsActiveInCurrentThread( self));
@@ -278,6 +280,7 @@ static inline struct NVGcontext   *CGContextGetNVGContext( CGContextRef self)
 }
 
 
+MULLE_C_CONST_RETURN
 static inline struct NVGcontext   *_CGContextGetNVGContext( CGContextRef self)
 {
    return( ((struct{ @defs( CGContext); } *) self)->_vg);

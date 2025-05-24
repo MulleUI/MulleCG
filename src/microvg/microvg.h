@@ -5,72 +5,10 @@
 
 #include <stdint.h>
 
-// almost all nanovg functions are wrapped here for use with mulle-gfx
-// geometry. Some functions with pointer parameter return values are changed
-// to return structs now..
 
 #include "microvg-nanowrap.h"
 
-enum MulleTextOption
-{
-   MVGTextDefault       = 0x0,
-   MVGTextAlignVisually = 0x1,
-   MVGTextAlignBaseline = 0x2,
-   MVGTextNoClip        = 0x4,
-   MVGTextFill          = 0x8
-};
-
-typedef uintptr_t     MulleTextOptions;
-
-// #define RENDER_DEBUG
-
-
-struct MulleTextMetrics
-{
-   CGFloat   ascender;
-   CGFloat   descender;
-   CGFloat   lineHeight;
-};
-
-
-static inline struct MulleTextMetrics
-    MulleTextMetricsMake( CGFloat ascender, CGFloat descender, CGFloat lineHeight)
-{
-   return( (struct MulleTextMetrics) { .ascender = ascender,
-                                       .descender = descender,
-                                       .lineHeight = lineHeight});
-}
-
-
-
-// Returns the vertical metrics based on the current text style.
-// Measured values are returned in local coordinate space.
-// When you call nvgFontSize(ctx, 12):
-//
-// *  NanoVG stores 12 as the font size
-// *  When text needs to be rendered, it scales this by the transformation and
-//    device pixel ratio
-// *  With unity transformation and standard DPI, it passes 12 to fontstash
-// *  Fontstash calls FT_Set_Char_Size(font, 0, 12*64, 0, 0)
-// *  FreeType renders each glyph at 12 points (which is 12 pixels at 72 DPI)
-// *  The resulting bitmap dimensions are in pixels
-// *  These bitmaps are copied into the atlas texture
-// *  When rendering text, NanoVG uses the glyph metrics to position each
-//    character
-//
-// The mvgTextLineHeight, which is used to vertically space lines when using
-// multiline text output, is not part of the font metric lineHeight.
-//
-static inline struct MulleTextMetrics   mvgTextMetrics( NVGcontext *vg)
-{
-   float   ascender;
-   float   descender;
-   float   lineh;
-
-   ascender = descender = lineh = NAN;
-   nvgTextMetrics( vg, &ascender, &descender, &lineh);
-   return( MulleTextMetricsMake( ascender, descender, lineh));
-}
+#import "CGTypes.h"
 
 
 /*
@@ -216,13 +154,13 @@ void   mvgFillRoundedShadow( struct NVGcontext *vg,
                              struct CGShadow *shadow);
 //
 // Draws text inside a rect. The text is clipped to the rect unless,
-// the option MVGTextNoClip is given. The position within in the rect is
+// the option CGTextOptionNoClip is given. The position within in the rect is
 // determined by contentMode (see: mulle-layout) e.g. CGContentModeTopLeft.
-// With MVGTextAlignVisually the will layout the text visually more pleasing,
+// With CGTextOptionAlignVisually the will layout the text visually more pleasing,
 // if the text contains no ascenders or descenders or lacks both.
 //
-// Option MVGTextAlignBaseline will use the fonts baseline for positioning.
-// With option MVGTextFill the text is layouted according to contentMode
+// Option CGTextOptionAlignBaseline will use the fonts baseline for positioning.
+// With option CGTextOptionFill the text is layouted according to contentMode
 // CGContentModeAspectFit and the result is then positioned within the rect
 // with contentMode.
 //
@@ -231,7 +169,7 @@ void   mvgTextInRect( NVGcontext *vg,
                       size_t length,
                       CGRect rect,
                       CGContentMode contentMode,
-                      MulleTextOptions options);
+                      CGTextOptions options);
 
 
 //
@@ -241,7 +179,7 @@ void   mvgTextInRect( NVGcontext *vg,
 void   mvgFormatInRect( struct NVGcontext *vg,
                         CGRect rect,
                         CGContentMode contentMode,
-                        MulleTextOptions options,
+                        CGTextOptions options,
                         char *format,
                         ...);
 
@@ -251,13 +189,13 @@ void   mvgFormat( struct NVGcontext *vg,  CGPoint point, char *format, ...);
 
 //
 // Calculate change to origin needed to properly place the string.
-// The only recognized MulleTextOptions is MVGTextAlignVisually.
+// The only recognized CGTextOptions is CGTextOptionAlignVisually.
 //
 CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
                                            char *s,
                                            size_t length,
                                            int alignment,
-                                           MulleTextOptions options);
+                                           CGTextOptions options);
 
 //
 // workhorse function for mvgText, will set state to alignment
@@ -267,12 +205,12 @@ void   _mvgExtendedAlignedText( struct NVGcontext *vg,
                                 size_t length,
                                 CGPoint origin,
                                 int alignment,
-                                MulleTextOptions options);
+                                CGTextOptions options);
 
 //
 // Draws text string at specified location. If end is specified only the
-// sub-string up to the end is drawn. The only recognized MulleTextOptions
-// is MVGTextAlignVisually. This will layout the text visually more pleasing,
+// sub-string up to the end is drawn. The only recognized CGTextOptions
+// is CGTextOptionAlignVisually. This will layout the text visually more pleasing,
 // if the text contains no ascenders or descenders or lacks both.
 //
 static inline void   mvgExtendedAlignedText( struct NVGcontext *vg,
@@ -280,12 +218,12 @@ static inline void   mvgExtendedAlignedText( struct NVGcontext *vg,
                                              size_t length,
                                              CGPoint origin,
                                              int alignment,
-                                             MulleTextOptions options)
+                                             CGTextOptions options)
 {
    int   halign;
 
    halign = alignment & (NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT);
-   if( halign != NVG_ALIGN_LEFT || (options & MVGTextAlignVisually))
+   if( halign != NVG_ALIGN_LEFT || (options & CGTextOptionAlignVisually))
    {
       // general idea: often the alignment and options are given
       // as a constant and the compiler can simplify the if away

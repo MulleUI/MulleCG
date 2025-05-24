@@ -35,16 +35,6 @@
 //
 - (CGFramebuffer *) _endRender; // does not call suspendRender
 
-- (void) changeRender:(struct CGFrameInfo *) info;
-
-//
-// used to intermix OpenGL or other commands, this flushes commands
-// cleans some font state and sets the viewport.
-// (resumeRender is in OpenGL)
-- (void) suspendRender;  // flushes and resets
-- (void) flushRender;    // suspends and resumes
-- (void) resumeRender;
-
 // betweenbeginRender: and endRender:
 - (BOOL) isRendering;
 

@@ -20,7 +20,7 @@ void   mvgAddCGPath( NVGcontext *vg, CGPathRef path)
    float           dir;
    float           a0, a1;
 
-   if( ! path)
+   if( ! vg || ! path)
       return;
 
    n        = _mulle_floatarray_get_count( &path->_floats);

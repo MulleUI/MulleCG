@@ -8,94 +8,84 @@
 
 
 #define COLS  4
-#define ROWS  4
+#define ROWS  2
 
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext    *vg;
-   CGRect               canvas;
-   CGRect               rect;
-   CGRect               rects[ ROWS][ COLS];
-   CGPaint              *paint;
-   NSUInteger           i, j;
-   CGFloat              strokeWidth;
-
-   vg     = CGContextGetNVGContext( context);
+   CGRect       canvas;
+   CGRect       rect;
+   CGRect       rects[ ROWS][ COLS];
+   CGPaint      *paint;
+   NSUInteger   i, j;
+   CGFloat      strokeWidth;
 
    canvas = [layer canvas];
    canvas = CGRectInset( canvas, 5.0, 5.0);
 
    CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( 5, 5), ROWS, COLS, (CGRect *) rects);
 
-   strokeWidth = 1.0;
+   strokeWidth = 4.0;
+
+   switch( [context numberOfFrames] % 6)
+   {
+   case 0 :
+      paint = [CGGradient gradientWithStartColor:CGColorMakeYellow()
+                                        endColor:CGColorMakeBlue()
+                                        rotation:[context numberOfFrames] / 20.0];
+      break;
+
+   case 1 :
+      paint = [[[CGImage alloc] initWithRGBABytes:bitmap2
+                                       bitmapSize:CGPixelSizeMake( 32, 32)
+                                     textureFlags:0  // NVG_IMAGE_REPEATX
+                                          context:context] autorelease];
+      break;
+
+   case 2 :
+      paint = [CGPaint paintWithColor:CGColorMakeBlack()];
+      break;
+
+   case 3 :
+      paint = [CGGradient linearGradientWithRect:canvas
+                                      startColor:CGColorMakeYellow()
+                                        endColor:CGColorMakeBlue()
+                                        rotation:[context numberOfFrames] / 20.0];
+      break;
+
+   case 4 :
+      paint = [CGGradient boxGradientWithRoundedRect:canvas
+                                        cornerRadius:20.0
+                                               color:CGColorMakeYellow()
+                                             feather:20.0
+                                        featherColor:CGColorMakeBlue()];
+      break;
+
+   case 5 :
+      paint = [CGGradient radialGradientWithCircle:CGRectGetOuterCircle( canvas)
+                                             color:CGColorMakeYellow()
+                                       innerRadius:20.0
+                                        innerColor:CGColorMakeBlue()];
+      break;
+   }
+
    for( j = 0; j < ROWS; j++)
    {
-      switch( [context numberOfFrames] % 3)
-      {
-      case 0 :
-         paint = [CGGradient gradientWithStartColor:CGColorMakeYellow()
-                                           endColor:CGColorMakeBlue()];
-         break;
-
-      case 1 :
-         paint = [[[CGImage alloc] initWithRGBABytes:bitmap2
-                                          bitmapSize:CGPixelSizeMake( 32, 32)
-                                        textureFlags:0  // NVG_IMAGE_REPEATX
-                                             context:context] autorelease];
-         break;
-
-      case 2 :
-         paint = [CGPaint paintWithColor:CGColorMakeBlack()];
-         break;
-      }
-
       for( i = 0; i < COLS; i++)
       {
          rect = CGRectIntegral( rects[ j][ i]);
 
          switch( j * COLS + i)
          {
-         case 0  : mvgStrokeRectWithPaint( vg, rect, strokeWidth, paint); break;
-         case 1  : mvgStrokeRoundedRectWithPaint( vg, rect, 3.0, strokeWidth, paint); break;
-         case 2  : mvgStrokeCircleWithPaint( vg, CGRectGetInnerCircle( rect), strokeWidth, paint); break;
-         case 3  : mvgStrokeLineWithPaint( vg, CGRectGetTopLeftPoint( rect), CGRectGetBottomRightPoint( rect), strokeWidth, paint); break;
+         case 0  : CGContextStrokeRectWithPaint( context, rect, strokeWidth, paint); break;
+         case 1  : CGContextStrokeRoundedRectWithPaint( context, rect, 3.0, strokeWidth, paint); break;
+         case 2  : CGContextStrokeCircleWithPaint( context, CGRectGetInnerCircle( rect), strokeWidth, paint); break;
+         case 3  : CGContextStrokeLineWithPaint( context, CGRectGetTopLeftPoint( rect), CGRectGetBottomRightPoint( rect), strokeWidth, paint); break;
 
-         case 4  : mvgFillRectWithPaint( vg, rect, paint); break;
-         case 5  : mvgFillRoundedRectWithPaint( vg, rect, 3.0, paint); break;
-         case 6  : mvgFillCircleWithPaint( vg, CGRectGetInnerCircle( rect), paint); break;
+         case 4  : CGContextFillRectWithPaint( context, rect, paint); break;
+         case 5  : CGContextFillRoundedRectWithPaint( context, rect, 3.0, paint); break;
+         case 6  : CGContextFillCircleWithPaint( context, CGRectGetInnerCircle( rect), paint); break;
          case 7  : break;
-         }
-
-         if( [paint isTexture])
-         {
-            switch( j * COLS + i)
-            {
-            case 8  : mvgStrokeRectWithImage( vg, rect, strokeWidth, (CGImage *) paint); break;
-            case 9  : mvgStrokeRoundedRectWithImage( vg, rect, 3.0, strokeWidth, (CGImage *) paint); break;
-            case 10 : mvgStrokeCircleWithImage( vg, CGRectGetInnerCircle( rect), strokeWidth, (CGImage *) paint); break;
-            case 11 : mvgStrokeLineWithImage( vg, CGRectGetTopLeftPoint( rect), CGRectGetBottomRightPoint( rect), strokeWidth, (CGImage *) paint); break;
-
-            case 12 : mvgFillRectWithImage( vg, rect, (CGImage *) paint); break;
-            case 13 : mvgFillRoundedRectWithImage( vg, rect, 3.0, (CGImage *) paint); break;
-            case 14 : mvgFillCircleWithImage( vg, CGRectGetInnerCircle( rect), (CGImage *) paint); break;
-            case 15 : break;
-            }
-         }
-         else
-         {
-            switch( j * COLS + i)
-            {
-            case 8  : mvgStrokeRectWithGradient( vg, rect, strokeWidth, (CGGradient *) paint); break;
-            case 9  : mvgStrokeRoundedRectWithGradient( vg, rect, 3.0, strokeWidth, (CGGradient *) paint); break;
-            case 10 : mvgStrokeCircleWithGradient( vg, CGRectGetInnerCircle( rect), strokeWidth, (CGGradient *) paint); break;
-            case 11 : mvgStrokeLineWithGradient( vg, CGRectGetTopLeftPoint( rect), CGRectGetBottomRightPoint( rect), strokeWidth, (CGGradient *) paint); break;
-
-            case 12 : mvgFillRectWithGradient( vg, rect, (CGGradient *) paint); break;
-            case 13 : mvgFillRoundedRectWithGradient( vg, rect, 3.0, (CGGradient *) paint); break;
-            case 14 : mvgFillCircleWithGradient( vg, CGRectGetInnerCircle( rect), (CGGradient *) paint); break;
-            case 15 : break;
-            }
          }
       }
    }

@@ -8,6 +8,7 @@
 #import "import-private.h"
 
 #import "CGContext+OpenGL.h"
+#import "CGContext+nanovg.h"
 
 #include <ctype.h>
 #include <string.h>

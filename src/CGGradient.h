@@ -104,3 +104,79 @@ CGGradient  *CGGradientCreate( CGColor startColor, CGColor endColor)
 {
    return( CGGradientCreateWithRotation( startColor, endColor, 0.0f));
 }
+
+
+//
+// base class, don't use directly, use CGGradient to construct it
+//
+@interface CGTwoColorGradient : CGGradient
+
+@property( readonly) CGColor   startColor;
+@property( readonly) CGColor   endColor;
+
+@end
+
+
+//
+// these gradients have a concept of a rectangle or circle, which they
+// inhabit
+//
+@interface CGLinearGradient : CGTwoColorGradient
+
+@property( readonly) CGPoint            startPoint;
+@property( readonly) CGPoint            endPoint;
+
+@end
+
+// can't be rotated
+@interface CGBoxGradient : CGTwoColorGradient
+
+@property( readonly) CGRect             rect;
+@property( readonly) CGFloat            cornerRadius;
+@property( readonly) CGFloat            feather;
+@property( dynamic, readonly) CGColor   featherColor;
+@property( dynamic, readonly) CGColor   color;
+
+@end
+
+// can't be rotated
+@interface CGRadialGradient : CGTwoColorGradient
+
+@property( readonly) CACircle           circle;
+@property( dynamic, readonly) CGColor   outerColor;
+@property( readonly) CGFloat            innerRadius;
+@property( dynamic, readonly) CGColor   innerColor;
+
+@end
+
+
+@interface CGGradient( CGGradientSubclasses)
+
++ (instancetype) linearGradientWithStartPoint:(CGPoint) startPoint
+                                   startColor:(CGColor) startColor
+                                     endPoint:(CGPoint) endPoint
+                                     endColor:(CGColor) endColor;
+
++ (instancetype) linearGradientWithRect:(CGRect) rect
+                             startColor:(CGColor) startColor
+                               endColor:(CGColor) endColor
+                               rotation:(CARotation) rotation;
+
++ (instancetype) boxGradientWithRoundedRect:(CGRect) rect
+                               cornerRadius:(CGFloat) cornerRadius
+                                      color:(CGColor) color
+                                    feather:(CGFloat) feather
+                               featherColor:(CGColor) endColor;
+
++ (instancetype) radialGradientWithCircle:(CACircle) circle
+                               outerColor:(CGColor) outerColor
+                              innerRadius:(CGFloat) innerRadius
+                               innerColor:(CGColor) innerColor;
+
++ (instancetype) radialGradientWithRect:(CGRect) circle
+                             outerColor:(CGColor) outerColor
+                            innerRadius:(CGFloat) innerRadius
+                             innerColor:(CGColor) innerColor;
+
+@end
+

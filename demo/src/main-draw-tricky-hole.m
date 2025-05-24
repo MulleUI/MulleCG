@@ -144,7 +144,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    paint = [CGPaint paintWithStartColor:CGColorMakeGray()
                                endColor:CGColorMakeBlack()];
    [paint fillWithBounds:aRect
-              NVGcontext:vg];
+                 context:context];
    return( YES);
 }
 

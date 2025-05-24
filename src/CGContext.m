@@ -1,12 +1,12 @@
-   #import "import-private.h"
+#import "import-private.h"
 
 #import "CGContext.h"
 
 #import "CGLayoutContext+CGFont.h"
 #import "CGContext+DebugPrivate.h"
 #import "CGContext+OpenGL.h"
+#import "CGContext+nanovg.h"
 #import "CGContext+Drawing.h"
-#import "CGContext+Shader.h"
 #import "CGContext+Shader.h"
 #import "CGContext+Texture.h"
 #import "CGContext+CGFramebuffer.h"
@@ -99,15 +99,16 @@ static struct
    abort();
 }
 
+
 //
 // due to freetype being singlethreaded (mostly ?) the nvgCreate routines
 // need to run locked so only one thread can create a NVG context at the
 // same time. The same probably has to be done for every font load  ?
 //
 - (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) osContext
-                           nameUTF8String:(char *) nameUTF8String
-                                  shareID:(NSUInteger) shareID
-                                  options:(UIGraphicsOptions) options
+                            nameUTF8String:(char *) nameUTF8String
+                                   shareID:(NSUInteger) shareID
+                                   options:(UIGraphicsOptions) options
 {
    struct mulle_allocator   *allocator;
 

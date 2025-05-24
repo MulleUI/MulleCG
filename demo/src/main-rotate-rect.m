@@ -17,7 +17,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect              rect;
    CGRect              rects[ 3][ 3];
    char                buf[ 128];
-   NVGpaint            paint;
+   CGPaint             *paint;
    struct NVGcontext   *vg;
    unsigned int        i, j;
    NSUInteger          frameNr;
@@ -46,13 +46,13 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    canvas = [layer canvas];
    vg     = CGContextGetNVGContext( context);
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
-      mvgRect( vg, canvas);
-      mvgStrokeWidth( vg, 8);
-      mvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
+   CGContextRect( context, canvas);
+   CGContextStrokeWidth( context, 8);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
-   nvgStroke( vg);
+   CGContextStroke( context);
 
    CGRectPartition3x3( CGRectInset( canvas, 50, 50), CGSizeMake( 100, 100), rects);
 
@@ -69,32 +69,37 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             continue;
 
          rect = CGRectIntegral( rects[ j][ i]);
-         mvgStrokeRectWithColor( vg, rect, 0.5, CGColorMakeWhite());
+         CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeWhite());
 
-         mvgSave( vg);
+         CGContextSave( context);
          {
             angle = CAAngleRotate( angle, CARotation90);
-            paint = [gradient linearGradientNVGpaintWithBounds:rect
-                                                    NVGcontext:vg];
 
+            CGContextTranslate( context, CGRectGetCenterPoint( rect));
+            CGContextRotate( context, CAAngleToRotation( angle));
+            CGContextTranslate( context, CGPointNegate( CGRectGetCenterPoint( rect)));
 
-            mvgTranslate( vg, CGRectGetCenterPoint( rect));
-            mvgRotate( vg, CAAngleToRotation( angle));
-            mvgTranslate( vg, CGPointNegate( CGRectGetCenterPoint( rect)));
+            CGContextBeginPath( context);
+            CGContextRect( context, rect);
+            CGContextFillPaint( context, paint);
+            CGContextFill( context);
 
-            mvgBeginPath( vg);
-            mvgRect( vg, rect);
-            mvgFillPaint( vg, paint);
-            mvgFill( vg);
+            CGContextFontFace( context,"sans");
+            CGContextFontSize( context, 12);
+            CGContextTextColor( context, CGColorMakeWhite());
+            CGContextTextBackgroundColor( context, CGColorMakeBrown());
 
-            [context useFontWithNameUTF8String:"sans"];
-            mvgFontSize( vg, 12);
-            mvgTextColor( vg, CGColorMakeWhite());
-            mvgTextBackgroundColor( vg, CGColorMakeBrown());
-            sprintf( buf, "%.1f°", CAAngleToDegrees( angle));
-            mvgTextInRect( vg, buf, (size_t) -1, rect, CGContentModeLeft, MVGTextAlignVisually);
+            mulle_buffer_do( buf)
+            {
+               mulle_buffer_sprintf( buf, "%.1f°", CAAngleToDegrees( angle));
+               CGContextTextInRect( context, mulle_buffer_get_string( buf),
+                                                 (size_t) -1,
+                                                 rect,
+                                                 CGContentModeLeft,
+                                                 CGTextOptionAlignVisually);
+            }
          }
-         mvgRestore( vg);
+         CGContextRestore( context);
       }
    }
    return( YES);

@@ -44,7 +44,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    mvgBeginPath( vg);
    mvgRect( vg, rect);
    [image fillWithBounds:rect
-              NVGcontext:vg];
+                 context:context];
 #else
    [image drawRect:rect
            options:&options

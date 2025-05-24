@@ -3,8 +3,8 @@
 //
 // prefer a local CGContext over one in import.h
 #ifdef __has_include
-# if __has_include( "CGContext.h")
-#  import "CGContext.h"
+# if __has_include( "CGLayoutContext.h")
+#  import "CGLayoutContext.h"
 # endif
 #endif
 
@@ -29,8 +29,6 @@
 - (CGFont *) fontWithCData:(struct mulle_data) data
         fontNameUTF8String:(char *) name;
 
-- (BOOL) useFontWithNameUTF8String:(char *) name;
-
 // useFont: is obsolete
 - (void) useFont:(CGFont *) font;
 
@@ -49,6 +47,9 @@
 - (void) mulleRelinquishAccessToFonts     MULLE_OBJC_THREADSAFE_METHOD;
 
 @end
+
+CGFont  *CGLayoutContextUseFontWithNameUTF8String( CGLayoutContext *context,
+                                                   char *name);
 
 
 

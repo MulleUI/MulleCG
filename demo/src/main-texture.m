@@ -175,8 +175,8 @@ int   main( int argc, char *argv[])
 
    // different styleMask just for fun
    styleMask = UIWindowStyleMaskDefault;
-   styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
-   styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+   styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
+   styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
 
    [CGContext setDebuggingFlags:YES];
 

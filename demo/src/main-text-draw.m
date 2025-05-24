@@ -28,7 +28,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                           CGPointMake( CGRectGetMinX( rect),
                           CGRectGetMaxY( rect)),
                           NVG_ALIGN_RIGHT|NVG_ALIGN_BOTTOM,
-                          MVGTextAlignVisually);
+                          CGTextOptionAlignVisually);
    return( YES);
 }
 
@@ -58,8 +58,8 @@ int   main( int argc, char *argv[])
    @autoreleasepool
    {
       styleMask = UIWindowStyleMaskDefault;
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
 
       window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 1000, 600)
                          titleUTF8String:"Demo"

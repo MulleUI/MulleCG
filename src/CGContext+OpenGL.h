@@ -11,34 +11,11 @@
 // we want "import.h" always anyway
 #import "import.h"
 
+#import "CGImage.h"
 
 
 @interface CGContext( OpenGL)
 
-+ (NVGcontext *) createPathContext;
-
-+ (CGContextNanoVGBackend) nanoVGBackend;
-+ (char *) nanoVGBackendUTF8String;
-- (char *) nanovgInfoUTF8String;
-
-- (void *) gpuTextureForImageID:(NSInteger) textureID;
-
-
-
-// context must be active
-// read texture data, you need to free the returned bitmap bytes
-- (struct CGBitmap) RGBABytesBitmapOfImage:(CGImage *) image
-                                 allocator:(struct mulle_allocator *) allocator;
-
-//
-// framebuffer needs to be bound here, and context must be active
-// you need to free the returned bitmap bytes
-//
-- (struct CGBitmap) readFramebufferBitmap:(CGPixelRect) rect
-                    framebufferBitmapType:(CGFramebufferBitmapType) type
-                                allocator:(struct mulle_allocator *) allocator;
-
-//
 // call this after beginRender, if you don't want to redraw the whole
 // framebuffer, set clearFramebufferBits to taste. Uses backgroundColor
 // to clear..
@@ -50,12 +27,6 @@
 // pixels, set flag to NO
 - (NSUInteger) framebufferBitsWithColorBit:(BOOL) flag;
 
-// called by -init / -finalize
-- (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options;
-
-// retrieve openGLError if any, print and abort
-- (void) assertNoBackendError:(char *) str;
-
 - (void) bindOpenGLFramebuffer:(void *) framebuffer;
 - (void) bindDefaultOpenGLFramebuffer;
 
@@ -66,43 +37,14 @@
 // drawings should have completed...
 - (struct CGBitmap) framebufferBitmap;
 
-+ (BOOL) supportsAntiAliasing;
-
-- (char *) nanovgInfoUTF8String;
-
-- (CGImage *) resolveMultiSampleImage:(CGImage *) image;
-
-@end
-
-
-@interface CGLayoutContext ( OpenGL)
-
-- (void) _initializeNanoVG:(NSUInteger) flags;
-- (void) _finalizeNanoVG;
+// private for CGContext+nanovg.m
+- (void) _changeRenderOpenGL:(struct CGFrameInfo *) info;
 
 @end
 
 
 void   CGShaderUTF8SourcesParseUniforms( struct CGShaderUTF8Sources *sources,
                                          struct mulle_assoc *assoc);
-
-char   *CGNVGBackendErrorUTF8String( void);
-char   *_CGNVGBackendErrorShortUTF8String( void *error);
-char   *_CGNVGBackendErrorUTF8String( void *error);
-
-
-void  _CGContextCheckBackendError( CGContext *ctxt, char *str);
-
-
-static inline void   CGContextCheckBackendError( CGContext *ctxt, char *str)
-{
-#ifdef DEBUG
-   _CGContextCheckBackendError( ctxt, str);
-#endif
-}
-
-// cleans error state, returns YES if there were errors
-BOOL   CGContextResetBackendError( CGContext *ctxt);
 
 
 struct CGContextFramebuffer
@@ -147,3 +89,10 @@ void   _CGContextBlitFramebufferFramebuffer( CGContext *self,
 CGPixelSize
    _CGContextBitmapSizeOfOpenGLFramebuffer( CGContext *self,
                                             struct CGContextFramebuffer fb);
+
+
+@interface CGImage ( OpenGL)
+
+- (GLint) openGLSamplerType;
+
+@end

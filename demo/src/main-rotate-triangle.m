@@ -10,7 +10,7 @@
 
 
 
-static void   draw_triangle_with_centroid( NVGcontext *vg,
+static void   draw_triangle_with_centroid( CGContext *context,
                                            CGPoint center,
                                            CGSize  size,
                                            CARotation rotation,
@@ -25,25 +25,25 @@ static void   draw_triangle_with_centroid( NVGcontext *vg,
       CGPointData( -0.5,  0.5),
       CGPointData(  0.5,  0.5)
    };
-   float      xform[ 6];
-   CGRect     rect;
-   CGFloat    scale;
-   CGPoint    massCenter;
-   CACircle   circle;
-   float      xy[ 2];
+   CGAffineTransform   xform;
+   CGRect              rect;
+   CGFloat             scale;
+   CGPoint             massCenter;
+   CGPoint             translated;
+   CACircle            circle;
 
    scale = CGSizeGetMaximum( size);
-   mvgSave( vg);
+   CGContextSave( context);
    {
       massCenter = CGPointTriangleGetCentroid( points[ 0], points[ 1], points[ 2]);
 
       // STEPS are all applied in reverse to the path
 
       // 5. move center of scaled triangle to destination
-      mvgTranslate( vg, center);
+      CGContextTranslate( context, center);
 
       // 4. scale (still center at 0.0)
-      mvgScale( vg, CGVectorMake( size.width, size.height));
+      CGContextScale( context, CGVectorMake( size.width, size.height));
 
       // 3. move "unity" triangle back down if needed
 //      if( rotateAroundCentroid)
@@ -51,31 +51,29 @@ static void   draw_triangle_with_centroid( NVGcontext *vg,
 //                                        +massCenter.y));
 
       // 2. rotate around center
-      mvgRotate( vg, rotation);
+      CGContextRotate( context, rotation);
 
       // 1. move "unity" triangle up if needed
       if( rotateAroundCentroid)
-         mvgTranslate( vg, CGPointMake( -massCenter.x,
-                                        -massCenter.y));
-
-      mvgBeginPath( vg);
-      mvgMoveTo( vg, points[ 0]);
-      mvgLineTo( vg, points[ 1]);
-      mvgLineTo( vg, points[ 2]);
-      mvgClosePath( vg);
+      CGContextTranslate( context, CGPointNegate( massCenter));
+      CGContextBeginPath( context);
+      CGContextMoveTo( context, points[ 0]);
+      CGContextLineTo( context, points[ 1]);
+      CGContextLineTo( context, points[ 2]);
+      CGContextClosePath( context);
 
       rect = CGRectMakeWithCenterPointAndSize( CGPointZero, CGSizeMake( 1.0, 1.0));
       [paint fillWithBounds:rect
-                 NVGcontext:vg];
+                    context:context];
 
 
-      mvgCurrentTransform( vg, xform);
-      nvgTransformPoint( &xy[ 0], &xy[ 1], xform, massCenter.x, massCenter.y);
+      xform      = CGContextCurrentTransform( context);
+      translated = CGPointApplyAffineTransform( massCenter, xform);
    }
-   mvgRestore( vg);
+   CGContextRestore( context);
 
-   circle = CACircleMake( CGPointMake( xy[ 0], xy[ 1]), centroidRadius);
-   mvgFillCircleWithPaint( vg, circle, centroidPaint);
+   circle = CACircleMake( translated, centroidRadius);
+   CGContextFillCircleWithPaint( context, circle, centroidPaint);
 }
 
 
@@ -129,11 +127,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          size   = CGSizeMake( rect.size.width * 2.0 / 3.0,
                               rect.size.height * 2.0 / 3.0);
 
-         mvgStrokeRectWithColor( vg, CGRectMakeWithCenterPointAndSize( center, size), 1.0, CGColorMakeOrange());
+         CGContextStrokeRectWithColor( context, CGRectMakeWithCenterPointAndSize( center, size), 1.0, CGColorMakeOrange());
 
-         draw_triangle_with_centroid( vg, center, size, rotation, paint, 5.0, centroidPaint, i == 1);
+         draw_triangle_with_centroid( context, center, size, rotation, paint, 5.0, centroidPaint, i == 1);
 
-         mvgFillCircleWithColor( vg, CACircleMake( center, 3.0), CGColorMakeOrange());
+         CGContextFillCircleWithColor( context, CACircleMake( center, 3.0), CGColorMakeOrange());
       }
    }
    return( YES);

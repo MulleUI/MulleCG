@@ -12,133 +12,105 @@
 #import "import.h"
 
 
+#import "CGContext.h"
 #import "CGPaint+nanovg.h"
-
-
-@interface CGGradient( nanovg)
-
-- (NVGpaint) linearGradientNVGpaintWithBounds:(CGRect) rect
-                                   NVGcontext:(NVGcontext *) vg;
-
-//
-// Use this usually for rotating a gradient around a shape
-// smoothness is usually 1.0f, unless you want a harder gradient
-// rotation is usually 0.0f to 1.0f
-//
-// An easy way to get more than just two color gradients, use two gradients
-// with color alphas of 0.5 and fill twice (or fallback on OpenGL)
-//
-- (NVGpaint) linearGradientNVGpaintWithBounds:(CGRect) rect
-                                   smoothness:(CGFloat) smoothness
-                                   NVGcontext:(NVGcontext *) vg;
-
-// this will rotate the gradient as if it was a giant rectangle
-- (NVGpaint) rectangularLinearGradientNVGpaintWithBounds:(CGRect) rect
-                                              smoothness:(CGFloat) smoothness
-                                              NVGcontext:(NVGcontext *) vg;
-
-//
-// A box gradient is just a linear two color gradient with the "feather"
-// It's prime use is shadows...
-//
-- (NVGpaint) boxGradientNVGpaintWithBounds:(CGRect) rect
-                              cornerRadius:(CGFloat) radius
-                                   feather:(CGFloat) feather
-                                NVGcontext:(NVGcontext *) vg;
-
-- (NVGpaint) radialGradientNVGpaintWithCircle:(CACircle) circle
-                                  innerRadius:(CGFloat) innerRadius
-                                   NVGcontext:(NVGcontext *) vg;
-
-@end
+#import "microvg-nanowrap.h"
 
 
 // will use radialGradient!
-void   mvgFillCircleWithGradient( NVGcontext *vg,
-                                  CACircle circle,
-                                  CGGradient *gradient);
-// will use radialGradient!
-void   mvgStrokeCircleWithGradient( NVGcontext *vg,
-                                    CACircle circle,
-                                    CGFloat strokeWidth,
-                                    CGGradient *gradient);
+void   CGContextFillCircleWithGradientColors( CGContext *context,
+                                              CACircle circle,
+                                              CGColor outerColor,
+                                              CGColor innerColor);
+
+void   CGContextStrokeCircleWithGradientColors( CGContext *context,
+                                                CACircle circle,
+                                                CGFloat strokeWidth,
+                                                CGColor outerColor,
+                                                CGColor innerColor);
+
+//
+// will use linear gradients, these functions may be somewhat
+// cheaper than using a CGGradient
+//
+void   CGContextFillRoundedRectWithGradientColors( CGContext *context,
+                                                   CGRect rect,
+                                                   CGFloat cornerRadius,
+                                                   CGFloat feather,
+                                                   CGColor startColor,
+                                                   CGColor endColor,
+                                                   CGFloat rotation);
+
+void   CGContextStrokeRectWithGradientColors( CGContext *context,
+                                              CGRect rect,
+                                              CGFloat strokeWidth,
+                                              CGColor startColor,
+                                              CGColor endColor,
+                                              CGFloat rotation);
 
 
-static inline void   mvgFillRoundedRectWithGradient( NVGcontext *vg,
-                                                     CGRect rect,
-                                                     CGFloat cornerRadius,
-                                                     CGGradient *gradient)
+
+// some helper functions to avoid having to create a CGGradient object
+
+static inline void   CGContextFillLinearGradient( CGContext *context,
+                                                  CGPoint start,
+                                                  CGColor startColor,
+                                                  CGPoint end,
+                                                  CGColor endColor)
 {
-   mvgFillRoundedRectWithPaint( vg, rect, cornerRadius, gradient);
+   NVGpaint     paint;
+   NVGcontext   *vg;
+
+   vg    = CGContextGetNVGContext( context);
+   paint = mvgLinearGradient( vg, start, startColor, end, endColor);
+   mvgFillPaint( vg, paint);
 }
 
 
-MULLE_CG_EXTERN_GLOBAL
-void   mvgFillRoundedRectWithLinearGradient( NVGcontext *vg,
-                                             CGRect rect,
-                                             CGFloat cornerRadius,
-                                             CGFloat smoothness,
-                                             CGGradient *gradient);
+static inline void   CGContextStrokeLinearGradient( CGContext *context,
+                                                    CGPoint start,
+                                                    CGColor startColor,
+                                                    CGPoint end,
+                                                    CGColor endColor)
+{
+   NVGpaint     paint;
+   NVGcontext   *vg;
 
-MULLE_CG_EXTERN_GLOBAL
-void   mvgFillRoundedRectWithRectangularLinearGradient( NVGcontext *vg,
-                                                        CGRect rect,
-                                                        CGFloat cornerRadius,
-                                                        CGFloat smoothness,
-                                                        CGGradient *gradient);
+   vg    = CGContextGetNVGContext( context);
+   paint = mvgLinearGradient( vg, start, startColor, end, endColor);
+   mvgStrokePaint( vg, paint);
+}
 
-MULLE_CG_EXTERN_GLOBAL
-void   mvgStrokeRoundedRectWithLinearGradient( NVGcontext *vg,
+
+
+static inline void   CGContextFillBoxGradient( CGContext *context,
                                                CGRect rect,
                                                CGFloat cornerRadius,
-                                               CGFloat strokeWidth,
-                                               CGFloat smoothness,
-                                               CGGradient *gradient);
-
-MULLE_CG_EXTERN_GLOBAL
-void   mvgStrokeRoundedRectWithRectangularLinearGradient( NVGcontext *vg,
-                                                          CGRect rect,
-                                                          CGFloat cornerRadius,
-                                                          CGFloat strokeWidth,
-                                                          CGFloat smoothness,
-                                                          CGGradient *gradient);
-
-
-static inline void   mvgFillRectWithGradient( NVGcontext *vg,
-                                              CGRect rect,
-                                              CGGradient *gradient)
+                                               CGColor color,
+                                               CGFloat feather,
+                                               CGColor featherColor)
 {
-   mvgFillRectWithPaint( vg, rect, gradient);
+   NVGpaint     paint;
+   NVGcontext   *vg;
+
+   vg    = CGContextGetNVGContext( context);
+   paint = mvgBoxGradient( vg, rect, cornerRadius, color, feather, featherColor);
+   mvgFillPaint( vg, paint);
 }
 
 
-
-static inline void   mvgStrokeRoundedRectWithGradient( NVGcontext *vg,
-                                                       CGRect rect,
-                                                       CGFloat cornerRadius,
-                                                       CGFloat strokeWidth,
-                                                       CGGradient *gradient)
-{
-   mvgStrokeRoundedRectWithPaint( vg, rect, cornerRadius, strokeWidth, gradient);
-}
-
-
-static inline void    mvgStrokeRectWithGradient( NVGcontext *vg,
+static inline void   CGContextStrokeBoxGradient( CGContext *context,
                                                  CGRect rect,
-                                                 CGFloat strokeWidth,
-                                                 CGGradient *gradient)
+                                                 CGFloat cornerRadius,
+                                                 CGColor color,
+                                                 CGFloat feather,
+                                                 CGColor featherColor)
 {
-   mvgStrokeRectWithPaint( vg, rect, strokeWidth, gradient);
-}
+   NVGpaint     paint;
+   NVGcontext   *vg;
 
-
-
-static inline void   mvgStrokeLineWithGradient( NVGcontext *vg,
-                                                CGPoint start,
-                                                CGPoint end,
-                                                CGFloat strokeWidth,
-                                                CGGradient *gradient)
-{
-   mvgStrokeLineWithPaint( vg, start, end, strokeWidth, gradient);
+   vg    = CGContextGetNVGContext( context);
+   paint = mvgBoxGradient( vg, rect, cornerRadius, color, feather, featherColor);
+   mvgStrokePaint( vg, paint);
 }
 

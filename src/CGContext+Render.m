@@ -6,6 +6,7 @@
 #import "import-private.h"
 
 #import "CGContext+OpenGL.h"
+#import "CGContext+nanovg.h"
 #import "CGContext+CGFramebuffer.h"
 #import "CGContext+DebugPrivate.h"
 
@@ -70,9 +71,9 @@ static struct CGFrameInfo   emptyInfo;
    assert( info->window.pixelRatio != 0.0);
 
    CGContextRenderLog( "Viewport: %s, FB: %s, Window: %s",
-                 CGPixelRectUTF8String( info->viewportFrame),
-                 CGPixelSizeUTF8String( info->window.framebufferSize),
-                 CGSizeUTF8String( info->window.frame.size));
+                           CGPixelRectUTF8String( info->viewportFrame),
+                           CGPixelSizeUTF8String( info->window.framebufferSize),
+                           CGSizeUTF8String( info->window.frame.size));
 
    // not 100% sure why this is written this way
 
@@ -184,41 +185,6 @@ static struct CGFrameInfo   emptyInfo;
 }
 
 
-// flushes drawings doesn't reset glViewport or reset internal caches
-- (void) flushRender
-{
-   assert( CGContextIsActiveInCurrentThread( self));
-
-   CGContextRenderLog( "");
-
-   // if there are no draw commands, this does nothing
-   nvgFlushFrame( _vg);
-}
-
-
-- (void) suspendRender
-{
-   assert( CGContextIsActiveInCurrentThread( self));
-
-   CGContextRenderLog( "");
-   // MEMO: this also flushes the font cache, not sure if this desirable or
-   //       necessary or too painful ??
-   //
-   // We could write a simpler:
-   //
-   // void nvgFlushFrame(NVGcontext* ctx)
-   // {
-   //    ctx->params.renderFlush(ctx->params.userPtr);
-   // }
-   //
-   CGContextCheckBackendError( self, "before nvgEndFrame");
-
-   nvgEndFrame( _vg);
-
-   CGContextCheckBackendError( self, "nvgEndFrame");
-}
-
-
 - (void) endRender
 {
    CGFramebuffer   *framebuffer;
@@ -244,50 +210,6 @@ static struct CGFrameInfo   emptyInfo;
       CGContextRenderLog( "End render into layer %#@", framebuffer);
       [self provideRenderedFramebuffer:framebuffer];
    }
-}
-
-
-//#define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX   0x9048
-//#define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
-- (void) changeRender:(struct CGFrameInfo *) info
-{
-   assert( CGContextIsActiveInCurrentThread( self));
-   assert( info);
-
-   CGContextRenderLog( "%s", CGFrameInfoUTF8String( info));
-   _currentFrameInfo = *info;
-   // wasn't initialized before so ignore
-   if( _currentFrameInfo.window.pixelRatio == 0.0)
-      return;
-
-   assert( _isRendering);
-
-   CGContextCheckBackendError( self, "before nvgChangeFrame");
-
-
-   // MEMO: the gLViewPort should be done afterwards
-   nvgChangeFrame( _vg, _currentFrameInfo.window.frame.size.width,
-                        _currentFrameInfo.window.frame.size.height,
-                        _currentFrameInfo.window.pixelRatio);
-   CGContextCheckBackendError( self, "nvgChangeFrame");
-
-   [self _changeRenderOpenGL:&_currentFrameInfo];
-}
-
-
-- (void) resumeRender
-{
-   assert( _isRendering);
-
-   CGContextRenderLog( "");
-
-   CGContextCheckBackendError( self, "before resumeRender");
-   [self _changeRenderOpenGL:&_currentFrameInfo];
-
-   nvgBeginFrame( _vg, _currentFrameInfo.window.frame.size.width,
-                       _currentFrameInfo.window.frame.size.height,
-                       _currentFrameInfo.window.pixelRatio);
-   CGContextCheckBackendError( self, "nvgBeginFrame");
 }
 
 @end

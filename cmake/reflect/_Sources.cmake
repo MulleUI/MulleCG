@@ -12,18 +12,21 @@ endif()
 #
 set( SOURCES
 nanovg/src/nanovg.c
+src/CGBlendedPaint+Drawing.m
 src/CGBlendedPaint.m
 src/CGBlendedPaint+nanovg.m
 src/CGColor+UTF8String.m
 src/CGContextBase.m
+src/CGContext+CGDrawable.m
 src/CGContext+CGFramebuffer.m
 src/CGContext+CGImage.m
-src/CGContext+Drawing.m
 src/CGContext+OpenGL.m
 src/CGContext+Render.m
 src/CGContext+Shader.m
 src/CGContext+Texture.m
+src/CGContext+UIGraphicsDrawing.m
 src/CGContext.m
+src/CGContext+nanovg.m
 src/CGDrawable.m
 src/CGFont.m
 src/CGFramebuffer.m
@@ -35,6 +38,7 @@ src/CGImage.m
 src/CGImage+nanovg.m
 src/CGLayoutContext+CGFont.m
 src/CGLayoutContext.m
+src/CGPaint+Drawing.m
 src/CGPaint.m
 src/CGPaint+nanovg.m
 src/CGPath.c
