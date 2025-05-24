@@ -308,7 +308,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
                                (size_t) -1,
                                iconRect,
                                CGContentModeScaleAspectFit,
-                               MVGTextAlignVisually);
+                               CGTextOptionAlignVisually);
          }
 
          textRect = MulleLayoutGetRemainingRowContentRect( &layout);
@@ -325,7 +325,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
                             (size_t) -1,
                             CGRectInset( textRect, 4, 4),
                             CGContentModeScaleAspectFit,
-                            MVGTextAlignVisually);
+                            CGTextOptionAlignVisually);
       }
       MulleLayoutDone( &layout);
    }

@@ -510,7 +510,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    for( i = 0; i < 3; i++)
    {
       mvgBeginPath( vg);
-      mvgAddCGPath( vg, &paths[ i]);
+      CGContextAddCGPath( context, &paths[ i]);
       mvgFillColor( vg, colors[ i]);
       mvgFill( vg);
 
@@ -595,8 +595,8 @@ int   main( int argc, char *argv[])
    @autoreleasepool
    {
       styleMask = UIWindowStyleMaskDefault;
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
 
       window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 1000, 600)
                          titleUTF8String:"Demo"

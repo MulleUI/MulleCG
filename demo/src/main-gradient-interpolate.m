@@ -87,16 +87,16 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
          rect = grid[ y][ x];
          rect = CGRectIntegral( rect);
-         mvgFillRectWithColor( vg, rect, CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.5));
+         CGContextFillRectWithColor( context, rect, CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.5));
 
          CGRectPartitionVertically( rect, 0.0, 3, subrows);
-         mvgFillRectWithPaint( vg, CGRectInset( CGRectIntegral( subrows[ 0]), 1.0, 1.0), gradient[ 0]);
+         CGContextFillRectWithPaint( context, CGRectInset( CGRectIntegral( subrows[ 0]), 1.0, 1.0), gradient[ 0]);
          CGRectPartitionVertically( CGRectInset( CGRectIntegral( subrows[ 1]), 1.0, 1.0), 0.0, 4, subsubrows);
-         mvgShapeAntiAlias( vg, NO);
+         CGContextShapeAntiAlias( context, NO);
          for( j = 0; j < 4; j++)
-            mvgFillRectWithPaint( vg, subsubrows[ j], interpolated[ j]);
-         mvgShapeAntiAlias( vg, YES);
-         mvgFillRectWithPaint( vg, CGRectInset( CGRectIntegral( subrows[ 2]), 1.0, 1.0), gradient[ 1]);
+            CGContextFillRectWithPaint( context, subsubrows[ j], interpolated[ j]);
+         CGContextShapeAntiAlias( context, YES);
+         CGContextFillRectWithPaint( context, CGRectInset( CGRectIntegral( subrows[ 2]), 1.0, 1.0), gradient[ 1]);
       }
    }
    return( YES);

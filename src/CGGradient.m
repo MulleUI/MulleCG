@@ -24,14 +24,13 @@
 @end 
 
 
-
-@implementation _CGTwoColorGradient
+@implementation CGTwoColorGradient
 
 + (instancetype) newWithStartColor:(CGColor) startColor
                           endColor:(CGColor) endColor
                           rotation:(CARotation) rotation
 {
-   _CGTwoColorGradient   *obj;
+   CGTwoColorGradient   *obj;
 
    obj = NSAllocateObject( self, 0, NULL);
    obj->_startColor = startColor;
@@ -85,11 +84,10 @@
 
 - (CGGradient *) rotatedGradient:(CARotation) rotation
 {
-   return( [[_CGTwoColorGradient newWithStartColor:_startColor
-                                          endColor:_endColor
-                                          rotation:_rotation + rotation] autorelease]);
+   return( [[CGTwoColorGradient newWithStartColor:_startColor
+                                         endColor:_endColor
+                                         rotation:_rotation + rotation] autorelease]);
 }
-
 
 @end
 
@@ -252,9 +250,9 @@ static id   CGGradientNewWithStartColorAndEndColor(
    if( CGColorEqualToColor( startColor, endColor))
       return( [_CGMonoColor newWithColor:startColor]);
 
-   return( [_CGTwoColorGradient newWithStartColor:startColor
-                                         endColor:endColor
-                                         rotation:rotation]);
+   return( [CGTwoColorGradient newWithStartColor:startColor
+                                        endColor:endColor
+                                        rotation:rotation]);
 }
 
 
@@ -271,9 +269,9 @@ static id   CGGradientNewWithColors( CGColor *colors,
    {
    case 0  : return( nil);
    case 1  : return( [_CGMonoColor newWithColor:colors[ 0]]);
-   case 2  : return( [_CGTwoColorGradient newWithStartColor:colors[ 0]
-                                                   endColor:colors[ 1]
-                                                   rotation:rotation]);
+   case 2  : return( [CGTwoColorGradient newWithStartColor:colors[ 0]
+                                                  endColor:colors[ 1]
+                                                  rotation:rotation]);
    default : return( [_CGMultiColorGradient newWithColors:colors
                                                  locations:locations
                                                      count:count
@@ -547,6 +545,248 @@ static CGColor   alphizer( CGColor color, void *alpha_p)
 @end
 
 
+@implementation CGLinearGradient
+
+static Class  CGLinearGradientClass;
+
++ (void) load
+{
+   CGLinearGradientClass = self;
+}
+
+
++ (instancetype) linearGradientWithStartPoint:(CGPoint) startPoint
+                                   startColor:(CGColor) startColor
+                                     endPoint:(CGPoint) endPoint
+                                     endColor:(CGColor) endColor
+{
+   CGLinearGradient   *obj;
+   CGFloat            dx;
+   CGFloat            dy;
+
+   dx = endPoint.x - startPoint.x;
+   dy = endPoint.y - startPoint.y;
+   if( dx == 0.0 || dy == 0.0)
+      return( [self gradientWithStartColor:startColor
+                                  endColor:endColor]);
+
+   obj                = NSAllocateObject( self, 0, NULL);
+   obj->_startColor   = startColor;
+   obj->_endColor     = endColor;
+   obj->_startPoint   = startPoint;
+   obj->_endPoint     = endPoint;
+   obj->_rotation     = 0.0;
+
+   return( [obj autorelease]);
+}
+
+//
+// need to keep rotationInfo alive for animation
+//
+- (CGGradient *) rotatedGradient:(CARotation) rotation
+{
+   CGLinearGradient   *obj;
+
+   obj                = NSAllocateObject( [self class], 0, NULL);
+   obj->_startColor   = self->_startColor;
+   obj->_endColor     = self->_endColor;
+   obj->_startPoint   = self->_startPoint;
+   obj->_endPoint     = self->_endPoint;
+   obj->_rotation    += rotation;
+
+   return( [obj autorelease]);
+}
+
+
+@end
+
+
+@implementation CGBoxGradient
+
+static Class  CGBoxGradientClass;
+
++ (void) load
+{
+   CGBoxGradientClass = self;
+}
+
+
++ (instancetype) boxGradientWithRoundedRect:(CGRect) rect
+                               cornerRadius:(CGFloat) cornerRadius
+                                      color:(CGColor) color
+                                    feather:(CGFloat) feather
+                               featherColor:(CGColor) featherColor
+{
+   CGBoxGradient   *obj;
+
+   obj                = NSAllocateObject( self, 0, NULL);
+   obj->_startColor   = color;
+   obj->_endColor     = featherColor;
+   obj->_rect         = rect;
+   obj->_feather      = feather;
+   obj->_cornerRadius = cornerRadius;
+
+   return( [obj autorelease]);
+}
+
+
+- (CGColor) color
+{
+   return( self->_startColor);
+}
+
+
+- (CGColor) featherColor
+{
+   return( self->_endColor);
+}
+
+
+- (CGFloat) rotation
+{
+   return( 0);
+}
+
+
+- (CGGradient *) rotatedGradient:(CARotation) rotation
+{
+   return( self);
+}
+
+@end
+
+
+@implementation CGRadialGradient
+
+
+static Class  CGRadialGradientClass;
+
++ (void) load
+{
+   CGRadialGradientClass = self;
+}
+
+
++ (instancetype) radialGradientWithCircle:(CACircle) circle
+                               outerColor:(CGColor) outerColor
+                              innerRadius:(CGFloat) innerRadius
+                               innerColor:(CGColor) innerColor
+{
+   CGRadialGradient   *obj;
+
+   obj               = NSAllocateObject( self, 0, NULL);
+   obj->_startColor  = outerColor;
+   obj->_endColor    = innerColor;
+   obj->_circle      = circle;
+   obj->_innerRadius = innerRadius;
+
+   return( [obj autorelease]);
+}
+
+
+- (CGColor) innerColor
+{
+   return( self->_endColor);
+}
+
+
+- (CGColor) outerColor
+{
+   return( self->_startColor);
+}
+
+
+- (CGFloat) rotation
+{
+   return( 0);
+}
+
+
+- (CGGradient *) rotatedGradient:(CARotation) rotation
+{
+   return( self);
+}
+
+@end
+
+
+@implementation CGGradient( CGGradientSubclasses)
+
+// paranoia: but could be warranted
++ (mulle_objc_dependency_t *) dependencies
+{
+   static mulle_objc_dependency_t   dependencies[] =
+   {
+      MULLE_OBJC_CLASS_DEPENDENCY( CGBoxGradient),
+      MULLE_OBJC_CLASS_DEPENDENCY( CGRadialGradient),
+      MULLE_OBJC_CLASS_DEPENDENCY( CGLinearGradient),
+      MULLE_OBJC_NO_DEPENDENCY
+   };
+   return( dependencies);
+}
+
+
++ (instancetype) linearGradientWithStartPoint:(CGPoint) startPoint
+                                   startColor:(CGColor) startColor
+                                     endPoint:(CGPoint) endPoint
+                                     endColor:(CGColor) endColor
+{
+   return( MulleObjCObjectPerformSelector1( CGLinearGradientClass, _cmd, (id) _param));
+}
+
+
++ (instancetype) linearGradientWithRect:(CGRect) rect
+                             startColor:(CGColor) startColor
+                               endColor:(CGColor) endColor
+                               rotation:(CARotation) rotation
+{
+   rect = CGRectRotate( rect, rotation);
+   return( [CGLinearGradientClass linearGradientWithStartPoint:CGRectGetOriginPoint( rect)
+                                                    startColor:startColor
+                                                      endPoint:CGRectGetOppositePoint( rect)
+                                                      endColor:endColor]);
+}
+
+
+
+
++ (instancetype) boxGradientWithRoundedRect:(CGRect) rect
+                               cornerRadius:(CGFloat) cornerRadius
+                                      color:(CGColor) color
+                                    feather:(CGFloat) feather
+                               featherColor:(CGColor) endColor
+{
+   return( MulleObjCObjectPerformSelector1( CGBoxGradientClass, _cmd, (id) _param));
+}
+
+
++ (instancetype) radialGradientWithCircle:(CACircle) circle
+                               outerColor:(CGColor) outerColor
+                              innerRadius:(CGFloat) innerRadius
+                               innerColor:(CGColor) innerColor
+{
+   return( MulleObjCObjectPerformSelector1( CGRadialGradientClass, _cmd, (id) _param));
+}
+
+
++ (instancetype) radialGradientWithRect:(CGRect) rect
+                             outerColor:(CGColor) outerColor
+                            innerRadius:(CGFloat) innerRadius
+                             innerColor:(CGColor) innerColor
+{
+   CACircle   circle;
+
+   circle = CGRectGetInnerCircle( rect);
+   return( [CGRadialGradientClass radialGradientWithCircle:circle
+                                                outerColor:outerColor
+                                               innerRadius:innerRadius
+                                                innerColor:innerColor]);
+}
+
+@end
+
+
+
 CGGradient  *CGGradientCreateWithRotation( CGColor startColor,
                                            CGColor endColor,
                                            CARotation rotation)
@@ -555,7 +795,7 @@ CGGradient  *CGGradientCreateWithRotation( CGColor startColor,
 
    gradient = CGGradientNewWithStartColorAndEndColor( startColor,
                                                       endColor,
-                                                      rotation);   
+                                                      rotation);
    gradient = [gradient autorelease];
    return( gradient);
 }

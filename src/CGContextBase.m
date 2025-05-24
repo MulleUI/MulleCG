@@ -83,7 +83,6 @@ static struct
 }
 
 
-
 - (void) finalize
 {
    [self _finalizeResourceStorage:&_resourceStorage];
@@ -134,12 +133,6 @@ static struct
 - (struct NVGcontext *) nvgContext
 {
    return( _vg);
-}
-
-
-- (void) reset
-{
-   nvgReset( _vg);
 }
 
 

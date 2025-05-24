@@ -6,6 +6,7 @@
 #import "import-private.h"
 
 #import "CGFont.h"
+#import "CGContext+Drawing.h"
 
 #include <assert.h>
 
@@ -130,7 +131,6 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 }
 
 
-
 - (void) mulleGainAccessToFonts
 {
    char    *name;
@@ -153,7 +153,6 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
       [font mulleRelinquishAccess];
    }
 }
-
 
 
 - (CGFont *) fontWithCData:(struct mulle_data) data
@@ -217,11 +216,11 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    if( font)
       return( font);
 
-   fontID = mvgCreateFontMem( [self nvgContext],
-                              "fallback",
-                              emoji_font_ttf,
-                              (int) s_emoji_font_ttf,
-                              0);
+   fontID = CGContextCreateFontMem( self,
+                                   "fallback",
+                                   emoji_font_ttf,
+                                   (int) s_emoji_font_ttf,
+                                   0);
    font   = [CGFont fontWithNameUTF8String:"fallback"
                                     fontID:fontID];
 
@@ -251,11 +250,11 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    {
       if( ! strcmp( font_by_name[ i].name, s))
       {
-         fontID = mvgCreateFontMem( _vg,
-                                    s,
-                                    font_by_name[ i].data.bytes,
-                                    (int) font_by_name[ i].data.length,
-                                    0);
+         fontID = CGContextCreateFontMem( self,
+                                          s,
+                                          font_by_name[ i].data.bytes,
+                                          (int) font_by_name[ i].data.length,
+                                          0);
          break;
       }
    }
@@ -265,7 +264,7 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 
    fallbackFont = [self fallbackFont];
    if( fallbackFont)
-      mvgAddFallbackFontId( _vg, fontID, [fallbackFont fontID]);
+      CGContextAddFallbackFontId( self, fontID, [fallbackFont fontID]);
 
    font = [CGFont fontWithNameUTF8String:s
                                   fontID:fontID];
@@ -275,38 +274,39 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
    return( font);
 }
 
-
-- (BOOL) useFontWithNameUTF8String:(char *) name
-{
-   CGFont   *font;
-
-   font = [self fontWithNameUTF8String:name];      
-   if( ! font)
-   {
-      nvgFontFace( _vg, _defaultFontName);
-      return( NO);
-   }
-
-   nvgFontFace( _vg, name);
-   return( YES);
-}
-
-
 - (CGFont *) defaultFont
 {
    return( [self fontWithNameUTF8String:NULL]);
 }
 
 
+// just for a stupid compiler warning
+
+CGFont  *CGLayoutContextUseFontWithNameUTF8String( CGLayoutContext *self, char *name)
+{
+   CGFont   *font;
+   char     *face;
+
+   font = [self fontWithNameUTF8String:name];      
+
+   // do not use CGContextFontFace, because it "uses" us
+   assert( self->_defaultFontName);
+   face = font ? name : self->_defaultFontName;
+   nvgFontFace( CGLayoutContextGetNVGContext( self), face);
+   return( font);
+}
+
+
 - (void) useFont:(CGFont *) font
 {
+   char     *face;
+
    // TODO: maybe boobytrappe mvgFontFace to make it unusable as one must
    //       use [font nameUTF8String] to get the proper string...
-   if( font)
-      nvgFontFace( _vg, [font nameUTF8String]);
-   else
-      nvgFontFace( _vg, _defaultFontName);
+   assert( self->_defaultFontName);
+   face = font ? [font nameUTF8String] : self->_defaultFontName;
 
+   nvgFontFace( _vg, face);
    _hasLoadedFont = YES;
 }
 
@@ -315,13 +315,13 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 {
    if( ! font)
       return( NULL);
-   return( nvgGetFontHandle( _vg, [font fontID]));
+   return( CGContextGetFontHandle( self, [font fontID]));
 }
 
 
 - (void *) internalFontHandle
 {
-   return( nvgGetFontHandle( _vg, -1));
+   return( CGContextGetFontHandle( self, -1));
 }
 
 @end

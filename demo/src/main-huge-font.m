@@ -88,8 +88,8 @@ int   main( int argc, char *argv[])
    @autoreleasepool
    {
       styleMask = UIWindowStyleMaskDefault;
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
 
       // TODO: if window > 512 + 20, then initially nanovg will fail
       window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 800, 500)

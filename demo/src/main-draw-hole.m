@@ -129,7 +129,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          paint = [CGPaint paintWithStartColor:CGColorMake( j / 1.0, i / 3.0, 0.0, 1.0)
                                      endColor:CGColorMakeLightGray()];
          [paint fillWithBounds:rect
-                    NVGcontext:vg];
+                       context:context];
 
          sprintf( buf, "%c%c%c %s%s",
             mode[ 0] == NVG_HOLE ? 'H' : 'S',

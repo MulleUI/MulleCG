@@ -63,13 +63,13 @@
 
 
 - (void) fillWithBounds:(CGRect) bounds
-             NVGcontext:(NVGcontext *) vg
+              CGContext:(CGContext *) context
 {
    [_paint fillWithBounds:bounds
-              NVGcontext:vg];
+                  context:context];
    [_rotatedPaint strokeWithBounds:bounds
                        strokeWidth:_strokeWidth
-                        NVGcontext:vg];
+                           context:context];
 }
 
 @end
@@ -102,7 +102,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                      rotation:factor];
    customPaint = [CustomPaint paintWithPaint:gradient
                                  strokeWidth:10];
-   mvgFillRectWithPaint( vg, rect, customPaint);
+   CGContextFillRectWithPaint( context, rect, customPaint);
 
    return( YES);
 }

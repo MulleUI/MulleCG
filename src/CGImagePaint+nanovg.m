@@ -1,28 +1,44 @@
 //
 // Copyright (c) <|YEAR|> Nat!, Mulle kybernetiK
 //
-#import "CGImagePaint+nanovg.h"
+#import "CGImagePaint.h"
 
 #import "import-private.h"
 
+#import "CGContext.h"
 #import "CGImage.h"
-#import "microvg-nanowrap.h"
+#import "CGTypes.h"
+#import "nanovg.h"
 
 
 @implementation CGImagePaint( nanovg)
 
 - (NVGpaint) NVGpaintWithBounds:(CGRect) rect
-                          alpha:(CGFloat) alpha
-                     NVGcontext:(NVGcontext *) vg
-{
-   CGImage   *image;
+                   paintOptions:(struct CGPaintOptions *) options
+                        context:(CGContext *) context
 
-   image = [_image resolvedImage];
-   return( mvgImagePattern( vg,
-                            rect,
-                            _rotation,
-                            [image textureID],
-                            _alpha * alpha));
+{
+   CGImage       *image;
+   CGTextureID   textureID;
+   NVGcontext    *vg;
+
+   assert( options);
+   assert( options->alpha >= 0.0 && options->alpha <= 1.0);
+
+   image     = [_image resolvedImage];
+   textureID = [image textureID];
+
+   if( ! context || textureID == CGTextureIDInvalid)
+      return( (NVGpaint){ 0});
+
+   vg = CGContextGetNVGContext( context);
+   return( nvgImagePattern( vg, rect.origin.x,
+                                rect.origin.y,
+                                rect.size.width,
+                                rect.size.height,
+                                CARotationToRadians( options->rotation + _rotation),
+                                textureID,
+                                options->alpha * _alpha));
 }
 
 @end

@@ -64,8 +64,27 @@ struct NVGcontext;
 - (NSThread *) activeThread                            MULLE_OBJC_THREADSAFE_METHOD;
 
 - (struct NVGcontext *) nvgContext;
-- (void) reset; // resets drawing state (incl. scissor and transform)
 
 @end
 
+
+
+//
+// use these functions, during rendering where we assume self->_vg is not
+// suddenly changed by someone
+//
+MULLE_C_CONST_RETURN
+static inline struct NVGcontext   *CGContextBaseGetNVGContext( CGContextBase *self)
+{
+   if( ! self)
+      return( NULL);
+   return( ((struct{ @defs( CGContextBase); } *) self)->_vg);
+}
+
+
+MULLE_C_CONST_RETURN
+static inline struct NVGcontext   *_CGContextBaseGetNVGContext( CGContextBase *self)
+{
+   return( ((struct{ @defs( CGContextBase); } *) self)->_vg);
+}
 

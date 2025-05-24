@@ -86,7 +86,6 @@ void   mvgStrokeLineVWithNVGPaint( NVGcontext *vg, CGPoint p, CGFloat h, CGFloat
 }
 
 
-
 void   mvgFillRoundedRectWithColor( NVGcontext *vg,
                                     CGRect rect,
                                     CGFloat cornerRadius,
@@ -187,7 +186,7 @@ void   mvgStrokeInsideOfRoundedRectWithColor( NVGcontext *vg,
 {
    mvgBeginPath( vg);
    {
-      rect = CGRectInset( rect, strokeWidth / 2.0f, strokeWidth / 2.0f);
+      rect = CGRectMakeStrokeRect( rect, strokeWidth, CGInside);
 
       mvgRoundedRect( vg, rect, cornerRadius);
       mvgStrokeColor( vg, color);
@@ -220,7 +219,7 @@ void   mvgStrokeInsideOfRectWithColor( NVGcontext *vg,
 {
    mvgBeginPath( vg);
    {
-      rect = CGRectInset( rect, strokeWidth / 2.0f, strokeWidth / 2.0f);
+      rect = CGRectMakeStrokeRect( rect, strokeWidth, CGInside);
 
       mvgRect( vg, rect);
       mvgStrokeColor( vg, color);
@@ -368,19 +367,21 @@ void   mvgTextInRect( struct NVGcontext *vg,
                       size_t length,
                       CGRect rect,
                       CGContentMode contentMode,
-                      MulleTextOptions options)
+                      CGTextOptions options)
 {
-   CGRect                    vbounds;
-   CGPoint                   origin;
-   CGRect                    coverage;
-   CGFloat                   hfactor;
-   CGFloat                   vfactor;
-   CGFloat                   factor;
-   CGFloat                   maxFactor;
-   float                     fontSize;
-   int                       binSearch;
-   CGContentMode             fillContentMode;
-   struct MulleTextMetrics   metrics;
+   CGRect          vbounds;
+   CGPoint         origin;
+   CGRect          coverage;
+   CGFloat         hfactor;
+   CGFloat         vfactor;
+   CGFloat         factor;
+   CGFloat         maxFactor;
+   float           fontSize;
+   float           lineHeight;
+   float           ascender;
+   float           descender;
+   int             binSearch;
+   CGContentMode   fillContentMode;
 
    if( ! s)
       return;
@@ -401,7 +402,7 @@ void   mvgTextInRect( struct NVGcontext *vg,
       nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 
       fillContentMode = CGContentModeLeft;
-      if( options & MVGTextFill)
+      if( options & CGTextOptionFill)
       {
          if( contentMode > CGContentModeScaleAspectFill)
             fillContentMode = contentMode;
@@ -416,7 +417,7 @@ void   mvgTextInRect( struct NVGcontext *vg,
          nvgFontSize( vg, REFERENCE_FONTSIZE); // need large font for precision
       }
 
-      if( options & MVGTextAlignVisually)
+      if( options & CGTextOptionAlignVisually)
       {
          mvgTextVisualBounds( vg, CGPointZero, s, length, &coverage);
       }
@@ -488,7 +489,7 @@ void   mvgTextInRect( struct NVGcontext *vg,
       // so we can't get more precision
       if( factor != 1.0f)
       {
-         metrics = mvgTextMetrics( vg);
+         nvgTextMetrics( vg, &ascender, &descender, &lineHeight);
 
          if( binSearch)
          {
@@ -496,7 +497,7 @@ void   mvgTextInRect( struct NVGcontext *vg,
             fontSize = round_to_one_tenth( REFERENCE_FONTSIZE * maxFactor);
             fontSize = mvgSearchFontSizeForText( vg, s, length, fontSize, rect.size.width);
             nvgFontSize( vg, fontSize);
-            vbounds  = CGRectMake( 0, 0, rect.size.width, metrics.lineHeight);
+            vbounds  = CGRectMake( 0, 0, rect.size.width, lineHeight);
          }
          else
          {
@@ -508,17 +509,17 @@ void   mvgTextInRect( struct NVGcontext *vg,
          if( fontSize < 5.0f)
             break;
 
-         if( options & MVGTextAlignVisually)
+         if( options & CGTextOptionAlignVisually)
             coverage = vbounds;
          else
-            coverage = CGRectMake( 0, 0, rect.size.width, metrics.lineHeight);
+            coverage = CGRectMake( 0, 0, rect.size.width, lineHeight);
 
 #ifdef RENDER_DEBUG
          mvgSave( vg);
          {
             char  buf[ 256];
 
-            sprintf( buf, "fontSize: %g  lineh: %g", fontSize, metrics.lineHeight);
+            sprintf( buf, "fontSize: %g  lineh: %g", fontSize, lineHeight);
             mvgFontSize( vg, 16.0);
             mvgFormat( vg, CGPointZero, buf);
          }
@@ -540,27 +541,27 @@ void   mvgTextInRect( struct NVGcontext *vg,
       origin.x -= coverage.origin.x;
       origin.y -= coverage.origin.y;
 
-      if( options & MVGTextAlignBaseline)
+      if( options & CGTextOptionAlignBaseline)
       {
-         metrics = mvgTextMetrics( vg);
+         nvgTextMetrics( vg, &ascender, &descender, &lineHeight);
 
          switch( contentMode)
          {
          case CGContentModeTopLeft     :
          case CGContentModeTop         :
-         case CGContentModeTopRight    : origin.y -= metrics.ascender; break;
+         case CGContentModeTopRight    : origin.y -= ascender; break;
 
          case CGContentModeLeft        :
          case CGContentModeCenterPoint :
-         case CGContentModeRight       : origin.y = CGRectGetMidY( rect) - metrics.ascender; break;
+         case CGContentModeRight       : origin.y = CGRectGetMidY( rect) - ascender; break;
 
          case CGContentModeBottomLeft  :
          case CGContentModeBottom      :
-         case CGContentModeBottomRight : origin.y -= metrics.descender; break;
+         case CGContentModeBottomRight : origin.y -= descender; break;
          }
       }
 
-      if( options & MVGTextNoClip)
+      if( options & CGTextOptionNoClip)
       {
          mvgText( vg, origin, s, length);
       }
@@ -602,7 +603,7 @@ void   mvgFormat( struct NVGcontext *vg, CGPoint point, char *format, ...)
 void   mvgFormatInRect( struct NVGcontext *vg,
                         CGRect rect,
                         CGContentMode contentMode,
-                        MulleTextOptions options,
+                        CGTextOptions options,
                         char *format,
                         ...)
 {
@@ -631,7 +632,7 @@ CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
                                            char *s,
                                            size_t length,
                                            int alignment,
-                                           MulleTextOptions options)
+                                           CGTextOptions options)
 {
    int      halign;
    int      valign;
@@ -658,7 +659,7 @@ CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
    nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
    nvgTextVisualBounds( vg, 0, 0, s, &s[ length], bounds);
 
-   if( options & MVGTextAlignVisually)
+   if( options & CGTextOptionAlignVisually)
    {
       coverage = CGRectMake( bounds[ 0],
                              bounds[ 1],
@@ -690,7 +691,7 @@ CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
    nvgRestore( vg);
 #endif
 
-   if( options & MVGTextAlignVisually)
+   if( options & CGTextOptionAlignVisually)
    {
       switch( valign)
       {
@@ -731,7 +732,7 @@ void   _mvgExtendedAlignedText( struct NVGcontext *vg,
                                 size_t length,
                                 CGPoint origin,
                                 int alignment,
-                                MulleTextOptions options)
+                                CGTextOptions options)
 {
    CGPoint   adjust;
 

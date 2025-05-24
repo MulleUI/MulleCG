@@ -7,6 +7,7 @@
 #import "CGContext+DebugPrivate.h"
 #import "CGContext.h"
 #import "CGContext+OpenGL.h"
+#import "CGContext+nanovg.h"
 #import "CGContext+Texture.h"
 
 #include <errno.h>

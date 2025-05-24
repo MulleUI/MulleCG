@@ -215,7 +215,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
  // TODO: use textColor
 
          origin = textOriginForAlignment( rect, alignment);
-         adjust = _mvgTLAdjustmentForVisualBounds( vg, s, (size_t) -1, alignment, MVGTextAlignVisually);
+         adjust = _mvgTLAdjustmentForVisualBounds( vg, s, (size_t) -1, alignment, CGTextOptionAlignVisually);
          nvgText( vg, origin.x + adjust.x, origin.y + adjust.y, s, NULL);
 
          nGlyphs = nvgTextGlyphPositions( vg, origin.x + adjust.x, origin.y + adjust.y, s, NULL, positions, 32);
@@ -264,8 +264,8 @@ int   main( int argc, char *argv[])
    @autoreleasepool
    {
       styleMask = UIWindowStyleMaskDefault;
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
 
       window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 1000, 600)
                          titleUTF8String:"Demo"

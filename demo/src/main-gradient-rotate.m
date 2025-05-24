@@ -8,15 +8,14 @@
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CGRect              canvas;
-   CGRect              rect;
-   CGRect              rects[ 3][ 3];
-   CGGradient          *gradient;
-   struct NVGcontext   *vg;
-   unsigned int        i, j;
-   CAAngle             angle;
-   NVGpaint            paint;
-   char                buf[ 128];
+   CGRect         canvas;
+   CGRect         rect;
+   CGRect         rects[ 3][ 3];
+   CGGradient     *gradient;
+   unsigned int   i, j;
+   CAAngle        angle;
+   NVGpaint       paint;
+   char           buf[ 128];
 
    // directions as we want the texture rotated in each rectangle
    static CAAngle   directions[ 9] =
@@ -36,15 +35,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
 
    canvas = [layer canvas];
-   vg     = CGContextGetNVGContext( context);
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
-      mvgRect( vg, canvas);
-      mvgStrokeWidth( vg, 8);
-      mvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
+      CGContextRect( context, canvas);
+      CGContextStrokeWidth( context, 8);
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
-   nvgStroke( vg);
+   CGContextStroke( context);
 
    CGRectPartition3x3( CGRectInset( canvas, 4, 4), CGSizeMake( 4, 4), rects);
 
@@ -59,27 +57,34 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
          rect = CGRectIntegral( rects[ j][ i]);
 
-         mvgBeginPath( vg);
-         mvgRect( vg, rect);
+         CGContextBeginPath( context);
+         CGContextRect( context, rect);
 
          // TODO: still a little weird
          // the "unrotated" gradient will be 0.0 rotation, which is North
          // but we want it so show up in East, so rotate it.
          angle    = CAAngleRotate( angle, CARotation90);
-         gradient = [CGGradient gradientWithStartColor:CGColorMakeGoldenrod()
+         gradient = [CGGradient linearGradientWithRect:rect
+                                            startColor:CGColorMakeGoldenrod()
                                               endColor:CGColorMakeMagenta()
                                               rotation:CAAngleToRotation( angle)];
-         paint    = [gradient linearGradientNVGpaintWithBounds:rect
-                                                    NVGcontext:vg];
-         mvgFillPaint( vg, paint);
-         mvgFill( vg);
+         CGContextFillPaint( context, gradient);
+         CGContextFill( context);
 
          [context useFontWithNameUTF8String:"sans"];
-         mvgFontSize( vg, 12);
-         mvgTextColor( vg, CGColorMakeBlack());
-         mvgTextBackgroundColor( vg, CGColorMakeOrange());
-         sprintf( buf, "%.1f°", CAAngleToDegrees( angle));
-         mvgTextInRect( vg, buf, (size_t) -1, rect, CGContentModeLeft, MVGTextAlignVisually);
+         CGContextFontSize( context, 12);
+         CGContextTextColor( context, CGColorMakeBlack());
+         CGContextTextBackgroundColor( context, CGColorMakeOrange());
+
+         mulle_buffer_do( buf)
+         {
+            mulle_buffer_sprintf( buf, "%.1f°", CAAngleToDegrees( angle));
+            CGContextTextInRect( context, mulle_buffer_get_string( buf),
+                                              (size_t) -1,
+                                              rect,
+                                              CGContentModeLeft,
+                                              CGTextOptionAlignVisually);
+         }
       }
    }
    return( YES);

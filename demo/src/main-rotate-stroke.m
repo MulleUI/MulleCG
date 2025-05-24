@@ -24,6 +24,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    unsigned int        i, j;
    NSUInteger          frameNr;
    double              x;
+   CGStrokeOptions     options;
 
    // directions as we want the texture rotated in each rectangle
    static CAAngle   directions[ 9] =
@@ -67,6 +68,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                         endColor:CGColorMakeMagenta()
                                         rotation:rotation];
 
+   options                  = CGStrokeOptionsDefault;
+   options.paint.smoothness = 0.25;
+
    for( j = 0; j < 3; j++)
    {
       for( i = 0; i < 3; i++)
@@ -81,10 +85,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          mvgSave( vg);
          {
             angle = CAAngleRotate( angle, CARotation90);
-            paint = [gradient linearGradientNVGpaintWithBounds:rect
-                                                    smoothness:0.25f
-                                                    NVGcontext:vg];
-
 
             mvgTranslate( vg, CGRectGetCenterPoint( rect));
             mvgRotate( vg, CAAngleToRotation( angle));
@@ -92,16 +92,17 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
             mvgBeginPath( vg);
             mvgRect( vg, rect);
-            mvgStrokePaint( vg, paint);
+
             mvgStrokeWidth( vg, 8.0);
+            CGContextStrokePaintWithOptions( context, gradient, rect, 8.0, &options);
             mvgStroke( vg);
 
-            [context useFontWithNameUTF8String:"sans"];
+            CGContextFontFace( context,"sans");
             mvgFontSize( vg, 12);
             mvgTextColor( vg, CGColorMakeWhite());
             mvgTextBackgroundColor( vg, CGColorMakeWithRGBA( 0.33, 0.33, 0.33, 1.0));
             sprintf( buf, "%.1f°", CAAngleToDegrees( angle));
-            mvgTextInRect( vg, buf, (size_t) -1, rect, CGContentModeLeft, MVGTextAlignVisually);
+            mvgTextInRect( vg, buf, (size_t) -1, rect, CGContentModeLeft, CGTextOptionAlignVisually);
          }
          mvgRestore( vg);
       }

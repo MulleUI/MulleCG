@@ -302,7 +302,7 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
                       (size_t) -1,
                       iconRect,
                       CGContentModeScaleAspectFit,
-                      MVGTextAlignVisually);
+                      CGTextOptionAlignVisually);
 }
 
 struct MulleUIButtonSegment
@@ -605,8 +605,8 @@ int   main( int argc, char *argv[])
    @autoreleasepool
    {
       styleMask = UIWindowStyleMaskDefault;
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
 
       window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 800, 600)
                          titleUTF8String:"Demo"

@@ -45,13 +45,10 @@ static char  *NVG_ALIGN_UTF8String( NSUInteger valign)
 static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *context)
 {
    struct UITextMetrics   metrics;
-   struct NVGcontext      *vg;
    CGRect                 adjustedBounds;
    CGPaint                *paint;
 
-   vg = CGContextGetNVGContext( context);
-
-   nvgSave( vg);
+   CGContextSave( context);
    {
 #if 0
       // adjustedBounds are just there for debugging
@@ -59,13 +56,13 @@ static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *contex
       paint          = [CGGradient gradientWithStartColor:CGColorMultiplyAlpha( CGColorMakePapaya(), 0.5)
                                                  endColor:CGColorMultiplyAlpha( CGColorMakeRed(), 0.5)
                                                  rotation:0.1625];
-      mvgStrokeRectWithPaint( vg, adjustedBounds, 1.0, paint);
+      CGContextStrokeRectWithPaint( context, adjustedBounds, 1.0, paint);
 #endif
 
-      mvgFontSize( vg, 11.0);
-      mvgClearType( vg, 0);
-      nvgTextColor( vg, CGColorMakeBlack());
-      nvgTextBackgroundColor( vg, CGColorMakeOrange());
+      CGContextFontSize( context, 11.0);
+      CGContextClearType( context, 0);
+      CGContextTextColor( context, CGColorMakeBlack());
+      CGContextTextBackgroundColor( context, CGColorMakeOrange());
 
       metrics = [context textMetrics];
 
@@ -77,27 +74,27 @@ static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *contex
                                     info->isClearType,
                                     info->fontSize,
                                     NVG_ALIGN_UTF8String( info->verticalAlignment));
-         mvgTextInRect( vg,
-                        mulle_buffer_get_string( buf), (size_t) -1,
-                        CGRectMake( canvas.origin.x + 2,
-                                    canvas.origin.y + 2,
-                                    canvas.size.width,
-                                    metrics.lineHeight),
-                        CGContentModeLeft,
-                        MVGTextDefault);
+         CGContextTextInRect( context,
+                 mulle_buffer_get_string( buf), (size_t) -1,
+                 CGRectMake( canvas.origin.x + 2,
+                 canvas.origin.y + 2,
+                 canvas.size.width,
+                 metrics.lineHeight),
+                 CGContentModeLeft,
+                 CGTextOptionDefault);
 
          mulle_buffer_reset( buf);
          mulle_buffer_sprintf( buf, "bounds = %s, area = %s",
                                     CGRectUTF8String( info->bounds),
                                     CGRectUTF8String( info->area));
-         mvgTextInRect( vg,
-                        mulle_buffer_get_string( buf), (size_t) -1,
-                        CGRectMake( canvas.origin.x + 2,
-                                    canvas.origin.y + (2 + metrics.lineHeight),
-                                    canvas.size.width,
-                                    metrics.lineHeight),
-                        CGContentModeLeft,
-                        MVGTextDefault);
+         CGContextTextInRect( context,
+                 mulle_buffer_get_string( buf), (size_t) -1,
+                 CGRectMake( canvas.origin.x + 2,
+                 canvas.origin.y + (2 + metrics.lineHeight),
+                 canvas.size.width,
+                 metrics.lineHeight),
+                 CGContentModeLeft,
+                 CGTextOptionDefault);
 
          // bottom info
          mulle_buffer_reset( buf);
@@ -105,14 +102,14 @@ static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *contex
                                     info->metrics.ascender,
                                     info->metrics.descender,
                                     info->metrics.lineHeight);
-         mvgTextInRect( vg,
-                        mulle_buffer_get_string( buf), (size_t) -1,
-                        CGRectMake( canvas.origin.x + 2,
-                                    CGRectGetMaxY( canvas) - (2 + metrics.lineHeight * 2),
-                                    canvas.size.width,
-                                    metrics.lineHeight),
-                        CGContentModeLeft,
-                        MVGTextDefault);
+         CGContextTextInRect( context,
+                 mulle_buffer_get_string( buf), (size_t) -1,
+                 CGRectMake( canvas.origin.x + 2,
+                 CGRectGetMaxY( canvas) - (2 + metrics.lineHeight * 2),
+                 canvas.size.width,
+                 metrics.lineHeight),
+                 CGContentModeLeft,
+                 CGTextOptionDefault);
 
          mulle_buffer_reset( buf);
          mulle_buffer_sprintf( buf, "visual: asc = %g, desc = %g, height = %g, compensation = %g",
@@ -120,17 +117,17 @@ static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *contex
                                     info->visualMetrics.descender,
                                     info->visualMetrics.lineHeight,
                                     info->compensation);
-         mvgTextInRect( vg,
-                        mulle_buffer_get_string( buf), (size_t) -1,
-                        CGRectMake( canvas.origin.x + 2,
-                                    CGRectGetMaxY( canvas) - (2 + metrics.lineHeight * 1),
-                                    canvas.size.width,
-                                    metrics.lineHeight),
-                        CGContentModeLeft,
-                        MVGTextDefault);
+         CGContextTextInRect( context,
+                 mulle_buffer_get_string( buf), (size_t) -1,
+                 CGRectMake( canvas.origin.x + 2,
+                 CGRectGetMaxY( canvas) - (2 + metrics.lineHeight * 1),
+                 canvas.size.width,
+                 metrics.lineHeight),
+                 CGContentModeLeft,
+                 CGTextOptionDefault);
       }
    }
-   nvgRestore( vg);
+   CGContextRestore( context);
 }
 
 
@@ -198,7 +195,6 @@ static void   dump_row_glyphs_to_file( FILE *fp,
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext      *vg;
    CGRect                 canvas;
    float                  factor;
    struct UITextRow       rows[ 64];
@@ -210,12 +206,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    NSUInteger             bits;
    CGFloat                lineHeight;
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
    paint  = [CGGradient gradientWithStartColor:CGColorMakeYellow()
                                       endColor:CGColorMakeOrange()
                                       rotation:0.1625];
-   mvgFillRectWithPaint( vg, canvas, paint);
+   CGContextFillRectWithPaint( context, canvas, paint);
 
    bits = [context numberOfFrames] & 0x1F;
 
@@ -242,16 +237,16 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    info->fontSize = 10 + (bits & 0x3);
 
    //mvgShapeAntiAlias( vg, 0);
-   mvgClearType( vg, info->isClearType);
-   mvgTextAlign( vg, NVG_ALIGN_LEFT | info->verticalAlignment);
-   mvgFontSize( vg, info->fontSize);
+   CGContextClearType( context, info->isClearType);
+   CGContextTextAlign( context, NVG_ALIGN_LEFT | info->verticalAlignment);
+   CGContextFontSize( context, info->fontSize);
 
    info->metrics       = [context textMetrics];
    info->visualMetrics = [context visualTextMetrics];
    info->compensation  = roundf( (info->visualMetrics.ascender - info->metrics.ascender));
    info->area          = CGRectInsetWithInsets( canvas, UIEdgeInsetsMake( 40, 30, 30, 30));
 
-   mvgFillRectWithColor( vg, CGRectExtrude( info->area, 2, 2), CGColorMakeWhite());
+   CGContextFillRectWithColor( context, CGRectExtrude( info->area, 2, 2), CGColorMakeWhite());
 
    // MEMO: if we don't do this fudge factor, the
    if( debug)
@@ -259,7 +254,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       paint = [CGGradient gradientWithStartColor:CGColorMakeDimGray()
                                         endColor:CGColorMakeDarkSlateGray()
                                         rotation:0.1625];
-      mvgFillRectWithPaint( vg, info->area, paint);
+      CGContextFillRectWithPaint( context, info->area, paint);
    }
 
    //
@@ -295,24 +290,24 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    case NVG_ALIGN_BOTTOM   : y += info->metrics.lineHeight; break;
    }
 
-   mvgTextColor( vg, CGColorMakeWhite());
-   mvgTextBackgroundColor( vg, CGColorMakeDarkSlateGray());
+   CGContextTextColor( context, CGColorMakeWhite());
+   CGContextTextBackgroundColor( context, CGColorMakeDarkSlateGray());
 
    // make black blobs
-   nvgGlobalCompositeBlendFunc( vg, NVG_ZERO, NVG_ZERO);
+   CGContextGlobalCompositeBlendFunc( context, NVG_ZERO, NVG_ZERO);
    // black background with inverted pixels (unreadable)
    // nvgGlobalCompositeBlendFunc( vg, NVG_ONE_MINUS_SRC_ALPHA, NVG_ZERO);
 
    for( i = 0; i < n; i++)
    {
-      nvgText( vg, x, y, rows[ i].start, rows[ i].end);
+      CGContextText( context, CGPointMake( x, y), rows[ i].start, rows[ i].end - rows[ i].start);
 
       if( dump_glyphs)
          dump_row_glyphs_to_file( stdout, rows, i, info,  context);
       y += info->visualMetrics.lineHeight;
    }
 
-   nvgGlobalCompositeBlendFunc( vg, NVG_ONE, NVG_ONE_MINUS_SRC_ALPHA);
+   CGContextGlobalCompositeBlendFunc( context, NVG_ONE, NVG_ONE_MINUS_SRC_ALPHA);
 
    if( debug)
       drawDebugInfo( info, canvas, context);

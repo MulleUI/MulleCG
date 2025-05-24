@@ -1,5 +1,12 @@
 # microvg / millivg
 
+These functions are not at the abstraction layer, the UI programmer would
+use. Instead they form the basis for the UI..Draw.. C functions, one should
+use instead. Why ?
+
+* supposed portability across different drawing libraries
+
+
 #### 🍢 microvg - conveniences atop nanovg
 
 All functions accept the current nanovg context `NVGcontext *vg` as the
@@ -10,6 +17,9 @@ Unless indicated or obvious from the function parameters, you set the desired
 nanovg state before the function call. Functions try to avoid clobbering nanovg
 state, that is not apparently affected from the function call parameters.
 (But check the header declaration for exceptions).
+
+Though not prefixed with `_` these functions will crash if the `vg` 
+parameter is NULL, just like the nanovg counterparts.
 
 
 #### Example

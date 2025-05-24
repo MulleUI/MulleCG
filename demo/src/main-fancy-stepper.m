@@ -242,7 +242,7 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
                       (size_t) -1,
                       iconRect,
                       CGContentModeScaleAspectFit,
-                      MVGTextAlignVisually);
+                      CGTextOptionAlignVisually);
 }
 
 

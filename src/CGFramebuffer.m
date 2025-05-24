@@ -4,6 +4,7 @@
 #import "CGContext+Drawing.h"
 #import "CGContext+DebugPrivate.h"
 #import "CGContext+OpenGL.h"
+#import "CGContext+nanovg.h"
 #import "CGContext+Render.h"
 #import "CGContext+CGFramebuffer.h"
 #import "CGImage+DebugPrivate.h"
@@ -431,7 +432,7 @@
 
    CGContextCheckBackendError( _context, "glViewport");
 
-// this here is also a little suspicious
+// TODO: this here is also a little suspicious
    nvgBeginFrame( vg, bitmapSize.width, bitmapSize.height, ratio);
 }
 
@@ -444,6 +445,8 @@
 //
    // if we do just nvgFlushFrame here, then we don't torch font maps
    // nvgEndFrame( vg);
+
+// TODO: not doing nvgFlushFrame is also a little suspicious
 
    // this will reset the viewport and call nvgFlushFrame
    [self _endFBRender:memo];

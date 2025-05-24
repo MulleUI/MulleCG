@@ -56,9 +56,9 @@ static char   *contentMode2_text[] =
 
 static int   alignMode[] =
 {
-   MVGTextDefault,
-   MVGTextAlignVisually,
-   MVGTextAlignBaseline
+   CGTextOptionDefault,
+   CGTextOptionAlignVisually,
+   CGTextOptionAlignBaseline
 };
 #define N_ALIGN_MODES      (sizeof( alignMode) / sizeof( alignMode[ 0]))
 
@@ -145,7 +145,7 @@ static void   drawStuff1( CALayer *layer, CGContext *context)
                   (size_t) -1,
                   rect,
                   CGContentModeScaleToFill,
-                  MVGTextAlignVisually);
+                  CGTextOptionAlignVisually);
 }
 
 
@@ -250,7 +250,7 @@ static void   drawStuff2( CALayer *layer, CGContext *context)
          nvgFontSize( vg, 10.0);
          nvgTextColor( vg, CGColorMakeGreen());
          nvgTextBackgroundColor( vg, CGColorMakeWhite());
-         mvgTextInRect( vg, s, (size_t) -1, small_rects[ j][ k], contentMode[ i], MVGTextFill|MVGTextAlignVisually);
+         mvgTextInRect( vg, s, (size_t) -1, small_rects[ j][ k], contentMode[ i], CGTextOptionFill|CGTextOptionAlignVisually);
       }
    }
 }
@@ -284,8 +284,8 @@ int   main( int argc, char *argv[])
    @autoreleasepool
    {
       styleMask = UIWindowStyleMaskDefault;
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
-      styleMask = UIWindowsStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleResizable, YES);
+      styleMask = UIWindowStyleMaskBySetting( styleMask, UIWindowStyleRetained, NO);
 
       window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 1000, 600)
                          titleUTF8String:"Demo"
