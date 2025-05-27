@@ -182,35 +182,11 @@ static inline CGRect
 }
 
 
-static inline CGFloat  CGRectGetStrokeMinX( CGRect rect, CGFloat strokeWidth)
-{
-   return( CGRectGetMinX( rect) + strokeWidth / 2.0);
-}
-
-
-static inline CGFloat  CGRectGetStrokeMaxX( CGRect rect, CGFloat strokeWidth)
-{
-   return( CGRectGetMaxX( rect) - strokeWidth / 2.0);
-}
-
-
-static inline CGFloat  CGRectGetStrokeMinY( CGRect rect, CGFloat strokeWidth)
-{
-   return( CGRectGetMinY( rect) + strokeWidth / 2.0);
-}
-
-
-static inline CGFloat  CGRectGetStrokeMaxY( CGRect rect, CGFloat strokeWidth)
-{
-   return( CGRectGetMaxY( rect) - strokeWidth / 2.0);
-}
-
-
 struct CGPaintOptions
 {
-   CGFloat   rotation;           // default: 0.0
-   CGFloat   smoothness;         // default: 1.0
-   CGFloat   alpha;              // default: 1.0
+   CARotation   rotation;           // default: 0.0
+   CGFloat      smoothness;         // default: 1.0
+   CGFloat      alpha;              // default: 1.0
 };
 
 struct CGStrokeOptions
@@ -249,6 +225,168 @@ struct CGFillOptions
 
 typedef struct CGFillOptions     CGFillOptions;
 typedef struct CGStrokeOptions   CGStrokeOptions;
+
+
+static inline CGFillOptions   CGFillOptionsMakeWithRotation( CARotation rotation)
+{
+   CGFillOptions   options = CGFillOptionsDefault;
+
+   options.paint.rotation = rotation;
+   return( options);
+}
+
+
+static inline CGFillOptions   CGFillOptionsMakeWithAlpha( CGFloat alpha)
+{
+   CGFillOptions   options = CGFillOptionsDefault;
+
+   options.paint.alpha = alpha;
+   return( options);
+}
+
+
+static inline CGFillOptions   CGFillOptionsMakeWithRotationAndAlpha( CARotation rotation, CGFloat alpha)
+{
+   CGFillOptions   options = CGFillOptionsDefault;
+
+   options.paint.rotation = rotation;
+   options.paint.alpha    = alpha;
+   return( options);
+}
+
+
+static inline CGStrokeOptions   CGStrokeOptionsMakeWithRotation( CARotation rotation)
+{
+   CGStrokeOptions   options = CGStrokeOptionsDefault;
+
+   options.paint.rotation = rotation;
+   return( options);
+}
+
+
+static inline CGStrokeOptions   CGStrokeOptionsMakeWithAlpha( CGFloat alpha)
+{
+   CGStrokeOptions   options = CGStrokeOptionsDefault;
+
+   options.paint.alpha = alpha;
+   return( options);
+}
+
+
+static inline CGStrokeOptions   CGStrokeOptionsMakeWithRotationAndAlpha( CARotation rotation, CGFloat alpha)
+{
+   CGStrokeOptions   options = CGStrokeOptionsDefault;
+
+   options.paint.rotation = rotation;
+   options.paint.alpha    = alpha;
+   return( options);
+}
+
+
+struct CGShadow
+{
+   struct MulleEdgeInsets   extrudes;
+   CGColor                  innerColor;
+   CGColor                  outerColor;
+   CGFloat                  blur;
+   char                     hole;
+};
+
+
+#define CGShadowDefaultValues  (struct CGShadow)                           \
+{                                                                          \
+   .extrudes   = { .top = 0.5, .left = 0.5, .bottom = 4.0, .right = 2.0 }, \
+   .innerColor = CGColorDataWithRGBA( 0, 0, 0, 0.5),                       \
+   .outerColor = CGColorDataWithRGBA( 0, 0, 0, 0),                         \
+   8.0,                                                                    \
+   1                                                                       \
+}
+
+
+static inline struct CGShadow
+   CGShadowMake( CGPoint offset, CGFloat blur, CGColor color)
+{
+   struct CGShadow   shadow;
+
+   shadow.extrudes = (struct MulleEdgeInsets)
+                     {
+                       .top    = offset.y,
+                       .bottom = offset.y,
+                       .left   = offset.x,
+                       .right  = offset.x
+                     };
+   shadow.innerColor = color;
+   shadow.outerColor = CGColorMakeTransparent();
+   shadow.blur       = blur;
+   shadow.hole       = 1;
+   return( shadow);
+}
+
+
+
+/**
+ * Retrieves the current font metrics for text rendering.
+ *
+ * This method provides essential vertical metrics for the currently selected
+ * font, which are necessary for proper text layout and positioning.
+ *
+ * @param metrics A pointer to a CGTextMetrics structure that will be filled
+ *                with the font metrics information. If NULL, the method returns
+ *                without doing anything.
+ *
+ * The metrics include (all values >= 0.0!!):
+ *
+ *   ascender    - The distance from the baseline to the top of capital letters
+ *   descender   - The distance from the baseline to the bottom of descenders
+ *   lineHeight  - The total height of the font
+ *
+ * These values can be visualized as follows:
+ *
+ *   +--------------------------------+  ← Top
+ *   |                                |
+ *   |                                |  ↑
+ *   |                                |  | ascender
+ *   |                                |  |
+ *   +--------------------------------+  ← Baseline
+ *   |                                |  ↓
+ *   |                                |  | descender
+ *   +--------------------------------+  ← Bottom
+ *                                       ↕ lineHeight
+ *
+ * @note For proper line spacing in multi-line text, you typically need to add
+ *       additional leading (space) between lines. A common practice is to use
+ *       lineHeight * 1.2 or similar for the distance between baselines.
+ *
+ * @note All metrics are returned in the same coordinate space as other NanoVG
+ *       drawing operations. The device pixel ratio is already accounted for
+ *       internally, so no additional conversion is needed.
+ *
+ * @note The metrics returned are for the currently selected font. Make sure
+ *       to call this method after setting the desired font and font size.
+ */
+typedef struct CGTextMetrics
+{
+   float   ascender;
+   float   descender;
+   float   lineHeight;
+} CGTextMetrics;
+
+
+static inline CGTextMetrics  CGTextMetricsMake( float ascender,
+                                                float descender,
+                                                float lineHeight)
+{
+   assert( ascender >= 0.0f);
+   assert( descender >= 0.0f);
+   assert( lineHeight >= ascender + descender);
+
+   return( (struct CGTextMetrics)
+           {
+              .ascender   = ascender,
+              .descender  = descender,
+              .lineHeight = lineHeight
+           });
+}
 
 
 #endif

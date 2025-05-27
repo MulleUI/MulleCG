@@ -6,8 +6,9 @@
 #include <time.h>
 
 
-static void   drawFilledRect( NVGcontext *vg, CGRect rect, CGColor color)
+static void   drawFilledRect( CGContext *context, CGRect rect, CGColor color)
 {
+   struct NVGcontext *vg = CGContextGetNVGContext( context);
    nvgBeginPath( vg);
    {
       nvgRect( vg, rect.origin.x,
@@ -20,8 +21,9 @@ static void   drawFilledRect( NVGcontext *vg, CGRect rect, CGColor color)
 }
 
 
-static void   drawStrokedRect( NVGcontext *vg, CGRect rect, CGColor color)
+static void   drawStrokedRect( CGContext *context, CGRect rect, CGColor color)
 {
+   struct NVGcontext *vg = CGContextGetNVGContext( context);
    nvgBeginPath( vg);
    {
       nvgRect( vg, rect.origin.x,
@@ -84,8 +86,9 @@ static inline CGFloat   CGRectGetCornerRadiusValue( CGRect rect, CGFloat factor)
 //
 // https://www.vecteezy.com/vector-art/957623-modern-rounded-web-interface-buttons-set
 //
-static void   drawFancyButtonBackground( struct NVGcontext *vg, CGRect rect, CGColor color1, CGColor color2)
+static void   drawFancyButtonBackground( CGContext *context, CGRect rect, CGColor color1, CGColor color2)
 {
+   struct NVGcontext *vg = CGContextGetNVGContext( context);
    NVGpaint   paint;
    CGFloat    corner;
 
@@ -115,8 +118,9 @@ static void   drawFancyButtonBackground( struct NVGcontext *vg, CGRect rect, CGC
 
 
 
-static void   drawFancyButtonHighlight( struct NVGcontext *vg, CGRect rect)
+static void   drawFancyButtonHighlight( CGContext *context, CGRect rect)
 {
+   struct NVGcontext *vg = CGContextGetNVGContext( context);
    NVGpaint   paint;
    CGFloat    corner;
 
@@ -162,8 +166,9 @@ static void   drawFancyButtonHighlight( struct NVGcontext *vg, CGRect rect)
 }
 
 
-static void   drawFancyButtonLine( struct NVGcontext *vg, CGRect rect, CGColor color)
+static void   drawFancyButtonLine( CGContext *context, CGRect rect, CGColor color)
 {
+   struct NVGcontext *vg = CGContextGetNVGContext( context);
    CGFloat    corner;
 
    corner = CGRectGetCornerRadiusValue( rect, 0.5);
@@ -193,9 +198,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
    CGRect     middleRect;
    CGFont     *font;
 
-   struct NVGcontext *vg;
-
-   vg = CGContextGetNVGContext( context);
+   struct NVGcontext *vg = CGContextGetNVGContext( context);
 
    nvgSave( vg);
    {
@@ -204,25 +207,24 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
        */
 
       outerRect = rect;
-      drawFancyButtonBackground( vg, outerRect, colors[ 0], colors[ 1]);
+      drawFancyButtonBackground( context, outerRect, colors[ 0], colors[ 1]);
 
       /*
        * inner
        */
       innerRect = CGRectInset( outerRect, 6, 6);
-      drawFancyButtonBackground( vg, innerRect, colors[ 1], colors[ 0]);
-
+      drawFancyButtonBackground( context, innerRect, colors[ 1], colors[ 0]);
 
       /*
        * highlight
        */
-      drawFancyButtonHighlight( vg, innerRect);
+      drawFancyButtonHighlight( context, innerRect);
 
       /*
        * line
        */
       lineRect = CGRectInset( innerRect, 12, 12);
-      drawFancyButtonLine( vg, lineRect, colors[ 3]);
+      drawFancyButtonLine( context, lineRect, colors[ 3]);
 
       // draw text
       // recognize that nvgText layout is somewhat broken, if using
@@ -242,7 +244,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
 
       struct MulleLayout     layout;
 
-      drawStrokedRect( vg, lineRect, CGColorMakeGray());
+      drawStrokedRect( context, lineRect, CGColorMakeGray());
 
       corner  = CGRectGetCornerRadiusValue( lineRect, 0.5);
       corner /= 4;
@@ -250,7 +252,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
       MulleLayoutInitReverse( &layout, lineRect, MulleEdgeInsetsMake( corner, corner + 8, corner, corner));
 
       remainingRect = MulleLayoutGetRemainingRowContentRect( &layout);
-      drawStrokedRect( vg, remainingRect, CGColorMakeGray());
+      drawStrokedRect( context, remainingRect, CGColorMakeGray());
 
       {
          if( preicon != 0)
@@ -267,7 +269,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
                iconRect = MulleLayoutAddToRow( &layout,
                                                CGSizeMake( size.width, size.width),
                                                MulleEdgeInsetsMake( 0, 8, 0, 0));
-            drawStrokedRect( vg, iconRect, CGColorMakeGray());
+            drawStrokedRect( context, iconRect, CGColorMakeGray());
 
             nvgBeginPath( vg);
             nvgCircle( vg, CGRectGetMidX( iconRect), CGRectGetMidY( iconRect), iconRect.size.width / 2.0);
@@ -304,7 +306,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
             nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
             nvgTextColor( vg, colors[ 3]);
             nvgTextBackgroundColor( vg, CGColorMultiplyAlpha( colors[ 1], 0.2));
-            mvgTextInRect( vg, iconText,
+            CGContextTextInRect( context, iconText,
                                (size_t) -1,
                                iconRect,
                                CGContentModeScaleAspectFit,
@@ -312,7 +314,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
          }
 
          textRect = MulleLayoutGetRemainingRowContentRect( &layout);
-         drawStrokedRect( vg, textRect, CGColorMakeBlack());
+         drawStrokedRect( context, textRect, CGColorMakeBlack());
 
          font = [context fontWithNameUTF8String:"sans"];
          assert( font);
@@ -321,7 +323,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
          nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
          nvgTextColor( vg, CGColorMultiplyAlpha( colors[ 3], 0.9));
          nvgTextBackgroundColor( vg, CGColorMultiplyAlpha( colors[ 1], 1.0));
-         mvgTextInRect( vg, text,
+         CGContextTextInRect( context, text,
                             (size_t) -1,
                             CGRectInset( textRect, 4, 4),
                             CGContentModeScaleAspectFit,
@@ -363,11 +365,10 @@ static void   drawButton( CALayer *layer, CGContext *context)
          nvgFontFace( vg, "sans");
          nvgTextColor( vg, CGColorMakeWhite());
          nvgTextBackgroundColor( vg, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 1.0));
-         mvgTextInRect( vg,
-                        CGRectUTF8String( rect),
+         CGContextTextInRect( context, CGRectUTF8String( rect),
                         (size_t) -1,
                         CGRectPlaceBelowRect( rect, 0.0, 16.0f),
-                        CGContentModeCenterPoint,
+                        CGContentModeCenter,
                         0);
       }
 }
@@ -423,7 +424,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -443,5 +444,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

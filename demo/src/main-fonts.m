@@ -12,7 +12,7 @@
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect               rect;
-   struct NVGcontext    *vg;
+   // Delete: struct NVGcontext    *vg; // No longer needed
    CGFont               *font;
 
    font = [context fontWithNameUTF8String:"sans"];
@@ -20,47 +20,47 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    font = [context fontWithNameUTF8String:"icons"];
    rect = [layer canvas];
 
-   vg = CGContextGetNVGContext( context);
+   // Delete: vg = CGContextGetNVGContext( context); // No longer needed
 
-   nvgFontFace( vg, "sans");
-   nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
-   nvgTextColor( vg, nvgRGBA( 0, 0, 0, 0xFF));
-   nvgTextBackgroundColor( vg, nvgRGBA( 0xFF, 0xFF, 0xFF, 0xFF));
+   CGContextFontFace( context, "sans");
+   CGContextTextAlign( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE
+   CGContextTextColor( context, CGColorMakeWithRGBA( 0, 0, 0, 0xFF));
+   CGContextTextBackgroundColor( context, CGColorMakeWithRGBA( 0xFF, 0xFF, 0xFF, 0xFF));
  // TODO: use textColor
 
-   nvgFontSize( vg, 20.0);
-   nvgText( vg, rect.origin.x,
-                rect.origin.y + 20.0,
+   CGContextFontSize( context, 20.0);
+   CGContextText( context, CGPointMake( rect.origin.x,
+                rect.origin.y + 20.0),
                 TEXT,
-                NULL);
+                (size_t) -1); // Converted from nvgText
 
-   nvgFontFace( vg, "sans-bold");
-   nvgText( vg, rect.origin.x,
-                rect.origin.y + 50.0,
+   CGContextFontFace( context, "sans-bold");
+   CGContextText( context, CGPointMake( rect.origin.x,
+                rect.origin.y + 50.0),
                 TEXT,
-                NULL);
+                (size_t) -1); // Converted from nvgText
 
    // TODO: emojis aren't colorized
-   nvgFontFace( vg, "sans");
-   nvgText( vg, rect.origin.x,
-                rect.origin.y + 80.0,
+   CGContextFontFace( context, "sans");
+   CGContextText( context, CGPointMake( rect.origin.x,
+                rect.origin.y + 80.0),
                 EMOJI_TEXT,
-                NULL);
+                (size_t) -1); // Converted from nvgText
 
    // TODO: emojis aren't bold
-   nvgFontFace( vg, "sans-bold");
-   nvgText( vg, rect.origin.x,
-                rect.origin.y + 120.0,
+   CGContextFontFace( context, "sans-bold");
+   CGContextText( context, CGPointMake( rect.origin.x,
+                rect.origin.y + 120.0),
                 EMOJI_TEXT,
-                NULL);
+                (size_t) -1); // Converted from nvgText
 
    // TODO: why so small ?
-   nvgFontFace( vg, "icons");
-   nvgFontSize( vg, 40.0);
-   nvgText( vg, rect.origin.x,
-                rect.origin.y + 150.0,
+   CGContextFontFace( context, "icons");
+   CGContextFontSize( context, 40.0);
+   CGContextText( context, CGPointMake( rect.origin.x,
+                rect.origin.y + 150.0),
                 ICONS_TEXT,
-                NULL);   
+                (size_t) -1); // Converted from nvgText
    return( YES);
 }
 
@@ -146,5 +146,5 @@ int   main( int argc, char *argv[])
 //              `▀▄M█┘        ║▀▌   ╫"    *Φ▄  █       Φ` ▀▌, ▄M╙
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
-//                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+//                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"
 

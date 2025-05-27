@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2022 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -97,126 +100,88 @@ static void   CornerAndLinearGradientInfoInit( struct CornerAndLinearGradientInf
 }
 
 
-static void   fillRectWithLinearGradient( struct NVGcontext *vg,
+static void   fillRectWithLinearGradient( CGContext *context, // Converted from struct NVGcontext *vg
                                           CGRect rect,
                                           CGColor color1,
                                           CGColor color2,
                                           struct CornerAndLinearGradientInfo *info)
 {
-   NVGpaint   paint;
-
    MulleUICLog( "cornerTL: %g cornerBL: %g cornerBR: %g cornerTR: %g",
                   info->cornerInfo.cornerTL,
                   info->cornerInfo.cornerBL,
                   info->cornerInfo.cornerBR,
                   info->cornerInfo.cornerTR);
 
-   nvgBeginPath( vg);
-   nvgRoundedRectVarying( vg, rect.origin.x,
-                              rect.origin.y,
-                              rect.size.width,
-                              rect.size.height,
-                              info->cornerInfo.cornerTL,
-                              info->cornerInfo.cornerTR,
-                              info->cornerInfo.cornerBR,
-                              info->cornerInfo.cornerBL);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
+   CGContextRoundedRectVarying( context, rect, MulleCornerInsetsMake( info->cornerInfo.cornerTL, info->cornerInfo.cornerTR, info->cornerInfo.cornerBR, info->cornerInfo.cornerBL)); // Converted from nvgRoundedRectVarying
 
-   paint = nvgLinearGradient( vg,
-                              info->gradientStartPoint.x,
-                              info->gradientStartPoint.y,
-                              info->gradientEndPoint.x,   // sic!, we dont want change across x
-                              info->gradientEndPoint.y,
-                              color1,
-                              color2);
-   nvgFillPaint( vg, paint);
-   nvgFill( vg);
+   CGContextFillLinearGradient( context, // Converted from nvgLinearGradient
+                                info->gradientStartPoint, // Converted from x, y
+                                color1,
+                                info->gradientEndPoint,   // Converted from x, y
+                                color2); // Converted from nvgFillPaint
+   CGContextFill( context); // Converted from nvgFill
 }
 
 
 
 // highlight is always top/down, 90 degree rotation makes no visual sense
 
-static void   fillRectWithHighlight( struct NVGcontext *vg,
+static void   fillRectWithHighlight( CGContext *context, // Converted from struct NVGcontext *vg
                                      CGRect rect,
                                      CGFloat thickness,
                                      CGFloat brightness,
                                      struct CornerAndLinearGradientInfo *info)
 {
-   NVGpaint   paint;
-
-   nvgBeginPath( vg);
-   nvgRoundedRectVarying( vg, rect.origin.x,
-                              rect.origin.y,
-                              rect.size.width,
-                              rect.size.height,
-                              info->cornerInfo.cornerTL,
-                              info->cornerInfo.cornerTR,
-                              info->cornerInfo.cornerBR,
-                              info->cornerInfo.cornerBL);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
+   CGContextRoundedRectVarying( context, rect, MulleCornerInsetsMake( info->cornerInfo.cornerTL, info->cornerInfo.cornerTR, info->cornerInfo.cornerBR, info->cornerInfo.cornerBL)); // Converted from nvgRoundedRectVarying
 
    // now subtract the next rect to get a highlight shape
-   nvgPathWinding(vg, NVG_HOLE); // sets nvgRoundedRect as a hole
+   CGContextPathWinding( context, NVG_HOLE); // Converted from nvgPathWinding
 
-   nvgRoundedRectVarying( vg, rect.origin.x,
+   CGContextRoundedRectVarying( context, CGRectMake( rect.origin.x, // Converted from nvgRoundedRectVarying
                               rect.origin.y + thickness,
                               rect.size.width,
-                              rect.size.height - thickness,
-                              info->cornerInfo.cornerTL,
-                              info->cornerInfo.cornerTR,
-                              info->cornerInfo.cornerBR,
-                              info->cornerInfo.cornerBL);
+                              rect.size.height - thickness),
+                              MulleCornerInsetsMake( info->cornerInfo.cornerTL, info->cornerInfo.cornerTR, info->cornerInfo.cornerBR, info->cornerInfo.cornerBL));
 
-   paint = nvgLinearGradient( vg,
-                              info->gradientStartPoint.x,
-                              info->gradientStartPoint.y,
-                              info->gradientStartPoint.x,   // sic
-                              info->gradientStartPoint.y + info->cornerInfo.corner,
-                              CGColorMakeWithRGBA( 1.0, 1.0, 1.0, brightness),
-                              CGColorMakeTransparent());
-//   nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
-   nvgFillPaint( vg, paint);
-   nvgFill( vg);
+//   CGContextGlobalCompositeOperation( context, NVG_LIGHTER); // Converted from nvgGlobalCompositeOperation
+   CGContextFillLinearGradient( context, // Converted from nvgLinearGradient
+                                info->gradientStartPoint, // Converted from x, y
+                                CGColorMakeWithRGBA( 1.0, 1.0, 1.0, brightness),
+                                CGPointMake( info->gradientStartPoint.x, info->gradientStartPoint.y + info->cornerInfo.corner), // Converted from x, y
+                                CGColorMakeTransparent());
+   CGContextFill( context); // Converted from nvgFill
 }
 
 
 
-static void   fillRectWithLinearGradientBorder( struct NVGcontext *vg,
+static void   fillRectWithLinearGradientBorder( CGContext *context, // Converted from struct NVGcontext *vg
                                                 CGRect rect,
                                                 CGFloat strokeWidth,
                                                 CGColor color1,
                                                 CGColor color2,
                                                 struct CornerAndLinearGradientInfo *info)
 {
-   NVGpaint   paint;
-
-   nvgBeginPath( vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
    rect = CGRectInset( rect, strokeWidth / 2.0, strokeWidth / 2.0);
-   nvgRoundedRectVarying( vg, rect.origin.x,
-                              rect.origin.y,
-                              rect.size.width,
-                              rect.size.height,
-                              info->cornerInfo.cornerTL,
-                              info->cornerInfo.cornerTR,
-                              info->cornerInfo.cornerBR,
-                              info->cornerInfo.cornerBL);
-   nvgFillColor( vg, color1);
-   nvgFill( vg);
+   CGContextRoundedRectVarying( context, rect, MulleCornerInsetsMake( info->cornerInfo.cornerTL, info->cornerInfo.cornerTR, info->cornerInfo.cornerBR, info->cornerInfo.cornerBL)); // Converted from nvgRoundedRectVarying
+   CGContextFillColor( context, color1); // Converted from nvgFillColor
+   CGContextFill( context); // Converted from nvgFill
 
-   paint = nvgLinearGradient( vg,
-                              info->gradientStartPoint.x,
-                              info->gradientStartPoint.y,
-                              info->gradientEndPoint.x,   // sic
-                              info->gradientEndPoint.y,
-                              color1,
-                              color2);
-   nvgStrokeWidth( vg, strokeWidth);
-   nvgStrokePaint( vg, paint);
-   nvgStroke( vg);
+   CGContextStrokeWidth( context, strokeWidth); // Converted from nvgStrokeWidth
+   CGContextStrokeLinearGradient( context, // Converted from nvgLinearGradient
+                                  info->gradientStartPoint, // Converted from x, y
+                                  color1,
+                                  info->gradientEndPoint,   // Converted from x, y
+                                  color2,
+                                  strokeWidth);// Converted from nvgStrokePaint
+   CGContextStroke( context); // Converted from nvgStroke
 }
 
 
 
-static void   strokeRectWithHairline( struct NVGcontext *vg,
+static void   strokeRectWithHairline( CGContext *context, // Converted from struct NVGcontext *vg
                                       CGRect rect,
                                       CGFloat strokeWidth,
                                       CGColor color,
@@ -224,30 +189,26 @@ static void   strokeRectWithHairline( struct NVGcontext *vg,
 {
    CGFloat    corner;
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
 
-   nvgRoundedRect( vg, rect.origin.x,
-                       rect.origin.y,
-                       rect.size.width,
-                       rect.size.height,
-                       info->cornerInfo.corner);
+   CGContextRoundedRect( context, rect, info->cornerInfo.corner); // Converted from nvgRoundedRect
 
-   nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
-   nvgStrokeColor( vg, color);
-   nvgStrokeWidth( vg, strokeWidth);
-   nvgStroke( vg);
+   CGContextGlobalCompositeOperation( context, NVG_SOURCE_OVER); // Converted from nvgGlobalCompositeOperation
+   CGContextStrokeColor( context, color); // Converted from nvgStrokeColor
+   CGContextStrokeWidth( context, strokeWidth); // Converted from nvgStrokeWidth
+   CGContextStroke( context); // Converted from nvgStroke
 }
 
 
 
 static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, BOOL highlight)
 {
-   CGFont              *font;
-   struct NVGpaint     paint;
-   struct NVGcontext   *vg;
-   char                icon[ 8];
-   char                *iconText;
-   CGFloat             radius;
+   CGFont     *font;
+   // Delete: struct NVGcontext   *vg;
+   char       icon[ 8];
+   char       *iconText;
+   CGFloat    radius;
+   CACircle   circle;
 
    // if too small, we don't draw anything
    radius = CGFloatMinimum( iconRect.size.width, iconRect.size.height) / 2.0;
@@ -255,50 +216,42 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
       return;
 
    font = [context fontWithNameUTF8String:"icons"];
-   vg   = CGContextGetNVGContext( context);
+   // Delete: vg   = CGContextGetNVGContext( context);
 
    if( highlight)
    {
-      nvgBeginPath( vg);
-      nvgCircle( vg, CGRectGetMidX( iconRect), CGRectGetMidY( iconRect), radius);
-#if 0
-   paint = nvgLinearGradient( vg,
-                              CGRectGetMinX( iconRect),
-                              CGRectGetMinY( iconRect),
-                              CGRectGetMinX( iconRect),
-                              CGRectGetMaxY( iconRect),
-                              CGColorMakeWithRGBA( 0.6, 0.6, 0.6, 0.6),
-                              CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.2));
-#else
-      paint = nvgRadialGradient( vg,
-                                 CGRectGetMidX( iconRect) - radius / 8.0,
-                                 CGRectGetMidY( iconRect) - radius / 8.0,
-                                 radius / 8.0,
-                                 radius / 2.0,
-                                 CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.6),
-                                 CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.3)),
-#endif
-      nvgFillPaint( vg, paint);
-      nvgFill( vg);
+      CGContextBeginPath( context); // Converted from nvgBeginPath
+      CGContextCircle( context, CACircleMake( CGRectGetMidX( iconRect),
+                                              CGRectGetMidY( iconRect),
+                                              radius)); // Converted from nvgCircle
+      circle = CACircleMake( CGRectGetMidX( iconRect) - radius / 8.0,
+                             CGRectGetMidY( iconRect) - radius / 8.0, // Converted from x, y
+                             radius / 8.0);
+      CGContextFillRadialGradient( context, // Converted from nvgRadialGradient
+                                   circle,
+                                   CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.6),
+                                   radius / 2.0,
+                                   CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.3));
+      CGContextFill( context); // Converted from nvgFill
    }
-//   nvgStrokeColor( vg, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 0.8));
-//   nvgStroke( vg);
+//   CGContextStrokeColor( context, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 0.8)); // Converted from nvgStrokeColor
+//   CGContextStroke( context); // Converted from nvgStroke
 
    iconRect.origin = CGPointMake( CGRectGetMidX( iconRect) - radius,
                                   CGRectGetMidY( iconRect) - radius);
    iconRect.size   = CGSizeMake( radius * 2.0, radius * 2.0f);
 
-   nvgFontSize( vg, iconRect.size.height);
-   nvgFontFace( vg, "icons");
+   CGContextFontSize( context, iconRect.size.height); // Converted from nvgFontSize
+   CGContextFontFace( context, "icons"); // Converted from nvgFontFace
 
    iconText = cpToUTF8( unicodeIcon, icon);
 
-   nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
-   nvgGlobalAlpha( vg, 0.8);
-   nvgTextColor( vg, CGColorMakeWhite());
-   nvgTextBackgroundColor( vg, CGColorMakeBlack());
+   CGContextGlobalCompositeOperation( context, NVG_LIGHTER); // Converted from nvgGlobalCompositeOperation
+   CGContextGlobalAlpha( context, 0.8); // Converted from nvgGlobalAlpha
+   CGContextTextColor( context, CGColorMakeWhite()); // Converted from nvgTextColor
+   CGContextTextBackgroundColor( context, CGColorMakeBlack()); // Converted from nvgTextBackgroundColor
 
-   mvgTextInRect( vg, iconText,
+   CGContextTextInRect( context, iconText, // Converted from mvgTextInRect
                       (size_t) -1,
                       iconRect,
                       CGContentModeScaleAspectFit,
@@ -392,13 +345,13 @@ static void   CGDrawSegmentedButton( CGContext *context, struct MulleUISegmented
    struct MulleUISegmentedButtonLayout  layout;
    struct CornerAndLinearGradientInfo   info;
    CADirection                          direction;
-   NVGcontext                           *vg;
+   // Delete: NVGcontext                           *vg;
 
    mulle_alloca_do( rects, CGRect, p->nSegments)
    {
-      vg = CGContextGetNVGContext( context);
+      // Delete: vg = CGContextGetNVGContext( context);
 
-   //   nvgSave( vg);
+   //   CGContextSave( context); // Converted from nvgSave
       {
          /*
           * outer
@@ -407,7 +360,7 @@ static void   CGDrawSegmentedButton( CGContext *context, struct MulleUISegmented
 
          CornerAndLinearGradientInfoInit( &info, layout.outerRect, p->cornerFactor, CADirectionLeft|CADirectionRight);
 
-         fillRectWithLinearGradientBorder( vg,
+         fillRectWithLinearGradientBorder( context, // Updated function call
                                            layout.outerRect,
                                            layout.innerThickness,
                                            p->color0,
@@ -421,13 +374,13 @@ static void   CGDrawSegmentedButton( CGContext *context, struct MulleUISegmented
 
             direction = MulleUISegmentedButtonDirectionForSegmentIndex( p, i);
             CornerAndLinearGradientInfoInit( &info, rect, p->cornerFactor, direction);
-            fillRectWithLinearGradient( vg,
+            fillRectWithLinearGradient( context, // Updated function call
                                         rect,
                                         p->segments[ i].color1,
                                         p->segments[ i].color0,
                                         &info);
 
-            fillRectWithHighlight( vg,
+            fillRectWithHighlight( context, // Updated function call
                                    rect,
                                    layout.innerThickness,
                                    p->segments[ i].brightness,
@@ -440,8 +393,8 @@ static void   CGDrawSegmentedButton( CGContext *context, struct MulleUISegmented
           */
 
          CGRectDivide( innerRect, &leftRect, &rightRect, innerRect.size.width / 2.0, CADirectionLeft);
-         fillRectWithLinearGradient( vg, leftRect, colors[ 1], colors[ 0], CADirectionLeft);
-         fillRectWithLinearGradient( vg, rightRect, colors[ 3], colors[ 2], CADirectionRight);
+         fillRectWithLinearGradient( context, leftRect, colors[ 1], colors[ 0], CADirectionLeft); // Updated function call
+         fillRectWithLinearGradient( context, rightRect, colors[ 3], colors[ 2], CADirectionRight); // Updated function call
 
          contentRect = innerRect;
 
@@ -449,13 +402,13 @@ static void   CGDrawSegmentedButton( CGContext *context, struct MulleUISegmented
           * highlight
           */
          thickness = roundf( horw / 5.0);
-         fillRectWithHighlight( vg, leftRect, thickness, 0.3, CADirectionLeft);
-         fillRectWithHighlight( vg, rightRect, thickness, 0.6, CADirectionRight);
+         fillRectWithHighlight( context, leftRect, thickness, 0.3, CADirectionLeft); // Updated function call
+         fillRectWithHighlight( context, rightRect, thickness, 0.6, CADirectionRight); // Updated function call
 
          if( innerRect.size.height >= 60.0 && innerRect.size.width >= 60.0)
          {
             lineRect = CGRectInset( innerRect, 12, 12);
-            strokeRectWithHairline( vg, lineRect, 1.5, colors[ 5]);
+            strokeRectWithHairline( context, lineRect, 1.5, colors[ 5]); // Updated function call
          }
 
          iconRect = CGRectInset( contentRect, 2, 2);
@@ -469,7 +422,7 @@ static void   CGDrawSegmentedButton( CGContext *context, struct MulleUISegmented
 #endif
       }
    }
-//   nvgRestore( vg);
+//   CGContextRestore( context); // Converted from nvgRestore
 }
 
 
@@ -637,8 +590,8 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
-// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
+// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
@@ -657,4 +610,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

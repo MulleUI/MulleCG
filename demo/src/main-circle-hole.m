@@ -57,7 +57,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 
    vg   = CGContextGetNVGContext( context);
    rect = CGRectInset( [layer canvas], 25, 25);
-   rect = CGSizePlaceInRect( CGSizeMake( rect.size.width, 200), rect, CGContentModeCenterPoint);
+   rect = CGSizePlaceInRect( CGSizeMake( rect.size.width, 200), rect, CGContentModeCenter);
 
    drawSplitRectWithHole( vg, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
    return( YES);

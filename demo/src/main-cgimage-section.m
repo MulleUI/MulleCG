@@ -20,25 +20,28 @@ static void   drawBitmap2( CALayer *layer, CGContext *context)
    CGRect              rects[ ROWS][ COLUMNS];
    CGRect              sections[ 3][ 3];
    CGImage             *image;
-   struct NVGcontext   *vg;
    CGRect              area;
    NSUInteger          x, y;
 
    canvas = [layer canvas];
 
-   vg = CGContextGetNVGContext( context);
+   // Delete: Remove NVGcontext variable
+   // struct NVGcontext   *vg;
+   // vg = CGContextGetNVGContext( context);
 
-   nvgShapeAntiAlias( vg, 1);  // makes no visual difference
+   // Delete: Remove NVG calls
+   // nvgShapeAntiAlias( vg, 1);  // makes no visual difference
 //   nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
 
    // gray rectangle so we know something is drawn...
-   nvgBeginPath( vg);
+   // Update: Use CGContext functions
+   CGContextBeginPath( context);
    {
-      nvgRect( vg, canvas.origin.x, canvas.origin.y, canvas.size.width, canvas.size.height);
-      nvgStrokeWidth( vg, 8);
-      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
+      CGContextRect( context, canvas);
+      CGContextStrokeWidth( context, 8);
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
-   nvgStroke( vg);
+   CGContextStroke( context);
 
 
    // if we immediately reclaim the image (via release) after drawing it
@@ -64,7 +67,7 @@ static void   drawBitmap2( CALayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipNone,
                                                     CGRepeatNone,
-                                                    CGContentModeCenterPoint);
+                                                    CGContentModeCenter);
 
    // extend middle
    assert( COLUMNS == 4);
@@ -153,5 +156,7 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+
+
 
 

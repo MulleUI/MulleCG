@@ -13,7 +13,7 @@
 + (instancetype) paintWithPaint:(CGPaint *) paint
                      otherPaint:(CGPaint *) otherPaint
                           blend:(CGFloat) blend
-                       rotation:(CGFloat) rotation
+                       rotation:(CARotation) rotation
 {
    CGBlendedPaint   *blended;
 
@@ -34,7 +34,7 @@
 - (instancetype) initWithPaint:(CGPaint *) paint
                     otherPaint:(CGPaint *) otherPaint
                          blend:(CGFloat) blend
-                      rotation:(CGFloat) rotation
+                      rotation:(CARotation) rotation
  {
    if( ! paint && ! otherPaint)
    {
@@ -83,7 +83,7 @@
 // 
 
 
-- (CGPaint *) rotatedPaint:(CGFloat) rotation
+- (CGPaint *) rotatedPaint:(CARotation) rotation
 {
    if( rotation == 0.0)
       return( self);

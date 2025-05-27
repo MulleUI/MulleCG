@@ -21,10 +21,10 @@
 
 @property( readonly, retain) CGImage   *image;
 @property( readonly) CGFloat           alpha;
-@property( readonly) CGFloat           rotation;
+@property( readonly) CARotation        rotation;
 
 - (instancetype) initWithImage:(CGImage *) image
-                      rotation:(CGFloat) rotation
+                      rotation:(CARotation) rotation
                          alpha:(CGFloat) alpha;
 
 @end
@@ -33,7 +33,7 @@
 @interface CGPaint( CGImagePaint)
 
 + (instancetype) paintWithImage:(CGImage *) image
-                       rotation:(CGFloat) rotation
+                       rotation:(CARotation) rotation
                           alpha:(CGFloat) alpha;
 
 @end

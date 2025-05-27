@@ -15,7 +15,7 @@
 //
 @interface CGGradient : CGPaint < MulleObjCClassCluster, NSCopying, MulleObjCValueProtocols>
 
-@property( readonly) CGFloat   rotation;
+@property( readonly) CARotation   rotation;
 
 + (instancetype) gradientWithStartColor:(CGColor) startColor
                                endColor:(CGColor) endColor
@@ -169,12 +169,12 @@ CGGradient  *CGGradientCreate( CGColor startColor, CGColor endColor)
                                featherColor:(CGColor) endColor;
 
 + (instancetype) radialGradientWithCircle:(CACircle) circle
-                               outerColor:(CGColor) outerColor
+                                    color:(CGColor) outerColor
                               innerRadius:(CGFloat) innerRadius
                                innerColor:(CGColor) innerColor;
 
 + (instancetype) radialGradientWithRect:(CGRect) circle
-                             outerColor:(CGColor) outerColor
+                                  color:(CGColor) outerColor
                             innerRadius:(CGFloat) innerRadius
                              innerColor:(CGColor) innerColor;
 

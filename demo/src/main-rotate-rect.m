@@ -75,9 +75,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          {
             angle = CAAngleRotate( angle, CARotation90);
 
-            CGContextTranslate( context, CGRectGetCenterPoint( rect));
+            CGContextTranslate( context, CGRectGetCenter( rect));
             CGContextRotate( context, CAAngleToRotation( angle));
-            CGContextTranslate( context, CGPointNegate( CGRectGetCenterPoint( rect)));
+            CGContextTranslate( context, CGPointNegate( CGRectGetCenter( rect)));
 
             CGContextBeginPath( context);
             CGContextRect( context, rect);

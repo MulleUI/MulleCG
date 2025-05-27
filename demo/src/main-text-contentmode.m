@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2022 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -5,254 +8,109 @@
 #include <string.h>
 
 
-static char   *fontName = "sans";
+static char  *fontName; // can be null
 
-static int   contentMode[] =
+static char  *nvgHAlignmentUTF8String( int alignment)
 {
-   CGContentModeTopLeft,
-   CGContentModeTop,
-   CGContentModeTopRight,
-   CGContentModeLeft,
-   CGContentModeCenterPoint,
-   CGContentModeRight,
-   CGContentModeBottomLeft,
-   CGContentModeBottom,
-   CGContentModeBottomRight
-};
-#define N_CONTENT_MODES    (sizeof( contentMode) / sizeof( contentMode[ 0]))
-
-
-static char   *contentMode_text[] =
-{
-   "CGContentModeTopLeft",
-   "CGContentModeTop",
-   "CGContentModeTopRight",
-   "CGContentModeLeft",
-   "CGContentModeCenterPoint",
-   "CGContentModeRight",
-   "CGContentModeBottomLeft",
-   "CGContentModeBottom",
-   "CGContentModeBottomRight"
-};
-#define N_CONTENT_MODES   (sizeof( contentMode) / sizeof( contentMode[ 0]))
-
-
-static int   contentMode2[] =
-{
-   CGContentModeScaleToFill,
-   CGContentModeScaleAspectFit,
-   CGContentModeScaleAspectFill
-};
-#define N_CONTENT_MODES2   (sizeof( contentMode2) / sizeof( contentMode2[ 0]))
-
-
-static char   *contentMode2_text[] =
-{
-   "Fill",
-   "AspectFit",
-   "AspectFill"
-};
-
-
-static int   alignMode[] =
-{
-   CGTextOptionDefault,
-   CGTextOptionAlignVisually,
-   CGTextOptionAlignBaseline
-};
-#define N_ALIGN_MODES      (sizeof( alignMode) / sizeof( alignMode[ 0]))
-
-
-static char   *alignMode_text[] =
-{
-   "DEFAULT",
-   "VISUAL",
-   "BASELINE"
-};
-
-char   *texts[] =
-{
-
-   "A long text",
-#if 0
-   "Hello",
-   "VfL y!",
-   "ux ma",
-   " <spc> "
-#endif
-};
-#define N_TEXTS   (sizeof( texts) / sizeof( texts[ 0]))
-
-
-static CGRect   drawLabelBelowRect( struct NVGcontext *vg, float fontSize, char *s, CGRect rect)
-{
-   CGRect   rectBelow;
-
-   rectBelow = CGRectMake( CGRectGetMinX( rect),
-                           CGRectGetMaxY( rect),
-                           rect.size.width,
-                           fontSize + 4.0);
-   nvgFontSize( vg, fontSize);
-   nvgTextColor( vg, CGColorMakeGray());
-   nvgTextBackgroundColor( vg, CGColorMakeWhite());
-
-   mvgTextInRect( vg,
-                  s,
-                  (size_t) -1,
-                  rectBelow,
-                  CGContentModeCenterPoint,
-                  0);
-
-   return( rectBelow);
-}
-
-
-// for debugging one mode
-static void   drawStuff1( CALayer *layer, CGContext *context)
-{
-   struct NVGcontext   *vg;
-   CGFont              *font;
-   CGRect              rect;
-   char                *s;
-   auto char           buf[ 256];
-   size_t              len;
-
-   s    = "Hello this is, yay, the VfL Bochum";
-   len  = strlen( s);
-   s    = &s[ len - [context numberOfFrames] % len];
-
-   vg   = CGContextGetNVGContext( context);
-   vg   = CGContextGetNVGContext( context);
-   font = [context fontWithNameUTF8String:fontName];
-   if( ! font)
+   switch( alignment & (CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight)) // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT
    {
-      fprintf( stderr, "unknown font %s\n", fontName ? fontName : "NULL");
-      abort();
+   case CGTextAlignLeft   : return( "CGTextAlignLeft"); // Converted from NVG_ALIGN_LEFT
+   case CGTextAlignCenter : return( "CGTextAlignCenter"); // Converted from NVG_ALIGN_CENTER
+   case CGTextAlignRight  : return( "CGTextAlignRight"); // Converted from NVG_ALIGN_RIGHT
+   default               : return( "*invalid*");
    }
-
-   rect = CGSizeCenterInRect( CGSizeMake( 300, 80), [layer canvas]);
-   mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
-
-   mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( rect),
-                                CGRectGetWidth( rect),  // why Y ?
-                                1.0,
-                                CGColorMakeGray());
-   nvgFontSize( vg, 20.0);
-   nvgTextColor( vg, CGColorMakeGreen());
-   nvgTextBackgroundColor( vg, CGColorMakeWhite());
-   mvgTextInRect( vg,
-                  s,
-                  (size_t) -1,
-                  rect,
-                  CGContentModeScaleToFill,
-                  CGTextOptionAlignVisually);
 }
 
 
-static void   drawStuff2( CALayer *layer, CGContext *context)
+static char  *nvgVAlignmentUTF8String( int alignment)
 {
-   struct NVGcontext    *vg;
-   CGFont               *font;
+   switch( alignment & (CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline)) // Converted from NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE
+   {
+   case CGTextAlignTop      : return( "CGTextAlignTop"); // Converted from NVG_ALIGN_TOP
+   case CGTextAlignMiddle   : return( "CGTextAlignMiddle"); // Converted from NVG_ALIGN_MIDDLE
+   case CGTextAlignBottom   : return( "CGTextAlignBottom"); // Converted from NVG_ALIGN_BOTTOM
+   case CGTextAlignBaseline : return( "CGTextAlignBaseline"); // Converted from NVG_ALIGN_BASELINE
+   default                 : return( "*invalid*");
+   }
+}
+
+
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
+{
+   // Delete: struct NVGcontext    *vg;
    CGRect               canvas;
+   CGRect               rects[ 3][ 3];
+   NSUInteger           x, y;
    CGRect               rect;
-   CGRect               rects[ N_ALIGN_MODES][ 2];
-   CGRect               small_rects[ N_ALIGN_MODES][ N_CONTENT_MODES2];
-   int                  i, j, k;
    char                 *s;
-   auto char            buf[ 256];
+   //float                ascender, descender, lineh;
+   char                 buf[ 256];
+   float                textBounds[ 4];
+   float                visualBounds[ 4];
+   float                glyphBounds[ 4];
+   float                bounds[ 4];
+   CGPoint              origin;
+   NVGglyphPosition     positions[ 32];
+   int                  i;
+   int                  nGlyphs;
+   CGPoint              adjust;
+   int                  alignment;
+   NSUInteger           frameNr;
+   CGContentMode        contentMode;
 
-   s    = texts[ [context numberOfFrames] % N_TEXTS];
+   frameNr   = [context numberOfFrames];
+   alignment = CGTextAlignCenter | CGTextAlignMiddle; // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE
 
-   vg   = CGContextGetNVGContext( context);
-   font = [context fontWithNameUTF8String:fontName];
-   if( ! font)
+   // Delete: vg     = CGContextGetNVGContext( context);
+
+   CGContextFontFace( context, fontName);
+   CGContextFontSize( context, 32.0); // Converted from nvgFontSize
+
+   canvas = [layer canvas];
+   canvas = CGRectInset( canvas, 4, 4);
+
+   CGRectPartition3x3( canvas, CGSizeMake( 4, 4), rects);
+
+   s = "Yay! Yay! Yay! Yay! Yay! Yay! Yay!";
+
+   for( y = 0; y < 3; y++)
    {
-      fprintf( stderr, "unknown font %s\n", fontName ? fontName : "NULL");
-      abort();
-   }
-   canvas = MulleEdgeInsetsInsetRect( MulleEdgeInsetsMake( 16, 32, 16 + 20, 32),
-                                      [layer canvas]);
-   CGRectPartitionIntoRowsAndColumns( CGRectInset( canvas, 32, 16),
-                                      CGSizeMake( 32, 32),
-                                      N_ALIGN_MODES,
-                                      2,
-                                      (CGRect *) rects);
-
-#if 1
-   for( i = 0; i < N_ALIGN_MODES; i++)
-   {
-      mvgStrokeRectWithColor( vg, rects[ i][ 0], 1.0, CGColorMakeGray());
-      drawLabelBelowRect( vg, 14, alignMode_text[ i], rects[ i][ 0]);
-
-      mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( rects[ i][ 0]),
-                                   CGRectGetWidth( rects[ i][ 0]),
-                                   1.0,
-                                   CGColorMakeGray());
-      nvgFontSize( vg, 20.0);
-      nvgTextColor( vg, CGColorMakeGreen());
-      nvgTextBackgroundColor( vg, CGColorMakeWhite());
-
-      for( j = 0; j < N_CONTENT_MODES; j++)
-         mvgTextInRect( vg, s, (size_t) -1, rects[ i][ 0], contentMode[ j], alignMode[ i]);
-   }
-
-#endif
-   CGRectPartitionIntoRowsAndColumns( rects[ 0][ 1],
-                                      CGSizeMake( 16, 16),
-                                      N_CONTENT_MODES2,
-                                      N_ALIGN_MODES,
-                                      (CGRect *) small_rects);
-
-#if 1
-   for( j = 0; j < N_CONTENT_MODES2; j++)
-   {
-      for( k = 0; k < N_ALIGN_MODES; k++)
+      for( x = 0; x < 3; x++)
       {
-         mvgStrokeRectWithColor( vg, small_rects[ j][ k], 1.0, CGColorMakeGray());
-         sprintf( buf, "%s/%s", alignMode_text[ k], contentMode2_text[ j]);
-         drawLabelBelowRect( vg, 9, buf, small_rects[ j][ k]);
+         rect = rects[ y][ x];
+         CGContextStrokeRectWithColor( context, rect, 1.0, CGColorMakeGray()); // Converted from mvgStrokeRectWithColor
 
-         mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( small_rects[ j][ k]),
-                                      CGRectGetWidth( small_rects[ j][ k]),
-                                      1.0,
-                                      CGColorMakeGray());
+         CGContextSave( context); // Converted from nvgSave
+         {
+            CGContextScissor( context, rect); // Converted from nvgScissor
 
-         nvgFontSize( vg, 10.0);
-         nvgTextColor( vg, CGColorMakeGreen());
-         nvgTextBackgroundColor( vg, CGColorMakeWhite());
-         mvgTextInRect( vg, s, (size_t) -1, small_rects[ j][ k], contentMode2[ j], alignMode[ k]);
+            rect = CGRectInset( rect, 2, 2);
+
+            CGContextTextAlign( context, alignment); // Converted from nvgTextAlign
+
+            switch( y * 3 + x)
+            {
+            case 0 : contentMode = CGContentModeTopLeft; break;
+            case 1 : contentMode = CGContentModeTop; break;
+            case 2 : contentMode = CGContentModeTopRight; break;
+
+            case 3 : contentMode = CGContentModeLeft; break;
+            case 4 : contentMode = CGContentModeCenter; break;
+            case 5 : contentMode = CGContentModeRight; break;
+
+            case 6 : contentMode = CGContentModeBottomLeft; break;
+            case 7 : contentMode = CGContentModeBottom; break;
+            case 8 : contentMode = CGContentModeBottomRight; break;
+            }
+
+            CGContextTextColor( context, CGColorMakeWithHSVA( (y * 3 + x) / 9.0, 1.0, 1.0, 1.0)); // Converted from nvgTextColor
+            CGContextTextBackgroundColor( context, CGColorMakeWhite()); // Converted from nvgTextBackgroundColor
+            CGContextTextInRect( context, s, (size_t) -1, rect, contentMode, CGTextOptionAlignVisually); // Converted from mvgTextInRect
+         }
+         CGContextRestore( context); // Converted from nvgRestore
       }
    }
-#endif
-
-   CGRectPartitionIntoRowsAndColumns( rects[ 1][ 1],
-                                      CGSizeMake( 16, 16),
-                                      N_CONTENT_MODES2,
-                                      N_ALIGN_MODES,
-                                      (CGRect *) small_rects);
-
-
-   for( j = 0; j < N_CONTENT_MODES2; j++)
-   {
-      for( k = 0; k < N_ALIGN_MODES; k++)
-      {
-         i = j * 3 + k;
-         mvgStrokeRectWithColor( vg, small_rects[ j][ k], 1.0, CGColorMakeGray());
-         rect = drawLabelBelowRect( vg, 9, contentMode_text[ i], small_rects[ j][ k]);
-         if( j == 2 && k == 1)
-            drawLabelBelowRect( vg, 12, "ALIGN_VISUAL/FILL", rect);
-
-         mvgStrokeLineHWithColor( vg, CGRectGetLeftPoint( small_rects[ j][ k]),
-                                      CGRectGetWidth( small_rects[ j][ k]),
-                                      1.0,
-                                      CGColorMakeGray());
-
-         nvgFontSize( vg, 10.0);
-         nvgTextColor( vg, CGColorMakeGreen());
-         nvgTextBackgroundColor( vg, CGColorMakeWhite());
-         mvgTextInRect( vg, s, (size_t) -1, small_rects[ j][ k], contentMode[ i], CGTextOptionFill|CGTextOptionAlignVisually);
-      }
-   }
+   return( YES);
 }
 
 
@@ -265,7 +123,7 @@ void   setupScene( UIWindow *window)
 
    view  = [UIView viewWithFrame:frame];
    [view setAutoresizingMask:UIViewAutoresizingScaleToFill];
-   [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff2]; // drawStuff1];
+   [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff]; // drawStuff1];
    [[window contentView] addSubview:view];
 }
 
@@ -320,7 +178,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -340,4 +198,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

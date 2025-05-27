@@ -11,6 +11,7 @@
       { @selector( CGContext), @selector( CGImageGPUTexture) },      // 80b7b568;CGContext;86f29fd6;CGImageGPUTexture
       { @selector( CGContext), @selector( Errors) },      // 80b7b568;CGContext;9ed60a6e;Errors
       { @selector( CGContext), @selector( OpenGL) },      // 80b7b568;CGContext;b5858523;OpenGL
+      { @selector( CGContext), @selector( OpenGLShader) },      // 80b7b568;CGContext;e881adba;OpenGLShader
       { @selector( CGContext), @selector( Render) },      // 80b7b568;CGContext;50cf42d3;Render
       { @selector( CGContext), @selector( Shader) },      // 80b7b568;CGContext;deb38887;Shader
       { @selector( CGContext), @selector( Texture) },      // 80b7b568;CGContext;94c55949;Texture
@@ -21,6 +22,8 @@
       { @selector( CGContextBase), MULLE_OBJC_NO_CATEGORYID },      // 750419bb;CGContextBase;;
       { @selector( CGFont), MULLE_OBJC_NO_CATEGORYID },      // 1881416f;CGFont;;
       { @selector( CGFramebuffer), @selector( CGContentRendering) },      // ef762cef;CGFramebuffer;84d6dd0c;CGContentRendering
+      { @selector( CGFramebuffer), @selector( OpenGL) },      // ef762cef;CGFramebuffer;b5858523;OpenGL
+      { @selector( CGFramebuffer), @selector( nanovg) },      // ef762cef;CGFramebuffer;df06d543;nanovg
       { @selector( CGFramebuffer), MULLE_OBJC_NO_CATEGORYID },      // ef762cef;CGFramebuffer;;
       { @selector( CGGradient), @selector( CGGradientSubclasses) },      // 37670335;CGGradient;15b75a5c;CGGradientSubclasses
       { @selector( CGGradient), @selector( nanovg) },      // 37670335;CGGradient;df06d543;nanovg
@@ -32,13 +35,13 @@
       { @selector( CGImagePaint), MULLE_OBJC_NO_CATEGORYID },      // 3e23b783;CGImagePaint;;
       { @selector( CGLayoutContext), @selector( CGFont) },      // ca9fd8c1;CGLayoutContext;1881416f;CGFont
       { @selector( CGLayoutContext), @selector( OpenGL) },      // ca9fd8c1;CGLayoutContext;b5858523;OpenGL
+      { @selector( CGLayoutContext), @selector( nanovg) },      // ca9fd8c1;CGLayoutContext;df06d543;nanovg
       { @selector( CGLayoutContext), MULLE_OBJC_NO_CATEGORYID },      // ca9fd8c1;CGLayoutContext;;
       { @selector( CGLinearGradient), @selector( nanovg) },      // a1f73d66;CGLinearGradient;df06d543;nanovg
       { @selector( CGLinearGradient), MULLE_OBJC_NO_CATEGORYID },      // a1f73d66;CGLinearGradient;;
       { @selector( CGPaint), @selector( CGBlendedPaint) },      // df22fbd2;CGPaint;f164885b;CGBlendedPaint
       { @selector( CGPaint), @selector( CGImagePaint) },      // df22fbd2;CGPaint;3e23b783;CGImagePaint
       { @selector( CGPaint), @selector( Drawing) },      // df22fbd2;CGPaint;53946657;Drawing
-      { @selector( CGPaint), @selector( nanovg) },      // df22fbd2;CGPaint;df06d543;nanovg
       { @selector( CGPaint), MULLE_OBJC_NO_CATEGORYID },      // df22fbd2;CGPaint;;
       { @selector( CGRadialGradient), @selector( nanovg) },      // 74b8ddc9;CGRadialGradient;df06d543;nanovg
       { @selector( CGRadialGradient), MULLE_OBJC_NO_CATEGORYID },      // 74b8ddc9;CGRadialGradient;;

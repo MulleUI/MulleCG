@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2023 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -5,36 +8,32 @@
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext    *vg;
    CGRect               canvas;
    float                factor;
    float                fontSize;
 
    [context useFontWithNameUTF8String:"sans"];
 
-   vg = CGContextGetNVGContext( context);
-   mvgClearType( vg, 1);
-   mvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-   mvgTextColor( vg, CGColorMakeOrange());
-   mvgTextBackgroundColor( vg, CGColorMakeBlack());
-
-   vg = CGContextGetNVGContext( context);
+   CGContextClearType( context, 1);
+   CGContextTextAlign( context, CGTextAlignCenter | CGTextAlignMiddle); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE
+   CGContextTextColor( context, CGColorMakeOrange());
+   CGContextTextBackgroundColor( context, CGColorMakeBlack());
 
    fontSize = 90.0f;
    factor   = CGContextGetLinearAnimationFactor( context, 10 * 60.0f);
    fontSize = 5.0f + 95.0f * factor;
    // fontSize += 5.0f * factor;
    fontSize  = roundf( fontSize);
-   mvgFontSize( vg, fontSize + 5.0f * factor);
+   CGContextFontSize( context, fontSize + 5.0f * factor);
 
    canvas = [layer canvas];
-   mvgFormat( vg, CGRectGetCenterPoint( canvas), "O");
+   CGContextFormat( context, CGRectGetCenter( canvas), "O");
 
-   mvgClearType( vg, 0);
-   mvgTextAlign( vg, NVG_ALIGN_LEFT| NVG_ALIGN_BOTTOM);
-   mvgTextColor( vg, CGColorMakeWhite());
-   mvgFontSize( vg, 14.0f);
-   mvgFormat( vg, CGPointOffset( CGRectGetBottomLeftPoint( canvas), 20, -20),
+   CGContextClearType( context, 0);
+   CGContextTextAlign( context, CGTextAlignLeft| CGTextAlignBottom); // Converted from NVG_ALIGN_LEFT| NVG_ALIGN_BOTTOM
+   CGContextTextColor( context, CGColorMakeWhite());
+   CGContextFontSize( context, 14.0f);
+   CGContextFormat( context, CGPointOffset( CGRectGetBottomLeft( canvas), 20, -20),
                   "fontSize: %g", fontSize);
    return( YES);
 }
@@ -64,7 +63,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -84,4 +83,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

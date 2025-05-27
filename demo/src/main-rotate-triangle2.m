@@ -53,11 +53,11 @@ static void   draw_triangle_with_centroid( CGContext *context,
       CGContextLineTo( context, points[ 2]);
       CGContextClosePath( context);
 
-      rect = CGRectMakeWithCenterPointAndSize( CGPointZero, CGSizeMake( 1.0, 1.0));
+      rect = CGRectMakeWithCenterAndSize( CGPointZero, CGSizeMake( 1.0, 1.0));
       [paint fillWithBounds:rect
                     context:context];
 
-      CGContextFillCircleWithPaint( context, CACircleMake( massCenter, centroidRadius / scale), centroidPaint);
+      CGContextFillCircleWithPaint( context, CACircleMakeWithCenterAndRadius( massCenter, centroidRadius / scale), centroidPaint);
    }
    CGContextRestore( context);
 }
@@ -116,7 +116,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       for( i = 0; i < 2; i++)
       {
          rect   = rects[ j][ i];
-         center = CGRectGetCenterPoint( rect);
+         center = CGRectGetCenter( rect);
          size   = CGSizeMake( rect.size.width * 2.0 / 3.0,
                               rect.size.height * 2.0 / 3.0);
 
@@ -133,8 +133,8 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                   [CGPaint paintWithColor:CGColorMakeWhite()],
                   i == 1);
 
-         CGContextFillCircleWithColor( context, CACircleMake( center, 5.0), CGColorMakeOrange());
-         CGContextStrokeRectWithColor( context, CGRectMakeWithCenterPointAndSize( center, size), 1.0, CGColorMakeOrange());
+         CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( center, 5.0), CGColorMakeOrange());
+         CGContextStrokeRectWithColor( context, CGRectMakeWithCenterAndSize( center, size), 1.0, CGColorMakeOrange());
 
       }
    }

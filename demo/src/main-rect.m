@@ -41,7 +41,7 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger mode)
    [context fontWithNameUTF8String:"sans"];
 
    nvgFontFace( vg, "sans");
-   nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+   nvgTextAlign( vg, CGTextAlignCenter | CGTextAlignBaseline); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE
    nvgTextColor( vg, CGColorMakeBlack());
    nvgTextBackgroundColor( vg, CGColorMakeWhite());
    nvgFontSize( vg, 13.0);
@@ -107,7 +107,7 @@ static void   fillRect( CALayer *layer, CGContext *context, NSUInteger mode)
    [context fontWithNameUTF8String:"sans"];
 
    nvgFontFace( vg, "sans");
-   nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+   nvgTextAlign( vg, CGTextAlignCenter | CGTextAlignBaseline); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE
    nvgTextColor( vg, CGColorMakeWhite());
    nvgTextBackgroundColor( vg, CGColorMakeRed());
 
@@ -190,7 +190,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫

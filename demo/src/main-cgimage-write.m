@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2023 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -8,30 +11,17 @@
 
 #include "bitmap.inc"
 
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              rect;
    CGImage             *image;
-   CGFramebuffer             *cgLayer;
-   struct NVGcontext   *vg;
+   CGFramebuffer       *cgLayer;
    static BOOL         written;
    UIBitmapImage       *bitmapImage;
+   struct CGBitmap     bitmapStruct;
 
    rect = [layer canvas];
-
-   vg = CGContextGetNVGContext( context);
-
-   // gray rectangle so we know something is drawn...
-   nvgBeginPath( vg);
-   {
-      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgStrokeWidth( vg, 8);
-      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
-   }
-   nvgStroke( vg);
 
    options = CGDrawableOptionsMakeScaleToFit();
 
@@ -50,21 +40,24 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    if( ! written)
    {
-//      bitmapImage = [image bitmapImage];
-//      if( ! bitmapImage)
-//         abort();
-//
-//      [bitmapImage writeToPNGUTF8String:"image.png"];
-//      written = YES;
-//
-//      cgLayer = [[[CGFramebuffer alloc] initWithImage:image
-//                                   textureFlags:NVG_IMAGE_NEAREST
-//                                        context:context] autorelease];
-//      bitmapImage = [cgLayer bitmapImage];
-//      if( ! bitmapImage)
-//         abort();
-//
-//      [bitmapImage writeToPNGUTF8String:"layer.png"];
+      bitmapStruct = [image RGBABytesBitmap:NULL];
+      bitmapImage  = [UIBitmapImage imageWithBitmap:bitmapStruct
+                                          allocator:NULL];
+      if( ! bitmapImage)
+         abort();
+
+      [bitmapImage writeToPNGUTF8String:"image.png"];
+      written = YES;
+
+      cgLayer = [[[CGFramebuffer alloc] initWithImage:image
+                                         textureFlags:NVG_IMAGE_NEAREST
+                                              context:context] autorelease];
+      bitmapStruct = [cgLayer RGBABytesBitmap:NULL];
+      bitmapImage = [UIBitmapImage imageWithBitmap:bitmapStruct allocator:NULL];
+      if( ! bitmapImage)
+         abort();
+
+      [bitmapImage writeToPNGUTF8String:"layer.png"];
    }
 
    return( YES);
@@ -141,5 +134,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

@@ -36,24 +36,21 @@ void   screenshot( UIWindow *window)
 static void   drawSmall( CALayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
-   NVGcontext          *vg;
 
    options = CGDrawableOptionsMake( 0.0, 1.0, 0.0, 0.0, YES);
 
-   vg = CGContextGetNVGContext( context);
-
-   nvgSave( vg);
+   CGContextSave( context); // Converted from nvgSave
 
    //
    // theory: the green flicker can "only" be explained by
    // reading transparent pixels from the screen sometimes and then sometimes
    // not.
    //
-   nvgGlobalCompositeOperation( vg, NVG_COPY); // ignore alpha
+   CGContextGlobalCompositeOperation( context, NVG_COPY); // Converted from nvgGlobalCompositeOperation // ignore alpha
    [image drawRect:[layer canvas]
            options:&options
            context:context];
-   nvgRestore( vg);
+   CGContextRestore( context); // Converted from nvgRestore
 }
 
 
@@ -62,30 +59,27 @@ static void  drawLarge( CALayer *layer, CGContext *context)
    CGRect       rect;
    CGRect       shape;
    CGRect       circle;
-   NVGcontext   *vg;
    CGFrameInfo  *info;
    CGFloat      radius;
    NSUInteger   frameNumber;
 
    frameNumber = [context numberOfRenderedFrames];
 
-   vg    = CGContextGetNVGContext( context);
-
    rect  = [layer canvas];
    shape = CGRectInset( rect, 60, 60);
 
    info  = [context currentFrameInfo];
 
-   nvgTranslate( vg, CGRectGetMidX( shape), CGRectGetMidY( shape));
-   nvgRotate( vg, 3.141 * 2 * (frameNumber % 360) / 360);
-   nvgTranslate( vg, -CGRectGetMidX( shape), -CGRectGetMidY( shape));
+   CGContextTranslate( context, CGRectGetMidX( shape), CGRectGetMidY( shape)); // Converted from nvgTranslate
+   CGContextRotate( context, 3.141 * 2 * (frameNumber % 360) / 360); // Converted from nvgRotate
+   CGContextTranslate( context, -CGRectGetMidX( shape), -CGRectGetMidY( shape)); // Converted from nvgTranslate
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
    {
-      nvgRect( vg, shape.origin.x, shape.origin.y, shape.size.width, shape.size.height);
-      nvgFillColor( vg, CGColorMakeRGBA( (frameNumber % 360) / 359.0, 0.6, 0.8, 1.0));
+      CGContextRect( context, CGRectMake( shape.origin.x, shape.origin.y, shape.size.width, shape.size.height)); // Converted from nvgRect
+      CGContextFillColor( context, CGColorMakeWithRGBA( (frameNumber % 360) / 359.0, 0.6, 0.8, 1.0)); // Converted from nvgFillColor
    }
-   nvgFill( vg);
+   CGContextFill( context); // Converted from nvgFill
 
    circle = CGRectInset( shape, 5, 5);
    if( circle.size.width < circle.size.height)
@@ -95,13 +89,13 @@ static void  drawLarge( CALayer *layer, CGContext *context)
 
    circle.size.width  = radius * 2.0;
    circle.size.height = radius * 2.0;
-   nvgBeginPath( vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
    {
-      nvgCircle( vg, CGRectGetMidX( circle), CGRectGetMidY( circle), radius);
-      nvgStrokeColor( vg, [UIColor darkGrayColor]);
-      nvgStrokeWidth( vg, 3.0);
+      CGContextCircle( context, CACircleMake( CGRectGetMidX( circle), CGRectGetMidY( circle), radius)); // Converted from nvgCircle
+      CGContextStrokeColor( context, [UIColor darkGrayColor]); // Converted from nvgStrokeColor
+      CGContextStrokeWidth( context, 3.0); // Converted from nvgStrokeWidth
    }
-   nvgStroke( vg);
+   CGContextStroke( context); // Converted from nvgStroke
 }
 
 
@@ -209,7 +203,6 @@ int   main( int argc, char *argv[])
 }
 
 
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
@@ -225,8 +218,8 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
-// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
+// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
@@ -245,4 +238,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

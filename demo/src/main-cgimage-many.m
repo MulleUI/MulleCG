@@ -15,21 +15,19 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect              rect;
    CGRect              canvas;
    CGImage             *image;
-   struct NVGcontext   *vg;
    NSUInteger          i;
 
    canvas = [layer canvas];
-   vg   = CGContextGetNVGContext( context);
 
    rect = CGRectInset( canvas, 2, 2);
    // gray rectangle so we know something is drawn...
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
-      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgStrokeWidth( vg, 8);
-      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
+      CGContextRect( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
+      CGContextStrokeWidth( context, 8);
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
-   nvgStroke( vg);
+   CGContextStroke( context);
 
    options = CGDrawableOptionsMakeDefault();
 
@@ -114,8 +112,8 @@ int   main( int argc, char *argv[])
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
-// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
-//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+// ║        !█▄▄████≤═^`╓█ █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
 //   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀
@@ -129,5 +127,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

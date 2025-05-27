@@ -39,3 +39,18 @@
 - (BOOL) isRendering;
 
 @end
+
+
+
+@interface CGContext( RenderFuture)
+
+//
+// used to intermix OpenGL or other commands, this flushes commands
+// cleans some font state and sets the viewport.
+// (resumeRender is in OpenGL)
+- (void) suspendRender;  // flushes and resets
+- (void) flushRender;    // suspends and resumes
+- (void) resumeRender;
+- (void) changeRender:(struct CGFrameInfo *) info;
+
+@end

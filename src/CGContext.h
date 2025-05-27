@@ -2,7 +2,7 @@
 #import "CGLayoutContext+CGFont.h"
 
 #import "CGColor.h"
-#include "microvg.h"
+#include "nanowrap.h"
 
 
 @class CGFont;
@@ -319,3 +319,21 @@ static inline float  CGContextGetLinearAnimationFactor( CGContext *context, NSUI
 
 
 
+// defined in nanovg-specifics
+
+
+char   *CGNVGBackendErrorUTF8String( void);
+char   *_CGNVGBackendErrorShortUTF8String( void *error);
+char   *_CGNVGBackendErrorUTF8String( void *error);
+
+void  _CGContextCheckBackendError( CGContext *ctxt, char *str);
+
+static inline void   CGContextCheckBackendError( CGContext *ctxt, char *str)
+{
+#ifdef DEBUG
+   _CGContextCheckBackendError( ctxt, str);
+#endif
+}
+
+// cleans error state, returns YES if there were errors
+BOOL   CGContextResetBackendError( CGContext *ctxt);

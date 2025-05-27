@@ -12,21 +12,18 @@ static void   drawArcTo( CGContext *context,
    CGPoint             p0, p1, p2;
    CGFloat             r;
    CGFloat             factor;
-   struct NVGcontext   *vg;
-
-   vg     = CGContextGetNVGContext( context);
 
    factor = ([context numberOfFrames] % 120) / 119.0;
    factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
-   mvgSave( vg);
+   CGContextSave( context);
    {
-//      mvgIntersectScissor( vg, CGRectExtrude( rect, 2.0, 2.0));
+//      CGContextIntersectScissor( context, CGRectExtrude( rect, 2.0, 2.0));
 
       r  = CGRectGetWidth( rect) / 2;
-      p0 = CGRectGetTopLeftPoint( rect);
-      p1 = CGRectGetRightPoint( rect);
-      p2 = CGRectGetBottomLeftPoint( rect);
+      p0 = CGRectGetTopLeft( rect);
+      p1 = CGRectGetRight( rect);
+      p2 = CGRectGetBottomLeft( rect);
 
       p1.x -= r * factor;
       r    += r * factor * factor;
@@ -39,9 +36,9 @@ static void   drawArcTo( CGContext *context,
       case CGContentModeTopLeft :
          // Top Left arc
          r  = CGFloatMinimum( CGRectGetWidth( rect), CGRectGetHeight( rect)) / 2.0;
-         p0 = CGRectGetLeftPoint( rect);
-         p1 = CGRectGetTopLeftPoint( rect);
-         p2 = CGRectGetTopPoint( rect);
+         p0 = CGRectGetLeft( rect);
+         p1 = CGRectGetTopLeft( rect);
+         p2 = CGRectGetTop( rect);
 
          p0.y += r * factor;
          p2.x += r * factor;
@@ -50,9 +47,9 @@ static void   drawArcTo( CGContext *context,
 
       case CGContentModeTopRight :
          r  = CGFloatMinimum( CGRectGetWidth( rect), CGRectGetHeight( rect)) / 2.0;
-         p0 = CGRectGetRightPoint( rect);
-         p1 = CGRectGetTopRightPoint( rect);
-         p2 = CGRectGetTopPoint( rect);
+         p0 = CGRectGetRight( rect);
+         p1 = CGRectGetTopRight( rect);
+         p2 = CGRectGetTop( rect);
 
          p0.y += r * factor;
          p2.x -= r * factor;
@@ -61,9 +58,9 @@ static void   drawArcTo( CGContext *context,
 
       case CGContentModeBottomLeft :
          r  = CGFloatMinimum( CGRectGetWidth( rect), CGRectGetHeight( rect)) / 2.0;
-         p0 = CGRectGetLeftPoint( rect);
-         p1 = CGRectGetBottomLeftPoint( rect);
-         p2 = CGRectGetBottomPoint( rect);
+         p0 = CGRectGetLeft( rect);
+         p1 = CGRectGetBottomLeft( rect);
+         p2 = CGRectGetBottom( rect);
 
          p0.y -= r * factor;
          p2.x += r * factor;
@@ -72,9 +69,9 @@ static void   drawArcTo( CGContext *context,
 
       case CGContentModeBottomRight :
          r  = CGFloatMinimum( CGRectGetWidth( rect), CGRectGetHeight( rect)) / 2.0;
-         p0 = CGRectGetRightPoint( rect);
-         p1 = CGRectGetBottomRightPoint( rect);
-         p2 = CGRectGetBottomPoint( rect);
+         p0 = CGRectGetRight( rect);
+         p1 = CGRectGetBottomRight( rect);
+         p2 = CGRectGetBottom( rect);
 
          p0.y -= r * factor;
          p2.x -= r * factor;
@@ -82,44 +79,42 @@ static void   drawArcTo( CGContext *context,
          break;
       }
 
-      mvgStrokeCircleWithColor( vg, CACircleMake( p1, r), 0.5, CGColorMakeOrange());
-//      mvgStrokeLineHWithColor( vg, p1, r, 0.5, CGColorMakeRed());
+      CGContextStrokeCircleWithColor( context, CACircleMakeWithCenterAndRadius( p1, r), 0.5, CGColorMakeOrange());
+//      CGContextStrokeLineHWithColor( context, p1, r, 0.5, CGColorMakeRed());
 
-      mvgStrokeLineWithColor( vg, p0, p1, 0.5, CGColorMakeGreen());
-      mvgStrokeLineWithColor( vg, p1, p2, 0.5, CGColorMakeBlue());
+      CGContextStrokeLineWithColor( context, p0, p1, 0.5, CGColorMakeGreen());
+      CGContextStrokeLineWithColor( context, p1, p2, 0.5, CGColorMakeBlue());
 
-      nvgBeginPath( vg);
+      CGContextBeginPath( context);
 
-      mvgMoveTo( vg, p0);
-      mvgArcTo( vg, p1, p2, r);
+      CGContextMoveTo( context, p0);
+      CGContextArcTo( context, p1, p2, r);
 
-      mvgStrokeWidth( vg, 3.0);
-      mvgStrokeColor( vg, color);
-      mvgStroke( vg);
+      CGContextStrokeWidth( context, 3.0);
+      CGContextStrokeColor( context, color);
+      CGContextStroke( context);
 
-      mvgFillCircleWithColor( vg, CACircleMake( p0, 2.0), CGColorMakeRed());
-      mvgFillCircleWithColor( vg, CACircleMake( p1, 2.0), CGColorMakeBlue());
-      mvgFillCircleWithColor( vg, CACircleMake( p2, 2.0), CGColorMakeLime());
+      CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( p0, 2.0), CGColorMakeRed());
+      CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( p1, 2.0), CGColorMakeBlue());
+      CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( p2, 2.0), CGColorMakeLime());
    }
-   mvgRestore( vg);
+   CGContextRestore( context);
 }
 
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   struct NVGcontext   *vg;
    CGRect              canvas;
    CGRect              rect;
    CGFloat             factor;
 
-   vg     = CGContextGetNVGContext( context);
    rect   = CGRectIntegral( [layer canvas]);
-   mvgFillRectWithColor( vg, rect, CGColorMake( 1.0, 1.0, 1.0, 1.0));
+   CGContextFillRectWithColor( context, rect, CGColorMake( 1.0, 1.0, 1.0, 1.0));
 
-   canvas = CGSizePlaceInRect( CGSizeMake( 200, 100), [layer canvas], CGContentModeCenterPoint);
+   canvas = CGSizePlaceInRect( CGSizeMake( 200, 100), [layer canvas], CGContentModeCenter);
    rect   = CGRectIntegral( canvas);
-   mvgStrokeRectWithColor( vg, rect, 3.0, CGColorMake( 0.0, 0.0, 0.0, 0.2));
+   CGContextStrokeRectWithColor( context, rect, 3.0, CGColorMake( 0.0, 0.0, 0.0, 0.2));
 
    // the nvgArcTo command is fairly inscrutable
    drawArcTo( context, rect, CGContentModeTopLeft, CGColorMakeDodgerBlue());
@@ -129,7 +124,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 
    return( YES);
 }
-
 
 
 int   main( int argc, char *argv[])
@@ -156,7 +150,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫

@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2022 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -5,108 +8,108 @@
 #include <string.h>
 
 
-static char  *nvgHAlignmentUTF8String( int alignment)
+static char  *CGHAlignmentUTF8String( int alignment)
 {
-   switch( alignment & (NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT))
+   switch( alignment & (CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight)) // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT
    {
-   case NVG_ALIGN_LEFT   : return( "NVG_ALIGN_LEFT");
-   case NVG_ALIGN_CENTER : return( "NVG_ALIGN_CENTER");
-   case NVG_ALIGN_RIGHT  : return( "NVG_ALIGN_RIGHT");
-   default               : return( "*invalid*");
+   case CGTextAlignLeft   : return( "CGTextAlignLeft"); // Converted from NVG_ALIGN_LEFT
+   case CGTextAlignCenter : return( "CGTextAlignCenter"); // Converted from NVG_ALIGN_CENTER
+   case CGTextAlignRight  : return( "CGTextAlignRight"); // Converted from NVG_ALIGN_RIGHT
+   default                : return( "*invalid*");
    }
 }
 
 
-static char  *nvgVAlignmentUTF8String( int alignment)
+static char  *CGVAlignmentUTF8String( int alignment)
 {
-   switch( alignment & (NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE))
+   switch( alignment & (CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline)) // Converted from NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE
    {
-   case NVG_ALIGN_TOP      : return( "NVG_ALIGN_TOP");
-   case NVG_ALIGN_MIDDLE   : return( "NVG_ALIGN_MIDDLE");
-   case NVG_ALIGN_BOTTOM   : return( "NVG_ALIGN_BOTTOM");
-   case NVG_ALIGN_BASELINE : return( "NVG_ALIGN_BASELINE");
-   default                 : return( "*invalid*");
+   case CGTextAlignTop      : return( "CGTextAlignTop"); // Converted from NVG_ALIGN_TOP
+   case CGTextAlignMiddle   : return( "CGTextAlignMiddle"); // Converted from NVG_ALIGN_MIDDLE
+   case CGTextAlignBottom   : return( "CGTextAlignBottom"); // Converted from NVG_ALIGN_BOTTOM
+   case CGTextAlignBaseline : return( "CGTextAlignBaseline"); // Converted from NVG_ALIGN_BASELINE
+   default                  : return( "*invalid*");
    }
 }
 
 #define N_ALIGNMENTS  (sizeof( alignments) / sizeof( alignments[ 0]))
 
 
-static void   nvgStrokeGlyphPosition( NVGcontext *vg, NVGglyphPosition *position, CGColor color)
+static void   CGContextStrokeGlyphPosition( CGContext *context, struct UIGlyphPosition *position, CGColor color) // Converted from NVGcontext *vg
 {
-   nvgBeginPath( vg);
-   nvgRect( vg, position->minx,
-                position->miny,
-                position->maxx - position->minx,
-                position->maxy - position->miny);
-   nvgStrokeColor( vg, color);
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
+   CGContextRect( context, CGRectMake( position->minx, // Converted from nvgRect
+                                       position->miny,
+                                       position->maxx - position->minx,
+                                       position->maxy - position->miny));
+   CGContextStrokeColor( context, color); // Converted from nvgStrokeColor
+   CGContextStrokeWidth( context, 1.0); // Converted from nvgStrokeWidth
+   CGContextStroke( context); // Converted from nvgStroke
 }
 
 
-static void   strokeBounds( NVGcontext *vg, float bounds[ 4], CGColor color)
+static void   strokeBounds( CGContext *context, float bounds[ 4], CGColor color) // Converted from NVGcontext *vg
 {
-   nvgBeginPath(vg);
-   nvgRect( vg, bounds[0], bounds[1], bounds[2] - bounds[0], bounds[3] - bounds[1]);
-   nvgStrokeColor( vg, color);
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
+   CGContextRect( context, CGRectMake( bounds[0], bounds[1], bounds[2] - bounds[0], bounds[3] - bounds[1])); // Converted from nvgRect
+   CGContextStrokeColor( context, color); // Converted from nvgStrokeColor
+   CGContextStrokeWidth( context, 1.0); // Converted from nvgStrokeWidth
+   CGContextStroke( context); // Converted from nvgStroke
 }
 
 
-static void  strokeBoundsInRect( NVGcontext *vg, float bounds[ 4], CGRect rect, CGColor color)
+static void  strokeBoundsInRect( CGContext *context, float bounds[ 4], CGRect rect, CGColor color) // Converted from NVGcontext *vg
 {
    CGPoint   point;
 
    point = CGPointMirrorInRectH( CGPointMake( bounds[ 0], 0), rect);
-   mvgStrokeLineVWithColor( vg, CGPointMake( bounds[ 0], CGRectGetMinY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color);
-   mvgStrokeLineVWithColor( vg, CGPointMake( point.x,    CGRectGetMidY( rect)), CGRectGetHeight( rect), 1.0, color);
-   mvgStrokeLineVWithColor( vg, CGPointMake( bounds[ 2], CGRectGetMinY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color);
+   CGContextStrokeLineVWithColor( context, CGPointMake( bounds[ 0], CGRectGetMinY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color); // Converted from mvgStrokeLineVWithColor
+   CGContextStrokeLineVWithColor( context, CGPointMake( point.x,    CGRectGetMidY( rect)), CGRectGetHeight( rect), 1.0, color); // Converted from mvgStrokeLineVWithColor
+   CGContextStrokeLineVWithColor( context, CGPointMake( bounds[ 2], CGRectGetMinY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color); // Converted from mvgStrokeLineVWithColor
 
 //   point = CGPointMirrorInRectH( CGPointMake( bounds[ 2], 0), rect);
-//   mvgStrokeLineVWithColor( vg, bounds[ 2], CGRectGetMinY( rect), CGRectGetMidY( rect), 1.0, color);
-//   mvgStrokeLineVWithColor( vg, point.x, CGRectGetMidY( rect), CGRectGetMaxY( rect), 1.0, color);
+//   CGContextStrokeLineVWithColor( context, bounds[ 2], CGRectGetMinY( rect), CGRectGetMidY( rect), 1.0, color); // Converted from mvgStrokeLineVWithColor
+//   CGContextStrokeLineVWithColor( context, point.x, CGRectGetMidY( rect), CGRectGetMaxY( rect), 1.0, color); // Converted from mvgStrokeLineVWithColor
 
-//   mvgStrokeLineHWithColor( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 1], 1.0, color);
-//   mvgStrokeLineHWithColor( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 3], 1.0, color);
+//   CGContextStrokeLineHWithColor( context, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 1], 1.0, color); // Converted from mvgStrokeLineHWithColor
+//   CGContextStrokeLineHWithColor( context, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 3], 1.0, color); // Converted from mvgStrokeLineHWithColor
 }
 
-static void  strokeBoundsInRect2( NVGcontext *vg, float bounds[ 4], CGRect rect, CGColor color)
+static void  strokeBoundsInRect2( CGContext *context, float bounds[ 4], CGRect rect, CGColor color) // Converted from NVGcontext *vg
 {
    CGPoint   point;
 
    point = CGPointMirrorInRectH( CGPointMake( bounds[ 0], 0), rect);
-   mvgStrokeLineVWithColor( vg, CGPointMake( bounds[ 0], CGRectGetMaxY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color);
-   mvgStrokeLineVWithColor( vg, CGPointMake( point.x,    CGRectGetMidY( rect)), CGRectGetHeight( rect), 1.0, color);
-   mvgStrokeLineVWithColor( vg, CGPointMake( bounds[ 2], CGRectGetMaxY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color);
+   CGContextStrokeLineVWithColor( context, CGPointMake( bounds[ 0], CGRectGetMaxY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color); // Converted from mvgStrokeLineVWithColor
+   CGContextStrokeLineVWithColor( context, CGPointMake( point.x,    CGRectGetMidY( rect)), CGRectGetHeight( rect), 1.0, color); // Converted from mvgStrokeLineVWithColor
+   CGContextStrokeLineVWithColor( context, CGPointMake( bounds[ 2], CGRectGetMaxY( rect)), CGRectGetHeight( rect) / 2.0, 1.0, color); // Converted from mvgStrokeLineVWithColor
 
 //   point = CGPointMirrorInRectH( CGPointMake( bounds[ 2], 0), rect);
-//   mvgStrokeLineVWithColor( vg, bounds[ 2], CGRectGetMinY( rect), CGRectGetMidY( rect), 1.0, color);
-//   mvgStrokeLineVWithColor( vg, point.x, CGRectGetMidY( rect), CGRectGetMaxY( rect), 1.0, color);
+//   CGContextStrokeLineVWithColor( context, bounds[ 2], CGRectGetMinY( rect), CGRectGetMidY( rect), 1.0, color); // Converted from mvgStrokeLineVWithColor
+//   CGContextStrokeLineVWithColor( context, point.x, CGRectGetMidY( rect), CGRectGetMaxY( rect), 1.0, color); // Converted from mvgStrokeLineVWithColor
 
-//   mvgStrokeLineHWithColor( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 1], 1.0, color);
-//   mvgStrokeLineHWithColor( vg, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 3], 1.0, color);
+//   CGContextStrokeLineHWithColor( context, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 1], 1.0, color); // Converted from mvgStrokeLineHWithColor
+//   CGContextStrokeLineHWithColor( context, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 3], 1.0, color); // Converted from mvgStrokeLineHWithColor
 }
 
 
 NSUInteger   alignments[] =
 {
-   NVG_ALIGN_LEFT   | NVG_ALIGN_TOP,
-   NVG_ALIGN_CENTER | NVG_ALIGN_TOP,
-   NVG_ALIGN_RIGHT  | NVG_ALIGN_TOP,
+   CGTextAlignLeft   | CGTextAlignTop, // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_TOP
+   CGTextAlignCenter | CGTextAlignTop, // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_TOP
+   CGTextAlignRight  | CGTextAlignTop, // Converted from NVG_ALIGN_RIGHT  | NVG_ALIGN_TOP
 
-   NVG_ALIGN_LEFT   | NVG_ALIGN_MIDDLE,
-   NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE,
-   NVG_ALIGN_RIGHT  | NVG_ALIGN_MIDDLE,
+   CGTextAlignLeft   | CGTextAlignMiddle, // Converted from NVG_ALIGN_LEFT   | NVG_ALIGN_MIDDLE
+   CGTextAlignCenter | CGTextAlignMiddle, // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE
+   CGTextAlignRight  | CGTextAlignMiddle, // Converted from NVG_ALIGN_RIGHT  | NVG_ALIGN_MIDDLE
 
-   NVG_ALIGN_LEFT   | NVG_ALIGN_BOTTOM,
-   NVG_ALIGN_CENTER | NVG_ALIGN_BOTTOM,
-   NVG_ALIGN_RIGHT  | NVG_ALIGN_BOTTOM,
+   CGTextAlignLeft   | CGTextAlignBottom, // Converted from NVG_ALIGN_LEFT   | NVG_ALIGN_BOTTOM
+   CGTextAlignCenter | CGTextAlignBottom, // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_BOTTOM
+   CGTextAlignRight  | CGTextAlignBottom, // Converted from NVG_ALIGN_RIGHT  | NVG_ALIGN_BOTTOM
 
-   NVG_ALIGN_LEFT   | NVG_ALIGN_BASELINE,
-   NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE,
-   NVG_ALIGN_RIGHT  | NVG_ALIGN_BASELINE
+   CGTextAlignLeft   | CGTextAlignBaseline, // Converted from NVG_ALIGN_LEFT   | NVG_ALIGN_BASELINE
+   CGTextAlignCenter | CGTextAlignBaseline, // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE
+   CGTextAlignRight  | CGTextAlignBaseline // Converted from NVG_ALIGN_RIGHT  | NVG_ALIGN_BASELINE
 };
 #define N_ALIGNMENTS  (sizeof( alignments) / sizeof( alignments[ 0]))
 
@@ -115,19 +118,19 @@ static CGPoint   textOriginForAlignment( CGRect  rect, int alignment)
 {
    CGPoint  origin;
 
-   switch( alignment & (NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT))
+   switch( alignment & (CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight)) // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT
    {
-   default               : origin.x = CGRectGetMinX( rect); break;
-   case NVG_ALIGN_CENTER : origin.x = CGRectGetMidX( rect); break;
-   case NVG_ALIGN_RIGHT  : origin.x = CGRectGetMaxX( rect); break;
+   default                : origin.x = CGRectGetMinX( rect); break;
+   case CGTextAlignCenter : origin.x = CGRectGetMidX( rect); break; // Converted from NVG_ALIGN_CENTER
+   case CGTextAlignRight  : origin.x = CGRectGetMaxX( rect); break; // Converted from NVG_ALIGN_RIGHT
    }
 
    // not sure what to do with baseline
-   switch( alignment & (NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE))
+   switch( alignment & (CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline)) // Converted from NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE
    {
-   case NVG_ALIGN_TOP    : origin.y = CGRectGetMinY( rect); break;
-   case NVG_ALIGN_MIDDLE : origin.y = CGRectGetMidY( rect); break;
-   default               : origin.y = CGRectGetMaxY( rect); break;
+   case CGTextAlignTop    : origin.y = CGRectGetMinY( rect); break; // Converted from NVG_ALIGN_TOP
+   case CGTextAlignMiddle : origin.y = CGRectGetMidY( rect); break; // Converted from NVG_ALIGN_MIDDLE
+   default                : origin.y = CGRectGetMaxY( rect); break;
    }
 
    return( origin);
@@ -140,7 +143,7 @@ static CGPoint   textOriginForAlignment( CGRect  rect, int alignment)
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext    *vg;
+   // Delete: struct NVGcontext    *vg;
    CGFont               *font;
    CGRect               canvas;
    CGRect               rects[ 4];
@@ -149,14 +152,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect               centeredRect;
    CGPoint              point;
    char                 *s;
-   float                ascender, descender, lineh;
+   //float                ascender, descender, lineh;
    char                 buf[ 256];
    float                textBounds[ 4];
    float                visualBounds[ 4];
    float                glyphBounds[ 4];
    float                bounds[ 4];
    CGPoint              origin;
-   NVGglyphPosition     positions[ 32];
+   struct UIGlyphPosition     positions[ 32];
    int                  i;
    int                  nGlyphs;
 #ifdef USE_OLD_CODE
@@ -169,8 +172,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    frameNr   = [context numberOfFrames];
    alignment = alignments[ frameNr % N_ALIGNMENTS];
 
-   vg     = CGContextGetNVGContext( context);
+   // Delete: vg     = CGContextGetNVGContext( context);
    font   = [context fontWithNameUTF8String:"sans"];
+
+   CGContextFontSize( context, 80.0); // Converted from nvgFontSize
 
    canvas = [layer canvas];
    canvas = CGRectInset( canvas, 20, 20);
@@ -188,52 +193,52 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       }
 
       rect = rects[ y];
-      nvgSave( vg);
+      CGContextSave( context); // Converted from nvgSave
       {
-         mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
+         CGContextStrokeRectWithColor( context, rect, 1.0, CGColorMakeGray()); // Converted from mvgStrokeRectWithColor
 
-         nvgFontSize( vg, 80.0);
+         CGContextFontSize( context, 80.0); // Converted from nvgFontSize
 
 
-//         nvgTextColor( vg, CGColorMakeWithRGB( 0.5, 0.5, 0.5));
+//         CGContextTextColor( context, CGColorMakeWithRGB( 0.5, 0.5, 0.5)); // Converted from nvgTextColor
  // TODO: use textColor
-//         nvgText( vg, origin.x, origin.y, s, NULL);
+//         CGContextText( context, origin, s, (size_t) -1); // Converted from nvgText
 
-         mvgStrokeLineHWithColor( vg, CGRectGetTopLeftPoint( rect), CGRectGetWidth( rect), 1.0, CGColorMakeGray());
-         mvgStrokeLineVWithColor( vg, CGRectGetTopLeftPoint( rect), CGRectGetHeight( rect), 1.0, CGColorMakeGray());
+         CGContextStrokeLineHWithColor( context, CGRectGetTopLeft( rect), CGRectGetWidth( rect), 1.0, CGColorMakeGray()); // Converted from mvgStrokeLineHWithColor
+         CGContextStrokeLineVWithColor( context, CGRectGetTopLeft( rect), CGRectGetHeight( rect), 1.0, CGColorMakeGray()); // Converted from mvgStrokeLineVWithColor
 
-         strokeBoundsInRect( vg, textBounds, rect, CGColorMakeWithRGBA( 1, 0, 0, 0.666));
-         strokeBounds( vg, visualBounds, CGColorMakeGreen());
+         strokeBoundsInRect( context, textBounds, rect, CGColorMakeWithRGBA( 1, 0, 0, 0.666)); // Updated function call
+         strokeBounds( context, visualBounds, CGColorMakeGreen()); // Updated function call
 
          // to draw little rectangles around each glyph, we need more detailed
          // information (untranslated)
 
 
-         nvgFontSize( vg, 80.0);
-         nvgTextColor( vg, CGColorMakeBlack());
-         nvgTextBackgroundColor( vg, CGColorMakeWhite());
+         CGContextFontSize( context, 80.0); // Converted from nvgFontSize
+         CGContextTextColor( context, CGColorMakeBlack()); // Converted from nvgTextColor
+         CGContextTextBackgroundColor( context, CGColorMakeWhite()); // Converted from nvgTextBackgroundColor
  // TODO: use textColor
 
          origin = textOriginForAlignment( rect, alignment);
-         adjust = _mvgTLAdjustmentForVisualBounds( vg, s, (size_t) -1, alignment, CGTextOptionAlignVisually);
-         nvgText( vg, origin.x + adjust.x, origin.y + adjust.y, s, NULL);
+         adjust = CGContextTLAdjustmentForVisualBounds( context, s, (size_t) -1, alignment, CGTextOptionAlignVisually); // Converted from _mvgTLAdjustmentForVisualBounds
+         CGContextText( context, CGPointMake( origin.x + adjust.x, origin.y + adjust.y), s, (size_t) -1); // Converted from nvgText
 
-         nGlyphs = nvgTextGlyphPositions( vg, origin.x + adjust.x, origin.y + adjust.y, s, NULL, positions, 32);
+         nGlyphs = CGContextTextGlyphPositions( context, CGPointMake( origin.x + adjust.x, origin.y + adjust.y), s, (size_t) -1, positions, 32); // Converted from nvgTextGlyphPositions
          for( i = 0; i < nGlyphs; i++)
-            nvgStrokeGlyphPosition( vg, &positions[ i], CGColorMakeGray());
+            CGContextStrokeGlyphPosition( context, &positions[ i], CGColorMakeGray()); // Updated function call
 
          // write info line
-         nvgFontSize( vg, 12);
-         nvgTextAlign( vg, NVG_ALIGN_LEFT|NVG_ALIGN_BOTTOM);
+         CGContextFontSize( context, 12); // Converted from nvgFontSize
+         CGContextTextAlign( context, NVG_ALIGN_LEFT|NVG_ALIGN_BOTTOM); // Converted from nvgTextAlign
          sprintf( buf, "align: %s | %s",
-                     nvgHAlignmentUTF8String( alignment),
-                     nvgVAlignmentUTF8String( alignment));
-         nvgTextColor( vg, CGColorMakeBlack());
-         nvgTextBackgroundColor( vg, CGColorMakeWhite());
+                     CGHAlignmentUTF8String( alignment),
+                     CGVAlignmentUTF8String( alignment));
+         CGContextTextColor( context, CGColorMakeBlack()); // Converted from nvgTextColor
+         CGContextTextBackgroundColor( context, CGColorMakeWhite()); // Converted from nvgTextBackgroundColor
  // TODO: use textColor
-         nvgText( vg, CGRectGetMinX( rect) + 2, CGRectGetMaxY( rect) - 2, buf, NULL);
+         CGContextText( context, CGPointMake( CGRectGetMinX( rect) + 2, CGRectGetMaxY( rect) - 2), buf, (size_t) -1); // Converted from nvgText
       }
-      nvgRestore( vg);
+      CGContextRestore( context); // Converted from nvgRestore
    }
    return( YES);
 }
@@ -296,8 +301,8 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
-// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
+// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
@@ -316,4 +321,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

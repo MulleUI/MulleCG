@@ -162,89 +162,82 @@ static void  didSwapBuffersCallback( UIWindow *window, BOOL immediately)
 //
 // draw frame number, current time, elapsed time and calculated fps
 //
-static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
+static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CustomContext          *context = (CustomContext *) _context;
-   NVGcontext             *vg;
-   NSUInteger             numberOfFrames;
-   mulle_absolutetime_t   now;
-   mulle_absolutetime_t   previous;
-   mulle_relativetime_t   elapsed;
-   mulle_relativetime_t   frameRate;
-   mulle_relativetime_t   previousElapsed;
-   CGRect                 canvas;
-   CGRect                 rect;
-   CGColor                color;
+   // Delete: struct NVGcontext    *vg;
+   CGFont               *font;
+   CGRect               canvas;
+   CGRect               rects[ 3][ 3];
+   NSUInteger           x, y;
+   CGRect               rect;
+   char                 *s;
+   //float                ascender, descender, lineh;
+   char                 buf[ 256];
+   float                textBounds[ 4];
+   float                visualBounds[ 4];
+   float                glyphBounds[ 4];
+   float                bounds[ 4];
+   CGPoint              origin;
+   NVGglyphPosition     positions[ 32];
+   int                  i;
+   int                  nGlyphs;
+   CGPoint              adjust;
+   int                  alignment;
+   NSUInteger           frameNr;
+   CGContentMode        contentMode;
 
-   numberOfFrames  = [context numberOfFrames];
-   now             = [context lastSwapBuffersTimestamp];
-   previous        = [context previousTimestamp];
-   previousElapsed = [context previousElapsed];
+   frameNr   = [context numberOfFrames];
+   alignment = CGTextAlignCenter | CGTextAlignMiddle; // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE
 
-   color           = CGColorMakeBlack();
-   elapsed         = 0.0;
+   // Delete: vg     = CGContextGetNVGContext( context);
+   font   = [context fontWithNameUTF8String:"sans"];
 
-   // reset occasionally
-   if( [context numberOfFrames] % 1000 == 999)
-      [context setLargestElapsed:previousElapsed];
-
-   if( previous != 0.0)
-   {
-      elapsed = now - previous;
-      if( previousElapsed != 0.0)
-      {
-         if( fabs( elapsed - previousElapsed) > elapsed / 2.0)
-            color = CGColorMakeRed();
-      }
-      if( elapsed > [context largestElapsed])
-         [context setLargestElapsed:elapsed];
-   }
-
-   [context useFontWithNameUTF8String:"mono"];
+   CGContextFontSize( context, 32.0); // Converted from nvgFontSize
 
    canvas = [layer canvas];
-   vg     = CGContextGetNVGContext( context);
-   mvgFillRectWithColor( vg, canvas, color);
+   canvas = CGRectInset( canvas, 4, 4);
 
-   rect             = CGRectInset( canvas, 2, 2);
-   rect.size.height = 24.0;
+   CGRectPartition3x3( canvas, CGSizeMake( 4, 4), rects);
 
-   mvgTextColor( vg, CGColorMakeWhite());
-   mvgFontSize( vg, 24.0);
+   s = "Yay! Yay! Yay! Yay! Yay! Yay! Yay!";
 
-   mvgFormatInRect( vg, rect, CGContentModeTopLeft, 0, "frame         : %lu", numberOfFrames);
-   rect.origin.y += rect.size.height;
+   for( y = 0; y < 3; y++)
+   {
+      for( x = 0; x < 3; x++)
+      {
+         rect = rects[ y][ x];
+         CGContextStrokeRectWithColor( context, rect, 1.0, CGColorMakeGray()); // Converted from mvgStrokeRectWithColor
 
-   mvgFormatInRect( vg, rect, CGContentModeTopLeft, 0, "previous      : %.9f", previous);
-   rect.origin.y += rect.size.height;
+         CGContextSave( context); // Converted from nvgSave
+         {
+            CGContextScissor( context, rect); // Converted from nvgScissor
 
-   mvgFormatInRect( vg, rect, CGContentModeTopLeft, 0, "now           : %.9f", now);
-   rect.origin.y += rect.size.height;
+            rect = CGRectInset( rect, 2, 2);
 
-   mvgFormatInRect( vg, rect, CGContentModeTopLeft, 0, "elapsed       : %.9f", elapsed);
-   rect.origin.y += rect.size.height;
+            CGContextTextAlign( context, alignment); // Converted from nvgTextAlign
 
-   mvgFormatInRect( vg, rect, CGContentModeTopLeft, 0, "elapsed (max) : %.9f", [context largestElapsed]);
-   rect.origin.y += rect.size.height;
+            switch( y * 3 + x)
+            {
+            case 0 : contentMode = CGContentModeTopLeft; break;
+            case 1 : contentMode = CGContentModeTop; break;
+            case 2 : contentMode = CGContentModeTopRight; break;
 
-   mvgFormatInRect( vg, rect, CGContentModeTopLeft, 0, "fps           : %.9f", elapsed != 0.0 ? 1.0 / elapsed : 0.0);
-   rect.origin.y += rect.size.height;
+            case 3 : contentMode = CGContentModeLeft; break;
+            case 4 : contentMode = CGContentModeCenter; break;
+            case 5 : contentMode = CGContentModeRight; break;
 
-   mvgFormatInRect( vg, rect, CGContentModeTopLeft, 0, "nominal fps   : %.9f", [context frameRateHz]);
-   rect.origin.y += rect.size.height;
+            case 6 : contentMode = CGContentModeBottomLeft; break;
+            case 7 : contentMode = CGContentModeBottom; break;
+            case 8 : contentMode = CGContentModeBottomRight; break;
+            }
 
-   mvgFormatInRect( vg, rect, CGContentModeTopLeft, 0, "screen fps    : %.9f", [context refreshRateHz]);
-   rect.origin.y += rect.size.height;
-
-   mvgFormatInRect( vg, rect, CGContentModeTopLeft, 0, "swaps         : %tu", swap_statistics.scheduled);
-   rect.origin.y += rect.size.height;
-
-   mvgFormatInRect( vg, rect, CGContentModeTopLeft, 0, "extra swaps   : %tu", swap_statistics.immediately);
-   rect.origin.y += rect.size.height;
-
-   [context setPreviousTimestamp:now];
-   [context setPreviousElapsed:elapsed];
-
+            CGContextTextColor( context, CGColorMakeWithHSVA( (y * 3 + x) / 9.0, 1.0, 1.0, 1.0)); // Converted from nvgTextColor
+            CGContextTextBackgroundColor( context, CGColorMakeWhite()); // Converted from nvgTextBackgroundColor
+            CGContextTextInRect( context, s, (size_t) -1, rect, contentMode, CGTextOptionAlignVisually); // Converted from mvgTextInRect
+         }
+         CGContextRestore( context); // Converted from nvgRestore
+      }
+   }
    return( YES);
 }
 
@@ -387,13 +380,13 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
-// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
+// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
-// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
-//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+// ║        !█▄▄████≤═^`╓█ █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
 //   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀
@@ -409,3 +402,27 @@ int   main( int argc, char *argv[])
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
 
 
+
+static char  *nvgHAlignmentUTF8String( int alignment)
+{
+   switch( alignment & (CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight)) // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT
+   {
+   case CGTextAlignLeft   : return( "CGTextAlignLeft"); // Converted from NVG_ALIGN_LEFT
+   case CGTextAlignCenter : return( "CGTextAlignCenter"); // Converted from NVG_ALIGN_CENTER
+   case CGTextAlignRight  : return( "CGTextAlignRight"); // Converted from NVG_ALIGN_RIGHT
+   default               : return( "*invalid*");
+   }
+}
+
+
+static char  *nvgVAlignmentUTF8String( int alignment)
+{
+   switch( alignment & (CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline)) // Converted from NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE
+   {
+   case CGTextAlignTop      : return( "CGTextAlignTop"); // Converted from NVG_ALIGN_TOP
+   case CGTextAlignMiddle   : return( "CGTextAlignMiddle"); // Converted from NVG_ALIGN_MIDDLE
+   case CGTextAlignBottom   : return( "CGTextAlignBottom"); // Converted from NVG_ALIGN_BOTTOM
+   case CGTextAlignBaseline : return( "CGTextAlignBaseline"); // Converted from NVG_ALIGN_BASELINE
+   default                 : return( "*invalid*");
+   }
+}

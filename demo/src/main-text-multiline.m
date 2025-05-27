@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2023 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -20,8 +23,8 @@ struct Info
 {
    CGRect                 bounds;
    CGRect                 area;
-   struct UITextMetrics   metrics;
-   struct UITextMetrics   visualMetrics;
+   struct CGTextMetrics   metrics;
+   struct CGTextMetrics   visualMetrics;
    CGFloat                compensation;
    BOOL                   isClearType;
    CGFloat                fontSize;
@@ -33,10 +36,10 @@ static char  *NVG_ALIGN_UTF8String( NSUInteger valign)
 {
    switch( valign)
    {
-   case NVG_ALIGN_BASELINE : return( "NVG_ALIGN_BASELINE");
-   case NVG_ALIGN_TOP      : return( "NVG_ALIGN_TOP");
-   case NVG_ALIGN_MIDDLE   : return( "NVG_ALIGN_MIDDLE");
-   case NVG_ALIGN_BOTTOM   : return( "NVG_ALIGN_BOTTOM");
+   case CGTextAlignBaseline : return( "CGTextAlignBaseline"); // Converted from NVG_ALIGN_BASELINE
+   case CGTextAlignTop      : return( "CGTextAlignTop"); // Converted from NVG_ALIGN_TOP
+   case CGTextAlignMiddle   : return( "CGTextAlignMiddle"); // Converted from NVG_ALIGN_MIDDLE
+   case CGTextAlignBottom   : return( "CGTextAlignBottom"); // Converted from NVG_ALIGN_BOTTOM
    }
    return( "???");
 }
@@ -44,9 +47,9 @@ static char  *NVG_ALIGN_UTF8String( NSUInteger valign)
 
 static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *context)
 {
-   struct UITextMetrics   metrics;
-   CGRect                 adjustedBounds;
-   CGPaint                *paint;
+   CGTextMetrics   metrics;
+   CGRect          adjustedBounds;
+   CGPaint         *paint;
 
    CGContextSave( context);
    {
@@ -221,10 +224,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    switch( bits & 0x3)
    {
-   case 0x00 : info->verticalAlignment = NVG_ALIGN_BASELINE; break;
-   case 0x01 : info->verticalAlignment = NVG_ALIGN_TOP;      break;
-   case 0x02 : info->verticalAlignment = NVG_ALIGN_MIDDLE;   break;
-   case 0x03 : info->verticalAlignment = NVG_ALIGN_BOTTOM;   break;
+   case 0x00 : info->verticalAlignment = CGTextAlignBaseline; break; // Converted from NVG_ALIGN_BASELINE
+   case 0x01 : info->verticalAlignment = CGTextAlignTop;      break; // Converted from NVG_ALIGN_TOP
+   case 0x02 : info->verticalAlignment = CGTextAlignMiddle;   break; // Converted from NVG_ALIGN_MIDDLE
+   case 0x03 : info->verticalAlignment = CGTextAlignBottom;   break; // Converted from NVG_ALIGN_BOTTOM
    }
    bits >>= 0x2;
 
@@ -236,9 +239,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    info->fontSize = 10 + (bits & 0x3);
 
-   //mvgShapeAntiAlias( vg, 0);
+   //CGContextShapeAntiAlias( context, 0);
    CGContextClearType( context, info->isClearType);
-   CGContextTextAlign( context, NVG_ALIGN_LEFT | info->verticalAlignment);
+   CGContextTextAlign( context, CGTextAlignLeft | info->verticalAlignment); // Converted from NVG_ALIGN_LEFT | info->verticalAlignment
    CGContextFontSize( context, info->fontSize);
 
    info->metrics       = [context textMetrics];
@@ -284,19 +287,19 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    y += info->compensation;
    switch( info->verticalAlignment)
    {
-   case NVG_ALIGN_BASELINE : y += info->metrics.ascender; // info->metrics.descender; break;
-   case NVG_ALIGN_TOP      : y += 0; break;
-   case NVG_ALIGN_MIDDLE   : y += info->metrics.lineHeight / 2.0; break;
-   case NVG_ALIGN_BOTTOM   : y += info->metrics.lineHeight; break;
+   case CGTextAlignBaseline : y += info->metrics.ascender; // info->metrics.descender; break; // Converted from NVG_ALIGN_BASELINE
+   case CGTextAlignTop      : y += 0; break; // Converted from NVG_ALIGN_TOP
+   case CGTextAlignMiddle   : y += info->metrics.lineHeight / 2.0; break; // Converted from NVG_ALIGN_MIDDLE
+   case CGTextAlignBottom   : y += info->metrics.lineHeight; break; // Converted from NVG_ALIGN_BOTTOM
    }
 
    CGContextTextColor( context, CGColorMakeWhite());
    CGContextTextBackgroundColor( context, CGColorMakeDarkSlateGray());
 
    // make black blobs
-   CGContextGlobalCompositeBlendFunc( context, NVG_ZERO, NVG_ZERO);
+   CGContextGlobalCompositeBlendFunc( context, CGBlendFactorZero, CGBlendFactorZero);
    // black background with inverted pixels (unreadable)
-   // nvgGlobalCompositeBlendFunc( vg, NVG_ONE_MINUS_SRC_ALPHA, NVG_ZERO);
+   // CGContextGlobalCompositeBlendFunc( context, CGBlendFactorOneMinusSrcAlpha, CGBlendFactorZero);
 
    for( i = 0; i < n; i++)
    {
@@ -307,7 +310,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       y += info->visualMetrics.lineHeight;
    }
 
-   CGContextGlobalCompositeBlendFunc( context, NVG_ONE, NVG_ONE_MINUS_SRC_ALPHA);
+   CGContextGlobalCompositeBlendFunc( context, CGBlendFactorOne, CGBlendFactorOneMinusSrcAlpha);
 
    if( debug)
       drawDebugInfo( info, canvas, context);
@@ -375,7 +378,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -395,4 +398,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

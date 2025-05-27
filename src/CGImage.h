@@ -6,7 +6,7 @@
 
 #import "CGContext+Texture.h" // needed for protocol
 
-#include "microvg.h"
+#include "nanowrap.h"
 
 //
 //                             .------------.

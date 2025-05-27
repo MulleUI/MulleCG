@@ -104,7 +104,7 @@ typedef struct CGDrawableOptions
 {
    CGFloat             alpha;
    MulleCornerInsets   cornerInsets;  // cornerInsets are used for bitmap images only
-   CGFloat             rotation;      // 0 means no rotation
+   CARotation          rotation;      // 0 means no rotation
    CGFloat             scale;         // 0.0 means scale to fit,
    struct
    {
@@ -122,7 +122,7 @@ extern CGDrawableOptions   CGDrawableOptionsScaleToFit;
 
 static inline CGDrawableOptions   CGDrawableOptionsMakeWithCornerRadius( CGFloat cornerRadius,
                                                                          CGFloat alpha,
-                                                                         CGFloat rotation,
+                                                                         CARotation rotation,
                                                                          CGFloat scale,
                                                                          CGFlip flip,
                                                                          CGRepeat repeat,
@@ -145,7 +145,7 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeWithCornerRadius( CGFloat
 
 static inline CGDrawableOptions   CGDrawableOptionsMake( MulleCornerInsets cornerInsets,
                                                          CGFloat alpha,
-                                                         CGFloat rotation,
+                                                         CARotation rotation,
                                                          CGFloat scale,
                                                          CGFlip flip,
                                                          CGRepeat repeat,
@@ -171,7 +171,7 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeDefault( void)
                                                   CGScaleNone,
                                                   CGFlipNone,
                                                   CGRepeatAsIs,
-                                                  CGContentModeCenterPoint));
+                                                  CGContentModeCenter));
 }
 
 
@@ -183,7 +183,7 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeScaleToFit( void)
                                                   CGScaleToFit,
                                                   CGFlipNone,
                                                   CGRepeatAsIs,
-                                                  CGContentModeCenterPoint));
+                                                  CGContentModeCenter));
 }                
 
 
@@ -273,10 +273,10 @@ PROTOCOLCLASS_END()
 
 
 MULLE_CG_EXTERN_GLOBAL
-CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngle angle);
+CGPoint  CGRectGetCenterAtAngle( CGRect patternRect, CAAngle angle);
 
 MULLE_CG_EXTERN_GLOBAL
-CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
+CGPoint  CGRectGetCenterAtAngleWithScaling( CGRect patternRect,
                                                  CAAngle rotation,
                                                  CGVector scaleFactor);
 

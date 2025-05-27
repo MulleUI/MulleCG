@@ -6,7 +6,7 @@
 #import "import-private.h"
 
 
-#import "CGPaint+Drawing.h"
+#import "CGPaint+UIGraphicsDrawing.h"
 
 
 @implementation CGBlendedPaint ( Drawing)

@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2023 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -25,7 +28,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    int                  atlas_w;
    int                  i;
    struct MulleLayout   layout;
-   struct NVGcontext    *vg;
    void                 *fonsContext;
    char                 *fontName;
 
@@ -35,7 +37,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       font     = [context fontWithContentsOfFileWithFileRepresentationString:fontFilename
                                                           fontNameUTF8String:fontName];
    }
-   else 
+   else
    {
       fontName = "sans";
       font     = [context fontWithNameUTF8String:fontName];
@@ -51,16 +53,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    MulleLayoutInit( &layout, CGRectInset( canvas, 30, 30), MulleEdgeInsetsZero);
 
-   vg = CGContextGetNVGContext( context);
-
-   mvgFillRectWithColor( vg, canvas, CGColorInvertRGB( TEXT_COLOR));
+   CGContextFillRectWithColor( context, canvas, CGColorInvertRGB( TEXT_COLOR));
 
    factor       = CGContextGetLinearAnimationFactor( context, 15.0f);
    useClearType = factor >= 0.5f;
-   nvgClearType( vg, useClearType);
+   CGContextClearType( context, useClearType);
 
-   nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
-   nvgTextColor( vg, TEXT_COLOR);
+   CGContextTextAlign( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE
+   CGContextTextColor( context, TEXT_COLOR);
 
    for( height = MIN_HEIGHT;; height = height >= MAX_HEIGHT ? MAX_HEIGHT : height + 1)
    {
@@ -76,35 +76,35 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          rect.origin.y = CGRectGetMidY( canvas) - height / 2.0;
       }
 #if 0
-      nvgStrokeColor( vg, nvgRGBA( 0x80, 0, 0, 0xFF));
-      nvgStrokeWidth( vg, 0.5);
-      nvgBeginPath( vg);
-      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgStroke( vg);
+      CGContextStrokeColor( context, CGColorMakeWithRGBA( 0x80, 0, 0, 0xFF));
+      CGContextStrokeWidth( context, 0.5);
+      CGContextBeginPath( context);
+      CGContextRect( context, rect);
+      CGContextStroke( context);
 #endif
 
-      nvgFontSize( vg, height);
-      nvgText( vg, rect.origin.x, rect.origin.y, TEXT, NULL);
+      CGContextFontSize( context, height);
+      CGContextText( context, rect.origin, TEXT, (size_t) -1);
 
       if( ! LOOP)
          break;
    }
 
    [context useDefaultFont];
-   nvgClearType( vg, 0);
-   nvgFontFace( vg, "sans");
-   nvgFontSize( vg, 13.0f);   if( useClearType)
-      nvgTextColor( vg, CGColorMakeRandomOpaque());
+   CGContextClearType( context, 0);
+   CGContextFontFace( context, "sans");
+   CGContextFontSize( context, 13.0f);
+   if( useClearType)
+      CGContextTextColor( context, CGColorMakeRandomOpaque());
    else
-      nvgTextColor( vg, CGColorMakeDarkGray());
-   nvgText( vg, CGRectGetMinX( canvas) + 15.0,
-                CGRectGetMaxY( canvas) - 15.0,
+      CGContextTextColor( context, CGColorMakeDarkGray());
+   CGContextText( context, CGPointMake( CGRectGetMinX( canvas) + 15.0,
+                CGRectGetMaxY( canvas) - 15.0),
                 useClearType ? "ClearType" : "Default",
-                NULL);
+                (size_t) -1);
 
    return( YES);
 }
-
 
 
 int   main( int argc, char *argv[])
@@ -133,7 +133,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -153,4 +153,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

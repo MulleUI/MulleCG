@@ -51,7 +51,7 @@ static inline CGFloat   CGRectGetCornerRadiusValue( CGRect rect, CGFloat factor)
 }
 
 
-static void   drawFancyStepperBackground( struct NVGcontext *vg,
+static void   drawFancyStepperBackground( CGContext *context, // Changed from struct NVGcontext *vg
                                           CGRect rect,
                                           CGColor color1,
                                           CGColor color2,
@@ -63,6 +63,7 @@ static void   drawFancyStepperBackground( struct NVGcontext *vg,
    CGFloat    cornerTL;
    CGFloat    cornerBR;
    CGFloat    cornerBL;
+   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
 
    /*
     * outer
@@ -104,7 +105,7 @@ static void   drawFancyStepperBackground( struct NVGcontext *vg,
 
 
 
-static void   drawFancyStepperHighlight( struct NVGcontext *vg,
+static void   drawFancyStepperHighlight( CGContext *context, // Changed from struct NVGcontext *vg
                                          CGRect rect,
                                          CGFloat thickness,
                                          CGFloat brightness,
@@ -114,6 +115,7 @@ static void   drawFancyStepperHighlight( struct NVGcontext *vg,
    CGFloat    corner;
    CGFloat    cornerTL;
    CGFloat    cornerTR;
+   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
 
    /*
     * highlight
@@ -159,9 +161,10 @@ static void   drawFancyStepperHighlight( struct NVGcontext *vg,
 }
 
 
-static void   drawFancyStepperLine( struct NVGcontext *vg, CGRect rect, CGFloat strokeWidth, CGColor color)
+static void   drawFancyStepperLine( CGContext *context, CGRect rect, CGFloat strokeWidth, CGColor color) // Changed from struct NVGcontext *vg
 {
    CGFloat    corner;
+   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
 
    corner = CGRectGetCornerRadiusValue( rect, 0.5);
 
@@ -217,7 +220,7 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
                                  radius / 8.0,
                                  radius / 2.0,
                                  CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.6),
-                                 CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.3)),
+                                 CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.3));
 #endif
       nvgFillPaint( vg, paint);
       nvgFill( vg);
@@ -238,7 +241,7 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
    nvgGlobalAlpha( vg, 0.8);
    nvgTextColor( vg, CGColorMakeWhite());
    nvgTextBackgroundColor( vg, CGColorMakeBlack());
-   mvgTextInRect( vg, iconText,
+   CGContextTextInRect( context, iconText, // Converted from mvgTextInRect
                       (size_t) -1,
                       iconRect,
                       CGContentModeScaleAspectFit,
@@ -249,23 +252,23 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
 
 static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[ 6])
 {
-   NVGpaint   paint;
-   CGFloat    corner;
+   NVGpaint   paint; // This variable seems unused here
+   CGFloat    corner; // This variable seems unused here
    CGRect     innerRect;
    CGRect     iconRect;
    CGRect     lineRect;
    CGRect     contentRect;
    CGRect     outerRect;
-   CGRect     middleRect;
+   CGRect     middleRect; // This variable seems unused here
    CGRect     leftRect;
    CGRect     rightRect;
-   CGFont     *font;
+   CGFont     *font; // This variable seems unused here
    CGFloat    thickness;
    CGFloat    horw;
 
-   struct NVGcontext *vg;
+   struct NVGcontext *vg = CGContextGetNVGContext( context); // vg is retrieved once
 
-   vg = CGContextGetNVGContext( context);
+   // Delete: vg = CGContextGetNVGContext( context); // Redundant
 
    nvgSave( vg);
    {
@@ -276,8 +279,8 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
       contentRect = outerRect;
 
       CGRectDivide( outerRect, &leftRect, &rightRect, outerRect.size.width / 2.0, CADirectionLeft);
-      drawFancyStepperBackground( vg, leftRect, colors[ 0], colors[ 1], CADirectionLeft);
-      drawFancyStepperBackground( vg, rightRect, colors[ 2], colors[ 3], CADirectionRight);
+      drawFancyStepperBackground( context, leftRect, colors[ 0], colors[ 1], CADirectionLeft); // Pass context
+      drawFancyStepperBackground( context, rightRect, colors[ 2], colors[ 3], CADirectionRight); // Pass context
 
       /*
        * inner
@@ -288,8 +291,8 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
       innerRect = CGRectInset( contentRect, thickness, thickness);
 
       CGRectDivide( innerRect, &leftRect, &rightRect, innerRect.size.width / 2.0, CADirectionLeft);
-      drawFancyStepperBackground( vg, leftRect, colors[ 1], colors[ 0], CADirectionLeft);
-      drawFancyStepperBackground( vg, rightRect, colors[ 3], colors[ 2], CADirectionRight);
+      drawFancyStepperBackground( context, leftRect, colors[ 1], colors[ 0], CADirectionLeft); // Pass context
+      drawFancyStepperBackground( context, rightRect, colors[ 3], colors[ 2], CADirectionRight); // Pass context
 
       contentRect = innerRect;
 
@@ -297,13 +300,13 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
        * highlight
        */
       thickness = roundf( horw / 5.0);
-      drawFancyStepperHighlight( vg, leftRect, thickness, 0.3, CADirectionLeft);
-      drawFancyStepperHighlight( vg, rightRect, thickness, 0.6, CADirectionRight);
+      drawFancyStepperHighlight( context, leftRect, thickness, 0.3, CADirectionLeft); // Pass context
+      drawFancyStepperHighlight( context, rightRect, thickness, 0.6, CADirectionRight); // Pass context
 
       if( innerRect.size.height >= 60.0 && innerRect.size.width >= 60.0)
       {
          lineRect = CGRectInset( innerRect, 12, 12);
-         drawFancyStepperLine( vg, lineRect, 1.5, colors[ 5]);
+         drawFancyStepperLine( context, lineRect, 1.5, colors[ 5]); // Pass context
       }
 
       iconRect = CGRectInset( contentRect, 2, 2);
@@ -327,7 +330,7 @@ static void   drawStepper( CALayer *layer, CGContext *context)
    CGRect              rect;
    NSUInteger          x, y;
    CGColor             colors[ 6];
-   NVGcontext          *vg;
+   // Delete: NVGcontext          *vg; // No longer needed
    CGFloat             leftHue;
    CGFloat             rightHue;
 
@@ -405,7 +408,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -425,5 +428,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

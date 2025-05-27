@@ -51,7 +51,7 @@
 }
 
 
-- (CGPaint *) rotatedPaint:(CGFloat) rotation
+- (CGPaint *) rotatedPaint:(CARotation) rotation
 {
    CGPaint  *paint;
 

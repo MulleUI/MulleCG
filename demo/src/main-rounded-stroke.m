@@ -11,7 +11,7 @@ enum
    RightConvave = 0x2
 };
 
-static void   drawRoundedStroke( struct NVGcontext *vg,
+static void   drawRoundedStroke( CGContext *context, // Converted from struct NVGcontext *vg
                                  CGRect rect,
                                  CGColor color,
                                  NSUInteger bits)
@@ -48,46 +48,43 @@ static void   drawRoundedStroke( struct NVGcontext *vg,
       ldir = NVG_CCW;
    }
 
-   nvgBeginPath(vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
 
-   nvgMoveTo( vg, rect.origin.x + offset, rect.origin.y);
+   CGContextMoveTo( context, CGPointMake( rect.origin.x + offset, rect.origin.y)); // Converted from nvgMoveTo
 
-   nvgArc( vg, rect.origin.x + offset,
-               rect.origin.y + radius,
-               radius,
+   CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + offset, rect.origin.y + radius), radius), // Converted from nvgArc
                startRadians,
                endRadians,
                ldir);
 
    // Draw the top edge of the rectangle to the beginning of the arc
-   nvgLineTo( vg, rect.origin.x + rect.size.width - offset,
-                  rect.origin.y + rect.size.height);
+   CGContextLineTo( context, CGPointMake( rect.origin.x + rect.size.width - offset, // Converted from nvgLineTo
+                  rect.origin.y + rect.size.height));
    // Add a concave half circle on the right edge of the rectangle
-   nvgArc( vg, rect.origin.x + rect.size.width,
-               rect.origin.y + radius,
-               radius,
+   CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + rect.size.width, // Converted from nvgArc
+               rect.origin.y + radius), radius),
                endRadians,
                startRadians,
                rdir);
-//   nvgLineTo( vg, rect.origin.x, rect.origin.y);
+//   CGContextLineTo( context, CGPointMake( rect.origin.x, rect.origin.y)); // Converted from nvgLineTo
    // Draw the left edge of the rectangle
 
-   nvgLineTo( vg, rect.origin.x + rect.size.width - offset, rect.origin.y);
+   CGContextLineTo( context, CGPointMake( rect.origin.x + rect.size.width - offset, rect.origin.y)); // Converted from nvgLineTo
 
-//   nvgClosePath(vg);
-   mvgFillColor( vg, color);
-   mvgFill( vg);
+//   CGContextClosePath( context); // Converted from nvgClosePath
+   CGContextFillColor( context, color); // Converted from mvgFillColor
+   CGContextFill( context); // Converted from mvgFill
 
 
-   mvgFillCircleWithColor( vg, CACircleMake( CGPointMake( rect.origin.x + offset, rect.origin.y), 2.0), CGColorMakeRed());
-   mvgFillCircleWithColor( vg, CACircleMake( CGPointMake( rect.origin.x + offset, rect.origin.y + radius), 2.0), CGColorMakeBlue());
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + offset, rect.origin.y), 2.0), CGColorMakeRed()); // Converted from mvgFillCircleWithColor
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + offset, rect.origin.y + radius), 2.0), CGColorMakeBlue()); // Converted from mvgFillCircleWithColor
 }
 
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                  *context = _context;
-   struct NVGcontext          *vg;
+   // Delete: struct NVGcontext          *vg;
    CGRect                     canvas;
    CGRect                     rect;
    struct MulleCornerInsets   insets;
@@ -102,7 +99,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    factor = ([context numberOfFrames] % 120) / 119.0;
    factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
-   vg     = CGContextGetNVGContext( context);
+   // Delete: vg     = CGContextGetNVGContext( context);
    canvas = CGRectInset( [layer canvas], 25, 25);
    CGRectPartition2x2( canvas, CGSizeMake( 100, 50), rects);
 
@@ -110,17 +107,15 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       for( i = 0; i < 2; i++)
       {
          rect           = CGRectIntegral( rects[ j][ i]);
-         mvgStrokeRectWithColor( vg, rect, 5.0, CGColorMake( 0.0, 0.0, 0.0, 0.2));
+         CGContextStrokeRectWithColor( context, rect, 5.0, CGColorMake( 0.0, 0.0, 0.0, 0.2)); // Converted from mvgStrokeRectWithColor
 
          h                = 2.0 + (rect.size.height - 2.0) * factor;
          rect.origin.y   += (rect.size.height - h) / 2.0;
          rect.size.height = h;
-         drawRoundedStroke( vg, rect, CGColorMakeWithHexColor( color[ j][ i]), (j << 1) + i);
+         drawRoundedStroke( context, rect, CGColorMakeWithHexColor( color[ j][ i]), (j << 1) + i); // Updated function call
       }
    return( YES);
 }
-
-
 
 int   main( int argc, char *argv[])
 {
@@ -153,13 +148,13 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
-// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
-//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+// ║        !█▄▄████≤═^`╓█ █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
 //   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀

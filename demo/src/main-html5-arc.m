@@ -6,7 +6,6 @@
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   struct NVGcontext   *vg;
    CGFloat             factor;
    NSUInteger          frameNr;
    CGFloat             r;
@@ -19,31 +18,53 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       factor = frameNr / 119.0;
    factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
-   vg = CGContextGetNVGContext( context);
+   CGPoint    p01;
+   CGPoint    p12;
+   CGFloat    m01;
+   CGFloat    m12;
 
-   center = CGRectGetCenterPoint( [layer canvas]);
+   CGPoint   p0 = { 200, 20  };
+   CGPoint   p1 = { 200, 130 };
+   CGPoint   p2 = { 50, 0    };
 
-   mvgBeginPath( vg);
-   mvgArc( vg, CACircleMake( center, 150.0), CARadiansToAngle( 2 * M_PI / 120.0), CARadiansToAngle( 2 * M_PI * factor), NVG_CW);
-   mvgClosePath( vg);
-   mvgFillColor( vg, CGColorMakeBlue());
-   mvgFill( vg);
-   mvgStrokeColor( vg, CGColorMakeBlack());
-   mvgStrokeWidth( vg, 5.0);
-   mvgStroke( vg);
+   p2.y += 300 * factor;
 
-   mvgBeginPath( vg);
-   mvgArc( vg, CACircleMake( center, 100.0), CARadiansToAngle( 2 * M_PI / 120.0), CARadiansToAngle( 2 * M_PI * factor), NVG_CCW);
-   mvgClosePath( vg);
-   mvgFillColor( vg, CGColorMakeRed());
-   mvgFill( vg);
-   mvgStrokeColor( vg, CGColorMakeBlack());
-   mvgStrokeWidth( vg, 5.0);
-   mvgStroke( vg);
+   r  = 50;
+
+   CGContextTranslate( context, CGPointMake( 100, 50)); // Converted from nvgTranslate
+
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextStrokeColor( context, CGColorMakeGray()); // Converted from mvgStrokeColor
+   CGContextMoveTo( context, p0); // Converted from mvgMoveTo
+   CGContextLineTo( context, p1); // Converted from mvgLineTo
+   CGContextLineTo( context, p2); // Converted from mvgLineTo
+   CGContextStrokeWidth( context, 1.0); // Converted from mvgStrokeWidth
+   CGContextStroke( context); // Converted from mvgStroke
+
+// Arc
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextStrokeColor( context, CGColorMakeWhite()); // Converted from mvgStrokeColor
+   CGContextMoveTo( context, p0); // Converted from mvgMoveTo
+   CGContextArcTo( context, p1, p2, r); // Converted from mvgArcTo
+   CGContextStrokeWidth( context, 5.0); // Converted from mvgStrokeWidth
+   CGContextStroke( context); // Converted from mvgStroke
+
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextCircle( context, CACircleMakeWithCenterAndRadius( p0, 5)); // Converted from mvgCircle
+   CGContextFillColor( context, CGColorMakeBlue()); // Converted from mvgFillColor
+   CGContextFill( context); // Converted from mvgFill
+
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextCircle( context, CACircleMakeWithCenterAndRadius( p1, 5)); // Converted from mvgCircle
+   CGContextFillColor( context, CGColorMakeRed()); // Converted from mvgFillColor
+   CGContextFill( context); // Converted from mvgFill
+
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextCircle( context, CACircleMakeWithCenterAndRadius( p2, 5)); // Converted from mvgCircle
+   CGContextFill( context); // Converted from mvgFill
 
    return( YES);
 }
-
 
 
 int   main( int argc, char *argv[])

@@ -15,21 +15,18 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
    CGRect              rects[ 5][ 5];
    CGRect              sections[ 5][ 5];
    CGImage             *image;
-   struct NVGcontext   *vg;
    NSUInteger          x, y;
 
    canvas = [layer canvas];
 
-   vg = CGContextGetNVGContext( context);
-
    // gray rectangle so we know something is drawn...
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
-      nvgRect( vg, canvas.origin.x, canvas.origin.y, canvas.size.width, canvas.size.height);
-      nvgStrokeWidth( vg, 8);
-      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
+      CGContextRect( context, canvas);
+      CGContextStrokeWidth( context, 8);
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
-   nvgStroke( vg);
+   CGContextStroke( context);
 
 
    // if we immediately reclaim the image (via release) after drawing it
@@ -55,7 +52,7 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipNone,
                                                     CGRepeatNone,
-                                                    CGContentModeCenterPoint);
+                                                    CGContentModeCenter);
 
 
    for( y = 0; y < 5; y++)
@@ -137,5 +134,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

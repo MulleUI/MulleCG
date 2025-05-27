@@ -8,21 +8,20 @@
 
 static void   draw_texture( CGFramebuffer *self, CGContext *context)
 {
-   struct NVGcontext          *vg;
    CGPixelSize    bitmapSize;
 
    bitmapSize = [self bitmapSize];
 
-   vg = CGContextGetNVGContext( context);
-
-   nvgBeginPath( vg);
-   nvgShapeAntiAlias( vg, 0);
-   nvgMoveTo( vg, bitmapSize.width - 2 + 0.5, 0.0);
-   nvgLineTo( vg, bitmapSize.width - 2 + 0.5, bitmapSize.height - 2);
-   nvgLineTo( vg, 0.0, bitmapSize.height - 2);
-   nvgStrokeColor( vg, CGColorMakeRed());
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   {
+      CGContextShapeAntiAlias( context, 0);
+      CGContextMoveTo( context, CGPointMake( bitmapSize.width - 2 + 0.5, 0.0));
+      CGContextLineTo( context, CGPointMake( bitmapSize.width - 2 + 0.5, bitmapSize.height - 2));
+      CGContextLineTo( context, CGPointMake( 0.0, bitmapSize.height - 2));
+      CGContextStrokeColor( context, CGColorMakeRed());
+      CGContextStrokeWidth( context, 1.0);
+   }
+   CGContextStroke( context);
 }
 
 
@@ -95,8 +94,8 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
                                    0,
                                    [cgLayer textureID],
                                    1.0);
-   nvgFillPaint( vg, imgPaint);
-   CGContextCheckBackendError( context, "after nvgFillPaint");
+   CGContextFillImageWithOptions( context, cgLayer, CGRectMakeWithSize( wh), NULL);
+   CGContextCheckBackendError( context, "after CGContextFillPaint");
 
    for( j = 0; j < 70; j++)
    {
@@ -107,10 +106,10 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
       rect.size.width  += 1.0;
       rect.size.height += 1.0;
 
-      nvgBeginPath( vg);
-      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgFill( vg);
-      CGContextCheckBackendError( context, "after nvgFill");
+      CGContextBeginPath( context);
+      CGContextRect( context, rect);
+      CGContextFill( context);
+      CGContextCheckBackendError( context, "after CGContextFill");
    }
 
    for( i = 0; i < 100; i++)
@@ -121,10 +120,10 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
       // compensate for surrounding unused space of CGFramebuffer
       rect.size.width  += 1.0;
       rect.size.height += 1.0;
-      nvgBeginPath( vg);
-      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgFill( vg);
-      CGContextCheckBackendError( context, "after nvgFill");
+      CGContextBeginPath( context);
+      CGContextRect( context, rect);
+      CGContextFill( context);
+      CGContextCheckBackendError( context, "after CGContextFill");
    }
 }
 

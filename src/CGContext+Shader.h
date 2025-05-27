@@ -37,7 +37,6 @@
 - (void) useShader:(CGShaderID) shaderID;
 - (void) deleteShader:(CGShaderID) shaderID;
 
-- (char *) shaderHeaderUTF8String;
 
 
 //
@@ -48,4 +47,19 @@
 
 - (struct CGShaderUTF8Sources *)
    registeredShaderSourcesForNameUTF8String:(char *) nameUTF8String;
+@end
+
+
+@interface CGContext( Future)
+
+- (char *) shaderHeaderUTF8String;
+
+- (CGShaderID) _compileShaderWithShaderSources:(struct CGShaderUTF8Sources *) source;
+
+- (void) _useShader:(CGShaderID) shaderID;
+
+- (void) _deleteShader:(CGShaderID) shaderID;
+
+- (char *) shaderHeaderUTF8String;
+
 @end

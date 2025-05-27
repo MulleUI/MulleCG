@@ -7,37 +7,37 @@
 
 static int    modes[] =
 {
-   NVG_ZERO,
-   NVG_ONE,
-   NVG_SRC_COLOR,
-   NVG_ONE_MINUS_SRC_COLOR,
+   CGBlendFactorZero,
+   CGBlendFactorOne,
+   CGBlendFactorSrcColor,
+   CGBlendFactorOneMinusSrcColor,
 
-   NVG_DST_COLOR,
-   NVG_ONE_MINUS_DST_COLOR,
-   NVG_SRC_ALPHA,
-   NVG_ONE_MINUS_SRC_ALPHA,
+   CGBlendFactorDstColor,
+   CGBlendFactorOneMinusDstColor,
+   CGBlendFactorSrcAlpha,
+   CGBlendFactorOneMinusSrcAlpha,
 
-   NVG_DST_ALPHA,
-   NVG_ONE_MINUS_DST_ALPHA,
-   NVG_SRC_ALPHA_SATURATE
+   CGBlendFactorDstAlpha,
+   CGBlendFactorOneMinusDstAlpha,
+   CGBlendFactorSrcAlphaSaturate
 };
 
 
 static char   *mode_names[] =
 {
-   "ZERO",
-   "ONE",
-   "SRC_COLOR",
-   "ONE_MINUS_SRC_COLOR",
+   "CGBlendFactorZero",
+   "CGBlendFactorOne",
+   "CGBlendFactorSrcColor",
+   "CGBlendFactorOneMinusSrcColor",
 
-   "DST_COLOR",
-   "ONE_MINUS_DST_COLOR",
-   "SRC_ALPHA",
-   "ONE_MINUS_SRC_ALPHA",
+   "CGBlendFactorDstColor",
+   "CGBlendFactorOneMinusDstColor",
+   "CGBlendFactorSrcAlpha",
+   "CGBlendFactorOneMinusSrcAlpha",
 
-   "DST_ALPHA",
-   "ONE_MINUS_DST_ALPHA",
-   "SRC_ALPHA_SATURATE"
+   "CGBlendFactorDstAlpha",
+   "CGBlendFactorOneMinusDstAlpha",
+   "CGBlendFactorSrcAlphaSaturate"
 };
 
 
@@ -91,7 +91,6 @@ static void   drawCirclesInRect( CGContext *context,
                                  int dstRGB,
                                  int dstAlpha)
 {
-   struct NVGcontext   *vg;
    CACircle            circle;
    CACircle            circles[ 3];
    CGFloat             radius;
@@ -100,32 +99,30 @@ static void   drawCirclesInRect( CGContext *context,
    CGFloat             alpha;
    CGRect              rects[ 2][ 2];
 
-   vg = CGContextGetNVGContext( context);
-
    drawGridInRect( context, rect);
-//   mvgFillRectWithColor( vg, rect, CGColorMakeBlack());
+   CGContextFillRectWithColor( context, rect, CGColorMakeBlack());
 
 //   CGRectPartition2x2( rect, CGSizeZero, rects);
 //
-//   mvgFillRectWithColor( vg, CGRectIntegral( rects[ 0][ 0]), CGColorMakeBlack());
-//   mvgFillRectWithColor( vg, CGRectIntegral( rects[ 1][ 0]), CGColorMakeBlack());
-//   mvgFillRectWithColor( vg, CGRectIntegral( rects[ 0][ 1]), CGColorMakeWhite());
-//   mvgFillRectWithColor( vg, CGRectIntegral( rects[ 1][ 1]), CGColorMakeWhite());
+//   CGContextFillRectWithColor( context, CGRectIntegral( rects[ 0][ 0]), CGColorMakeBlack());
+//   CGContextFillRectWithColor( context, CGRectIntegral( rects[ 1][ 0]), CGColorMakeBlack());
+//   CGContextFillRectWithColor( context, CGRectIntegral( rects[ 0][ 1]), CGColorMakeWhite());
+//   CGContextFillRectWithColor( context, CGRectIntegral( rects[ 1][ 1]), CGColorMakeWhite());
 
    circle = CGRectGetInnerCircle( rect);
    radius = CACircleGetRadius( circle) / 2.0;
    circle = CACircleInset( circle, radius + radius / 4.0);
    radius += radius / 4.0;
 
-   mvgSave( vg);
+   CGContextSave( context);
    {
-//      nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
-      nvgGlobalCompositeBlendFuncSeparate( vg, srcRGB, srcAlpha, dstRGB, dstAlpha);
-//      nvgGlobalCompositeBlendFuncSeparate( vg,
-//                                           NVG_ONE,
-//                                           NVG_ONE,
-//                                           NVG_ONE,
-//                                           NVG_ONE);
+//      CGContextGlobalCompositeOperation( context, CGCompositeOperationLighter); // Updated commented line
+      CGContextGlobalCompositeBlendFuncSeparate( context, srcRGB, srcAlpha, dstRGB, dstAlpha);
+//      CGContextGlobalCompositeBlendFuncSeparate( context, // Updated commented line
+//                                           CGBlendFactorOne,
+//                                           CGBlendFactorOne,
+//                                           CGBlendFactorOne,
+//                                           CGBlendFactorOne);
       factor = (frameNr % 360) / (CGFloat) (360 - 1);
       deg    = 360.0f * factor + 60.0f * (step / (11.0f * 11.0f));
 
@@ -140,11 +137,11 @@ static void   drawCirclesInRect( CGContext *context,
       alpha  = factor < 0.5
                ? 1.0
                : 0.5;
-      mvgFillCircleWithColor( vg, circles[ 0], CGColorBySettingAlpha( CGColorMakeRed(),  alpha));
-      mvgFillCircleWithColor( vg, circles[ 1], CGColorBySettingAlpha( CGColorMakeLime(), alpha));
-      mvgFillCircleWithColor( vg, circles[ 2], CGColorBySettingAlpha( CGColorMakeBlue(), alpha));
+      CGContextFillCircleWithColor( context, circles[ 0], CGColorBySettingAlpha( CGColorMakeRed(),  alpha));
+      CGContextFillCircleWithColor( context, circles[ 1], CGColorBySettingAlpha( CGColorMakeLime(), alpha));
+      CGContextFillCircleWithColor( context, circles[ 2], CGColorBySettingAlpha( CGColorMakeBlue(), alpha));
    }
-   mvgRestore( vg);
+   CGContextRestore( context);
 }
 
 
@@ -153,7 +150,6 @@ static NSInteger   freeze;
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   struct NVGcontext   *vg;
    int                 srcRGB;
    int                 dstRGB;
    int                 srcAlpha;
@@ -228,19 +224,18 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    }
 
 found:
-   vg = CGContextGetNVGContext( context);
-   mvgFontSize( vg, 12.0f);
-   nvgTextColor( vg, CGColorMakeBlack());
-   nvgTextBackgroundColor( vg, CGColorMakeWhite());
+   CGContextFontSize( context, 12.0f);
+   CGContextTextColor( context, CGColorMakeBlack());
+   CGContextTextBackgroundColor( context, CGColorMakeWhite());
    if( [context buttonStates])
-      mvgFormatInRect( vg, CGRectInset( info, 2, 2),
+      CGContextFormatInRect( context, CGRectInset( info, 2, 2),
                            CGContentModeLeft,
                            0,
                            "srcRGB: %s dstRGB: %s",
                            mode_name_for_mode( srcRGB),
                            mode_name_for_mode( dstRGB));
 
-   mvgFormatInRect( vg, CGRectInset( info, 2, 2),
+   CGContextFormatInRect( context, CGRectInset( info, 2, 2),
                         CGContentModeRight,
                         0,
                         "%d (%d) srcAlpha: %s dstAlpha: %s",
@@ -250,22 +245,21 @@ found:
 
 
 //   [context useDefaultFont];
-//   mvgFontSize( vg, 20.0f);
-//   mvgTextColor( vg, CGColorMakeBlack(), CGColorMakeWhite());
-//   mvgFormatInRect( vg, CGRectInset( rects[ 0][ 0], 10, 10), CGContentModeTopLeft, 0, "srcRGB: %s", mode_name_for_mode( srcRGB));
+//   CGContextFontSize( context, 20.0f);
+//   CGContextTextColor( context, CGColorMakeBlack(), CGColorMakeWhite());
+//   CGContextFormatInRect( context, CGRectInset( rects[ 0][ 0], 10, 10), CGContentModeTopLeft, 0, "srcRGB: %s", mode_name_for_mode( srcRGB));
 //
-//   mvgTextColor( vg, CGColorMakeBlack(), CGColorMakeLightGray());
-//   mvgFormatInRect( vg, CGRectInset( rects[ 0][ 1], 10, 10), CGContentModeTopRight, 0, "dstRGB: %s", mode_name_for_mode( dstRGB));
+//   CGContextTextColor( context, CGColorMakeBlack(), CGColorMakeLightGray());
+//   CGContextFormatInRect( context, CGRectInset( rects[ 0][ 1], 10, 10), CGContentModeTopRight, 0, "dstRGB: %s", mode_name_for_mode( dstRGB));
 //
-//   mvgTextColor( vg, CGColorMakeWhite(), CGColorMakeGray());
-//   mvgFormatInRect( vg, CGRectInset( rects[ 1][ 0], 10, 10), CGContentModeBottomLeft, 0, "srcAlpha: %s", mode_name_for_mode( srcAlpha));
+//   CGContextTextColor( context, CGColorMakeWhite(), CGColorMakeGray());
+//   CGContextFormatInRect( context, CGRectInset( rects[ 1][ 0], 10, 10), CGContentModeBottomLeft, 0, "srcAlpha: %s", mode_name_for_mode( srcAlpha));
 //
-//   mvgTextColor( vg, CGColorMakeWhite(), CGColorMakeBlack());
-//   mvgFormatInRect( vg, CGRectInset( rects[ 1][ 1], 10, 10), CGContentModeBottomRight, 0, "dstAlpha: %s", mode_name_for_mode( dstAlpha));
+//   CGContextTextColor( context, CGColorMakeWhite(), CGColorMakeBlack());
+//   CGContextFormatInRect( context, CGRectInset( rects[ 1][ 1], 10, 10), CGContentModeBottomRight, 0, "dstAlpha: %s", mode_name_for_mode( dstAlpha));
 //   drawCirclesInRect( context, canvas, srcRGB, srcAlpha, dstRGB, dstAlpha);
    return( YES);
 }
-
 
 
 int   main( int argc, char *argv[])
@@ -292,7 +286,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫

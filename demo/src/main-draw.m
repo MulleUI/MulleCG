@@ -32,10 +32,12 @@ static void   lag( long refreshRate)
 //  * run renderloop (with event handling)
 //  * shows differences for pixel alignment and antialiasing
 //
-static void   _drawAlpha( NVGcontext *vg,
+static void   _drawAlpha( CGContext *context, // Changed from NVGcontext *vg
                           CGRect rect,
                           int antialias)
 {
+   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
+
    rect.size.width  -= 50;
    rect.size.height -= 50;
 
@@ -83,12 +85,14 @@ static void   _drawAlpha( NVGcontext *vg,
 
 
 
-static void   _drawRects( NVGcontext *vg,
+static void   _drawRects( CGContext *context, // Changed from NVGcontext *vg
                           CGRect rect,
                           CGColor color,
                           int antialias,
                           CGFloat thickness)
 {
+   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
+
    nvgShapeAntiAlias( vg, antialias);
    nvgStrokeWidth( vg, thickness);
 
@@ -106,11 +110,12 @@ static void   _drawRects( NVGcontext *vg,
 
 static NSInteger   lines;
 
-static void   _drawColoredLinesH( NVGcontext *vg,
+static void   _drawColoredLinesH( CGContext *context, // Changed from NVGcontext *vg
                                   CGRect rect,
                                   int antialias,
                                   CGFloat thickness)
 {
+   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
    CGPoint      point;
    NSUInteger   i;
    CGFloat      h;
@@ -151,11 +156,12 @@ static void   _drawColoredLinesH( NVGcontext *vg,
 }
 
 
-static void   _drawColoredLinesV( NVGcontext *vg,
+static void   _drawColoredLinesV( CGContext *context, // Changed from NVGcontext *vg
                                   CGRect rect,
                                   int antialias,
                                   CGFloat thickness)
 {
+   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
    CGPoint      point;
    NSUInteger   i;
    CGFloat      w;
@@ -196,11 +202,12 @@ static void   _drawColoredLinesV( NVGcontext *vg,
 }
 
 
-static void   _drawColoredLinesHV( NVGcontext *vg,
+static void   _drawColoredLinesHV( CGContext *context, // Changed from NVGcontext *vg
                                    CGRect rect,
                                    int antialias,
                                    CGFloat thickness)
 {
+   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
    CGPoint      point;
    NSUInteger   i;
    CGFloat      w;
@@ -247,7 +254,7 @@ static void   _drawColoredLinesHV( NVGcontext *vg,
 }
 
 
-static void   _drawColoredLines( NVGcontext *vg,
+static void   _drawColoredLines( CGContext *context, // Changed from NVGcontext *vg
                                  CGRect rect,
                                  int antialias,
                                  CGFloat thickness)
@@ -259,12 +266,12 @@ static void   _drawColoredLines( NVGcontext *vg,
 
    CGRectPartitionHorizontally( rows[ 0], 2, 2, columns);
 
-   _drawColoredLinesH( vg, columns[ 0], antialias, thickness);
-   _drawColoredLinesV( vg, columns[ 1], antialias, thickness);
+   _drawColoredLinesH( context, columns[ 0], antialias, thickness); // Pass context
+   _drawColoredLinesV( context, columns[ 1], antialias, thickness); // Pass context
 
    CGRectPartitionHorizontally( rows[ 1], 2, 2, columns);
 
-   _drawColoredLinesHV( vg, columns[ 0], antialias, thickness);
+   _drawColoredLinesHV( context, columns[ 0], antialias, thickness); // Pass context
 }
 
 
@@ -311,7 +318,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          rect.origin.y += 0.5;
       }
 #ifdef DRAW_ALPHA
-      _drawAlpha( vg, rect, i >= 2);
+      _drawAlpha( context, rect, i >= 2); // Pass context
 #endif
    }
 
@@ -356,7 +363,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             rect.origin.y += 0.5;
          }
 #ifdef DRAW_RECT
-         _drawRects( vg, rect, fore, i >= 2, i >= 4 ? 0.5 : 1.0);
+         _drawRects( context, rect, fore, i >= 2, i >= 4 ? 0.5 : 1.0); // Pass context
 #endif
       }
    }
@@ -404,7 +411,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             rect.origin.y += 0.5;
          }
 #ifdef DRAW_LINES
-         _drawColoredLines( vg, rect, i >= 2, i >= 4 ? 0.5 : 1.0);
+         _drawColoredLines( context, rect, i >= 2, i >= 4 ? 0.5 : 1.0); // Pass context
 #endif
       }
       if( lines > 0)
@@ -576,25 +583,27 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
 // ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
 //  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
-//  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
+//  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
 //   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
 //   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀
 //    ╙▄     ╙▀███╙█▄▐██▄,╙▀█████▄▀▄▀▄   ,█M╗ ▀▄██▀╙""*ⁿ═─≈-,,▄▌,        ▄▀
 //     `▌╙µ,▄Φ▀x███▄██████████▀V███▀╙└ ,▄#▌████▀`"*«,      .█▀▄▀▄,      ▄╛
 //       ▀Ö█  ;▓████████▄▄█▀▄╙W "V▄██▀▀│▄███▀└ ▀╦     "*═╥▄▀ ║,  ║▀▄  ,▓
 //        ╙W▀ '█████╨▀▀█████████   "▀▀████└      ╙▄   ,▄▀'   `▀▀╣H ▐▀▄▀
-//          ╙▄  ▀▀Γ╓▌  ▄▀ⁿ`╙▀███      ██▌         ╓█R▀▄A█        ▀▀▄▀
+//          ╙▄  Φ▀╓▌  ▄▀ⁿ`╙▀███      ██▌         ╓█R▀▄A█        ▀▀▄▀
 //            ╙W,Φ╙  ║█        ▄╙╙ª%≡╦██≤≤╗╗≡≡╜▀▀   ╣▌   █╕     ,▄▀
 //              `▀▄M█┘        ║▀▌   ╫"    *Φ▄  █       Φ` ▀▌, ▄M╙
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+
+
 
 

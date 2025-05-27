@@ -11,25 +11,25 @@
 
 static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias)
 {
-   struct NVGcontext    *vg;
-   CGRect               canvas;
-   CGRect               fillRect;
-   CGRect               strokeRect;
-   char                 buf[ 1024];
-   CGFloat              strokeWidth;
-   CGRect               rows[ 3];
-   CGRect               columns[ 3];
-   NSUInteger           i, j;
-   char                 *strokeMode;
-   char                 *fillMode;
+   CGFloat      strokeWidth;
+   CGRect       canvas;
+   CGRect       columns[ 3];
+   CGRect       fillRect;
+   CGRect       rect;
+   CGRect       rows[ 3];
+   CGRect       strokeRect;
+   char         *fillMode;
+   char         *strokeMode;
+   char         buf[ 1024];
+   NSUInteger   i, j;
+   // struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context, though not strictly needed if all calls are CGContext...
 
-   vg     = CGContextGetNVGContext( context);
-   canvas = CGRectInset( [layer canvas], 10.0, 10.0);
+   canvas      = CGRectInset( [layer canvas], 10.0, 10.0);
 
    strokeWidth = 6.0;
-   nvgShapeAntiAlias( vg, antiAlias);
+   CGContextShapeAntiAlias( context, antiAlias); // Converted from nvgShapeAntiAlias
 
-   nvgResetScissor( vg); // see if it makes a difference
+   CGContextResetScissor( context); // Converted from nvgResetScissor // see if it makes a difference
    CGRectPartitionVertically( canvas, 20.0, 3, rows);
    for( i = 0; i < 3; i++)
    {
@@ -77,20 +77,20 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
             break;
          }
 
-         nvgBeginPath( vg);
-         nvgRect( vg, strokeRect.origin.x, strokeRect.origin.y, strokeRect.size.width, strokeRect.size.height);
-         nvgStrokeColor( vg, CGColorMake( 1.0, 0.0, 1.0, 0.75));
-         nvgStrokeWidth( vg, strokeWidth);
-         nvgStroke( vg);
+         CGContextBeginPath( context);
+         CGContextRect( context, strokeRect);
+         CGContextStrokeColor( context, CGColorMake( 1.0, 0.0, 1.0, 0.75));
+         CGContextStrokeWidth( context, strokeWidth);
+         CGContextStroke( context);
 
-         nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
+         CGContextGlobalCompositeOperation( context, NVG_LIGHTER);
          {
-            nvgBeginPath( vg);
-            nvgRect( vg, fillRect.origin.x, fillRect.origin.y, fillRect.size.width, fillRect.size.height);
-            nvgFillColor( vg, CGColorMake( 0.0, 1.0, 0.0, 0.75));
-            nvgFill( vg);
+            CGContextBeginPath( context);
+            CGContextRect( context, fillRect);
+            CGContextFillColor( context, CGColorMake( 0.0, 1.0, 0.0, 0.75));
+            CGContextFill( context);
          }
-         nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
+         CGContextGlobalCompositeOperation( context, NVG_SOURCE_OVER);
          mulle_snprintf( buf, sizeof( buf),
                            "%s %s %s\nf:%s\ns:%s",
                            antiAlias ? "AA " : "No AA ",
@@ -99,23 +99,21 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
                            CGRectUTF8String( fillRect),
                            CGRectUTF8String( strokeRect));
 
-         [context fontWithNameUTF8String:"sans"];
-
-         nvgFontFace( vg, "sans");
-         nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
-         nvgTextColor( vg, CGColorMakeBlack());
-         nvgTextBackgroundColor( vg, CGColorMake( 0.0, 1.0, 0.0, 0.75));
-         nvgFontSize( vg, 12.0);
-         nvgTextBox( vg, CGRectGetMinX( fillRect),
-                         CGRectGetMidY( fillRect) - 12.0,
-                         fillRect.size.width,
-                         buf,
-                         NULL);
+         CGContextFontFace( context, "sans");
+         CGContextTextAlign( context, CGTextAlignCenter | CGTextAlignTop); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_TOP
+         CGContextTextColor( context, CGColorMakeBlack());
+         CGContextTextBackgroundColor( context, CGColorMake( 0.0, 1.0, 0.0, 0.75));
+         CGContextFontSize( context, 12.0);
+         CGContextTextBox( context, CGPointMake ( CGRectGetMinX( fillRect),
+                                                  CGRectGetMidY( fillRect) - 12.0),
+                                    fillRect.size.width,
+                                    buf,
+                                    (size_t) -1);
       }
    }
 
    strokeWidth = 1.0;
-   nvgShapeAntiAlias( vg, 1);
+   CGContextShapeAntiAlias( context, 1); // Converted from nvgShapeAntiAlias
 
    CGRectPartitionVertically( canvas, 20.0, 3, rows);
    for( i = 2; i < 3; i++)
@@ -124,32 +122,34 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
       for( j = 0; j < 3; j++)
       {
          fillRect = CGRectIntegral( columns[ j]);
+         rect     = CGRectMakeStrokeRect( fillRect, strokeWidth, CGOutside);
 
-         nvgBeginPath( vg);
-         nvgStrokeWidth( vg, strokeWidth);
-         nvgStrokeColor( vg, CGColorMake( 1.0, 1.0, 1.0, 0.8));
+         CGContextBeginPath( context);
+         {
+            CGContextStrokeWidth( context, strokeWidth);
+            CGContextStrokeColor( context, CGColorMake( 1.0, 1.0, 1.0, 0.8));
 
-         nvgMoveTo( vg, CGRectGetStrokeMinX( fillRect, 1.0), CGRectGetStrokeMinY( fillRect, 1.0) - 3.0);
-         nvgLineTo( vg, CGRectGetStrokeMinX( fillRect, 1.0), CGRectGetStrokeMinY( fillRect, 1.0) + 3.0);
-         nvgMoveTo( vg, CGRectGetStrokeMinX( fillRect, 1.0) - 3.0, CGRectGetStrokeMinY( fillRect, 1.0));
-         nvgLineTo( vg, CGRectGetStrokeMinX( fillRect, 1.0) + 3.0, CGRectGetStrokeMinY( fillRect, 1.0));
+            CGContextMoveTo( context, CGPointMake( CGRectGetMinX( rect),       CGRectGetMinY( rect) - 3.0));
+            CGContextLineTo( context, CGPointMake( CGRectGetMinX( rect),       CGRectGetMinY( rect) + 3.0));
+            CGContextMoveTo( context, CGPointMake( CGRectGetMinX( rect) - 3.0, CGRectGetMinY( rect)));
+            CGContextLineTo( context, CGPointMake( CGRectGetMinX( rect) + 3.0, CGRectGetMinY( rect)));
 
-         nvgMoveTo( vg, CGRectGetStrokeMaxX( fillRect, 1.0), CGRectGetStrokeMinY( fillRect, 1.0) - 3.0);
-         nvgLineTo( vg, CGRectGetStrokeMaxX( fillRect, 1.0), CGRectGetStrokeMinY( fillRect, 1.0) + 3.0);
-         nvgMoveTo( vg, CGRectGetStrokeMaxX( fillRect, 1.0) - 3.0, CGRectGetStrokeMinY( fillRect, 1.0));
-         nvgLineTo( vg, CGRectGetStrokeMaxX( fillRect, 1.0) + 3.0, CGRectGetStrokeMinY( fillRect, 1.0));
+            CGContextMoveTo( context, CGPointMake( CGRectGetMaxX( rect),       CGRectGetMinY( rect) - 3.0));
+            CGContextLineTo( context, CGPointMake( CGRectGetMaxX( rect),       CGRectGetMinY( rect) + 3.0));
+            CGContextMoveTo( context, CGPointMake( CGRectGetMaxX( rect) - 3.0, CGRectGetMinY( rect)));
+            CGContextLineTo( context, CGPointMake( CGRectGetMaxX( rect) + 3.0, CGRectGetMinY( rect)));
 
-         nvgMoveTo( vg, CGRectGetStrokeMinX( fillRect, 1.0), CGRectGetStrokeMaxY( fillRect, 1.0) - 3.0);
-         nvgLineTo( vg, CGRectGetStrokeMinX( fillRect, 1.0), CGRectGetStrokeMaxY( fillRect, 1.0) + 3.0);
-         nvgMoveTo( vg, CGRectGetStrokeMinX( fillRect, 1.0) - 3.0, CGRectGetStrokeMaxY( fillRect, 1.0));
-         nvgLineTo( vg, CGRectGetStrokeMinX( fillRect, 1.0) + 3.0, CGRectGetStrokeMaxY( fillRect, 1.0));
+            CGContextMoveTo( context, CGPointMake( CGRectGetMinX( rect),       CGRectGetMaxY( rect) - 3.0));
+            CGContextLineTo( context, CGPointMake( CGRectGetMinX( rect),       CGRectGetMaxY( rect) + 3.0));
+            CGContextMoveTo( context, CGPointMake( CGRectGetMinX( rect) - 3.0, CGRectGetMaxY( rect)));
+            CGContextLineTo( context, CGPointMake( CGRectGetMinX( rect) + 3.0, CGRectGetMaxY( rect)));
 
-         nvgMoveTo( vg, CGRectGetStrokeMaxX( fillRect, 1.0), CGRectGetStrokeMaxY( fillRect, 1.0) - 3.0);
-         nvgLineTo( vg, CGRectGetStrokeMaxX( fillRect, 1.0), CGRectGetStrokeMaxY( fillRect, 1.0) + 3.0);
-         nvgMoveTo( vg, CGRectGetStrokeMaxX( fillRect, 1.0) - 3.0, CGRectGetStrokeMaxY( fillRect, 1.0));
-         nvgLineTo( vg, CGRectGetStrokeMaxX( fillRect, 1.0) + 3.0, CGRectGetStrokeMaxY( fillRect, 1.0));
-
-         nvgStroke( vg);
+            CGContextMoveTo( context, CGPointMake( CGRectGetMaxX( rect),       CGRectGetMaxY( rect) - 3.0));
+            CGContextLineTo( context, CGPointMake( CGRectGetMaxX( rect),       CGRectGetMaxY( rect) + 3.0));
+            CGContextMoveTo( context, CGPointMake( CGRectGetMaxX( rect) - 3.0, CGRectGetMaxY( rect)));
+            CGContextLineTo( context, CGPointMake( CGRectGetMaxX( rect) + 3.0, CGRectGetMaxY( rect)));
+         }
+         CGContextStroke( context);
       }
    }
 }
@@ -212,13 +212,13 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
-// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
-//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+// ║        !█▄▄████≤═^`╓█ █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
 //   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀
@@ -232,4 +232,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

@@ -8,7 +8,7 @@ int   main( int argc, char *argv[])
    CGLayoutContext          *context;
    CGRect                   bounds;
    CGRect                   vbounds;
-   struct UITextMetrics     metrics;
+   struct CGTextMetrics     metrics;
    struct UIGlyphPosition   positions[ 32];
    NSUInteger               i, n;
    char                     *text;
@@ -27,9 +27,8 @@ int   main( int argc, char *argv[])
                       length:(NSUInteger) -1];
       printf( "%s\n", CGRectUTF8String( bounds));
 
-      [context getTextVisualBounds:&vbounds
-                              text:text
-                            length:(NSUInteger) -1];
+      vbounds = [context visualBoundsOfText:text
+                                     length:(NSUInteger) -1];
       printf( "%s\n", CGRectUTF8String( vbounds));
 
       n = [context getGlyphPositions:positions

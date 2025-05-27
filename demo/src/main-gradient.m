@@ -35,7 +35,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 //   feather = 20.0;
 
    gradientRect  = CGRectInset( rect, feather / 4.0, feather / 4.0);
-   paint         = [CGGradient boxGradientWithRoundedRect:gradientRect
+   paint         = [CGGradient boxGradientWithRoundedRect:gradientRect // Converted from nvgBoxGradient
                                              cornerRadius:0.0
                                                     color:CGColorMakeYellow()
                                                   feather:feather
@@ -45,9 +45,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    if( drawHelpers)
    {
-      CGContextFillCircleWithColor( context, CACircleMake( CGRectGetCenterPoint( rect), 3.0), CGColorMakeBlack());
-      CGContextStrokeRectWithColor( context, gradientRect, 1.0, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.66));
-      CGContextStrokeRectWithColor( context, CGRectExtrude( gradientRect,
+      CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), 3.0), CGColorMakeBlack()); // Already CGContext
+      CGContextStrokeRectWithColor( context, gradientRect, 1.0, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.66)); // Already CGContext
+      CGContextStrokeRectWithColor( context, CGRectExtrude( gradientRect, // Already CGContext
                                         feather / 2.0,
                                         feather / 2.0),
                                   1.0,
@@ -55,7 +55,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
 
    rect  = rects[ 0][ 1];
-   paint = [CGGradient boxGradientWithRoundedRect:rect
+   paint = [CGGradient boxGradientWithRoundedRect:rect // Converted from nvgBoxGradient
                               cornerRadius:0.0
                                      color:CGColorMakeBlue()
                                    feather:feather
@@ -65,10 +65,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    if( drawHelpers)
    {
-      CGContextFillCircleWithColor( context, CACircleMake( CGRectGetCenterPoint( rect), 3.0), CGColorMakeBlack());
-      CGContextStrokeWidth( context, 1.0);
-      CGContextStrokeRectWithColor( context, gradientRect, 1.0, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.66));
-      CGContextStrokeRectWithColor( context, CGRectExtrude( gradientRect,
+      CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), 3.0), CGColorMakeBlack()); // Already CGContext
+      CGContextStrokeWidth( context, 1.0); // Already CGContext
+      CGContextStrokeRectWithColor( context, gradientRect, 1.0, CGColorMakeWithRGBA( 1.0, 0.0, 0.0, 0.66)); // Already CGContext
+      CGContextStrokeRectWithColor( context, CGRectExtrude( gradientRect, // Already CGContext
                                                  feather / 2.0,
                                                  feather / 2.0),
                                   1.0f,
@@ -76,21 +76,22 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
 
    rect  = rects[ 1][ 0];
-   paint = [CGGradient gradientWithRect:rect
-                             startColor:CGColorMakeYellow()
-                               endColor:CGColorMakeBlue()];
+   paint = [CGGradient linearGradientWithRect:rect // Converted from nvgLinearGradient
+                                   startColor:CGColorMakeYellow()
+                                     endColor:CGColorMakeBlue()
+                                     rotation:0.0f];
 
    CGContextFillRectWithPaint( context, rect, paint);
 
    if( drawHelpers)
    {
-      CGContextFillCircleWithColor( context, CACircleMake( CGRectGetCenterPoint( rect), 3.0), CGColorMakeBlack());
+      CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), 3.0), CGColorMakeBlack()); // Already CGContext
    }
 
    rect   = rects[ 1][ 1];
    radius = CGRectGetOuterRadius( rect);
    radius = radius * _CAQuadraticGetValue( CAQuadraticEaseOut, x);
-   paint  = [CGGradient radialGradientWithCircle:CACircleMake( CGRectGetCenterPoint( rect), radius)
+   paint  = [CGGradient radialGradientWithCircle:CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), radius) // Converted from nvgRadialGradient
                                            color:CGColorMakeBlue()
                                      innerRadius:0.0
                                       innerColor:CGColorMakeBlue()];
@@ -99,7 +100,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    if( drawHelpers)
    {
-      CGContextFillCircleWithColor( context, CACircleMake( CGRectGetCenterPoint( rect), 3.0), CGColorMakeBlack());
+      CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), 3.0), CGColorMakeBlack()); // Already CGContext
    }
 
    return( YES);
@@ -150,4 +151,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
