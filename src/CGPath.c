@@ -149,7 +149,7 @@ CGRect   CGPathComputeCoarseBounds( CGPathRef path)
             a0  = a1;
             a1  = tmp;
          }
-         c       = CACircleMake( point, radius);
+         c       = CACircleMakeWithCenterAndRadius( point, radius);
          bbox    = CGRectUnion( bbox, CACircleOuterRectOfSector( c, a0, a1));
          break;
 

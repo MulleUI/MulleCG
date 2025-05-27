@@ -10,13 +10,13 @@
 
 //
 // Problem: nanovg hat eine atlas grösse von 512, wenn der Font nicht rein
-//          passt muss der atlas resized werden. Das macht nanovg aber 
+//          passt muss der atlas resized werden. Das macht nanovg aber
 //          scheinz nicht automatisch.
 //
-// Problem 2: Man kann "freetype2" nicht aufzwingen wieviele Pixel es 
+// Problem 2: Man kann "freetype2" nicht aufzwingen wieviele Pixel es
 //          generieren soll. Wenn man eine Fontgrösse von 32 pixel angibt
 //          können auch 34 rauskommen. Die Lösung ist vermutlich, daß man
-//          als CALayer nicht clipt. wenn man Text macht. ? 
+//          als CALayer nicht clipt. wenn man Text macht. ?
 
 // static void   setupSceneInWindow( UIWindow *window)
 // {
@@ -24,11 +24,11 @@
 //    CGRect          frame;
 //    UIView          *view;
 //    UIWindowPlane   *contentPlane;
-// 
+//
 //    contentPlane = [window contentView];
 //    frame        = [contentPlane contentRect];
 //    frame        = UIEdgeInsetsInsetRect( frame, UIEdgeInsetsMake( 10, 10, 10, 10));
-// 
+//
 //    layer = [CATextLayer layerWithFrame:frame];
 //    [layer setBorderWidth:1.0];
 //    [layer setBorderColor:CGColorMakeOrange()];
@@ -42,20 +42,18 @@
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext  *vg;
    CGFont             *font;
    CGRect             canvas;
 
-   vg     = CGContextGetNVGContext( context);
    font   = [context fontWithNameUTF8String:"sans"];
    canvas = [layer canvas];
 
-   mvgStrokeRectWithColor( vg, canvas, 1.0, CGColorMakeOrange());
-   nvgFontSize( vg, canvas.size.height);
-   nvgTextColor( vg, CGColorMakeWhite());
-   nvgTextBackgroundColor( vg, CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0));
-   nvgTextAlign( vg, NVG_ALIGN_CENTER|NVG_ALIGN_BOTTOM);
-   nvgText( vg, CGRectGetMidX( canvas), CGRectGetMaxY( canvas), "|y|", NULL);
+   CGContextStrokeRectWithColor( context, canvas, 1.0, CGColorMakeOrange()); // Converted from mvgStrokeRectWithColor
+   CGContextFontSize( context, canvas.size.height);
+   CGContextTextColor( context, CGColorMakeWhite());
+   CGContextTextBackgroundColor( context, CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0));
+   CGContextTextAlign( context, CGTextAlignCenter|CGTextAlignBottom); // Converted from NVG_ALIGN_CENTER|NVG_ALIGN_BOTTOM
+   CGContextText( context, CGPointMake( CGRectGetMidX( canvas), CGRectGetMaxY( canvas)), "|y|", (size_t) -1);
 
    return( YES);
 }
@@ -120,7 +118,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -141,3 +139,5 @@ int   main( int argc, char *argv[])
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
 
+
+// EOF

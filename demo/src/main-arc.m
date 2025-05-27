@@ -12,10 +12,8 @@ static void   drawArc( CGContext *context,
    CAPolarPoint        x0, x1, x2;
    CGFloat             r;
    CGFloat             factor;
-   struct NVGcontext   *vg;
    NSUInteger          frameNr;
 
-   vg      = CGContextGetNVGContext( context);
    frameNr = [context numberOfFrames] % 240;
    if( frameNr >= 120)
       factor = 1.0 - (frameNr - 120) / 119.0;
@@ -25,7 +23,7 @@ static void   drawArc( CGContext *context,
    factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
    r  = CGRectGetHeight( rect);
-   p0 = CGRectGetTopPoint( rect);                                                // RED
+   p0 = CGRectGetTop( rect);                                                // RED
    x1 = CAPolarPointMakeWithAngle( r, CADegreesToAngle( 0.0 + 90.0 * factor));           // BLUE
    x2 = CAPolarPointMakeWithAngle( r, CADegreesToAngle( (90.0 + 90.0) - 90.0 * factor));  // LIME
 
@@ -33,55 +31,55 @@ static void   drawArc( CGContext *context,
    p2 = CGPointAddPolarPoint( p0, x2);
 
    {
-      mvgBeginPath( vg);
-      mvgMoveTo( vg, p1);
-      mvgArcTo( vg, p0, p2, r);
-      mvgStrokeWidth( vg, 3.0);
-      mvgStrokeColor( vg, CGColorMakeBlack());
-      mvgStroke( vg);
+      CGContextBeginPath( context);
+      CGContextMoveTo( context, p1);
+      CGContextArcTo( context, p0, p2, r);
+      CGContextStrokeWidth( context, 3.0);
+      CGContextStrokeColor( context, CGColorMakeBlack());
+      CGContextStroke( context);
 #if 1
-      mvgBeginPath( vg);
-      mvgMoveTo( vg, p1);
-      mvgArcTo( vg, p2, p0, r);
-      mvgStrokeWidth( vg, 1.0);
-      mvgStrokeColor( vg, CGColorMakeIndigo());
-      mvgStroke( vg);
+      CGContextBeginPath( context);
+      CGContextMoveTo( context, p1);
+      CGContextArcTo( context, p2, p0, r);
+      CGContextStrokeWidth( context, 1.0);
+      CGContextStrokeColor( context, CGColorMakeIndigo());
+      CGContextStroke( context);
 
-      mvgBeginPath( vg);
-      mvgMoveTo( vg, p0);
-      mvgArcTo( vg, p1, p2, r);
-      mvgStrokeWidth( vg, 1.0);
-      mvgStrokeColor( vg, CGColorMakeOlive());
-      mvgStroke( vg);
+      CGContextBeginPath( context);
+      CGContextMoveTo( context, p0);
+      CGContextArcTo( context, p1, p2, r);
+      CGContextStrokeWidth( context, 1.0);
+      CGContextStrokeColor( context, CGColorMakeOlive());
+      CGContextStroke( context);
 
-      mvgBeginPath( vg);
-      mvgMoveTo( vg, p0);
-      mvgArcTo( vg, p2, p1, r);
-      mvgStrokeWidth( vg, 1.0);
-      mvgStrokeColor( vg, CGColorMakeSalmon());
-      mvgStroke( vg);
+      CGContextBeginPath( context);
+      CGContextMoveTo( context, p0);
+      CGContextArcTo( context, p2, p1, r);
+      CGContextStrokeWidth( context, 1.0);
+      CGContextStrokeColor( context, CGColorMakeSalmon());
+      CGContextStroke( context);
 
-      mvgBeginPath( vg);
-      mvgMoveTo( vg, p2);
-      mvgArcTo( vg, p0, p1, r);
-      mvgStrokeWidth( vg, 2.0);
-      mvgStrokeColor( vg, CGColorMakeOrange());
-      mvgStroke( vg);
+      CGContextBeginPath( context);
+      CGContextMoveTo( context, p2);
+      CGContextArcTo( context, p0, p1, r);
+      CGContextStrokeWidth( context, 2.0);
+      CGContextStrokeColor( context, CGColorMakeOrange());
+      CGContextStroke( context);
 
-      mvgBeginPath( vg);
-      mvgMoveTo( vg, p2);
-      mvgArcTo( vg, p1, p0, r);
-      mvgStrokeWidth( vg, 2.0);
-      mvgStrokeColor( vg, CGColorMakeDodgerBlue());
-      mvgStroke( vg);
+      CGContextBeginPath( context);
+      CGContextMoveTo( context, p2);
+      CGContextArcTo( context, p1, p0, r);
+      CGContextStrokeWidth( context, 2.0);
+      CGContextStrokeColor( context, CGColorMakeDodgerBlue());
+      CGContextStroke( context);
 #endif
 
-      mvgStrokeLineWithColor( vg, p0, p1, 0.5, CGColorMakeBlack());
-      mvgStrokeLineWithColor( vg, p0, p2, 0.5, CGColorMakeBlack());
+      CGContextStrokeLineWithColor( context, p0, p1, 0.5, CGColorMakeBlack());
+      CGContextStrokeLineWithColor( context, p0, p2, 0.5, CGColorMakeBlack());
 
-      mvgFillCircleWithColor( vg, CACircleMake( p0, 5.0), CGColorMakeRed());
-      mvgFillCircleWithColor( vg, CACircleMake( p1, 5.0), CGColorMakeBlue());
-      mvgFillCircleWithColor( vg, CACircleMake( p2, 5.0), CGColorMakeLime());
+      CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( p0, 5.0), CGColorMakeRed());
+      CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( p1, 5.0), CGColorMakeBlue());
+      CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( p2, 5.0), CGColorMakeLime());
    }
 }
 
@@ -89,23 +87,20 @@ static void   drawArc( CGContext *context,
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   struct NVGcontext   *vg;
    CGRect              canvas;
    CGRect              rect;
 
-   vg     = CGContextGetNVGContext( context);
    rect   = CGRectIntegral( [layer canvas]);
-   mvgFillRectWithColor( vg, rect, CGColorMake( 1.0, 1.0, 1.0, 1.0));
+   CGContextFillRectWithColor( context, rect, CGColorMake( 1.0, 1.0, 1.0, 1.0));
 
-   canvas = CGSizePlaceInRect( CGSizeMake( 200, 100), [layer canvas], CGContentModeCenterPoint);
+   canvas = CGSizePlaceInRect( CGSizeMake( 200, 100), [layer canvas], CGContentModeCenter);
    rect   = CGRectIntegral( canvas);
-   mvgStrokeRectWithColor( vg, rect, 3.0, CGColorMake( 0.0, 0.0, 0.0, 0.2));
+   CGContextStrokeRectWithColor( context, rect, 3.0, CGColorMake( 0.0, 0.0, 0.0, 0.2));
 
    drawArc( context, rect, CGColorMakeDodgerBlue());
 
    return( YES);
 }
-
 
 
 int   main( int argc, char *argv[])

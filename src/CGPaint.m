@@ -136,7 +136,7 @@
 
 + (CGPaint *) paintWithStartColor:(CGColor) startColor
                          endColor:(CGColor) endColor
-                         rotation:(CGFloat) rotation
+                         rotation:(CARotation) rotation
 {
    if( rotation == 0.0 && CGColorEqualToColor( startColor, endColor))
       return( [[_CGMonoColor newWithColor:startColor] autorelease]);
@@ -190,7 +190,7 @@
 }
 
 
-- (CGFloat) rotation
+- (CARotation) rotation
 {
    return( 0.0);
 }
@@ -202,7 +202,7 @@
 }
 
 
-- (CGPaint *) rotatedPaint:(CGFloat) rotation
+- (CGPaint *) rotatedPaint:(CARotation) rotation
 {
    return( self);
 }

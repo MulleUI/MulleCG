@@ -80,7 +80,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          case 0  : CGContextStrokeRectWithPaint( context, rect, strokeWidth, paint); break;
          case 1  : CGContextStrokeRoundedRectWithPaint( context, rect, 3.0, strokeWidth, paint); break;
          case 2  : CGContextStrokeCircleWithPaint( context, CGRectGetInnerCircle( rect), strokeWidth, paint); break;
-         case 3  : CGContextStrokeLineWithPaint( context, CGRectGetTopLeftPoint( rect), CGRectGetBottomRightPoint( rect), strokeWidth, paint); break;
+         case 3  : CGContextStrokeLineWithPaint( context, CGRectGetTopLeft( rect), CGRectGetBottomRight( rect), strokeWidth, paint); break;
 
          case 4  : CGContextFillRectWithPaint( context, rect, paint); break;
          case 5  : CGContextFillRoundedRectWithPaint( context, rect, 3.0, paint); break;

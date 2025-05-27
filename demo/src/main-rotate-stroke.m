@@ -7,7 +7,7 @@
 
 
 //
-// This demo was used to debug CGGradientNVGpaintForRect, so that the 
+// This demo was used to debug CGGradientNVGpaintForRect, so that the
 // rotation of the linear gradient looks smooth
 //
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
@@ -20,7 +20,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect              rects[ 3][ 3];
    char                buf[ 128];
    NVGpaint            paint;
-   struct NVGcontext   *vg;
    unsigned int        i, j;
    NSUInteger          frameNr;
    double              x;
@@ -52,15 +51,15 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
 
    canvas = [layer canvas];
-   vg     = CGContextGetNVGContext( context);
+   // Delete: vg     = CGContextGetNVGContext( context);
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
    {
-      mvgRect( vg, canvas);
-      mvgStrokeWidth( vg, 8);
-      mvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
+      CGContextRect( context, canvas); // Converted from mvgRect
+      CGContextStrokeWidth( context, 8); // Converted from mvgStrokeWidth
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF)); // Converted from mvgStrokeColor
    }
-   nvgStroke( vg);
+   CGContextStroke( context); // Converted from nvgStroke
 
    CGRectPartition3x3( CGRectInset( canvas, 50, 50), CGSizeMake( 75, 75), rects);
 
@@ -80,31 +79,31 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             continue;
 
          rect = CGRectIntegral( rects[ j][ i]);
-         mvgStrokeRectWithColor( vg, rect, 0.5, CGColorMakeWhite());
+         CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeWhite()); // Converted from mvgStrokeRectWithColor
 
-         mvgSave( vg);
+         CGContextSave( context); // Converted from mvgSave
          {
             angle = CAAngleRotate( angle, CARotation90);
 
-            mvgTranslate( vg, CGRectGetCenterPoint( rect));
-            mvgRotate( vg, CAAngleToRotation( angle));
-            mvgTranslate( vg, CGPointNegate( CGRectGetCenterPoint( rect)));
+            CGContextTranslate( context, CGRectGetCenter( rect)); // Converted from mvgTranslate
+            CGContextRotate( context, CAAngleToRotation( angle)); // Converted from mvgRotate
+            CGContextTranslate( context, CGPointNegate( CGRectGetCenter( rect))); // Converted from mvgTranslate
 
-            mvgBeginPath( vg);
-            mvgRect( vg, rect);
+            CGContextBeginPath( context); // Converted from mvgBeginPath
+            CGContextRect( context, rect); // Converted from mvgRect
 
-            mvgStrokeWidth( vg, 8.0);
+            CGContextStrokeWidth( context, 8.0); // Converted from mvgStrokeWidth
             CGContextStrokePaintWithOptions( context, gradient, rect, 8.0, &options);
-            mvgStroke( vg);
+            CGContextStroke( context); // Converted from mvgStroke
 
             CGContextFontFace( context,"sans");
-            mvgFontSize( vg, 12);
-            mvgTextColor( vg, CGColorMakeWhite());
-            mvgTextBackgroundColor( vg, CGColorMakeWithRGBA( 0.33, 0.33, 0.33, 1.0));
+            CGContextFontSize( context, 12); // Converted from mvgFontSize
+            CGContextTextColor( context, CGColorMakeWhite()); // Converted from mvgTextColor
+            CGContextTextBackgroundColor( context, CGColorMakeWithRGBA( 0.33, 0.33, 0.33, 1.0)); // Converted from mvgTextBackgroundColor
             sprintf( buf, "%.1f°", CAAngleToDegrees( angle));
-            mvgTextInRect( vg, buf, (size_t) -1, rect, CGContentModeLeft, CGTextOptionAlignVisually);
+            CGContextTextInRect( context, buf, (size_t) -1, rect, CGContentModeLeft, CGTextOptionAlignVisually); // Converted from mvgTextInRect
          }
-         mvgRestore( vg);
+         CGContextRestore( context); // Converted from mvgRestore
       }
    }
    return( YES);
@@ -182,5 +181,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

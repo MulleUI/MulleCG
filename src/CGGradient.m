@@ -32,7 +32,7 @@
 {
    CGTwoColorGradient   *obj;
 
-   obj = NSAllocateObject( self, 0, NULL);
+   obj              = NSAllocateObject( self, 0, NULL);
    obj->_startColor = startColor;
    obj->_endColor   = endColor;
    obj->_rotation   = rotation;
@@ -642,7 +642,7 @@ static Class  CGBoxGradientClass;
 }
 
 
-- (CGFloat) rotation
+- (CARotation) rotation
 {
    return( 0);
 }
@@ -668,7 +668,7 @@ static Class  CGRadialGradientClass;
 
 
 + (instancetype) radialGradientWithCircle:(CACircle) circle
-                               outerColor:(CGColor) outerColor
+                                    color:(CGColor) outerColor
                               innerRadius:(CGFloat) innerRadius
                                innerColor:(CGColor) innerColor
 {
@@ -696,7 +696,7 @@ static Class  CGRadialGradientClass;
 }
 
 
-- (CGFloat) rotation
+- (CARotation) rotation
 {
    return( 0);
 }
@@ -741,9 +741,9 @@ static Class  CGRadialGradientClass;
                                rotation:(CARotation) rotation
 {
    rect = CGRectRotate( rect, rotation);
-   return( [CGLinearGradientClass linearGradientWithStartPoint:CGRectGetOriginPoint( rect)
+   return( [CGLinearGradientClass linearGradientWithStartPoint:CGRectGetOrigin( rect)
                                                     startColor:startColor
-                                                      endPoint:CGRectGetOppositePoint( rect)
+                                                      endPoint:CGRectGetOpposite( rect)
                                                       endColor:endColor]);
 }
 
@@ -761,8 +761,8 @@ static Class  CGRadialGradientClass;
 
 
 + (instancetype) radialGradientWithCircle:(CACircle) circle
-                               outerColor:(CGColor) outerColor
-                              innerRadius:(CGFloat) innerRadius
+                                    color:(CGColor) outerColor
+                             innerRadius:(CGFloat) innerRadius
                                innerColor:(CGColor) innerColor
 {
    return( MulleObjCObjectPerformSelector1( CGRadialGradientClass, _cmd, (id) _param));
@@ -770,7 +770,7 @@ static Class  CGRadialGradientClass;
 
 
 + (instancetype) radialGradientWithRect:(CGRect) rect
-                             outerColor:(CGColor) outerColor
+                                  color:(CGColor) outerColor
                             innerRadius:(CGFloat) innerRadius
                              innerColor:(CGColor) innerColor
 {
@@ -778,7 +778,7 @@ static Class  CGRadialGradientClass;
 
    circle = CGRectGetInnerCircle( rect);
    return( [CGRadialGradientClass radialGradientWithCircle:circle
-                                                outerColor:outerColor
+                                                     color:outerColor
                                                innerRadius:innerRadius
                                                 innerColor:innerColor]);
 }

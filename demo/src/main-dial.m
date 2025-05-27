@@ -1,9 +1,12 @@
+//
+// Copyright (c) 2023 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
 
 
-static inline void mvgRoundedSector(NVGcontext *vg,
+static inline void mvgRoundedSector(CGContext *context, // Changed parameter type
                                     CACircle innerCircle,
                                     CACircle outerCircle,
                                     CAAngle startAngle,
@@ -15,12 +18,12 @@ static inline void mvgRoundedSector(NVGcontext *vg,
    CGFloat    deltaAngleOuter;
    CGPoint    compensatedInnerStart;
    CGPoint    compensatedInnerEnd;
+   CGPoint    compensatedOuterStart;
+   CGPoint    compensatedOuterEnd;
    CGPoint    innerStart;
    CGPoint    innerEnd;
    CGPoint    outerStart;
    CGPoint    outerEnd;
-   CGPoint    compensatedOuterStart;
-   CGPoint    compensatedOuterEnd;
    CGPoint    middleStart;
    CGPoint    middleEnd;
    CACircle   midCircle;
@@ -63,11 +66,11 @@ static inline void mvgRoundedSector(NVGcontext *vg,
    compensatedOuterEnd = CACirclePointAtAngle( outerCircle, reducedOuterEndAngle);
 
 #if 0
-   mvgFillCircleWithColor( vg, CACircleMake( innerEnd, 3.0), CGColorMakeMagenta());
-   mvgFillCircleWithColor( vg, CACircleMake( outerEnd, 3.0), CGColorMakeRed());
-   mvgFillCircleWithColor( vg, CACircleMake( middleEnd, 3.0), CGColorMakeOrange());
-   mvgFillCircleWithColor( vg, CACircleMake( compensatedInnerEnd, 3.0), CGColorMakeHotPink());
-   mvgFillCircleWithColor( vg, CACircleMake( compensatedOuterEnd, 3.0), CGColorMakeYellow());
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( innerEnd, 3.0), CGColorMakeMagenta()); // Converted from mvgFillCircleWithColor
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( outerEnd, 3.0), CGColorMakeRed()); // Converted from mvgFillCircleWithColor
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( middleEnd, 3.0), CGColorMakeOrange()); // Converted from mvgFillCircleWithColor
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( compensatedInnerEnd, 3.0), CGColorMakeHotPink()); // Converted from mvgFillCircleWithColor
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( compensatedOuterEnd, 3.0), CGColorMakeYellow()); // Converted from mvgFillCircleWithColor
 #endif
 
    increasedInnerStartAngle = CAAngleAddRadians( startAngle, deltaAngleInner);
@@ -83,37 +86,41 @@ static inline void mvgRoundedSector(NVGcontext *vg,
    compensatedOuterStart = CACirclePointAtAngle( outerCircle, increasedOuterStartAngle);
 
 #if 0
-   mvgFillCircleWithColor( vg, CACircleMake( innerStart, 3.0), CGColorMakeDodgerBlue());
-   mvgFillCircleWithColor( vg, CACircleMake( middleStart, 3.0), CGColorMakeBlue());
-   mvgFillCircleWithColor( vg, CACircleMake( outerStart, 3.0), CGColorMakeIndigo());
-   mvgFillCircleWithColor( vg, CACircleMake( compensatedInnerStart, 3.0), CGColorMakeBlack());
-   mvgFillCircleWithColor( vg, CACircleMake( compensatedOuterStart, 3.0), CGColorMakeDarkGray());
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( innerStart, 3.0), CGColorMakeDodgerBlue()); // Converted from mvgFillCircleWithColor
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( middleStart, 3.0), CGColorMakeBlue()); // Converted from mvgFillCircleWithColor
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( outerStart, 3.0), CGColorMakeIndigo()); // Converted from mvgFillCircleWithColor
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( compensatedInnerStart, 3.0), CGColorMakeBlack()); // Converted from mvgFillCircleWithColor
+   CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( compensatedOuterStart, 3.0), CGColorMakeDarkGray()); // Converted from mvgFillCircleWithColor
 #endif
 
-   mvgBeginPath(vg);
+   CGContextBeginPath(context); // Converted from mvgBeginPath
 
-   mvgMoveTo( vg, compensatedInnerStart);
-   mvgArcTo( vg, innerStart, middleStart, innerCornerRadius);
+   CGContextMoveTo( context, compensatedInnerStart); // Converted from mvgMoveTo
+   CGContextArcTo( context, innerStart, middleStart, innerCornerRadius); // Converted from mvgArcTo
 
    if( innerCornerRadius < halfDistance)
-       mvgLineTo( vg, middleStart);
-   mvgArcTo( vg, outerStart, compensatedOuterStart, outerCornerRadius);
+       CGContextLineTo( context, middleStart); // Converted from mvgLineTo
+   CGContextArcTo( context, outerStart, compensatedOuterStart, outerCornerRadius); // Converted from mvgArcTo
 
-   mvgArc( vg, outerCircle, increasedOuterStartAngle, reducedOuterEndAngle, NVG_CW);
+   CGContextArc( context, outerCircle, increasedOuterStartAngle, reducedOuterEndAngle, NVG_CW); // Converted from mvgArc
 
-   mvgArcTo( vg, outerEnd, middleEnd, outerCornerRadius);
+   CGContextArcTo( context, outerEnd, middleEnd, outerCornerRadius); // Converted from mvgArcTo
    if( outerCornerRadius < halfDistance)
-       mvgLineTo( vg, middleEnd);
-   mvgArcTo( vg, innerEnd, compensatedInnerEnd, innerCornerRadius);
+       CGContextLineTo( context, middleEnd); // Converted from mvgLineTo
+   CGContextArcTo( context, innerEnd, compensatedInnerEnd, innerCornerRadius); // Converted from mvgArcTo
 
-   mvgArc( vg, innerCircle, reducedInnerEndAngle, increasedInnerStartAngle, NVG_CCW);
+   CGContextArc( context, innerCircle, reducedInnerEndAngle, increasedInnerStartAngle, NVG_CCW); // Converted from mvgArc
+
+#if 0
+   CGContextClosePath( context); // Converted from mvgClosePath
+#endif
 }
 
 
 
 
 
-static void   drawDial( CGContext *context,
+static void   drawDial( CGContext *context, // Changed parameter type
                         CGRect rect,
                         CGFloat width,
                         CAAngle startAngle,
@@ -121,7 +128,7 @@ static void   drawDial( CGContext *context,
                         CGFloat fill,
                         CGColor color)
 {
-   struct NVGcontext   *vg;
+// Delete:   struct NVGcontext   *vg;
    CACircle            outerCircle;
    CACircle            innerCircle;
    CGPoint             startPoint;
@@ -129,7 +136,7 @@ static void   drawDial( CGContext *context,
    CGFloat             space;
    CGFloat             radians;
 
-   vg          = CGContextGetNVGContext( context);
+// Delete:   vg          = CGContextGetNVGContext( context);
 
    outerCircle = CGRectGetInnerCircle( rect);
    innerCircle = CACircleInset( outerCircle, width);
@@ -156,15 +163,17 @@ static void   drawDial( CGContext *context,
    endAngle    = CAAngleAddRadians( startAngle, radians);
 
 #if 1
-   mvgRoundedSector( vg, innerCircle, outerCircle, startAngle, endAngle, 10.0);
+   mvgRoundedSector( context, innerCircle, outerCircle, startAngle, endAngle, 10.0); // Changed function call
 #else
-   mvgBeginPath( vg);
-   mvgArc( vg, innerCircle, startAngle, endAngle, NVG_CW);
-   mvgArc( vg, outerCircle, endAngle, startAngle, NVG_CCW);
-   mvgClosePath( vg);
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextArc( context, innerCircle, startAngle, endAngle, NVG_CW); // Converted from mvgArc
+   CGContextArc( context, outerCircle, endAngle, startAngle, NVG_CCW); // Converted from mvgArc
+   CGContextClosePath( context); // Converted from mvgClosePath
 #endif
-//   mvgFillWithColor( vg, CGColorMakeLightGray());
-   mvgStrokeWithColor( vg, 1.0, CGColorMakeGray());
+//   CGContextFillWithColor( context, CGColorMakeLightGray()); // Converted from mvgFillWithColor
+   CGContextStrokeWidth( context, 1.0f);
+   CGContextStrokeColor( context, CGColorMakeGray()); // Converted from mvgStrokeWithColor
+   CGContextStroke( context);
 }
 
 
@@ -172,19 +181,19 @@ static void   drawDial( CGContext *context,
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   struct NVGcontext   *vg;
+// Delete:   struct NVGcontext   *vg;
    CGRect              canvas;
    CGRect              rect;
    CGFloat             percentage;
 
-   vg     = CGContextGetNVGContext( context);
-   canvas = CGSizePlaceInRect( CGSizeMake( 400, 200), [layer canvas], CGContentModeCenterPoint);
+// Delete:   vg     = CGContextGetNVGContext( context);
+   canvas = CGSizePlaceInRect( CGSizeMake( 400, 200), [layer canvas], CGContentModeCenter);
    rect   = CGRectIntegral( canvas);
 
    percentage = CGContextGetBackAndForthAnimationFactor( context, 120.f * 10.0);
 
-   mvgStrokeRectWithColor( vg, rect, 0.5, CGColorMakeBlack());
-   drawDial( context, rect, 50.0f, CAAngleSouthWest, CAAngleSouthEast, percentage, CGColorMakeDodgerBlue());
+   CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeBlack()); // Converted from mvgStrokeRectWithColor
+   drawDial( context, rect, 50.0f, CAAngleSouthWest, CAAngleSouthEast, percentage, CGColorMakeDodgerBlue()); // Changed function call
 
    return( YES);
 }
@@ -215,7 +224,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫

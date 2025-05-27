@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2023 Nat!, Mulle kybernetiK
+//
 #import "import.h"
 
 #import <string.h>
@@ -10,7 +13,7 @@
 static CGFramebuffer   *texture;
 
 //
-// In this example, we use nvg to draw something into a CGFramebuffer (aka texture).
+// In this example, we use CGContext to draw something into a CGFramebuffer (aka texture).
 // Then we use this CGFramebuffer as paint (texture) for a rectangle.
 // The drawing of the texture must be done outside of the main window render
 // loop. (why ? Apparently because at the time of writing this there was
@@ -20,28 +23,25 @@ static CGFramebuffer   *texture;
 static void   drawTexture( CGContext *context, CGSize size)
 {
    CGFloat      radius;
-   NVGcontext   *vg;
 
-   vg = CGContextGetNVGContext( context);
-
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
-      nvgRect( vg, 0, 0, size.width, size.height);
-      nvgFillColor( vg, CGColorMakeWithHexColor( 0xFFFF20FF));
+      CGContextRect( context, CGRectMake( 0, 0, size.width, size.height));
+      CGContextFillColor( context, CGColorMakeWithHexColor( 0xFFFF20FF));
    }
-   nvgFill( vg);
+   CGContextFill( context);
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
       radius  = size.width < size.height ? size.width : size.height;
       radius -= 4.0;
       radius /= 2.0;
 
-      nvgCircle( vg, size.width / 2.0, size.height / 2.0, radius);
-      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x2040FFFF));
-      nvgStrokeWidth( vg, 4.0);
+      CGContextCircle( context, CACircleMakeWithCenterAndRadius( CGPointMake( size.width / 2.0, size.height / 2.0), radius));
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x2040FFFF));
+      CGContextStrokeWidth( context, 4.0);
    }
-   nvgStroke( vg);
+   CGContextStroke( context);
 }
 
 
@@ -90,39 +90,34 @@ static void  drawStuff( CALayer *layer, CGContext *context)
    CGFloat      angle;
    CGRect       rect;
    CGRect       shape;
-   CGFloat      rotation;
+   CARotation   rotation;
    NVGpaint     paint;
    NSUInteger   frameNumber;
-   NVGcontext   *vg;
 
    frameNumber = [context numberOfFrames];
 
    rect     = [layer canvas];
    shape    = CGRectInset( rect, 60, 60);
 
-   vg       = CGContextGetNVGContext( context);
    rotation = (frameNumber % 360) / 360.0;
 
-   nvgTranslate( vg, CGRectGetMidX( shape), CGRectGetMidY( shape));
-   nvgRotate( vg, CARotationToAngle( rotation));
-   nvgTranslate( vg, -CGRectGetMidX( shape), -CGRectGetMidY( shape));
+   CGContextTranslate( context, CGPointMake( CGRectGetMidX( shape), CGRectGetMidY( shape)));
+   CGContextRotate( context, CARotationToAngle( rotation));
+   CGContextTranslate( context, CGPointMake( -CGRectGetMidX( shape), -CGRectGetMidY( shape)));
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
-      mvgRect( vg, shape);
+      CGContextRect( context, shape);
       // ugliness fix this, this need not be an object
 
 #ifdef HAVE_TEXTURE
-      paint = mvgImagePattern( vg, CGRectMake( 0, 0, 32, 32),
-                                   rotation,
-                                   [texture textureID],
-                                   1.0);
-      nvgFillPaint( vg, paint);
+      CGFillOptions options = CGFillOptionsMakeWithRotation( rotation);
+      CGContextFillImageWithOptions( context, texture, CGRectMake( 0, 0, 32, 32), &options);
 #else
-      nvgFillColor( vg, CGColorMakeWithHexColor( 0xFFFF00FF));
+      CGContextFillColor( context, CGColorMakeWithHexColor( 0xFFFF00FF));
 #endif
    }
-   nvgFill( vg);
+   CGContextFill( context);
 }
 
 
@@ -209,7 +204,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -229,4 +224,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

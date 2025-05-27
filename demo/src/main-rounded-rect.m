@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2022 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -339,7 +342,7 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
 
 
 
-static void   drawRoundedRect( struct NVGcontext *vg, CGRect canvas, struct MulleCornerInsets insets)
+static void   drawRoundedRect( CGContext *context, CGRect canvas, struct MulleCornerInsets insets) // Converted from struct NVGcontext *vg
 {
    CGRect    rect;
 
@@ -347,36 +350,28 @@ static void   drawRoundedRect( struct NVGcontext *vg, CGRect canvas, struct Mull
 
    // insets are flipped, because rect is flipped!
 
-   nvgBeginPath( vg);
-   nvgRoundedRectVarying( vg, rect.origin.x,
-                              rect.origin.y,
-                              rect.size.width,
-                              rect.size.height,
-                              insets.topLeft,
-                              insets.topRight,
-                              insets.bottomRight,
-                              insets.bottomLeft);
-   nvgStrokeWidth( vg, 8);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xF0C0C0FF));
-   nvgStroke( vg);//   nvgFillColor( vg, CGColorMakeRed());
+   CGContextBeginPath( context); // Converted from nvgBeginPath
+   CGContextRoundedRectVarying( context, rect, insets); // Converted from nvgRoundedRectVarying
+   CGContextStrokeWidth( context, 8); // Converted from nvgStrokeWidth
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xF0C0C0FF)); // Converted from nvgStrokeColor
+   CGContextStroke( context);//   CGContextFillColor( context, CGColorMakeRed()); // Converted from nvgStroke, nvgFillColor
 
 
-   mvgBeginPath( vg);
-   mvgRoundedRectVarying( vg, rect, insets);
-   mvgStrokeWidth( vg, 2);
-   mvgStrokeColor( vg, CGColorMakeWithHexColor( 0x808080FF));
-   mvgStroke( vg);//   nvgFillColor( vg, CGColorMakeRed());
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextRoundedRectVarying( context, rect, insets); // Converted from mvgRoundedRectVarying
+   CGContextStrokeWidth( context, 2); // Converted from mvgStrokeWidth
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x808080FF)); // Converted from mvgStrokeColor
+   CGContextStroke( context);//   CGContextFillColor( context, CGColorMakeRed()); // Converted from mvgStroke, nvgFillColor
 
-//   nvgFill( vg);
+//   CGContextFill( context); // Converted from nvgFill
 
-//   mvgStrokeRectWithColor( vg, rect, 1.0, CGColorMakeGray());
+//   CGContextStrokeRectWithColor( context, rect, 1.0, CGColorMakeGray()); // Converted from mvgStrokeRectWithColor
 }
 
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                  *context = _context;
-   struct NVGcontext          *vg;
    CGRect                     canvas;
    CGRect                     rect;
    struct MulleCornerInsets   insets;
@@ -384,7 +379,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGRect                     rects[ 2][ 2];
    int                        i, j;
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
    canvas = CGRectInset( canvas, 10, 10);
    CGRectPartition2x2( canvas, CGSizeMake( 10, 10), rects);
@@ -402,7 +396,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 //                               CGRectGetMaxY( rect),
 //                               -CGRectGetWidth( rect),
 //                               -CGRectGetHeight( rect));
-         drawRoundedRect( vg, rect, insets);
+         drawRoundedRect( context, rect, insets); // Updated function call
       }
    return( YES);
 }
@@ -458,4 +452,4 @@ int   main( int argc, char *argv[])
 //              `▀▄M█┘        ║▀▌   ╫"    *Φ▄  █       Φ` ▀▌, ▄M╙
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
-//                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+

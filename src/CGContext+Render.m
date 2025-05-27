@@ -5,8 +5,7 @@
 
 #import "import-private.h"
 
-#import "CGContext+OpenGL.h"
-#import "CGContext+nanovg.h"
+#import "CGTypes.h"
 #import "CGContext+CGFramebuffer.h"
 #import "CGContext+DebugPrivate.h"
 
@@ -100,7 +99,7 @@ static struct CGFrameInfo   emptyInfo;
       // will acquire hopefully a preexisting framebuffer for reuse
       assert( ! _renderFramebuffer);
 
-      textureFlags   = ( _nvgFlags & NVG_IMAGE_MSAA) ? NVG_MSAA : 0;
+      textureFlags  = (_nvgFlags & CGImageFlagMSAA) ? NVG_MSAA : 0;
 #if defined( DEBUG) || defined( MULLE_TEST)
       {
          static uintptr_t   counter;

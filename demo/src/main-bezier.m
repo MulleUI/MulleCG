@@ -5,40 +5,37 @@
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext    *vg;
+   CGContextBeginPath( context);
 
-   vg = CGContextGetNVGContext( context);
-   nvgBeginPath(vg);
+   CGContextRect( context, CGRectMake(100, 100, 300, 300));
+   CGContextStrokeColor(context, CGColorMakeWithRGBA(0, 0, 128, 64));
+   CGContextStrokeWidth(context, 1);
+   CGContextStroke(context);
 
-   nvgRect( vg, 100, 100, 300, 300);
-   nvgStrokeColor(vg, nvgRGBA(0, 0, 128, 64));
-   nvgStrokeWidth(vg, 1);
-   nvgStroke(vg);
-
-   nvgBeginPath(vg);
-   nvgMoveTo(vg, 100, 100);
-   nvgArcTo(vg, 100, 400,
-                400, 400,
+   CGContextBeginPath( context);
+   CGContextMoveTo(context, CGPointMake(100, 100));
+   CGContextArcTo(context, CGPointMake(100, 400),
+                CGPointMake(400, 400),
                 300);
-   nvgStrokeColor(vg, nvgRGBA(0, 0, 0, 255));
-   nvgStrokeWidth(vg, 32);
-   nvgMiterLimit( vg, 20);
-   nvgStroke(vg);
+   CGContextStrokeColor(context, CGColorMakeWithRGBA(0, 0, 0, 255));
+   CGContextStrokeWidth(context, 32);
+   CGContextMiterLimit( context, 20);
+   CGContextStroke(context);
 
 
-   nvgBeginPath(vg);
-   nvgRect( vg, 450, 100, 300, 300);
-   nvgStrokeColor(vg, nvgRGBA(0, 0, 128, 64));
-   nvgStrokeWidth(vg, 1);
-   nvgStroke(vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake(450, 100, 300, 300));
+   CGContextStrokeColor(context, CGColorMakeWithRGBA(0, 0, 128, 64));
+   CGContextStrokeWidth(context, 1);
+   CGContextStroke(context);
 
-   nvgBeginPath(vg);
-   nvgMoveTo( vg, 750, 100);
-   nvgBezierTo( vg, 750, 100 - (0.552 * -300), 450 - (0.552 * -300), 400, 450,400);
-   nvgStrokeColor(vg, nvgRGBA(0, 0, 0, 255));
-   nvgStrokeWidth(vg, 32);
-   nvgMiterLimit( vg, 20);
-   nvgStroke(vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(750, 100));
+   CGContextBezierTo( context, CGPointMake(750, 100 - (0.552 * -300)), CGPointMake(450 - (0.552 * -300), 400), CGPointMake(450,400));
+   CGContextStrokeColor(context, CGColorMakeWithRGBA(0, 0, 0, 255));
+   CGContextStrokeWidth(context, 32);
+   CGContextMiterLimit( context, 20);
+   CGContextStroke(context);
 
    return( YES);
 }
@@ -94,5 +91,5 @@ int   main( int argc, char *argv[])
 //              `▀▄M█┘        ║▀▌   ╫"    *Φ▄  █       Φ` ▀▌, ▄M╙
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
-//                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+//                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀`
 

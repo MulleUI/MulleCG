@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2023 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -25,14 +28,12 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    int                 dir;
    int                 startingPoint;
    NSUInteger          frameNr;
-   struct NVGcontext   *vg;
    unsigned int        i, j;
 
    frameNr       = [context numberOfFrames] % 240 * 4;
    startingPoint = frameNr / 240;
 
    canvas  = [layer canvas];
-   vg      = CGContextGetNVGContext( context);
 
    CGRectPartitionIntoRowsAndColumns( CGRectInset( canvas, 10, 10),
                                       CGSizeMake( 10, 10),
@@ -42,12 +43,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    [context useDefaultFont];
 
    for( j = 0; j < 2; j++)
-   {
-      if( j & 0x1)
-         initial = 1.5;
-      else
-         initial = 0.5;
-
       for( i = 0; i < 4; i++)
       {
          if( i & 0x2)
@@ -67,25 +62,25 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          }
 
          rect = CGRectIntegral( rects[ j][ i]);
-         mvgStrokeRectWithColor( vg, rect, 0.5, CGColorMakeBlack());
+         CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeBlack()); // Converted from mvgStrokeRectWithColor
 
          CGRectDivide( rect, &bottomRect, &topRect, 20, CADirectionBottom);
 
-         nvgSave( vg);
+         CGContextSave( context); // Converted from nvgSave
          {
-            mvgIntersectScissor( vg, rect);
+            CGContextIntersectScissor( context, rect); // Converted from mvgIntersectScissor
 
             // draw label
             sprintf( buf, "%s %g-%g", dir == NVG_CW ? "CW" : "CCW",
                                     start, end);
-            nvgTextColor( vg, CGColorMakeBlack());
-            nvgTextBackgroundColor( vg, CGColorMakeWhite());
-            mvgTextInRect( vg, buf, (size_t) -1, bottomRect, CGContentModeCenterPoint, 0);
+            CGContextTextColor( context, CGColorMakeBlack()); // Converted from nvgTextColor
+            CGContextTextBackgroundColor( context, CGColorMakeWhite()); // Converted from nvgTextBackgroundColor
+            CGContextTextInRect( context, buf, (size_t) -1, bottomRect, CGContentModeCenter, 0); // Converted from mvgTextInRect
 
             // draw arc
-            // mvgMoveTo( vg, CGRectGetTopPoint( topRect));
+            // mvgMoveTo( vg, CGRectGetTop( topRect));
 
-            centerPoint = CGRectGetCenterPoint( topRect);
+            centerPoint = CGRectGetCenter( topRect);
             radius      = CGRectGetInnerRadius( topRect) - 4.0;
             polar       = CAPolarPointMakeWithPoint( centerPoint);
             polar       = CAPolarPointAdd( polar, CAPolarPointMakeWithRadians( radius, start * M_PI_f));
@@ -94,41 +89,43 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             polar       = CAPolarPointAdd( polar, CAPolarPointMakeWithRadians( radius, end * M_PI_f));
             rightPoint  = CGPointMakeWithPolarPoint( polar);
 
-            mvgStrokeLineWithColor( vg, centerPoint, leftPoint, 0.5, CGColorMakeBlack());
-            mvgStrokeLineWithColor( vg, centerPoint, rightPoint, 0.5, CGColorMakeRed());
+            CGContextStrokeLineWithColor( context, centerPoint, leftPoint, 0.5, CGColorMakeBlack()); // Converted from mvgStrokeLineWithColor
+            CGContextStrokeLineWithColor( context, centerPoint, rightPoint, 0.5, CGColorMakeRed()); // Converted from mvgStrokeLineWithColor
 
             switch( startingPoint)
             {
-            case 0 : nvgBeginPath( vg);
+            case 0 : CGContextBeginPath( context); // Converted from nvgBeginPath
                      break;
 
-            case 1 : mvgFillCircleWithColor( vg, CACircleMake( centerPoint, 4.0), CGColorMakeDarkGray());
-                     nvgBeginPath( vg);
-                     mvgMoveTo( vg, centerPoint);
+            case 1 : CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( centerPoint, 4.0), CGColorMakeDarkGray()); // Converted from mvgFillCircleWithColor
+                     CGContextBeginPath( context); // Converted from nvgBeginPath
+                     CGContextMoveTo( context, centerPoint); // Converted from mvgMoveTo
                      break;
 
-            case 2 : mvgFillCircleWithColor( vg, CACircleMake( leftPoint, 4.0), CGColorMakeDarkGray());
-                     nvgBeginPath( vg);
-                     mvgMoveTo( vg, leftPoint);
+            case 2 : CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( leftPoint, 4.0), CGColorMakeDarkGray()); // Converted from mvgFillCircleWithColor
+                     CGContextBeginPath( context); // Converted from nvgBeginPath
+                     CGContextMoveTo( context, leftPoint); // Converted from mvgMoveTo
                      break;
 
-            case 3 : mvgFillCircleWithColor( vg, CACircleMake( rightPoint, 4.0), CGColorMakeDarkGray());
-                     nvgBeginPath( vg);
-                     mvgMoveTo( vg, rightPoint);
+            case 3 : CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( rightPoint, 4.0), CGColorMakeDarkGray()); // Converted from mvgFillCircleWithColor
+                     CGContextBeginPath( context); // Converted from nvgBeginPath
+                     CGContextMoveTo( context, rightPoint); // Converted from mvgMoveTo
                      break;
             }
 
-            nvgArc( vg, centerPoint.x, centerPoint.y, radius, start * M_PI_f, end * M_PI_f, dir);
+            CGContextArc( context, CACircleMakeWithCenterAndRadius( centerPoint, radius),
+                                   CARadiansToAngle( start * M_PI_f),
+                                   CARadiansToAngle( end * M_PI_f),
+                                   dir); // Converted from nvgArc
             color = CGColorMakeWithHSL( 0.2 + ((i + (j * 4)) / 7.0) * 0.6,
                                         1.0,
                                         0.6);
-            nvgStrokeColor( vg, color);
-            nvgStrokeWidth( vg, 3);
-            nvgStroke( vg);
+            CGContextStrokeColor( context, color); // Converted from nvgStrokeColor
+            CGContextStrokeWidth( context, 3); // Converted from nvgStrokeWidth
+            CGContextStroke( context); // Converted from nvgStroke
          }
-         nvgRestore( vg);
+         CGContextRestore( context); // Converted from nvgRestore
       }
-   }
    return( YES);
 }
 
@@ -232,7 +229,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -252,5 +249,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

@@ -8,7 +8,7 @@ int   main( int argc, char *argv[])
    CGLayoutContext          *context;
    CGRect                   bounds;
    CGRect                   vbounds;
-   struct UITextMetrics     metrics;
+   struct CGTextMetrics     metrics;
    struct UIGlyphPosition   positions[ 64];
    struct UITextRow         rows[ 8];
    NSUInteger               i, n;

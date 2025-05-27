@@ -172,7 +172,7 @@ static inline void  CGPathAddArcToPoint( CGPathRef path,
 }
 
 
-static inline void  CGPathAddArcWithCenterPoint( CGPathRef path,
+static inline void  CGPathAddArcWithCenter( CGPathRef path,
                                                  CGPoint point,
                                                  CGFloat radius,
                                                  CAAngle a0,
@@ -282,7 +282,7 @@ static inline void  CGPathAddArc( CGPathRef path,
                                   float a0, float a1,
                                   int direction)
 {
-   CGPathAddArcWithCenterPoint( path, CGPointMake( cx, cy),
+   CGPathAddArcWithCenter( path, CGPointMake( cx, cy),
                                       r,
                                       CARadiansToAngle( a0),
                                       CARadiansToAngle( a1),

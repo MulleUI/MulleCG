@@ -3,7 +3,7 @@
 #import "import-private.h"
 
 
-static void   metricsDraw( struct NVGcontext *vg, float x, float y, float w, CGFloat fontSize)
+static void   metricsDraw( struct NVGcontext *vg, float x, float y, float w, float fontSize)
 {
    float   ascender, descender, lineHeight;
 
@@ -11,7 +11,7 @@ static void   metricsDraw( struct NVGcontext *vg, float x, float y, float w, CGF
    nvgFontSize(vg, fontSize);
 
    // Set text alignment to default left and baseline
-   nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
+   nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE); // Reverted to original NVG_ALIGN_* constants
 
    nvgTextMetrics( vg, &ascender, &descender, &lineHeight);
 
@@ -21,6 +21,7 @@ static void   metricsDraw( struct NVGcontext *vg, float x, float y, float w, CGF
    nvgMoveTo( vg, x, y -ascender);
    nvgLineTo( vg, x + w, y -ascender);
 
+   // nvg descender is negative
    nvgMoveTo( vg, x, y - descender);
    nvgLineTo( vg, x + w, y - descender);
 
@@ -28,11 +29,11 @@ static void   metricsDraw( struct NVGcontext *vg, float x, float y, float w, CGF
    nvgStrokeWidth( vg, 1.0);
    nvgStroke( vg);
 
-   mulle_printf( "font ascender,descender,lineHeight : %g %g %g\n", ascender, descender, lineHeight);
+   mulle_printf( "font ascender,descender,lineHeight : %g %g %g\n", ascender, -descender, lineHeight);
 }
 
 
-static void   visualMetricsDraw( struct NVGcontext *vg, float x, float y, float w, CGFloat fontSize)
+static void   visualMetricsDraw( struct NVGcontext *vg, float x, float y, float w, float fontSize)
 {
    float   ascender, descender, lineHeight;
 
@@ -40,7 +41,7 @@ static void   visualMetricsDraw( struct NVGcontext *vg, float x, float y, float 
    nvgFontSize(vg, fontSize);
 
    // Set text alignment to default left and baseline
-   nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
+   nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE); // Reverted to original NVG_ALIGN_* constants
 
    nvgTextVisualMetrics( vg, &ascender, &descender, &lineHeight);
 
@@ -57,7 +58,7 @@ static void   visualMetricsDraw( struct NVGcontext *vg, float x, float y, float 
    nvgStrokeWidth( vg, 1.0);
    nvgStroke( vg);
 
-   mulle_printf( "visual ascender,descender,lineHeight : %g %g %g\n", ascender, descender, lineHeight);
+   mulle_printf( "visual ascender,descender,lineHeight : %g %g %g\n", ascender, -descender, lineHeight);
 }
 
 
@@ -67,7 +68,7 @@ static void   codyDraw( struct NVGcontext *vg, float x, float y, char *s, float 
    nvgFontSize(vg, fontSize);
 
    // Set text alignment to default left and baseline
-   nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
+   nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE); // Reverted to original NVG_ALIGN_* constants
 
    // Measure the text bounds
    float bounds[6]= {0};
@@ -130,7 +131,7 @@ static void codyDraw2(struct NVGcontext *vg, float x, float y, char *s, float fo
     nvgFontSize(vg, fontSize);
 
     // Set text alignment to default left and baseline
-    nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
+    nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE); // Reverted to original NVG_ALIGN_* constants
 
     // Measure the glyph positions
     NVGglyphPosition glyphs[100]; // Assuming the string is not longer than 100 characters
@@ -240,7 +241,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -260,4 +261,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

@@ -3,8 +3,6 @@
 #import "CGContext.h"
 #import "CGContext+Drawing.h"
 #import "CGContext+DebugPrivate.h"
-#import "CGContext+OpenGL.h"
-#import "CGContext+nanovg.h"
 #import "CGContext+Render.h"
 #import "CGContext+CGFramebuffer.h"
 #import "CGImage+DebugPrivate.h"
@@ -42,64 +40,6 @@
                           context:context];
     obj = [obj autorelease];
     return(obj);
-}
-
-- (instancetype) initWithBitmapSize:(CGPixelSize) bitmapSize
-                       textureFlags:(NSUInteger) textureFlags
-                     nameUTF8String:(char *) nameUTF8String
-                            context:(CGContext *) context
-{
-   NVGcontext   *vg;
-   NSInteger    textureID;
-   int          w, h;
-   int          imageFlags;
-
-   assert( context && [context isKindOfClass:[CGContext class]]);
-
-   if( bitmapSize.width == 0 || bitmapSize.height == 0)
-   {
-      [self release];
-      return( nil);
-   }
-
-   vg              = CGContextGetNVGContext( context);
-   _gpuFramebuffer = nvgluCreateFramebuffer( vg,
-                                            bitmapSize.width,
-                                            bitmapSize.height,
-                                            textureFlags);
-   if( ! _gpuFramebuffer)
-   {
-      [self release];
-      return( nil);
-   }
-
-   textureID = ((NVGLUframebuffer *) _gpuFramebuffer)->image;
-
-   // MEMO: nanovg adds some flags, so get em 
-   nvgImageTextureInfo( vg, textureID, &imageFlags, NULL, NULL);
-   // for completeness check if nanovg did some adaptations
-   nvgImageSize( vg, textureID, &w, &h);
-
-   textureFlags     |= imageFlags; // get FLIPY bit for example
-   bitmapSize.width  = w;
-   bitmapSize.height = h;
-
-   //
-   // Image is dependent on the graphics context, and can't live without it
-   // TextureImage is threfore retained by the context and not the other way
-   // (how long does the context live though)
-   //
-
-   CGImageLog( "create framebuffer %p with textureID %td (GPU: %p)",
-                     _gpuFramebuffer,
-                     textureID,
-                     [context gpuTextureForImageID:textureID]);
-
-   return( [self initWithTextureID:textureID
-                        bitmapSize:bitmapSize
-                      textureFlags:textureFlags
-                    nameUTF8String:nameUTF8String
-                           context:context]);
 }
 
 
@@ -360,29 +300,6 @@
 }
 
 
-- (void) _bindToContext
-{
-   assert( CGContextIsActiveInCurrentThread( _context));
-
-   _CGContextRenderLog( _context, "->%p", _gpuFramebuffer);
-
-   nvgluBindFramebuffer( _gpuFramebuffer);
-   CGContextCheckBackendError( _context, "nvgluBindFramebuffer");
-}
-
-
-- (void) _unbindFromContext
-{
-   assert( CGContextIsActiveInCurrentThread( _context));
-
-   _CGContextRenderLog( _context, "%p->NULL", _gpuFramebuffer);
-
-   nvgluBindFramebuffer( NULL);
-   CGContextCheckBackendError( _context, "nvgluBindFramebuffer");
-   [self setInitializedFramebuffer:YES];
-}
-
-
 - (void) _beginFBRender:(struct CGFramebufferRenderInfo *) memo
 {
    assert( memo);
@@ -406,50 +323,16 @@
 }
 
 
-- (void) beginFBRenderWithBackgroundColor:(CGColor) color
-                         devicePixelRatio:(CGFloat) ratio
-                          layerRenderInfo:(struct CGFramebufferRenderInfo *) memo
+- (void) _didBeginFBRenderWithBitmapSize:(CGPixelSize) bitmapSize
+                        devicePixelRatio:(CGFloat) ratio
 {
-#ifdef _CGLMACRO_H
-   CGLContextObj  cgl_ctx = CGLGetCurrentContext();
-#endif
-   CGFloat             rgba[ 4];
-   CGPixelSize         bitmapSize;
-   struct NVGcontext   *vg;
-
-   [self _beginFBRender:memo];
-
-   vg = CGContextGetNVGContext( _context);
-
-   CGColorGetRGBAComponents( color, rgba);
-
-   bitmapSize = [self bitmapSize];
-   glClearColor( rgba[ 0], rgba[ 1], rgba[ 2], rgba[ 3]);
-   glClear( GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
-
-// this here is a little suspicious
-   glViewport( 0, 0, bitmapSize.width, bitmapSize.height);
-
-   CGContextCheckBackendError( _context, "glViewport");
-
-// TODO: this here is also a little suspicious
-   nvgBeginFrame( vg, bitmapSize.width, bitmapSize.height, ratio);
+   // hack for nanovg category
 }
 
 
-- (void) endFBRender:(struct CGFramebufferRenderInfo *) memo
+- (void) _willEndFBRender:(struct CGFramebufferRenderInfo *) memo
 {
-//   struct NVGcontext   *vg;
-//
-//   vg = CGContextGetNVGContext( _context);
-//
-   // if we do just nvgFlushFrame here, then we don't torch font maps
-   // nvgEndFrame( vg);
-
-// TODO: not doing nvgFlushFrame is also a little suspicious
-
-   // this will reset the viewport and call nvgFlushFrame
-   [self _endFBRender:memo];
+   // hack for nanovg category
 }
 
 @end

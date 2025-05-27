@@ -4,6 +4,9 @@
 
 
 //
+// Copyright (c) 2023 Nat!, Mulle kybernetiK
+//
+//
 // straight from:
 // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/arcTo
 //
@@ -12,7 +15,6 @@
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   struct NVGcontext   *vg;
    CGFloat             factor;
    NSUInteger          frameNr;
    CGFloat             r;
@@ -37,43 +39,41 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    p2.y += 300 * factor;
 
    r  = 50;
-   vg = CGContextGetNVGContext( context);
 
-   nvgTranslate( vg, 100, 50);
+   CGContextTranslate( context, CGPointMake( 100, 50)); // Converted from nvgTranslate
 
-   mvgBeginPath( vg);
-   mvgStrokeColor( vg, CGColorMakeGray());
-   mvgMoveTo( vg, p0);
-   mvgLineTo( vg, p1);
-   mvgLineTo( vg, p2);
-   mvgStrokeWidth( vg, 1.0);
-   mvgStroke( vg);
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextStrokeColor( context, CGColorMakeGray()); // Converted from mvgStrokeColor
+   CGContextMoveTo( context, p0); // Converted from mvgMoveTo
+   CGContextLineTo( context, p1); // Converted from mvgLineTo
+   CGContextLineTo( context, p2); // Converted from mvgLineTo
+   CGContextStrokeWidth( context, 1.0); // Converted from mvgStrokeWidth
+   CGContextStroke( context); // Converted from mvgStroke
 
 // Arc
-   mvgBeginPath( vg);
-   mvgStrokeColor( vg, CGColorMakeWhite());
-   mvgMoveTo( vg, p0);
-   mvgArcTo( vg, p1, p2, r);
-   mvgStrokeWidth( vg, 5.0);
-   mvgStroke( vg);
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextStrokeColor( context, CGColorMakeWhite()); // Converted from mvgStrokeColor
+   CGContextMoveTo( context, p0); // Converted from mvgMoveTo
+   CGContextArcTo( context, p1, p2, r); // Converted from mvgArcTo
+   CGContextStrokeWidth( context, 5.0); // Converted from mvgStrokeWidth
+   CGContextStroke( context); // Converted from mvgStroke
 
-   mvgBeginPath( vg);
-   mvgCircle( vg, CACircleMake( p0, 5));
-   mvgFillColor( vg, CGColorMakeBlue());
-   mvgFill( vg);
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextCircle( context, CACircleMakeWithCenterAndRadius( p0, 5)); // Converted from mvgCircle
+   CGContextFillColor( context, CGColorMakeBlue()); // Converted from mvgFillColor
+   CGContextFill( context); // Converted from mvgFill
 
-   mvgBeginPath( vg);
-   mvgCircle( vg, CACircleMake( p1, 5));
-   mvgFillColor( vg, CGColorMakeRed());
-   mvgFill( vg);
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextCircle( context, CACircleMakeWithCenterAndRadius( p1, 5)); // Converted from mvgCircle
+   CGContextFillColor( context, CGColorMakeRed()); // Converted from mvgFillColor
+   CGContextFill( context); // Converted from mvgFill
 
-   mvgBeginPath( vg);
-   mvgCircle( vg, CACircleMake( p2, 5));
-   mvgFill( vg);
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextCircle( context, CACircleMakeWithCenterAndRadius( p2, 5)); // Converted from mvgCircle
+   CGContextFill( context); // Converted from mvgFill
 
    return( YES);
 }
-
 
 
 int   main( int argc, char *argv[])
@@ -105,8 +105,8 @@ int   main( int argc, char *argv[])
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
-// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
-//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+// ║        !█▄▄████≤═^`╓█ █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
 //   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀

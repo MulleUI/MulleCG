@@ -22,16 +22,16 @@ typedef NS_ENUM( NSUInteger, CGBlendedPaintBlendStyle)
 //
 @interface CGBlendedPaint : CGPaint
 
-@property( readonly) CGFloat   blend;
+@property( readonly) CGFloat     blend;
 //@property( assign) CGBlendedPaintBlendStyle   blendStyle;
-@property( readonly) CGFloat   rotation;
-@property( readonly) CGPaint   *paint;
-@property( readonly) CGPaint   *otherPaint;
+@property( readonly) CARotation  rotation;
+@property( readonly) CGPaint     *paint;
+@property( readonly) CGPaint     *otherPaint;
 
 - (instancetype) initWithPaint:(CGPaint *) paint
                     otherPaint:(CGPaint *) otherPaint
                          blend:(CGFloat) blend
-                      rotation:(CGFloat) rotation;
+                      rotation:(CARotation) rotation;
 
 @end
 
@@ -42,6 +42,6 @@ typedef NS_ENUM( NSUInteger, CGBlendedPaintBlendStyle)
 + (instancetype) paintWithPaint:(CGPaint *) paint
                      otherPaint:(CGPaint *) otherPaint
                           blend:(CGFloat) blend
-                       rotation:(CGFloat) rotation;
+                       rotation:(CARotation) rotation;
 
 @end

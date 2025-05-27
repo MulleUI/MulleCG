@@ -10,20 +10,17 @@ enum
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
    CGRect              canvas;
    CGPoint             point;
    int                 oddEvenStart;
    int                 oddEvenLine;
    int                 oddEvenField;
 
-   vg = CGContextGetNVGContext( (CGContext *) context);
-
    canvas = [layer canvas];
 
    for( oddEvenStart = even; oddEvenStart <= odd; oddEvenStart++)
    {
-      nvgBeginPath( vg);
+      CGContextBeginPath( context);
       oddEvenLine = oddEvenStart;
       for( point.y = 0; point.y < canvas.size.height; point.y += 8)
       {
@@ -34,19 +31,20 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             oddEvenField = ! oddEvenField;
             if( oddEvenField != oddEvenLine)
                continue;
-            nvgRect( vg, point.x, point.y, 8, 8);
+            CGContextRect( context, CGRectMake(point.x, point.y, 8, 8));
          }
       }
 
       if( oddEvenStart == even)
-         nvgFillColor( vg, nvgRGBAf( 0.25, 1.0, 0.25, 1.0));
+         // Fix: Use CGColorMakeWithRGBA instead of CGColorMakeWithRGBAf
+         CGContextFillColor( context, CGColorMakeWithRGBA( 0.25, 1.0, 0.25, 1.0));
       else
-         nvgFillColor( vg, nvgRGBAf( 1.0, 0.5, 0.0, 1.0));
-      nvgFill( vg);
+         // Fix: Use CGColorMakeWithRGBA instead of CGColorMakeWithRGBAf
+         CGContextFillColor( context, CGColorMakeWithRGBA( 1.0, 0.5, 0.0, 1.0));
+      CGContextFill( context);
    }
    return( YES);
 }
-
 
 
 static void   usage( void)

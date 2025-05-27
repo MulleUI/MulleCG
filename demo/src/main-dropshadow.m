@@ -20,7 +20,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGFloat              cornerRadius;
    struct CGShadow   shadow;
    NSUInteger           frameNr;
-   struct NVGcontext    *vg;
 
    canvas = [layer canvas];
    rect   = CGRectInset( canvas, DISTANCE, DISTANCE);
@@ -32,7 +31,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                       rects);
 
    frameNr = [context numberOfFrames];
-   vg      = CGContextGetNVGContext( context);
    i       = 0;
    
    for( y = 0; y < ROWS; y++)
@@ -44,13 +42,13 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          if( (frameNr & 0x4))
             rect = CGRectContract( rect, rect.size.height / 4.0, 0xFF);
          cornerRadius    = rect.size.width / 16.0;
-         mvgFillRoundedShadow( vg, rect, cornerRadius, &shadow);
+         CGContextFillRoundedShadow( context, rect, cornerRadius, &shadow);
 
          if( frameNr & 0x1)
          {
-            mvgStrokeRoundedRectWithColor( vg, CGRectExtrude( rect, shadow.blur, shadow.blur), cornerRadius, 1.0f, CGColorMakeRed());
-            mvgStrokeRoundedRectWithColor( vg, rect, cornerRadius, 1.0f, CGColorMakeOrange());
-//            mvgStrokeRoundedRectWithColor( vg, CGRectInset( rect, shadow.blur, shadow.blur), cornerRadius, CGColorMakeYellow());
+            CGContextStrokeRoundedRectWithColor( context, CGRectExtrude( rect, shadow.blur, shadow.blur), cornerRadius, 1.0f, CGColorMakeRed());
+            CGContextStrokeRoundedRectWithColor( context, rect, cornerRadius, 1.0f, CGColorMakeOrange());
+//            CGContextStrokeRoundedRectWithColor( context, CGRectInset( rect, shadow.blur, shadow.blur), cornerRadius, CGColorMakeYellow());
          }
          ++i;
       }
@@ -110,4 +108,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

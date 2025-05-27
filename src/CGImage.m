@@ -2,13 +2,13 @@
 
 #import "import-private.h"
 
+#import "CGTypes.h"
+#import "CGContext.h"
+#import "CGContext+CGFramebuffer.h"
+#import "CGContext+Texture.h"
+#import "CGContext+DebugPrivate.h"
 #import "CGImage+DebugPrivate.h"
 #import "CGFramebuffer.h"
-#import "CGContext+DebugPrivate.h"
-#import "CGContext.h"
-#import "CGContext+OpenGL.h"
-#import "CGContext+nanovg.h"
-#import "CGContext+Texture.h"
 
 #include <errno.h>
 
@@ -459,6 +459,7 @@ static struct
     return( image );
 }
 
+
 + (instancetype) imageWithGPUTexture:(CGGPUTextureID) gpuTexture
                          bitmapSize:(CGPixelSize) size
                        textureFlags:(NSUInteger) textureFlags
@@ -475,6 +476,7 @@ static struct
     image = [image autorelease];
     return( image );
 }
+
 
 + (instancetype) imageWithSharedGPUTexture:(CGSharedGPUTexture *) sharedGPUTexture
                                bitmapSize:(CGPixelSize) size
@@ -565,13 +567,13 @@ static struct
                                    nameUTF8String:(char *) nameUTF8String
                                           context:(CGContext *) context
 {
-   NSInteger                 textureID;
+   NSInteger     textureID;
    CGPixelSize   bitmapSize;
 
    assert( CGContextIsActiveInCurrentThread( context));
 
    textureID  = [context textureIDWithContentsOfFileUTF8String:filename
-                                               textureFlags:textureFlags & 0x3F];
+                                                  textureFlags:textureFlags & 0x3F];
    bitmapSize = [context bitmapSizeForTextureID:textureID];
    return( [self initWithTextureID:textureID
                         bitmapSize:bitmapSize
@@ -586,9 +588,9 @@ static struct
                                           context:(CGContext *) context
 {
    return( [self initWithContentsOfFileUTF8String:filename
-                                  textureFlags:textureFlags
-                                nameUTF8String:NULL
-                                       context:context]);
+                                     textureFlags:textureFlags
+                                   nameUTF8String:NULL
+                                          context:context]);
 }
 
 
@@ -803,7 +805,7 @@ static struct
 // cgimages for paints
 - (BOOL) isMultiSample
 {
-   return( (_textureFlags & NVG_IMAGE_MSAA) ? YES : NO);
+   return( (_textureFlags & CGImageFlagMSAA) ? YES : NO);
 }
 
 

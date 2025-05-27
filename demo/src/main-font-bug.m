@@ -8,39 +8,36 @@
 
 static BOOL   drawStuff( CGGraphicsLayer *self, CGContext *context)
 {
-   struct NVGcontext   *vg;
    CGRect              rect;
    CGRect              textRect;
 
    [context useFontWithNameUTF8String:"mono"];
-   vg = CGContextGetNVGContext( context);
+   // Delete: vg = CGContextGetNVGContext( context);
 
 
    rect = CGRectMake( 100, 100, FONT_SIZE * 10, FONT_SIZE * 10);
    rect = CGRectIntegral( rect);
 
-   nvgBeginPath( vg);
-   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-   nvgFillColor( vg, CGColorMakeBlack());
-   nvgFill( vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
+   CGContextRect( context, rect); // Converted from nvgRect
+   CGContextFillColor( context, CGColorMakeBlack()); // Converted from nvgFillColor
+   CGContextFill( context); // Converted from nvgFill
 
-   mvgSave( vg);
+   CGContextSave( context); // Converted from mvgSave
    {
-      mvgIntersectScissor( vg, rect);
+      CGContextIntersectScissor( context, rect); // Converted from mvgIntersectScissor
 
-      mvgTextColor( vg, CGColorMakeWhite());
-      mvgTextBackgroundColor( vg,  CGColorMakeBlack());
+      CGContextTextColor( context, CGColorMakeWhite()); // Converted from mvgTextColor
+      CGContextTextBackgroundColor( context,  CGColorMakeBlack()); // Converted from mvgTextBackgroundColor
 
       textRect = CGRectInset( rect, 4.0, 4.0);
-      mvgFontSize( vg, FONT_SIZE);
-      mvgFormatInRect( vg, textRect, CGContentModeLeft|CGContentModeTop, 0, "%s", CGPointUTF8String( rect.origin));
-      mvgFormatInRect( vg, textRect, CGContentModeRight|CGContentModeBottom, 0, "%s", CGSizeUTF8String( rect.size));
+      CGContextFontSize( context, FONT_SIZE); // Converted from mvgFontSize
+      CGContextFormatInRect( context, textRect, CGContentModeLeft|CGContentModeTop, 0, "%s", CGPointUTF8String( rect.origin)); // Converted from mvgFormatInRect
+      CGContextFormatInRect( context, textRect, CGContentModeRight|CGContentModeBottom, 0, "%s", CGSizeUTF8String( rect.size)); // Converted from mvgFormatInRect
    }
-   mvgRestore( vg);
+   CGContextRestore( context); // Converted from mvgRestore
    return( YES);
 }
-
-
 
 int   main()
 {
@@ -63,9 +60,6 @@ int   main()
    }
    return( [app runApp]);
 }
-
-
-
 
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
@@ -102,4 +96,3 @@ int   main()
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

@@ -1,4 +1,3 @@
-
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -39,7 +38,7 @@ static void   drawCheckboard( CGRect  rect, CGContext *context)
 }
 
 
-static void   drawRect( struct NVGcontext *vg, CGRect rect, int slim)
+static void   drawRect( CGContext *context, CGRect rect, int slim)
 {
    CGRect   drawRect;
 
@@ -52,24 +51,23 @@ static void   drawRect( struct NVGcontext *vg, CGRect rect, int slim)
    }
 
 #if 1
-   mvgRect( vg, drawRect);
+   CGContextRect( context, drawRect);
 #else
-   mvgRoundedRect( vg, drawRect, 3.0);
+   CGContextRoundedRect( context, drawRect, 3.0);
 #endif
 }
 
 
-static void   drawCircle( struct NVGcontext *vg, CGRect rect, CGFloat animation)
+static void   drawCircle( CGContext *context, CGRect rect, CGFloat animation)
 {
    rect = CGRectInset( rect, 20, 20);
    rect = CGRectInset( rect, animation, animation);
-   mvgCircle( vg, CGRectGetInnerCircle( rect));
+   CGContextCircle( context, CGRectGetInnerCircle( rect));
 }
 
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
    CGRect              rects[ 2][ 4];
    int                 i, j;
    CGRect              rect;
@@ -90,8 +88,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    drawCheckboard( [layer canvas], context);
 
-   vg = CGContextGetNVGContext( context);
-
    CGRectPartitionVerticallyAndHorizontally(
                        CGRectInset( [layer canvas], 4, 4),
                        CGSizeMake( 4, 4),
@@ -103,27 +99,27 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       {
          rect = CGRectIntegral( rects[ j][ i]);
 
-         mvgStrokeRectWithColor( vg, rect, 0.5, CGColorMakeBlack());
+         CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeBlack());
 
-         mvgBeginPath( vg);
-         mode[ 0] = i < 2 ? NVG_SOLID : NVG_HOLE;
-         mvgPathWinding( vg, mode[ 0]);
-
-         if( reverse)
-            drawCircle( vg, rect, animation);
-         else
-            drawRect( vg, rect, slim);
-
-         mode[ 1] = (i & 0x1) ? NVG_SOLID : NVG_HOLE;
-         mvgPathWinding( vg, mode[ 1]);
+         CGContextBeginPath( context);
+         mode[ 0] = i < 2 ? CGSoliditySolid : CGSolidityHole; // Converted from NVG_SOLID/NVG_HOLE
+         CGContextPathWinding( context, mode[ 0]);
 
          if( reverse)
-            drawRect( vg, rect, slim);
+            drawCircle( context, rect, animation);
          else
-            drawCircle( vg, rect, animation);
+            drawRect( context, rect, slim);
 
-         mode[ 2] = j ? NVG_SOLID : NVG_HOLE;
-         mvgPathWinding( vg, mode[ 2]);
+         mode[ 1] = (i & 0x1) ? CGSoliditySolid : CGSolidityHole; // Converted from NVG_SOLID/NVG_HOLE
+         CGContextPathWinding( context, mode[ 1]);
+
+         if( reverse)
+            drawRect( context, rect, slim);
+         else
+            drawCircle( context, rect, animation);
+
+         mode[ 2] = j ? CGSoliditySolid : CGSolidityHole; // Converted from NVG_SOLID/NVG_HOLE
+         CGContextPathWinding( context, mode[ 2]);
 
 
          paint = [CGPaint paintWithStartColor:CGColorMake( j / 1.0, i / 3.0, 0.0, 1.0)
@@ -132,20 +128,20 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                        context:context];
 
          sprintf( buf, "%c%c%c %s%s",
-            mode[ 0] == NVG_HOLE ? 'H' : 'S',
-            mode[ 1] == NVG_HOLE ? 'H' : 'S',
-            mode[ 2] == NVG_HOLE ? 'H' : 'S',
+            mode[ 0] == CGSolidityHole ? 'H' : 'S', // Converted from NVG_HOLE
+            mode[ 1] == CGSolidityHole ? 'H' : 'S', // Converted from NVG_HOLE
+            mode[ 2] == CGSolidityHole ? 'H' : 'S', // Converted from NVG_HOLE
             slim ? "s" : "f",
             reverse ? "r" : "n");
 
          [context useDefaultFont];
-         mvgTextColor( vg, CGColorMakeGray());
-         mvgTextBackgroundColor( vg, CGColorMakeWhite());
-         mvgTextInRect( vg,
+         CGContextTextColor( context, CGColorMakeGray());
+         CGContextTextBackgroundColor( context, CGColorMakeWhite());
+         CGContextTextInRect( context,
                         buf,
                         (size_t) -1,
                         CGRectInset( rect, 4, 4),
-                        CGContentModeCenterPoint,
+                        CGContentModeCenter,
                         0);
       }
 
@@ -179,7 +175,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -199,4 +195,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

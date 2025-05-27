@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2023 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -95,7 +98,6 @@ static void   drawCirclesInRect( CGContext *context,
                                  CGRect rect,
                                  int  operation)
 {
-   struct NVGcontext   *vg;
    CACircle            circle;
    CACircle            circles[ 3];
    CGFloat             radius;
@@ -103,19 +105,17 @@ static void   drawCirclesInRect( CGContext *context,
    CGFloat             deg;
    CGFloat             alpha;
 
-   vg = CGContextGetNVGContext( context);
-
-   mvgSave( vg);
+   CGContextSave( context);
    {
       factor = CGContextGetLinearAnimationFactor( context, SPEED * 4);
       if( factor >= 1.0 / 3)
       {
-         mvgFillRectWithColor( vg, rect, CGColorMakeBlack());
+         CGContextFillRectWithColor( context, rect, CGColorMakeBlack());
       }
 
       if( factor >= 2.0 / 3)
       {
-         nvgGlobalCompositeOperation( CGContextGetNVGContext( context), NVG_COPY);
+         CGContextGlobalCompositeOperation( context, NVG_COPY);
          drawGridInRect( context, rect);
       }
 
@@ -125,10 +125,10 @@ static void   drawCirclesInRect( CGContext *context,
       radius += radius / 4.0;
 
       if( operation == 1848)
-         nvgGlobalCompositeBlendFuncSeparate( vg, NVG_DST_COLOR, NVG_SRC_ALPHA, NVG_SRC_COLOR, NVG_ZERO);
+         CGContextGlobalCompositeBlendFuncSeparate( context, NVG_DST_COLOR, NVG_SRC_ALPHA, NVG_SRC_COLOR, NVG_ZERO);
       else
-         nvgGlobalCompositeOperation( vg, operation);
-      factor = CGContextGetLinearAnimationFactor( context, SPEED);
+         CGContextGlobalCompositeOperation( context, operation);
+      factor = CGContextGetBackAndForthAnimationFactor( context, SPEED);
 
       deg    = 360.0f * factor + 60.0f * (step / (3.0f * 4.0f));
 
@@ -141,18 +141,17 @@ static void   drawCirclesInRect( CGContext *context,
 
       factor = CGContextGetBackAndForthAnimationFactor( context, SPEED);
       alpha  = factor;
-      mvgFillCircleWithColor( vg, circles[ 0], CGColorBySettingAlpha( CGColorMakeRed(),  alpha));
-      mvgFillCircleWithColor( vg, circles[ 1], CGColorBySettingAlpha( CGColorMakeLime(), alpha));
-      mvgFillCircleWithColor( vg, circles[ 2], CGColorBySettingAlpha( CGColorMakeBlue(), alpha));
+      CGContextFillCircleWithColor( context, circles[ 0], CGColorBySettingAlpha( CGColorMakeRed(),  alpha));
+      CGContextFillCircleWithColor( context, circles[ 1], CGColorBySettingAlpha( CGColorMakeLime(), alpha));
+      CGContextFillCircleWithColor( context, circles[ 2], CGColorBySettingAlpha( CGColorMakeBlue(), alpha));
    }
-   mvgRestore( vg);
+   CGContextRestore( context);
 }
 
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   struct NVGcontext   *vg;
    CGRect              canvas;
    CGRect              rect;
    CGRect              info;
@@ -161,10 +160,8 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    NSUInteger          i, j;
    int                 mode;
 
-   vg = CGContextGetNVGContext( context);
-
    canvas = [layer canvas];
-   mvgFillRectWithColor( vg, canvas, CGColorMake( 0.5, 0.5, 0.5, 1.0));
+   CGContextFillRectWithColor( context, canvas, CGColorMake( 0.5, 0.5, 0.5, 1.0));
 //   MulleUICLog( "f: %s b: %s c: %s",
 //                     CGRectUTF8String( [layer frame]),
 //                     CGRectUTF8String( [layer bounds]),
@@ -189,11 +186,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
                             modes[ mode]);
 
          [context useDefaultFont];
-         mvgFontSize( vg, 12.0f);
-         mvgTextColor( vg, CGColorMakeBlack());
-         mvgTextBackgroundColor( vg, CGColorMakeWhite());
-         mvgFormatInRect( vg, CGRectInset( info, 2, 2),
-                              CGContentModeCenterPoint,
+         CGContextFontSize( context, 12.0f);
+         CGContextTextColor( context, CGColorMakeBlack());
+         CGContextTextBackgroundColor( context, CGColorMakeWhite());
+         CGContextFormatInRect( context, CGRectInset( info, 2, 2),
+                              CGContentModeCenter,
                               0,
                               "%s",
                               mode_name_for_mode( modes[ mode]));
@@ -202,7 +199,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 
    return( YES);
 }
-
 
 
 int   main( int argc, char *argv[])
@@ -229,7 +225,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫

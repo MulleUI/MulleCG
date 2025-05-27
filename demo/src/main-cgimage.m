@@ -14,20 +14,17 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGDrawableOptions   options;
    CGRect              rect;
    CGImage             *image;
-   struct NVGcontext   *vg;
 
    rect = [layer canvas];
 
-   vg = CGContextGetNVGContext( context);
-
    // magenta rectangle so we know something is drawn...
-   nvgBeginPath( vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
    {
-      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgStrokeWidth( vg, 8);
-      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
+      CGContextRect( context, rect); // Converted from nvgRect
+      CGContextStrokeWidth( context, 8); // Converted from nvgStrokeWidth
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF)); // Converted from nvgStrokeColor
    }
-   nvgStroke( vg);
+   CGContextStroke( context); // Converted from nvgStroke
 
    options = CGDrawableOptionsMakeScaleToFit();
 
@@ -41,8 +38,8 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    rect = CGRectInset( rect, 4, 4);
 #if 1
-   mvgBeginPath( vg);
-   mvgRect( vg, rect);
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextRect( context, rect); // Converted from mvgRect
    [image fillWithBounds:rect
                  context:context];
 #else
@@ -125,5 +122,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

@@ -1,7 +1,9 @@
 #import "CGDrawable.h"
 
 #import "CGContext.h"
-#import "CGContext+CGDrawable.h"
+#import "CGContext+Drawing.h"
+#import "CGPaint+Drawing.h"
+#import "CGContext.h"
 
 
 // #define DRAWABLE_DEBUG
@@ -15,7 +17,7 @@ CGDrawableOptions   CGDrawableOptionsDefault =
    .scale             = CGScaleNone,
    .flags.flip        = CGFlipNone,
    .flags.repeat      = CGRepeatAsIs,
-   .flags.contentMode = CGContentModeCenterPoint
+   .flags.contentMode = CGContentModeCenter
 };
 
 
@@ -27,7 +29,7 @@ CGDrawableOptions   CGDrawableOptionsScaleToFit =
    .scale             = CGScaleToFit,
    .flags.flip        = CGFlipNone,
    .flags.repeat      = CGRepeatAsIs,
-   .flags.contentMode = CGContentModeCenterPoint
+   .flags.contentMode = CGContentModeCenter
 };
 
 
@@ -51,7 +53,7 @@ PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
 
 // if you want to do more, do your own layer
 
-CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngle angle)
+CGPoint  CGRectGetCenterAtAngle( CGRect patternRect, CAAngle angle)
 {
    CAPolarPoint   rotatedPolarPoint;
    CAPolarPoint   centerPolarPoint;
@@ -74,7 +76,7 @@ CGPoint  CGRectGetCenterPointAtAngle( CGRect patternRect, CAAngle angle)
 }
 
 
-CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
+CGPoint  CGRectGetCenterAtAngleWithScaling( CGRect patternRect,
                                                  CAAngle angle,
                                                  CGVector scaleFactor)
 {
@@ -100,7 +102,7 @@ CGPoint  CGRectGetCenterPointAtAngleWithScaling( CGRect patternRect,
 
 
 static CGAffineTransform   textureMapperTransform( CGRect rect,
-                                                   CGFloat rotation,
+                                                   CARotation rotation,
                                                    CGSize extent)
 {
    CGAffineTransform   rotate;
@@ -166,7 +168,7 @@ CGAffineTransform   CGRectReverseImageMapperTransform( CGRect rect,
 //                                                          CAAngleRadians angle,
 //                                                          CGSize extent)
 //{
-//   CGPoint             imageCenterPoint;
+//   CGPoint             imageCenter;
 //   CGPoint             rotatedPoint;
 //   CGPoint             rotatedOrigin;
 //   CGPoint             centerPoint;
@@ -179,7 +181,7 @@ CGAffineTransform   CGRectReverseImageMapperTransform( CGRect rect,
 //         CGRectUTF8String( rect), CAAngleRadiansToDegrees( angle), CGSizeUTF8String( extent));
 //
 //   // xform should place texture at center so
-//   //rect.origin        = CGRectGetCenterPoint( rect);
+//   //rect.origin        = CGRectGetCenter( rect);
 //
 //   // if we draw unscaled and unangled, the image will be at top/left
 //   // so when we then calculate the imageCenter this will not be the center
@@ -187,7 +189,7 @@ CGAffineTransform   CGRectReverseImageMapperTransform( CGRect rect,
 //   // So we first have to fake the rect to be in the center of the drawing.
 //   centeredRect       = CGSizeCenterInRect( extent, rect);
 //   fprintf( stderr, "centeredRect     : %s\n", CGRectUTF8String( centeredRect));
-//   centerPoint        = CGRectGetCenterPoint( centeredRect);
+//   centerPoint        = CGRectGetCenter( centeredRect);
 //   fprintf( stderr, "centerPoint      : %s\n", CGPointUTF8String( centerPoint));
 //
 //   xform              = textureMapperTransform( centeredRect, angle, extent);
@@ -232,7 +234,7 @@ CGAffineTransform   CGRectReverseImageMapperTransform( CGRect rect,
 
 CGPoint  CGRectGetOriginToTexturePointForRotationAndExtent( CGRect rect,
                                                             CGPoint texturePoint,
-                                                            CGFloat rotation,
+                                                            CARotation rotation,
                                                             CGSize extent)
 {
    CGPoint             rotatedPoint;
@@ -248,7 +250,7 @@ CGPoint  CGRectGetOriginToTexturePointForRotationAndExtent( CGRect rect,
 #endif
 
    // xform should place texture at center so
-   //rect.origin        = CGRectGetCenterPoint( rect);
+   //rect.origin        = CGRectGetCenter( rect);
 
    // if we draw unscaled and unangled, the image will be at top/left
    // so when we then calculate the imageCenter this will not be the center
@@ -259,7 +261,7 @@ CGPoint  CGRectGetOriginToTexturePointForRotationAndExtent( CGRect rect,
    fprintf( stderr, "centeredRect     : %s\n", CGRectUTF8String( centeredRect));
 #endif   
 
-   centerPoint        = CGRectGetCenterPoint( centeredRect);
+   centerPoint        = CGRectGetCenter( centeredRect);
 #ifdef DRAWABLE_DEBUG
    fprintf( stderr, "centerPoint      : %s\n", CGPointUTF8String( centerPoint));
 #endif   
@@ -310,7 +312,7 @@ CGPoint  CGRectGetOriginToTexturePointForRotationAndExtent( CGRect rect,
 
 
 static CGPoint  CGRectGetOriginToCenterForRotationAndExtent( CGRect rect,
-                                                             CGFloat rotation,
+                                                             CARotation rotation,
                                                              CGSize extent)
 {
    CGPoint             rotatedPoint;
@@ -325,7 +327,7 @@ static CGPoint  CGRectGetOriginToCenterForRotationAndExtent( CGRect rect,
          CGRectUTF8String( rect), CAAngleToDegrees( rotation), CGSizeUTF8String( extent));
 #endif
    // xform should place texture at center so
-   //rect.origin        = CGRectGetCenterPoint( rect);
+   //rect.origin        = CGRectGetCenter( rect);
 
    // if we draw unscaled and unangled, the image will be at top/left
    // so when we then calculate the imageCenter this will not be the center
@@ -335,7 +337,7 @@ static CGPoint  CGRectGetOriginToCenterForRotationAndExtent( CGRect rect,
 #ifdef DRAWABLE_DEBUG
    fprintf( stderr, "centeredRect     : %s\n", CGRectUTF8String( centeredRect));
 #endif
-   centerPoint        = CGRectGetCenterPoint( centeredRect);
+   centerPoint        = CGRectGetCenter( centeredRect);
 #ifdef DRAWABLE_DEBUG
    fprintf( stderr, "centerPoint      : %s\n", CGPointUTF8String( centerPoint));
 #endif
@@ -520,7 +522,7 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self,
 
    assert( options->scale             == CGScaleToFit || CGSizeEqualToSize( rect.size, fromRect.size));
    assert( options->flags.repeat      == CGRepeatNone || options->flags.repeat == CGRepeatAsIs);
-   assert( options->flags.contentMode == CGContentModeCenterPoint);
+   assert( options->flags.contentMode == CGContentModeCenter);
 
    r = CGDrawablePatternRect( self, rect, fromRect, options);
 

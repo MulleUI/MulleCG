@@ -84,7 +84,7 @@ static inline void   ParticleInit( struct Particle *p, CGSize canvasSize)
    p->color       = CGColorMakeWithRGB( r, g, b);
 }
 
-static inline void   ParticleDraw( struct Particle *p, NVGcontext *vg)
+static inline void   ParticleDraw( struct Particle *p, CGContext *context) // Converted from NVGcontext *vg
 {
    CGFloat   size;
 
@@ -94,23 +94,23 @@ static inline void   ParticleDraw( struct Particle *p, NVGcontext *vg)
    size = PARTICLE_SIZE;
 #endif
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context); // Converted from nvgBeginPath
 #if CIRCLE
-   nvgCircle( vg, p->location.x,
-                  p->location.y,
-                  size);
+   CGContextCircle( context, CACircleMake( p->location.x, // Converted from nvgCircle
+                                          p->location.y,
+                                          size));
 #else
-   nvgRect( vg, p->location.x,
-                p->location.y,
-                size,
-                size);
+   CGContextRect( context, CGRectMake( p->location.x, // Converted from nvgRect
+                                       p->location.y,
+                                       size,
+                                       size));
 #endif
 #if DRAW_METHOD == STROKE
-   nvgStrokeColor( vg, p->color);
-   nvgStroke( vg);
+   CGContextStrokeColor( context, p->color); // Converted from nvgStrokeColor
+   CGContextStroke( context); // Converted from nvgStroke
 #else
-   nvgFillColor( vg, p->color);
-   nvgFill( vg);
+   CGContextFillColor( context, p->color); // Converted from nvgFillColor
+   CGContextFill( context); // Converted from nvgFill
 #endif
 }
 
@@ -168,7 +168,7 @@ static inline void   ParticleUpdate( struct Particle *p, CGSize canvasSize)
 
 - (BOOL) drawInContext:(CGContext *) context
 {
-   NVGcontext   *vg;
+   // Delete: NVGcontext   *vg;
    CGRect       canvas;
    NSUInteger   i;
 
@@ -177,10 +177,10 @@ static inline void   ParticleUpdate( struct Particle *p, CGSize canvasSize)
    if( ! [super drawInContext:context])
       return( NO);
 
-   vg     = CGContextGetNVGContext( context);
+   // Delete: vg = CGContextGetNVGContext( context);
    canvas = [self canvas];
 
-   nvgShapeAntiAlias( vg, SHAPE_ANTIALIAS);
+   CGContextShapeAntiAlias( context, SHAPE_ANTIALIAS); // Converted from nvgShapeAntiAlias
 
 
 //enum NVGcompositeOperation {
@@ -197,14 +197,14 @@ static inline void   ParticleUpdate( struct Particle *p, CGSize canvasSize)
 //	NVG_XOR,    // flitter effect
 //};
 
-//   nvgGlobalCompositeOperation( vg, NVG_ATOP);
+//   CGContextGlobalCompositeOperation( context, NVG_ATOP); // Converted from nvgGlobalCompositeOperation
 
-   nvgStrokeWidth( vg, PARTICLE_SIZE / 4);
+   CGContextStrokeWidth( context, PARTICLE_SIZE / 4); // Converted from nvgStrokeWidth
 
    for( i = 0; i < _numberOfParticles; i++)
    {
       ParticleUpdate( &_particles[ i], canvas.size);
-      ParticleDraw( &_particles[ i], vg);
+      ParticleDraw( &_particles[ i], context); // Updated function call
    }
 
    return( YES);
@@ -251,7 +251,6 @@ int   main()
 }
 
 
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
@@ -267,8 +266,8 @@ int   main()
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
-// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
+// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
@@ -287,4 +286,6 @@ int   main()
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
+
+
 

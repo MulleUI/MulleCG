@@ -9,7 +9,7 @@
 @implementation CGPaint( CGImagePaint)
 
 + (instancetype) paintWithImage:(CGImage *) image
-                       rotation:(CGFloat) rotation
+                       rotation:(CARotation) rotation
                           alpha:(CGFloat) alpha
 {
    id   paint;
@@ -29,7 +29,7 @@
 @implementation CGImagePaint
 
 - (instancetype) initWithImage:(CGImage *) image
-                      rotation:(CGFloat) rotation
+                      rotation:(CARotation) rotation
                          alpha:(CGFloat) alpha
 {
    if( ! image || alpha == 0.0)

@@ -18,11 +18,10 @@
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                     *context = _context;
-   CGFramebuffer                       *cgLayer;
+   CGFramebuffer               *cgLayer;
    CGRect                        canvas;
    CGRect                        originalCanvas;
    CGRect                        rect;
-   struct NVGcontext             *vg;
    CGRect                        rects[ 2][ 2];
    NSUInteger                    i, j;
    NVGpaint                      paint;
@@ -32,15 +31,13 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    {
       originalCanvas = [layer canvas];
 
-      vg = CGContextGetNVGContext( context);
-
       // draw a little square "conventionally"
       rect = CGRectCenterInRect( CGRectMake( 0, 0, 40, 40), originalCanvas);
 
-      nvgBeginPath( vg);
-      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-      nvgFillColor( vg, nvgRGBAf( 0.7, 0.5, 0.7, 1.0));
-      nvgFill( vg);
+      CGContextBeginPath( context); // Converted from nvgBeginPath
+      CGContextRect( context, rect); // Converted from nvgRect
+      CGContextFillColor( context, CGColorMakeWithRGBA( 0.7, 0.5, 0.7, 1.0)); // Converted from nvgFillColor
+      CGContextFill( context); // Converted from nvgFill
 
       // we want to draw the flag four times. We render it once into a CGFramebuffer
       // and then draw the CGFramebuffer. This may or may not be better than drawing
@@ -58,7 +55,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       [cgLayer beginFBRenderWithBackgroundColor:CGColorMakeWhite()
                                devicePixelRatio:1.0
                                 layerRenderInfo:&memo];
-      drawRedWhiteBlueFlag( vg, canvas);
+      drawRedWhiteBlueFlag( context, canvas); // Updated function call
       [cgLayer endFBRender:&memo];
 
       CGRectPartition2x2( originalCanvas, CGSizeMake( 8.0, 8.0), rects);
@@ -70,11 +67,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
                       context:context];
 
             rect = CGRectExtrude( rects[ j][ i], 1, 1);
-            nvgBeginPath( vg);
-            nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-            nvgStrokeColor( vg, CGColorMakeGreen());
-            nvgStrokeWidth( vg, 2.0);
-            nvgStroke( vg);
+            CGContextBeginPath( context); // Converted from nvgBeginPath
+            CGContextRect( context, rect); // Converted from nvgRect
+            CGContextStrokeColor( context, CGColorMakeGreen()); // Converted from nvgStrokeColor
+            CGContextStrokeWidth( context, 2.0); // Converted from nvgStrokeWidth
+            CGContextStroke( context); // Converted from nvgStroke
          }
 
       // CGFramebuffer must remain until actual render end or flush

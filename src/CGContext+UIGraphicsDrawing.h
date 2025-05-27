@@ -23,3 +23,41 @@
 - (void) drawIcon:(mulle_utf32_t) icon
           atPoint:(CGPoint) rect;
 @end
+
+
+
+
+static inline void  CGContextDrawText( CGContext *self,
+                                       CGFloat x,
+                                       CGFloat y,
+                                       char *s,
+                                       CGFloat fontSize,
+                                       CGColor color)
+{
+   [self drawAtPoint:CGPointMake( x, y)
+     textUTF8String:s
+  fontNameUTF8String:NULL
+         fontSize:fontSize
+         hexColor:CGHexColorMakeWithColor( color)];
+}
+
+
+static inline void   CGContextDrawIconInRect( CGContext *self,
+                                              mulle_utf32_t icon,
+                                              CGRect rect)
+{
+   [self drawIcon:icon
+          atPoint:CGRectGetCenter( rect)];
+}
+
+
+// ###
+// Functions that actually "value add" on top of the mvg/nanovg functions
+// ###
+
+// Sets the font face based on specified name.
+static inline void   CGContextFontFace( CGLayoutContext *context, char *fontname)
+{
+   [context useFontWithNameUTF8String:fontname];
+}
+

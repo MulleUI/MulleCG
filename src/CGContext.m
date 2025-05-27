@@ -4,8 +4,6 @@
 
 #import "CGLayoutContext+CGFont.h"
 #import "CGContext+DebugPrivate.h"
-#import "CGContext+OpenGL.h"
-#import "CGContext+nanovg.h"
 #import "CGContext+Drawing.h"
 #import "CGContext+Shader.h"
 #import "CGContext+Texture.h"

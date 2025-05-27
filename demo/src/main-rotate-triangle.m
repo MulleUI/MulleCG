@@ -1,3 +1,6 @@
+//
+// Copyright (c) 2023 Nat!, Mulle kybernetiK
+//
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -47,8 +50,8 @@ static void   draw_triangle_with_centroid( CGContext *context,
 
       // 3. move "unity" triangle back down if needed
 //      if( rotateAroundCentroid)
-//         mvgTranslate( vg, CGPointMake( +massCenter.x,
-//                                        +massCenter.y));
+//         CGContextTranslate( context, CGPointMake( +massCenter.x, // Converted from mvgTranslate
+//                                         +massCenter.y));
 
       // 2. rotate around center
       CGContextRotate( context, rotation);
@@ -62,7 +65,7 @@ static void   draw_triangle_with_centroid( CGContext *context,
       CGContextLineTo( context, points[ 2]);
       CGContextClosePath( context);
 
-      rect = CGRectMakeWithCenterPointAndSize( CGPointZero, CGSizeMake( 1.0, 1.0));
+      rect = CGRectMakeWithCenterAndSize( CGPointZero, CGSizeMake( 1.0, 1.0));
       [paint fillWithBounds:rect
                     context:context];
 
@@ -72,7 +75,7 @@ static void   draw_triangle_with_centroid( CGContext *context,
    }
    CGContextRestore( context);
 
-   circle = CACircleMake( translated, centroidRadius);
+   circle = CACircleMakeWithCenterAndRadius( translated, centroidRadius);
    CGContextFillCircleWithPaint( context, circle, centroidPaint);
 }
 
@@ -84,7 +87,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CARotation   rotation;
    CGRect       canvas;
    CGRect       rect;
-   NVGcontext   *vg;
+   // Delete: NVGcontext   *vg;
    CGRect       rects[ 2][ 2];
    NSUInteger   i, j;
    CGPaint      *paint;
@@ -100,7 +103,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    rotation = (frameNr % 120) / 120.0f + 0.25;
 
    canvas   = [layer canvas];
-   vg       = CGContextGetNVGContext( context);
+   // Delete: vg       = CGContextGetNVGContext( context);
 
    CGRectPartition2x2( CGRectInset( canvas, 10, 10),
                        CGSizeMake( 10, 10),
@@ -123,20 +126,19 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       for( i = 0; i < 2; i++)
       {
          rect   = rects[ j][ i];
-         center = CGRectGetCenterPoint( rect);
+         center = CGRectGetCenter( rect);
          size   = CGSizeMake( rect.size.width * 2.0 / 3.0,
                               rect.size.height * 2.0 / 3.0);
 
-         CGContextStrokeRectWithColor( context, CGRectMakeWithCenterPointAndSize( center, size), 1.0, CGColorMakeOrange());
+         CGContextStrokeRectWithColor( context, CGRectMakeWithCenterAndSize( center, size), 1.0, CGColorMakeOrange());
 
          draw_triangle_with_centroid( context, center, size, rotation, paint, 5.0, centroidPaint, i == 1);
 
-         CGContextFillCircleWithColor( context, CACircleMake( center, 3.0), CGColorMakeOrange());
+         CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( center, 3.0), CGColorMakeOrange());
       }
    }
    return( YES);
 }
-
 
 int   main( int argc, char *argv[])
 {
@@ -145,45 +147,3 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            30.0f));
 }
-
-
-
-
-
-//
-//                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
-//                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
-//                  ╓#╜^*█⌐   `╕       █           ╓▌    `╙%w
-//               ╓ΦΓ      █    ╙⌐     ,█,,,Φ      ╓▌         ╙¥▄
-//            ,▄▀ █▄       █µ,╓╝,╓≤╗≡≡ª╨╨╨¥≡∞╗w╓,ª█,  ,       ]▄▀V,
-//          ,Φ└   ║"▀▄     ,▄▀╨"                 "╙¥▓▓       ▄▀  º▄¥,
-//        ,#▌Φ▓▄╓  Φ `█Q▄M╙                           ╙¥▄ ,▄▀ ╙▄⌐`  `Φ
-//       ▄▀   `V,"▀▀¼╓╩└                                 ╙¥▓╗ ,       ╙▄
-//      Φ       `¥═▄▀                            ╒          ▀▄          ▓
-//    .▓         ╓▓]V▄H       ▓                 ,Å            ▀,         ▀
-//    █      ,-ª▓╛  `██▀½      "▄  ,╓╓╓╓;╓▄▄▄▄╗▄█,             ╙▄         ▀
-//   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
-//  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
-//  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
-// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
-// █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
-// █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
-// █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
-// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
-//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
-//  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
-//   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
-//   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀
-//    ╙▄     ╙▀███╙█▄▐██▄,╙▀█████▄▀▄▀▄   ,█M╗ ▀▄██▀╙""*ⁿ═─≈-,,▄▌,        ▄▀
-//     `▌╙µ,▄Φ▀x███▄██████████▀V███▀╙└ ,▄#▌████▀`"*«,      .█▀▄▀▄,      ▄╛
-//       ▀Ö█  ;▓████████▄▄█▀▄╙W "V▄██▀▀│▄███▀└ ▀╦     "*═╥▄▀ ║,  ║▀▄  ,▓
-//        ╙W▀ '█████╨▀▀█████████   "▀▀████└      ╙▄   ,▄▀'   `▀▀╣H ▐▀▄▀
-//          ╙▄  ▀▀Γ╓▌  ▄▀ⁿ`╙▀███      ██▌         ╓█R▀▄A█        ▀▀▄▀
-//            ╙W,Φ╙  ║█        ▄╙╙ª%≡╦██≤≤╗╗≡≡╜▀▀   ╣▌   █╕     ,▄▀
-//              `▀▄M█┘        ║▀▌   ╫"    *Φ▄  █       Φ` ▀▌, ▄M╙
-//                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
-//                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
-//                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

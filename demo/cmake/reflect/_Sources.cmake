@@ -22,6 +22,8 @@ src/texture.frag
 #
 set( SOURCES
 src/main-aaa-demo.m
+src/main-alpha.m
+src/main-alpha-white.m
 src/main-arc-cw.m
 src/main-arc.m
 src/main-arcto.m
@@ -67,6 +69,7 @@ src/main-grid.m
 src/main-html5-arc.m
 src/main-html5-arcto.m
 src/main-huge-font.m
+src/main-line-context.m
 src/main-line-nanovg.m
 src/main-opengl.m
 src/main-outline-glyph.m
@@ -77,6 +80,7 @@ src/main-particles-sorted.m
 src/main-precompiled.m
 src/main-rect.m
 src/main-rect-pain.m
+src/main-relation.m
 src/main-rotate-rect.m
 src/main-rotate-stroke.m
 src/main-rotate-triangle2.m
@@ -95,6 +99,7 @@ src/main-text-contentmode.m
 src/main-text-draw.m
 src/main-text-extent.m
 src/main-text-fps.m
+src/main-text-in-rect.m
 src/main-text.m
 src/main-text-multiline.m
 src/main-text-nanovg.m

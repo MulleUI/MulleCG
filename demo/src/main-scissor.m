@@ -6,7 +6,6 @@
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   struct NVGcontext   *vg;
    CGRect              canvas;
    CGRect              rect;
    CGRect              scissor;
@@ -19,21 +18,20 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    factor = ([context numberOfFrames] % 120) / 119.0;
    factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
-   vg     = CGContextGetNVGContext( context);
    canvas = CGRectInset( [layer canvas], 25, 25);
 
    rect    = CGRectIntegral( canvas);
-   mvgStrokeRectWithColor( vg, CGRectExtrude( rect, 1.0, 1.0), 2.0, CGColorMakeBlack());
+   CGContextStrokeRectWithColor( context, CGRectExtrude( rect, 1.0, 1.0), 2.0, CGColorMakeBlack());
 
    scissor = rect;
    rect    = CGRectInset( rect, rect.size.width / 4.0, rect.size.height / 4.0);
-   mvgSave( vg);
+   CGContextSave( context);
    {
       if( isScissoring)
-         mvgIntersectScissor( vg, scissor);
-      mvgFillRectWithColor( vg, CGRectExtrude( rect, rect.size.width * factor, rect.size.height * factor), CGColorMakeRed());
+         CGContextIntersectScissor( context, scissor);
+      CGContextFillRectWithColor( context, CGRectExtrude( rect, rect.size.width * factor, rect.size.height * factor), CGColorMakeRed());
    }
-   mvgRestore( vg);
+   CGContextRestore( context);
 
    return( YES);
 }
@@ -76,8 +74,8 @@ int   main( int argc, char *argv[])
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
 // █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
-// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
-//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+// ║        !█▄▄████≤═^`╓█ █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
 //   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
 //   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀

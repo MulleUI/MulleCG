@@ -46,11 +46,6 @@ struct CGFrameInfo;
                               textureFlags:(NSUInteger) textureFlags
                                    context:(CGContext *) context;
 
-- (instancetype) initWithBitmapSize:(CGPixelSize) size
-                       textureFlags:(NSUInteger) textureFlags
-                     nameUTF8String:(char *) nameUTF8String
-                            context:(CGContext *) context;
-
 // more or less for completeness... probably makes no sense
 - (instancetype) initWithImage:(CGImage *) image
                   textureFlags:(NSUInteger) textureFlags
@@ -59,7 +54,6 @@ struct CGFrameInfo;
 
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
-
 
 @end
 
@@ -91,17 +85,37 @@ typedef void   CGFramebufferDrawFunction_t( CGContext *context,
                             nameUTF8String:(char *) nameUTF8String
                                    context:(CGContext *) context;
 
+// these functions don't setup the view port or clear the CGFramebuffer
+- (void) _beginFBRender:(struct CGFramebufferRenderInfo *) memo;
+- (void) _endFBRender:(struct CGFramebufferRenderInfo *) memo;
+
+
+@end
+
+
+//@compatiblity_alias CGLayer CGFramebuffer;
+typedef CGFramebuffer   CGLayer;
+
+
+//
+// implemented by CGFramebuffer+nanovg (or whatever we be using)
+//
+@interface CGFramebuffer( FutureCategory)
+
+- (instancetype) initWithBitmapSize:(CGPixelSize) size
+                       textureFlags:(NSUInteger) textureFlags
+                     nameUTF8String:(char *) nameUTF8String
+                            context:(CGContext *) context;
 
 // Use CGContext bindFramebuffer: to bind/unbind a layer, don't call directly
 - (void) _bindToContext;
 - (void) _unbindFromContext;
 
-// these functions don't setup the view port or clear the CGFramebuffer
-- (void) _beginFBRender:(struct CGFramebufferRenderInfo *) memo;
-- (void) _endFBRender:(struct CGFramebufferRenderInfo *) memo;
+// hacks for nanovg (to set )
+- (void) _didBeginFBRenderWithBitmapSize:(CGPixelSize) bitmapSize
+                        devicePixelRatio:(CGFloat) ratio;
+- (void) _willEndFBRender:(struct CGFramebufferRenderInfo *) memo;
 
-// Convenience routine clears and sets up the viewport and starts nvg frame.
-// Feed the memo to endFBRender when done
 - (void) beginFBRenderWithBackgroundColor:(CGColor) color
                          devicePixelRatio:(CGFloat) ratio
                           layerRenderInfo:(struct CGFramebufferRenderInfo *) memo;
@@ -110,6 +124,3 @@ typedef void   CGFramebufferDrawFunction_t( CGContext *context,
 
 @end
 
-
-//@compatiblity_alias CGLayer CGFramebuffer;
-typedef CGFramebuffer   CGLayer;

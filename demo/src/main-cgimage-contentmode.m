@@ -57,7 +57,7 @@ static NSInteger   contentMode[ 12] =
 {
    CGContentModeScaleToFill,  CGContentModeScaleAspectFit, CGContentModeScaleAspectFill,
    CGContentModeTopLeft, CGContentModeTop, CGContentModeTopRight,
-   CGContentModeLeft, CGContentModeCenterPoint, CGContentModeRight,
+   CGContentModeLeft, CGContentModeCenter, CGContentModeRight,
    CGContentModeBottomLeft, CGContentModeBottom, CGContentModeBottomRight
 };
 
@@ -67,26 +67,26 @@ static NSInteger   contentMode[ 12] =
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
+   CGRect              tempRect;
    CGRect              canvas;
    CGRect              rects[ ROWS][ COLUMNS];
    CGImage             *image;
-   struct NVGcontext   *vg;
    CGRect              area;
    NSUInteger          x, y;
    NSUInteger          i;
 
    canvas = [layer canvas];
 
-   vg = CGContextGetNVGContext( context);
+   tempRect = CGRectInset( canvas, 2, 2);
 
    // gray rectangle so we know something is drawn...
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
-      nvgRect( vg, canvas.origin.x, canvas.origin.y, canvas.size.width, canvas.size.height);
-      nvgStrokeWidth( vg, 8);
-      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
+      CGContextRect( context, CGRectMake( tempRect.origin.x, tempRect.origin.y, tempRect.size.width, tempRect.size.height));
+      CGContextStrokeWidth( context, 8);
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
-   nvgStroke( vg);
+   CGContextStroke( context);
 
 
    // if we immediately reclaim the image (via release) after drawing it
@@ -102,7 +102,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    // get a rectangle inside canvas thats centered and as large as possible
    area.size = CGSizeAspectFitToSize( CGSizeMake( 1, 1), canvas.size);
-   area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenterPoint);
+   area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenter);
 
    // subdivide into rows and columns
    CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( 4, 4), ROWS, COLUMNS, (CGRect *) rects);
@@ -178,7 +178,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -198,5 +198,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

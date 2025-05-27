@@ -1,4 +1,3 @@
-
 #define _GNU_SOURCE
 
 #import "import-private.h"
@@ -39,7 +38,7 @@ static void   drawCheckboard( CGRect  rect, CGContext *context)
 }
 
 
-static CGRect   drawRect( struct NVGcontext *vg, CGRect rect)
+static CGRect   drawRect( CGContext *context, CGRect rect) // Converted from struct NVGcontext *vg
 {
    CGRect   drawRect;
 
@@ -47,13 +46,13 @@ static CGRect   drawRect( struct NVGcontext *vg, CGRect rect)
    drawRect.origin.y    = CGRectGetMidY( rect);
    drawRect.size.height = 0.0;
    drawRect             = CGRectExtrude( drawRect, 0.0, 5.0);
-   mvgRect( vg, drawRect);
+   CGContextRect( context, drawRect); // Converted from mvgRect
 
    return( drawRect);
 }
 
 
-static void   drawArcHole( struct NVGcontext *vg, CGRect rect)
+static void   drawArcHole( CGContext *context, CGRect rect) // Converted from struct NVGcontext *vg
 {
    CGPoint          center;
    CGFloat          radius;
@@ -64,7 +63,7 @@ static void   drawArcHole( struct NVGcontext *vg, CGRect rect)
    CGFloat          x;
    CGPaint          *paint;
 
-   center = CGRectGetCenterPoint( rect);
+   center = CGRectGetCenter( rect);
    radius = 20.0;
 
    h_2    = rect.size.height / 2.0;
@@ -82,24 +81,17 @@ static void   drawArcHole( struct NVGcontext *vg, CGRect rect)
    fprintf( stderr, "2: %s\n", CGPointUTF8String( intersectionPoint[ 2]));
    fprintf( stderr, "3: %s\n", CGPointUTF8String( intersectionPoint[ 3]));
 
-   // calculate angles
-   angle[ 0] = CARadiansToAngle( atan2( intersectionPoint[ 0].y - center.y, intersectionPoint[ 0].x - center.x));
-   angle[ 1] = CARadiansToAngle( atan2( intersectionPoint[ 1].y - center.y, intersectionPoint[ 1].x - center.x));
-   angle[ 2] = CARadiansToAngle( atan2( intersectionPoint[ 2].y - center.y, intersectionPoint[ 2].x - center.x));
-   angle[ 3] = CARadiansToAngle( atan2( intersectionPoint[ 3].y - center.y, intersectionPoint[ 3].x - center.x));
- 
-   mvgMoveTo( vg, intersectionPoint[ 1]);
-   mvgArc( vg, CACircleMake( center, radius), angle[ 1], angle[ 0], NVG_CW);
-   mvgLineTo( vg, intersectionPoint[ 2]);
-   mvgArc( vg, CACircleMake( center, radius), angle[ 2], angle[ 3], NVG_CW);
-   mvgLineTo( vg, intersectionPoint[ 1]);
+   CGContextMoveTo( context, intersectionPoint[ 1]); // Converted from mvgMoveTo
+   CGContextArc( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 1], angle[ 0], NVG_CW); // Converted from mvgArc
+   CGContextLineTo( context, intersectionPoint[ 2]); // Converted from mvgLineTo
+   CGContextArc( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 2], angle[ 3], NVG_CW); // Converted from mvgArc
+   CGContextLineTo( context, intersectionPoint[ 1]); // Converted from mvgLineTo
 }
 
 
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
    CGRect              rect;
    CGRect              aRect;
    CGRect              bRect;
@@ -116,29 +108,27 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    animFrame = [context numberOfFrames] / 10 % 80;
    animShape = animFrame >= 40;
 
-   vg = CGContextGetNVGContext( context);
-
    rect = CGRectIntegral( [layer canvas]);
-   mvgStrokeRectWithColor( vg, rect, 0.5, CGColorMakeBlack());
+   CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeBlack()); // Converted from mvgStrokeRectWithColor
 
-   mvgBeginPath( vg);
-   aRect = drawRect( vg, rect);
-   mvgPathWinding( vg, NVG_SOLID);
+   CGContextBeginPath( context); // Converted from mvgBeginPath
+   aRect = drawRect( context, rect); // Updated function call
+   CGContextPathWinding( context, NVG_SOLID); // Converted from mvgPathWinding
 
    if( animShape)
    {
-      bRect = CACircleGetOuterRect( CACircleMake( CGRectGetCenterPoint( rect), 50.0));
+      bRect = CACircleGetOuterRect( CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), 50.0));
       bRect = CGRectOffset( bRect, animation * rect.size.width / 2.0 / 20.0, 0.0);
-      mvgRect( vg, bRect);
-      mvgPathWinding( vg, NVG_HOLE);
+      CGContextRect( context, bRect); // Converted from mvgRect
+      CGContextPathWinding( context, NVG_HOLE); // Converted from mvgPathWinding
    }
    else
    {
       radius = CGRectGetHeight( aRect) / 2.0;
-      bRect  = CACircleGetOuterRect( CACircleMake( CGRectGetCenterPoint( rect), radius));
+      bRect  = CACircleGetOuterRect( CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), radius));
       bRect  = CGRectOffset( bRect, animation * rect.size.width / 2.0 / 20.0, 0.0);
-      mvgCircle( vg, CACircleMake( CGRectGetCenterPoint( bRect), radius - 1.0));
-      mvgPathWinding( vg, NVG_HOLE);
+      CGContextCircle( context, CACircleMakeWithCenterAndRadius( CGRectGetCenter( bRect), radius - 1.0)); // Converted from mvgCircle
+      CGContextPathWinding( context, NVG_HOLE); // Converted from mvgPathWinding
    }
 
    paint = [CGPaint paintWithStartColor:CGColorMakeGray()
@@ -175,7 +165,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -195,4 +185,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-

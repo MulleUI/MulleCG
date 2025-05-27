@@ -3,7 +3,7 @@
 
 @class CGContext;
 
-#include "microvg.h"
+#include "nanowrap.h"
 
 //
 // CGFont is created and maintained by CGContext, you should not keep a

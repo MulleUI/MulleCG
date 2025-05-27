@@ -5,8 +5,6 @@
 
 #import "import-private.h"
 
-#import "CGContext+OpenGL.h"
-#import "CGContext+nanovg.h"
 #import "CGContext+Drawing.h"
 #import "CGLayoutContext+CGFont.h"
 #import "_MulleCGBackend.h"
@@ -14,35 +12,9 @@
 
 @implementation CGLayoutContext
 
-- (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) context
-                            nameUTF8String:(char *) nameUTF8String
-{
-   self = [super initWithOSGraphicsContext:context
-                            nameUTF8String:nameUTF8String];
-   if( self)
-   {
-      // if _vg is already set, then we are a subclass so don't
-      // init as a real CGLayoutContext 
-      if( ! _vg)
-      {
-         _nvgFlags = NVG_FONT_ONLY;
-#ifdef DEBUG
-         _nvgFlags |= NVG_DEBUG;
-#endif
-         [self _initializeNanoVG:_nvgFlags];
-      }
-
-      _defaultFontName = "sans";
-
-      [self _initFontCache];
-   }
-
-   return( self);
-}
-
-
 - (instancetype) init
 {
+   // in CGLayoutContext+nanovg.m
    return( [self initWithOSGraphicsContext:nil
                             nameUTF8String:NULL]);
 }
@@ -154,9 +126,8 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
       s      = extreme_chars;
       do
       {
-         [self getTextVisualBounds:&fontBounds
-                              text:s
-                            length:1];
+         fontBounds = [self visualBoundsOfText:s
+                                        length:1];
          bounds = CGRectUnion( fontBounds, bounds);
          ++s;
       }
@@ -189,15 +160,15 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
 //
 // This function estimates this by using some typically outside char boxes.
 //
-- (struct UITextMetrics) visualTextMetricsOfUTF8Characters:(char *) s
-                                                    length:(NSUInteger) length
-                                                      blur:(CGFloat) blur
-                                                     scale:(CGFloat) scale
+- (CGTextMetrics) visualTextMetricsOfUTF8Characters:(char *) s
+                                             length:(NSUInteger) length
+                                               blur:(CGFloat) blur
+                                              scale:(CGFloat) scale
 {
-   CGRect                 bounds;
-   CGRect                 rect;
-   struct UITextMetrics   metrics = { 0 };
-   NSUInteger             i, n;
+   CGRect          bounds;
+   CGRect          rect;
+   CGTextMetrics   metrics = { 0 };
+   NSUInteger      i, n;
 
    if( ! s)
       return( metrics);
@@ -227,15 +198,15 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
    }
    CGContextRestore( self);
 
-   metrics.ascender   = -bounds.origin.y;
-   metrics.descender  = -(bounds.size.height - metrics.ascender);
    metrics.lineHeight = bounds.size.height;
+   metrics.ascender   = fabsf( -bounds.origin.y);
+   metrics.descender  = fabsf( metrics.lineHeight - metrics.ascender);
 
    return( metrics);
 }
 
 
-- (struct UITextMetrics) visualTextMetrics
+- (CGTextMetrics) visualTextMetrics
 {
    return( [self visualTextMetricsOfUTF8Characters:extreme_chars
                                             length:sizeof( extreme_chars)
@@ -251,7 +222,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
 // because nvg internally, only works with the integer pixel values that are
 // used to index the atlas.
 //
-- (struct UITextMetrics) textMetrics
+- (CGTextMetrics) textMetrics
 {
    return( CGContextTextMetrics( self));
 }
@@ -265,15 +236,14 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
                    text:(char *) text
                  length:(NSUInteger) length
 {
-   return( CGContextTextBounds( self, CGPointZero, text, length, bounds));
+   return( CGContextGetTextBounds( self, CGPointZero, text, length, bounds));
 }
 
 
-- (void) getTextVisualBounds:(CGRect *) visualBounds
-                        text:(char *) text
-                      length:(NSUInteger) length
+- (CGRect) visualBoundsOfText:(char *) text
+                       length:(NSUInteger) length
 {
-   CGContextTextVisualBounds( self, CGPointZero, text, length, visualBounds);
+   return( CGContextTextVisualBounds( self, CGPointZero, text, length));
 }
 
 
@@ -315,7 +285,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
    struct UITextRow      *p;
    struct UITextRow      *sentinel;
    CGRect                rect;
-   struct UITextMetrics  metrics;
+   struct CGTextMetrics  metrics;
 
    if( ! rows || ! count)
       return( CGRectZero);

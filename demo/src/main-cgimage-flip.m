@@ -16,21 +16,18 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect              canvas;
    CGRect              rects[ 2][ 2];
    CGImage             *image;
-   struct NVGcontext   *vg;
    CGRect              area;
 
    canvas = [layer canvas];
 
-   vg = CGContextGetNVGContext( context);
-
    // gray rectangle so we know something is drawn...
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
-      nvgRect( vg, canvas.origin.x, canvas.origin.y, canvas.size.width, canvas.size.height);
-      nvgStrokeWidth( vg, 8);
-      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x8020A0FF));
+      CGContextRect( context, CGRectMake( canvas.origin.x, canvas.origin.y, canvas.size.width, canvas.size.height));
+      CGContextStrokeWidth( context, 8);
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
-   nvgStroke( vg);
+   CGContextStroke( context);
 
 
    // if we immediately reclaim the image (via release) after drawing it
@@ -46,7 +43,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    // get a rectangle inside canvas thats centered and as large as possible
    area.size = CGSizeAspectFillToSize( CGSizeMake( 1, 1), canvas.size);
-   area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenterPoint);
+   area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenter);
 
    // subdivide into 2x2
    CGRectPartition2x2( area, CGSizeMake( 4, 4), rects);
@@ -57,7 +54,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipNone,
                                                     CGRepeatNone,
-                                                    CGContentModeCenterPoint);
+                                                    CGContentModeCenter);
    [image drawRect:rects[ 0][ 0]
            options:&options
            context:context];
@@ -68,7 +65,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipHorizontally,
                                                     CGRepeatNone,
-                                                    CGContentModeCenterPoint);
+                                                    CGContentModeCenter);
    [image drawRect:rects[ 0][ 1]
            options:&options
            context:context];
@@ -79,7 +76,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipVertically,
                                                     CGRepeatNone,
-                                                    CGContentModeCenterPoint);
+                                                    CGContentModeCenter);
    [image drawRect:rects[ 1][ 0]
            options:&options
            context:context];
@@ -90,7 +87,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipBoth,
                                                     CGRepeatNone,
-                                                    CGContentModeCenterPoint);
+                                                    CGContentModeCenter);
    [image drawRect:rects[ 1][ 1]
            options:&options
            context:context];
@@ -150,7 +147,7 @@ int   main( int argc, char *argv[])
 //   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
 //  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
 //  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
-// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙███` `╙╙║█  ▐H        █
 // █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
 // █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
 // █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
@@ -170,5 +167,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-
