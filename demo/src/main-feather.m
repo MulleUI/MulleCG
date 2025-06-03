@@ -102,7 +102,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
          drawRect = rect;
          CGContextRoundedRect( context, drawRect, cornerRadius); // Converted from nvgRoundedRect
-         CGContextFillPaint( context, paint); // Converted from nvgFillPaint
+         CGContextFillPaintable( context, paint); // Converted from nvgFillPaint
          CGContextFill( context); // Converted from nvgFill
 #if 0
          nvgBeginPath(vg);

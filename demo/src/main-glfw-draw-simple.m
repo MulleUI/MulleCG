@@ -53,7 +53,7 @@ static UIWindowDisplayBits   display( id <UIOSWindow> window_in)
    frameInfo = CGFrameInfoSFMake( canvas, [window os_framebufferSize], 1.0);
    [context beginRender:&frameInfo];
    {
-      drawRedWhiteBlueFlag( CGContextGetNVGContext( context), canvas);
+      drawRedWhiteBlueFlag( context, canvas);
    }
    [context endRender];
    return( 0);

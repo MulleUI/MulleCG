@@ -76,7 +76,7 @@ static void   draw_triangle_with_centroid( CGContext *context,
    CGContextRestore( context);
 
    circle = CACircleMakeWithCenterAndRadius( translated, centroidRadius);
-   CGContextFillCircleWithPaint( context, circle, centroidPaint);
+   CGContextFillCircleWithPaintable( context, circle, centroidPaint);
 }
 
 
@@ -115,7 +115,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       {
          paint = [[[CGImage alloc] initWithRGBABytes:bitmap2
                                        bitmapSize:CGPixelSizeMake( 32, 32)
-                                     textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY  // NVG_IMAGE_REPEATX
+                                     textureFlags:CGImageFlagRepeatX|CGImageFlagRepeatY  // CGImageFlagRepeatX
                                           context:context] autorelease];
       }
       else

@@ -16,10 +16,7 @@
  */
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
-
-   vg = CGContextGetNVGContext( context);
-   drawRedWhiteBlueFlag( vg, [layer canvas]);
+   drawRedWhiteBlueFlag( context, [layer canvas]);
 //   [UIApp requestTerminate];
    return( YES);
 }

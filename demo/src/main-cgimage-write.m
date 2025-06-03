@@ -29,7 +29,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    // is too early, and the texture is gone too soon
    image   = [[[CGImage alloc] initWithRGBABytes:bitmap
                                       bitmapSize:CGPixelSizeMake( 8, 8)
-                                    textureFlags:NVG_IMAGE_NEAREST  // NVG_IMAGE_REPEATX
+                                    textureFlags:NVG_IMAGE_NEAREST  // CGImageFlagRepeatX
                                          context:context] autorelease];
    assert( image);
 

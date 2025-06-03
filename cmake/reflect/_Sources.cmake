@@ -46,6 +46,7 @@ src/nanovg-specific/CGGradient+nanovg.m
 src/nanovg-specific/CGImagePaint+nanovg.m
 src/nanovg-specific/CGImage+nanovg.m
 src/nanovg-specific/CGLayoutContext+nanovg.m
+src/nanovg-specific/CGPaint+DrawingConveniences.m
 src/nanovg-specific/CGPaint+nanovg.m
 src/nanovg-specific/CGPath+nanovg.c
 src/nanovg-specific/nanovg+UTF8String.m

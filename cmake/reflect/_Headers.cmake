@@ -132,6 +132,7 @@ src/nanovg-specific/CGContext+nanovgTexture.h
 src/nanovg-specific/CGContext+nanovg.h
 src/nanovg-specific/CGFramebuffer+nanovg.h
 src/nanovg-specific/CGLayoutContext+nanovg.h
+src/nanovg-specific/CGPaint+DrawingConveniences.h
 src/nanovg-specific/CGPaint+Drawing.h
 src/nanovg-specific/CGPath+nanovg.h
 src/nanovg-specific/microvg/nanowrap.h

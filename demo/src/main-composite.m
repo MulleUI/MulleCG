@@ -80,7 +80,7 @@ static void   drawGridInRect( CGContext  *context, CGRect rect)
 
    image = [context imageWithRGBABytes:imagedata
                             bitmapSize:CGPixelSizeMake( 8, 8)
-                          textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
+                          textureFlags:CGImageFlagRepeatX|CGImageFlagRepeatY
                         nameUTF8String:NULL
                            resourceKey:MulleUIResourceStorageKey( grid)];
    assert( image);

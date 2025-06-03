@@ -93,7 +93,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             CGContextRect( context, rect); // Converted from mvgRect
 
             CGContextStrokeWidth( context, 8.0); // Converted from mvgStrokeWidth
-            CGContextStrokePaintWithOptions( context, gradient, rect, 8.0, &options);
+            CGContextStrokePaintableOptions( context, gradient, rect, 8.0, &options);
             CGContextStroke( context); // Converted from mvgStroke
 
             CGContextFontFace( context,"sans");

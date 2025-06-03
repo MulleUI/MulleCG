@@ -112,7 +112,7 @@ static void  drawStuff( CALayer *layer, CGContext *context)
 
 #ifdef HAVE_TEXTURE
       CGFillOptions options = CGFillOptionsMakeWithRotation( rotation);
-      CGContextFillImageWithOptions( context, texture, CGRectMake( 0, 0, 32, 32), &options);
+      CGContextFillImageOptions( context, texture, CGRectMake( 0, 0, 32, 32), &options);
 #else
       CGContextFillColor( context, CGColorMakeWithHexColor( 0xFFFF00FF));
 #endif
@@ -149,7 +149,7 @@ void   setupScene( UIWindow *window)
    {
       texture = createTexture( context,
                                [window pixelRatio],
-                               NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY);
+                               CGImageFlagRepeatX|CGImageFlagRepeatY);
       [[texture bitmapImage] writeToPNGUTF8String:"debug.png"];
    }
    [window deactivateGraphicsContext:context];

@@ -43,6 +43,7 @@
 #import "CGContext+nanovg.h"
 #import "CGFramebuffer+nanovg.h"
 #import "CGLayoutContext+nanovg.h"
+#import "CGPaint+DrawingConveniences.h"
 #import "CGPaint+Drawing.h"
 #import "CGContext+OpenGLShader.h"
 #import "CGContext+OpenGL.h"

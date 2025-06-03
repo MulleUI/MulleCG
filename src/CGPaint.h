@@ -9,6 +9,8 @@
 @class CGImage;
 
 
+
+
 // In UIViews and UILayers it's convenient to abstract CGColor, CGGradient *
 // and CGImage * away, into CGPaint *. That way you can easily change "CSS"
 // like the appearance and be animatable.
@@ -21,7 +23,7 @@
 // There is no paintWithCGImage: as CGImage is a CGPaint.
 // 
 // Never transfer a CGPaint in mulleGainAccess or mulleRelinquishAccess as
-// it's either threadsafe anyway or already a resource which will have been
+// it's either threadsafe anyway or its a resource which will have been
 // transferred already (or will be)
 //
 // TODO:

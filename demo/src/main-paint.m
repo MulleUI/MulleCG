@@ -11,6 +11,37 @@
 #define ROWS  2
 
 
+
+static void   drawRectBehindText( CGContext *context, CGRect canvas, char *label)
+{
+   struct CGTextBoundsInfo   info;
+
+   // BUG: The visually is needed to "remove" the descender space. What is not
+   //      super clear here is, that NVG_ALIGN_TOP | NVG_ALIGN_LEFT will be
+   //      working on descender and ascender lineHeight, which is spitting
+   //      in the soup again.
+   CGContextFontFace( context, "sans");
+   CGContextFontSize( context, 10.0f);
+
+   info = CGContextTextBoundsOptions( context, label, (size_t) -1,
+                                                   CGRectInset( canvas, 8, 8),
+                                                   CGContentModeBottomLeft,
+                                                   CGTextOptionAlignVisually);
+
+   CGContextFillRoundedRectWithColor( context,
+                                      CGRectExtrude( info.bounds, 6, 6),
+                                      6.0,
+                                      CGColorBySettingAlpha( CGColorMakeBlack(), 0.5));
+
+   CGContextTextColor( context, CGColorMakeWhite());
+   CGContextTextBackgroundColor( context, CGColorMakeGray());
+
+   CGContextTextAlign( context, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+   CGContextText( context, info.bounds.origin, label, (size_t) -1);
+}
+
+
+
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect       canvas;
@@ -19,13 +50,17 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGPaint      *paint;
    NSUInteger   i, j;
    CGFloat      strokeWidth;
+   char         *label;
 
    canvas = [layer canvas];
-   canvas = CGRectInset( canvas, 5.0, 5.0);
-
-   CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( 5, 5), ROWS, COLS, (CGRect *) rects);
+   CGRectPartitionIntoRowsAndColumns( CGRectInset( canvas, 5.0, 5.0),
+                                      CGSizeMake( 5, 5),
+                                      ROWS,
+                                      COLS,
+                                      (CGRect *) rects);
 
    strokeWidth = 4.0;
+   label       = "???";
 
    switch( [context numberOfFrames] % 6)
    {
@@ -33,39 +68,45 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       paint = [CGGradient gradientWithStartColor:CGColorMakeYellow()
                                         endColor:CGColorMakeBlue()
                                         rotation:[context numberOfFrames] / 20.0];
+      label = "yellow/blue gradient";
       break;
 
    case 1 :
-      paint = [[[CGImage alloc] initWithRGBABytes:bitmap2
-                                       bitmapSize:CGPixelSizeMake( 32, 32)
-                                     textureFlags:0  // NVG_IMAGE_REPEATX
-                                          context:context] autorelease];
+      paint = [CGImage imageWithRGBABytes:bitmap2
+                               bitmapSize:CGPixelSizeMake( 32, 32)
+                             textureFlags:CGImageFlagRepeatX|CGImageFlagRepeatY
+                                  context:context];
+      label = "bitmap fill";
       break;
 
    case 2 :
-      paint = [CGPaint paintWithColor:CGColorMakeBlack()];
+      paint = [CGPaint paintWithColor:CGColorMakeGreen()];
+      label = "green color fill";
       break;
 
    case 3 :
       paint = [CGGradient linearGradientWithRect:canvas
-                                      startColor:CGColorMakeYellow()
-                                        endColor:CGColorMakeBlue()
+                                      startColor:CGColorMakePapaya()
+                                        endColor:CGColorMakeChartreuse()
                                         rotation:[context numberOfFrames] / 20.0];
+      label = "papaya/chartreuse linear gradient";
       break;
 
    case 4 :
       paint = [CGGradient boxGradientWithRoundedRect:canvas
                                         cornerRadius:20.0
-                                               color:CGColorMakeYellow()
+                                               color:CGColorMakeOlive()
                                              feather:20.0
-                                        featherColor:CGColorMakeBlue()];
+                                        featherColor:CGColorMakePurple()];
+      label = "olive/purple box gradient";
       break;
 
    case 5 :
       paint = [CGGradient radialGradientWithCircle:CGRectGetOuterCircle( canvas)
-                                             color:CGColorMakeYellow()
+                                             color:CGColorMakeOrange()
                                        innerRadius:20.0
-                                        innerColor:CGColorMakeBlue()];
+                                        innerColor:CGColorMakeRed()];
+      label = "orange/red radial gradient";
       break;
    }
 
@@ -77,18 +118,21 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
          switch( j * COLS + i)
          {
-         case 0  : CGContextStrokeRectWithPaint( context, rect, strokeWidth, paint); break;
-         case 1  : CGContextStrokeRoundedRectWithPaint( context, rect, 3.0, strokeWidth, paint); break;
-         case 2  : CGContextStrokeCircleWithPaint( context, CGRectGetInnerCircle( rect), strokeWidth, paint); break;
-         case 3  : CGContextStrokeLineWithPaint( context, CGRectGetTopLeft( rect), CGRectGetBottomRight( rect), strokeWidth, paint); break;
+         case 0  : CGContextStrokeRectWithPaintable( context, rect, strokeWidth, paint); break;
+         case 1  : CGContextStrokeRoundedRectWithPaintable( context, rect, 3.0, strokeWidth, paint); break;
+         case 2  : CGContextStrokeCircleWithPaintable( context, CGRectGetInnerCircle( rect), strokeWidth, paint); break;
+         case 3  : CGContextStrokeLineWithPaintable( context, CGRectGetTopLeft( rect), CGRectGetBottomRight( rect), strokeWidth, paint); break;
 
-         case 4  : CGContextFillRectWithPaint( context, rect, paint); break;
-         case 5  : CGContextFillRoundedRectWithPaint( context, rect, 3.0, paint); break;
-         case 6  : CGContextFillCircleWithPaint( context, CGRectGetInnerCircle( rect), paint); break;
+         case 4  : CGContextFillRectWithPaintable( context, rect, paint); break;
+         case 5  : CGContextFillRoundedRectWithPaintable( context, rect, 3.0, paint); break;
+         case 6  : CGContextFillCircleWithPaintable( context, CGRectGetInnerCircle( rect), paint); break;
          case 7  : break;
          }
       }
    }
+
+   drawRectBehindText( context, canvas, label);
+
    return( YES);
 }
 

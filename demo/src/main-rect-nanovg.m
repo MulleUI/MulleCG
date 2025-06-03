@@ -170,6 +170,7 @@ int   main( int argc, char *argv[])
       [window[ i] setDrawCallback:drawStuff[ i]];
       [window[ i] setBackgroundColor:CGColorMakeWhite()];
       [app addWindow:window[ i]];
+     // [app runLoopIteration];  // process some events and redraws in between
    }
    return( [app runApp]);
 }

@@ -39,7 +39,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       oldFrameInfo = [context bindRender:&frameInfo];
       {
          [context clearFramebufferWithColor:CGColorMakeOrange()];
-         drawRedWhiteBlueFlag( CGContextGetNVGContext( context), rect);
+         drawRedWhiteBlueFlag( context, rect);
       }
       // restore old frameinfo
       [context bindRender:&oldFrameInfo];
@@ -61,7 +61,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                  options:NULL
                  context:context];
 #else
-   drawRedWhiteBlueFlag( CGContextGetNVGContext( context), rect);
+   drawRedWhiteBlueFlag( context, rect);
 #endif
    MulleUICLog( "****** <<<<<< ****** <<<<<<< *******");
    return( YES);

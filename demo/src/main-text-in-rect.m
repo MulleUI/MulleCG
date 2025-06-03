@@ -25,14 +25,14 @@ static void   drawTextOverRect( CGContext *context, CGRect canvas)
 
 static void   drawRectBehindText( CGContext *context, CGRect canvas)
 {
-   CGRect                  rect;
-   CGRect                  nopadRect;
-   CGRect                  bounds;
-   CGFloat                 fontSize;
-   CGRect                  textRect;
-   CGRect                  backgroundRect;
-   CGFloat                 pad;
-   struct CGTextMetrics    metrics;
+   CGRect                    rect;
+   CGRect                    nopadRect;
+   CGFloat                   fontSize;
+   CGRect                    textRect;
+   CGRect                    backgroundRect;
+   CGFloat                   pad;
+   struct CGTextMetrics      metrics;
+   struct CGTextBoundsInfo   info;
 
    // BUG: The visually is needed to "remove" the descender space. What is not
    //      super clear here is, that NVG_ALIGN_TOP | NVG_ALIGN_LEFT will be
@@ -41,17 +41,16 @@ static void   drawRectBehindText( CGContext *context, CGRect canvas)
    pad       = 6.0f;
    rect      = CGSizePlaceInRect( CGSizeMake( 200, 80), canvas, CGContentModeCenter);
    nopadRect = CGRectInset( rect, pad, pad);
-   bounds    = CGContextTextBoundsWithOptions( context, "VfL Bochum 1848", (size_t) -1,
+   info      = CGContextTextBoundsOptions( context, "VfL Bochum 1848", (size_t) -1,
                                                         nopadRect,
                                                         CGContentModeScaleAspectFit,
-                                                        CGTextOptionAlignVisually,
-                                                        &fontSize);
-   if( fontSize == 0.0f)
+                                                        CGTextOptionAlignVisually);
+   if( info.size == 0.0f)
       return;
-   if( ! isnan( fontSize))
-      CGContextFontSize( context, fontSize);
+   if( ! isnan( info.size))
+      CGContextFontSize( context, info.size);
 
-   textRect       = CGSizePlaceInRect( bounds.size, rect, CGContentModeCenter);
+   textRect       = CGSizePlaceInRect( info.bounds.size, rect, CGContentModeCenter);
    backgroundRect = CGRectExtrude( textRect, pad, pad);
    CGContextFillRoundedRectWithColor( context, backgroundRect, 8.0, CGColorBySettingAlpha( CGColorMakeWhite(), 0.5));
 
