@@ -41,6 +41,7 @@
       { @selector( CGLinearGradient), MULLE_OBJC_NO_CATEGORYID },      // a1f73d66;CGLinearGradient;;
       { @selector( CGPaint), @selector( CGBlendedPaint) },      // df22fbd2;CGPaint;f164885b;CGBlendedPaint
       { @selector( CGPaint), @selector( CGImagePaint) },      // df22fbd2;CGPaint;3e23b783;CGImagePaint
+      { @selector( CGPaint), @selector( CGPaintable) },      // df22fbd2;CGPaint;faf2d5d6;CGPaintable
       { @selector( CGPaint), @selector( Drawing) },      // df22fbd2;CGPaint;53946657;Drawing
       { @selector( CGPaint), MULLE_OBJC_NO_CATEGORYID },      // df22fbd2;CGPaint;;
       { @selector( CGRadialGradient), @selector( nanovg) },      // 74b8ddc9;CGRadialGradient;df06d543;nanovg

@@ -67,7 +67,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       // 5. tell CGContext about the new dimensions
       frameInfo = CGFrameInfoFBMake( CGPixelSizeMakeWithSize( canvas.size), 1.0, 1.0);
       [context changeRender:&frameInfo];
-      drawRedWhiteBlueFlag( vg, canvas);
+      drawRedWhiteBlueFlag( context, canvas);
 
       // 6. flush all draw commands to our framebuffer
       [context flushRender];

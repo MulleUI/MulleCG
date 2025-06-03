@@ -236,7 +236,12 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
                    text:(char *) text
                  length:(NSUInteger) length
 {
-   return( CGContextGetTextBounds( self, CGPointZero, text, length, bounds));
+   CGTextBoundsInfo   info;
+
+   info = CGContextTextBoundsInfo( self, CGPointZero, text, length);
+   if( bounds)
+      *bounds = info.bounds;
+   return( info.size);
 }
 
 

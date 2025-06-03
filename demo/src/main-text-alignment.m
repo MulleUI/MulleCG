@@ -214,7 +214,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             }
 
             CGRect tempRectForTextBounds;
-            CGContextGetTextBounds( context, origin, s, (size_t) -1, &tempRectForTextBounds);
+            tempRectForTextBounds = CGContextTextBoundsInfo( context, origin, s, (size_t) -1).bounds;
             textBoundsArr[0] = tempRectForTextBounds.origin.x;
             textBoundsArr[1] = tempRectForTextBounds.origin.y;
             textBoundsArr[2] = tempRectForTextBounds.origin.x + tempRectForTextBounds.size.width;
@@ -228,7 +228,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
             CGRect tempRectForVisualBounds;
 
-            tempRectForVisualBounds = CGContextTextVisualBounds( context, origin, s, (size_t) -1);
+            tempRectForTextBounds = CGContextTextBoundsInfo( context, origin, s, (size_t) -1).bounds;
             visualBoundsArr[0] = tempRectForVisualBounds.origin.x;
             visualBoundsArr[1] = tempRectForVisualBounds.origin.y;
             visualBoundsArr[2] = tempRectForVisualBounds.origin.x + tempRectForVisualBounds.size.width;

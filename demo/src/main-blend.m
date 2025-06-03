@@ -72,7 +72,7 @@ static void   drawGridInRect( CGContext  *context, CGRect rect)
 
    image = [[[CGImage alloc] initWithRGBABytes:imagedata
                                     bitmapSize:CGPixelSizeMake( 8, 8)
-                                  textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
+                                  textureFlags:CGImageFlagRepeatX|CGImageFlagRepeatY
                                        context:context] autorelease];
    [image drawRect:rect
            options:NULL

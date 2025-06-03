@@ -59,7 +59,7 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
 
    bitmapSize = CGPixelSizeMake( 4, 4);
    cgLayer    = [CGFramebuffer framebufferWithBitmapSize:bitmapSize
-                                            textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
+                                            textureFlags:CGImageFlagRepeatX|CGImageFlagRepeatY
                                                  context:context];
    if( ! cgLayer)
    {
@@ -94,8 +94,8 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
                                    0,
                                    [cgLayer textureID],
                                    1.0);
-   CGContextFillImageWithOptions( context, cgLayer, CGRectMakeWithSize( wh), NULL);
-   CGContextCheckBackendError( context, "after CGContextFillPaint");
+   CGContextFillImageOptions( context, cgLayer, CGRectMakeWithSize( wh), NULL);
+   CGContextCheckBackendError( context, "after CGContextFillPaintable");
 
    for( j = 0; j < 70; j++)
    {

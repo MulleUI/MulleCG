@@ -102,7 +102,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                      rotation:factor];
    customPaint = [CustomPaint paintWithPaint:gradient
                                  strokeWidth:10];
-   CGContextFillRectWithPaint( context, rect, customPaint);
+   CGContextFillRectWithPaintable( context, rect, customPaint);
 
    return( YES);
 }

@@ -33,7 +33,7 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
    // is too early, and the texture is gone too soon
    image = [[[CGImage alloc] initWithRGBABytes:bitmap
                                     bitmapSize:CGPixelSizeMake( 5, 5)
-                                  textureFlags:NVG_IMAGE_NEAREST  // NVG_IMAGE_REPEATX
+                                  textureFlags:NVG_IMAGE_NEAREST  // CGImageFlagRepeatX
                                        context:context] autorelease];
    assert( image);
 

@@ -68,7 +68,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                             startColor:CGColorMakeGoldenrod()
                                               endColor:CGColorMakeMagenta()
                                               rotation:CAAngleToRotation( angle)];
-         CGContextFillPaint( context, gradient);
+         CGContextFillPaintable( context, gradient);
          CGContextFill( context);
 
          [context useFontWithNameUTF8String:"sans"];

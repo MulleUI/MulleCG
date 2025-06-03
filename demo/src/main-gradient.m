@@ -41,7 +41,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                                   feather:feather
                                              featherColor:CGColorMakeBlue()];
 
-   CGContextFillRectWithPaint( context, rect, paint);
+   CGContextFillRectWithPaintable( context, rect, paint);
 
    if( drawHelpers)
    {
@@ -61,7 +61,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                    feather:feather
                               featherColor:CGColorMakeYellow()];
 
-   CGContextFillRectWithPaint( context, rect, paint);
+   CGContextFillRectWithPaintable( context, rect, paint);
 
    if( drawHelpers)
    {
@@ -81,7 +81,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                      endColor:CGColorMakeBlue()
                                      rotation:0.0f];
 
-   CGContextFillRectWithPaint( context, rect, paint);
+   CGContextFillRectWithPaintable( context, rect, paint);
 
    if( drawHelpers)
    {
@@ -96,7 +96,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                      innerRadius:0.0
                                       innerColor:CGColorMakeBlue()];
 
-   CGContextFillRectWithPaint( context, rect, paint);
+   CGContextFillRectWithPaintable( context, rect, paint);
 
    if( drawHelpers)
    {

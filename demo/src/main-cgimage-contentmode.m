@@ -91,12 +91,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon
-   image   = [[[CGImage alloc] initWithRGBABytes:bitmap2
-                                      bitmapSize:CGPixelSizeMake( 32, 32)
-                                    textureFlags:0  // NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
-                                         context:context] autorelease];
+   image     = [CGImage imageWithRGBABytes:bitmap2
+                                bitmapSize:CGPixelSizeMake( 32, 32)
+                              textureFlags:0  // CGImageFlagRepeatX|CGImageFlagRepeatY
+                                   context:context];
    assert( image);
-
 
    canvas    = CGRectInset( canvas, 4, 4);
 
@@ -148,9 +147,9 @@ int   main( int argc, char *argv[])
    app = [UIApplication sharedInstance];
    @autoreleasepool
    {
-      window = [[[UIWindow alloc] initWithFrame:CGRectMake( 0.0, 0.0, 600, 400)
-                                titleUTF8String:"Demo"
-                                      styleMask:UIWindowStyleMaskDefault & ~UIWindowStyleRetained] autorelease];
+      window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 600, 400)
+                         titleUTF8String:"Demo"
+                               styleMask:UIWindowStyleMaskDefault & ~UIWindowStyleRetained];
 
       assert( window);
       [window setBackgroundColor:CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0)];

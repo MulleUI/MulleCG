@@ -28,7 +28,7 @@ static void   drawGridInRect( CGContext  *context, CGRect rect)
 
    image = [[[CGImage alloc] initWithRGBABytes:imagedata
                                     bitmapSize:CGPixelSizeMake( 8, 8)
-                                  textureFlags:NVG_IMAGE_REPEATX|NVG_IMAGE_REPEATY
+                                  textureFlags:CGImageFlagRepeatX|CGImageFlagRepeatY
                                        context:context] autorelease];
    [image drawRect:rect
            options:NULL
@@ -90,13 +90,13 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          CGContextFillRectWithColor( context, rect, CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.5));
 
          CGRectPartitionVertically( rect, 0.0, 3, subrows);
-         CGContextFillRectWithPaint( context, CGRectInset( CGRectIntegral( subrows[ 0]), 1.0, 1.0), gradient[ 0]);
+         CGContextFillRectWithPaintable( context, CGRectInset( CGRectIntegral( subrows[ 0]), 1.0, 1.0), gradient[ 0]);
          CGRectPartitionVertically( CGRectInset( CGRectIntegral( subrows[ 1]), 1.0, 1.0), 0.0, 4, subsubrows);
          CGContextShapeAntiAlias( context, NO);
          for( j = 0; j < 4; j++)
-            CGContextFillRectWithPaint( context, subsubrows[ j], interpolated[ j]);
+            CGContextFillRectWithPaintable( context, subsubrows[ j], interpolated[ j]);
          CGContextShapeAntiAlias( context, YES);
-         CGContextFillRectWithPaint( context, CGRectInset( CGRectIntegral( subrows[ 2]), 1.0, 1.0), gradient[ 1]);
+         CGContextFillRectWithPaintable( context, CGRectInset( CGRectIntegral( subrows[ 2]), 1.0, 1.0), gradient[ 1]);
       }
    }
    return( YES);

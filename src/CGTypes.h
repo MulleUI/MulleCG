@@ -128,6 +128,37 @@ typedef NS_ENUM( NSUInteger, CGRelation)
    CGOverlap
 };
 
+
+
+// this is only for a single bit in buttons
+static inline char   *_CGRelationUTF8String( NSUInteger bit)
+{
+   switch( bit)
+   {
+   case CGCover   : return( "Cover");
+   case CGInside  : return( "Inside");
+   case CGOutside : return( "Outside");
+   case CGOverlap : return( "Overlap");
+   }
+   return( NULL);
+}
+
+
+static inline char   *CGRelationUTF8String( NSUInteger bit)
+{
+   char   *s;
+
+   s = _CGRelationUTF8String( bit);
+   return( s ? s : "???");
+}
+
+
+//
+// CGOverlap :  fill extends covers half the strokeWidth (i.e. no compensation)
+// CGInside  :  fill extends to stroke, but does not cover any portion
+// CGCover   :  fill extends to cover stroke, covers it
+// CGOutside :  same as CGCover
+//
 static inline CGRect
    CGRectMakeFillRect( CGRect rect, CGFloat strokeWidth, CGRelation relation)
 {
@@ -141,23 +172,25 @@ static inline CGRect
      break;
 
    case CGCover   :
+   case CGOutside :
      rect.origin.x    -= strokeWidth / 2.0;
      rect.origin.y    -= strokeWidth / 2.0;
      rect.size.width  += strokeWidth;
      rect.size.height += strokeWidth;
-     break;
 
-   // useless
-   case CGOutside :
-     rect.origin.x    -= strokeWidth;
-     rect.origin.y    -= strokeWidth;
-     rect.size.width  += strokeWidth * 2.0;
-     rect.size.height += strokeWidth * 2.0;
+   case CGOverlap :
+     break;
    }
    return( rect);
 }
 
 
+//
+// CGOverlap :  stroke extends over half the rect (i.e. no compensation)
+// CGInside  :  stroke does not extend over the rect
+// CGOutside :  stroke paints outside of rect
+// CGCover   :  same as CGInside
+//
 static inline CGRect
    CGRectMakeStrokeRect( CGRect rect, CGFloat strokeWidth, CGRelation relation)
 {
@@ -176,6 +209,7 @@ static inline CGRect
      rect.origin.y    -= strokeWidth / 2.0;
      rect.size.width  += strokeWidth;
      rect.size.height += strokeWidth;
+   case CGOverlap :
      break;
    }
    return( rect);
@@ -187,6 +221,7 @@ struct CGPaintOptions
    CARotation   rotation;           // default: 0.0
    CGFloat      smoothness;         // default: 1.0
    CGFloat      alpha;              // default: 1.0
+   NSUInteger   textureFlags;       // default: 0
 };
 
 struct CGStrokeOptions
@@ -200,7 +235,7 @@ struct CGFillOptions
 {
    struct CGPaintOptions   paint;
    CGRelation              relation;        // default: CGCover
-   CGFloat                 fillStrokeWidth; // default: 0.0 used by CGInside
+   CGFloat                 strokeWidth;    // default: 0.0 used by CGInside
 };
 
 #define CGPaintOptionsDefault                                     \
@@ -213,13 +248,13 @@ struct CGFillOptions
 #define CGFillOptionsDefault                                      \
    ((struct CGFillOptions) {                                      \
                              .paint    = CGPaintOptionsDefault,   \
-                             .relation = CGInside                 \
+                             .relation = CGOverlap                \
                            })
 
 #define CGStrokeOptionsDefault                                    \
    ((struct CGStrokeOptions) {                                    \
                                .paint    = CGPaintOptionsDefault, \
-                               .relation = CGInside               \
+                               .relation = CGOverlap              \
                              })
 
 
@@ -387,6 +422,5 @@ static inline CGTextMetrics  CGTextMetricsMake( float ascender,
               .lineHeight = lineHeight
            });
 }
-
 
 #endif

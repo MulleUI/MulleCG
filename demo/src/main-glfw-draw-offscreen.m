@@ -68,7 +68,7 @@ static UIWindowDisplayBits   display( id <UIOSWindow> window_in)
    [context setRendersOffScreen:YES];
    [context beginRender:&frameInfo];
    {
-      drawRedWhiteBlueFlag( CGContextGetNVGContext( context), canvas);
+      drawRedWhiteBlueFlag( context, canvas);
    }
 
    // do what endRender does, but get the offscreen framebuffer

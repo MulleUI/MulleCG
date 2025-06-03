@@ -81,7 +81,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
             CGContextBeginPath( context);
             CGContextRect( context, rect);
-            CGContextFillPaint( context, paint);
+            CGContextFillPaintable( context, paint);
             CGContextFill( context);
 
             CGContextFontFace( context,"sans");

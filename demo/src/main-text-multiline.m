@@ -59,7 +59,7 @@ static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *contex
       paint          = [CGGradient gradientWithStartColor:CGColorMultiplyAlpha( CGColorMakePapaya(), 0.5)
                                                  endColor:CGColorMultiplyAlpha( CGColorMakeRed(), 0.5)
                                                  rotation:0.1625];
-      CGContextStrokeRectWithPaint( context, adjustedBounds, 1.0, paint);
+      CGContextStrokeRectWithPaintable( context, adjustedBounds, 1.0, paint);
 #endif
 
       CGContextFontSize( context, 11.0);
@@ -213,7 +213,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    paint  = [CGGradient gradientWithStartColor:CGColorMakeYellow()
                                       endColor:CGColorMakeOrange()
                                       rotation:0.1625];
-   CGContextFillRectWithPaint( context, canvas, paint);
+   CGContextFillRectWithPaintable( context, canvas, paint);
 
    bits = [context numberOfFrames] & 0x1F;
 
@@ -257,7 +257,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       paint = [CGGradient gradientWithStartColor:CGColorMakeDimGray()
                                         endColor:CGColorMakeDarkSlateGray()
                                         rotation:0.1625];
-      CGContextFillRectWithPaint( context, info->area, paint);
+      CGContextFillRectWithPaintable( context, info->area, paint);
    }
 
    //

@@ -73,12 +73,14 @@ src/main-line-context.m
 src/main-line-nanovg.m
 src/main-opengl.m
 src/main-outline-glyph.m
+src/main-paint-image.m
 src/main-paint.m
+src/main-paint-relation.m
 src/main-particlelayers.m
 src/main-particles.m
 src/main-particles-sorted.m
 src/main-precompiled.m
-src/main-rect.m
+src/main-rect-nanovg.m
 src/main-rect-pain.m
 src/main-relation.m
 src/main-rotate-rect.m
