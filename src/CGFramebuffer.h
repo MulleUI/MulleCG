@@ -47,6 +47,7 @@ struct CGFrameInfo;
                                    context:(CGContext *) context;
 
 // more or less for completeness... probably makes no sense
+// (but used in a demo cgimage-write, so... )
 - (instancetype) initWithImage:(CGImage *) image
                   textureFlags:(NSUInteger) textureFlags
                 nameUTF8String:(char *) nameUTF8String

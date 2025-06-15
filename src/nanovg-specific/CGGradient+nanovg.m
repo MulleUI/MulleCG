@@ -33,7 +33,7 @@ static NVGpaint
 
    assert( vg);
 
-   radians  = CARotationToRadians( rotation);
+   radians  = CARotationToRadiansAsAngle( rotation);
    if( isRectangular)
    {
       w     = rect.size.width * cosf( radians) * smoothness;
@@ -90,6 +90,16 @@ static inline NVGpaint
    NVGpaint   paint;
 
    assert( options);
+
+#ifdef DEBUG
+   if( isinf( rect.origin.x))
+   {
+      mulle_fprintf( stderr, "The standard linear gradient must be used with"
+                             "\"CGContextFillPaintableOptions\" and proper "
+                             "bounds being specified\n");
+      abort();
+   }
+#endif
 
    paint = CGGradientNVGpaintForRect( self,
                                       rect,

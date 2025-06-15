@@ -36,7 +36,7 @@
                                 rect.origin.y,
                                 rect.size.width,
                                 rect.size.height,
-                                CARotationToRadians( options->rotation + _rotation),
+                                CARotationToRadiansAsRotation( options->rotation + _rotation),
                                 textureID,
                                 options->alpha * _alpha));
 }

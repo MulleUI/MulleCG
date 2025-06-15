@@ -106,11 +106,11 @@ static void   fillRectWithLinearGradient( CGContext *context, // Converted from 
                                           CGColor color2,
                                           struct CornerAndLinearGradientInfo *info)
 {
-   MulleUICLog( "cornerTL: %g cornerBL: %g cornerBR: %g cornerTR: %g",
-                  info->cornerInfo.cornerTL,
-                  info->cornerInfo.cornerBL,
-                  info->cornerInfo.cornerBR,
-                  info->cornerInfo.cornerTR);
+   // MulleUICLog( "cornerTL: %g cornerBL: %g cornerBR: %g cornerTR: %g",
+   //                info->cornerInfo.cornerTL,
+   //                info->cornerInfo.cornerBL,
+   //                info->cornerInfo.cornerBR,
+   //                info->cornerInfo.cornerTR);
 
    CGContextBeginPath( context); // Converted from nvgBeginPath
    CGContextRoundedRectVarying( context, rect, MulleCornerInsetsMake( info->cornerInfo.cornerTL, info->cornerInfo.cornerTR, info->cornerInfo.cornerBR, info->cornerInfo.cornerBL)); // Converted from nvgRoundedRectVarying
@@ -292,7 +292,7 @@ static CADirection   MulleUISegmentedButtonDirectionForSegmentIndex( struct Mull
    if( i == p->nSegments - 1)
       direction |= CADirectionRight;
 
-   MulleUICLog( "%td of %td -> %tx", i, p->nSegments, direction);
+   //MulleUICLog( "%td of %td -> %tx", i, p->nSegments, direction);
    return( direction);
 }
 
@@ -467,7 +467,7 @@ static struct MulleUISegmentedButton  button =
 
 static void   drawStuff1( CALayer *layer, CGContext *context)
 {
-   MulleUICLog( "%#@ %#@", layer, context);
+   // MulleUICLog( "%#@ %#@", layer, context);
 
    button.frame = [layer canvas];
    CGDrawSegmentedButton( context, &button);
@@ -516,7 +516,7 @@ static struct MulleUISegmentedButton  pushed_button =
 
 static void   drawStuff2( CALayer *layer, CGContext *context)
 {
-   MulleUICLog( "%#@ %#@", layer, context);
+   // MulleUICLog( "%#@ %#@", layer, context);
 
 
    if( [context numberOfFrames] & 1)

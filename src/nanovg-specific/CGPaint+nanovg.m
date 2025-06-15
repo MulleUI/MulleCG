@@ -44,8 +44,10 @@ static void   assertImageInNVGcontext( CGImage *self, NVGcontext *vg)
 }
 
 
-static void   assertPaintInNVGcontext( id <CGPaintable>  self, NVGcontext *vg)
+static void   assertPaintableInNVGcontext( id <CGPaintable> self, NVGcontext *vg)
 {
+   assert( [(NSObject *) self conformsToProtocol:@protocol( CGPaintable)]);
+
    assertImageInNVGcontext( [self image], vg);
    assertImageInNVGcontext( [self otherImage], vg);
 }
@@ -61,10 +63,10 @@ void   CGContextFillPaintableOptions( CGContext *context,
                                       CGRect  bounds,
                                       CGFillOptions *options)
 {
-   static CGFillOptions   CGDefaultFillOptions_static =  CGFillOptionsDefault;
+   static CGFillOptions   CGDefaultFillOptions_static = CGFillOptionsDefault;
    NVGpaint               nvgPaint;
 
-   assertPaintInNVGcontext( paint, CGContextGetNVGContext( context));
+   assertPaintableInNVGcontext( paint, CGContextGetNVGContext( context));
 
    if( options)
       bounds = CGRectMakeFillRect( bounds, options->strokeWidth, options->relation);
@@ -79,16 +81,15 @@ void   CGContextFillPaintableOptions( CGContext *context,
 
 
 void   CGContextStrokePaintableOptions( CGContext *context,
-                                            id <CGPaintable> paint,
-                                            CGRect  bounds,
-                                            CGFloat strokeWidth,
-                                            CGStrokeOptions *options)
+                                        id <CGPaintable> paint,
+                                        CGRect  bounds,
+                                        CGFloat strokeWidth,
+                                        CGStrokeOptions *options)
 {
    static CGStrokeOptions   CGDefaultStrokeOptions_static = CGStrokeOptionsDefault;
    NVGpaint                 nvgPaint;
 
-
-   assertPaintInNVGcontext( paint, CGContextGetNVGContext( context));
+   assertPaintableInNVGcontext( paint, CGContextGetNVGContext( context));
    assert( strokeWidth > 0.0f);
 
    options  = options ? options : &CGDefaultStrokeOptions_static;

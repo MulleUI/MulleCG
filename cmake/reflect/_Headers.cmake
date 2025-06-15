@@ -115,7 +115,6 @@ src/CGLayoutContext+CGFont.h
 src/CGLayoutContext.h
 src/CGPaint+UIGraphicsDrawing.h
 src/CGPaint.h
-src/CGPath.h
 src/CGTypes.h
 src/_MulleCGBackend.h
 src/MulleCG.h
@@ -128,7 +127,6 @@ src/mulle-color/mulle-color.h
 src/nanovg-specific/CGAffineTransform+nanovg.h
 src/nanovg-specific/CGContext+DrawingConveniences.h
 src/nanovg-specific/CGContext+Drawing.h
-src/nanovg-specific/CGContext+nanovgTexture.h
 src/nanovg-specific/CGContext+nanovg.h
 src/nanovg-specific/CGFramebuffer+nanovg.h
 src/nanovg-specific/CGLayoutContext+nanovg.h

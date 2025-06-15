@@ -32,7 +32,6 @@ src/CGLayoutContext+CGFont.m
 src/CGLayoutContext.m
 src/CGPaint+UIGraphicsDrawing.m
 src/CGPaint.m
-src/CGPath.c
 src/mulle-color/CGColorDiff.c
 src/mulle-color/CGColor.c
 src/mulle-color/CGGolorNames.c

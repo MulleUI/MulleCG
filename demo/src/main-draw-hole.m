@@ -102,7 +102,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeBlack());
 
          CGContextBeginPath( context);
-         mode[ 0] = i < 2 ? CGSoliditySolid : CGSolidityHole; // Converted from NVG_SOLID/NVG_HOLE
+         mode[ 0] = i < 2 ? CGPathFillStyleSolid : CGPathFillStyleHole; // Converted from NVG_SOLID/NVG_HOLE
          CGContextPathWinding( context, mode[ 0]);
 
          if( reverse)
@@ -110,7 +110,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          else
             drawRect( context, rect, slim);
 
-         mode[ 1] = (i & 0x1) ? CGSoliditySolid : CGSolidityHole; // Converted from NVG_SOLID/NVG_HOLE
+         mode[ 1] = (i & 0x1) ? CGPathFillStyleSolid : CGPathFillStyleHole; // Converted from NVG_SOLID/NVG_HOLE
          CGContextPathWinding( context, mode[ 1]);
 
          if( reverse)
@@ -118,7 +118,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          else
             drawCircle( context, rect, animation);
 
-         mode[ 2] = j ? CGSoliditySolid : CGSolidityHole; // Converted from NVG_SOLID/NVG_HOLE
+         mode[ 2] = j ? CGPathFillStyleSolid : CGPathFillStyleHole; // Converted from NVG_SOLID/NVG_HOLE
          CGContextPathWinding( context, mode[ 2]);
 
 
@@ -128,9 +128,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                        context:context];
 
          sprintf( buf, "%c%c%c %s%s",
-            mode[ 0] == CGSolidityHole ? 'H' : 'S', // Converted from NVG_HOLE
-            mode[ 1] == CGSolidityHole ? 'H' : 'S', // Converted from NVG_HOLE
-            mode[ 2] == CGSolidityHole ? 'H' : 'S', // Converted from NVG_HOLE
+            mode[ 0] == CGPathFillStyleHole ? 'H' : 'S', // Converted from NVG_HOLE
+            mode[ 1] == CGPathFillStyleHole ? 'H' : 'S', // Converted from NVG_HOLE
+            mode[ 2] == CGPathFillStyleHole ? 'H' : 'S', // Converted from NVG_HOLE
             slim ? "s" : "f",
             reverse ? "r" : "n");
 

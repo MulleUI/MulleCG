@@ -8,7 +8,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGContextBeginPath( context);
 
    CGContextRect( context, CGRectMake(100, 100, 300, 300));
-   CGContextStrokeColor(context, CGColorMakeWithRGBA(0, 0, 128, 64));
+   CGContextStrokeColor(context, CGColorMakeWithRGBABytes(0, 0, 128, 64));
    CGContextStrokeWidth(context, 1);
    CGContextStroke(context);
 
@@ -17,7 +17,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGContextArcTo(context, CGPointMake(100, 400),
                 CGPointMake(400, 400),
                 300);
-   CGContextStrokeColor(context, CGColorMakeWithRGBA(0, 0, 0, 255));
+   CGContextStrokeColor(context, CGColorMakeWithRGBABytes(0, 0, 0, 255));
    CGContextStrokeWidth(context, 32);
    CGContextMiterLimit( context, 20);
    CGContextStroke(context);
@@ -25,14 +25,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    CGContextBeginPath( context);
    CGContextRect( context, CGRectMake(450, 100, 300, 300));
-   CGContextStrokeColor(context, CGColorMakeWithRGBA(0, 0, 128, 64));
+   CGContextStrokeColor(context, CGColorMakeWithRGBABytes(0, 0, 128, 64));
    CGContextStrokeWidth(context, 1);
    CGContextStroke(context);
 
    CGContextBeginPath( context);
    CGContextMoveTo( context, CGPointMake(750, 100));
    CGContextBezierTo( context, CGPointMake(750, 100 - (0.552 * -300)), CGPointMake(450 - (0.552 * -300), 400), CGPointMake(450,400));
-   CGContextStrokeColor(context, CGColorMakeWithRGBA(0, 0, 0, 255));
+   CGContextStrokeColor(context, CGColorMakeWithRGBABytes(0, 0, 0, 255));
    CGContextStrokeWidth(context, 32);
    CGContextMiterLimit( context, 20);
    CGContextStroke(context);

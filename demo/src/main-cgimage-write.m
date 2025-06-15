@@ -42,7 +42,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    {
       bitmapStruct = [image RGBABytesBitmap:NULL];
       bitmapImage  = [UIBitmapImage imageWithBitmap:bitmapStruct
-                                          allocator:NULL];
+                                       freeWhenDone:YES];
       if( ! bitmapImage)
          abort();
 
@@ -51,9 +51,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
       cgLayer = [[[CGFramebuffer alloc] initWithImage:image
                                          textureFlags:NVG_IMAGE_NEAREST
+                                       nameUTF8String:"image"
                                               context:context] autorelease];
       bitmapStruct = [cgLayer RGBABytesBitmap:NULL];
-      bitmapImage = [UIBitmapImage imageWithBitmap:bitmapStruct allocator:NULL];
+      bitmapImage = [UIBitmapImage imageWithBitmap:bitmapStruct
+                                      freeWhenDone:YES];
       if( ! bitmapImage)
          abort();
 

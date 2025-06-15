@@ -6,8 +6,7 @@
 
 #include "include.h"
 
-#include "CGPath.h"
 
-void   mvgAddCGPath( NVGcontext *nvg, CGPathRef path);
+void   mvgAddCGPath( NVGcontext *nvg, CGPath *path);
 
 #endif

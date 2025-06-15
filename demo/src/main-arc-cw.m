@@ -25,12 +25,12 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect              rects[ 2][ 4];
    CGRect              topRect;
    char                buf[ 128];
-   int                 dir;
+   CARotationDirection dir;
    int                 startingPoint;
    NSUInteger          frameNr;
    unsigned int        i, j;
 
-   frameNr       = [context numberOfFrames] % 240 * 4;
+   frameNr       = [context numberOfFrames] % (240 * 4);
    startingPoint = frameNr / 240;
 
    canvas  = [layer canvas];
@@ -46,9 +46,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       for( i = 0; i < 4; i++)
       {
          if( i & 0x2)
-            dir = NVG_CCW;
+            dir = CARotationDirectionCounterClockWise;
          else
-            dir = NVG_CW;
+            dir = CARotationDirectionClockWise;
 
          if( i & 0x1)
          {
@@ -71,8 +71,8 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             CGContextIntersectScissor( context, rect); // Converted from mvgIntersectScissor
 
             // draw label
-            sprintf( buf, "%s %g-%g", dir == NVG_CW ? "CW" : "CCW",
-                                    start, end);
+            sprintf( buf, "%s %g - %g", dir == NVG_CW ? "CW" : "CCW",
+                                        start, end);
             CGContextTextColor( context, CGColorMakeBlack()); // Converted from nvgTextColor
             CGContextTextBackgroundColor( context, CGColorMakeWhite()); // Converted from nvgTextBackgroundColor
             CGContextTextInRect( context, buf, (size_t) -1, bottomRect, CGContentModeCenter, 0); // Converted from mvgTextInRect
@@ -83,10 +83,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             centerPoint = CGRectGetCenter( topRect);
             radius      = CGRectGetInnerRadius( topRect) - 4.0;
             polar       = CAPolarPointMakeWithPoint( centerPoint);
-            polar       = CAPolarPointAdd( polar, CAPolarPointMakeWithRadians( radius, start * M_PI_f));
+            polar       = CAPolarPointAdd( polar, CAPolarPointMake( radius, start * M_PI_f));
             leftPoint   = CGPointMakeWithPolarPoint( polar);
             polar       = CAPolarPointMakeWithPoint( centerPoint);
-            polar       = CAPolarPointAdd( polar, CAPolarPointMakeWithRadians( radius, end * M_PI_f));
+            polar       = CAPolarPointAdd( polar, CAPolarPointMake( radius, end * M_PI_f));
             rightPoint  = CGPointMakeWithPolarPoint( polar);
 
             CGContextStrokeLineWithColor( context, centerPoint, leftPoint, 0.5, CGColorMakeBlack()); // Converted from mvgStrokeLineWithColor
@@ -113,10 +113,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                      break;
             }
 
-            CGContextArc( context, CACircleMakeWithCenterAndRadius( centerPoint, radius),
-                                   CARadiansToAngle( start * M_PI_f),
-                                   CARadiansToAngle( end * M_PI_f),
-                                   dir); // Converted from nvgArc
+            // TODO: kick out lowlevel fix
+            mvgArc( CGContextGetNVGContext( context),
+                    CACircleMakeWithCenterAndRadius( centerPoint, radius),
+                    CARadiansToAngle( start * M_PI_f),
+                    fabsf( end - start) * ((dir == CARotationDirectionCounterClockWise) ? -1 : +1));
             color = CGColorMakeWithHSL( 0.2 + ((i + (j * 4)) / 7.0) * 0.6,
                                         1.0,
                                         0.6);

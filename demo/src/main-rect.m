@@ -1,0 +1,212 @@
+#define _GNU_SOURCE
+
+#import "import-private.h"
+
+
+#define AntiAlias  1
+#define Thick      2
+
+
+static void   drawRect( CALayer *layer, CGContext *context, NSUInteger mode)
+{
+   struct NVGcontext    *vg;
+   CGRect               canvas;
+   CGRect               rect;
+   char                 buf[ 64];
+   CGFloat              strokeWidth;
+
+   vg     = CGContextGetNVGContext( context);
+   canvas = [layer canvas];
+   nvgResetScissor( vg); // see if it makes a difference
+
+   canvas = CGRectInset( canvas, 2.0, 2.0);
+
+   strokeWidth = 1.0;
+   if( mode & Thick)
+      strokeWidth = 2.5;
+
+   rect = CGRectMakeStrokeRect( canvas, strokeWidth, CGInside);
+
+   nvgBeginPath( vg);
+   nvgShapeAntiAlias( vg, (mode & AntiAlias) ? 1 : 0);
+   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+   nvgStrokeColor( vg, CGColorMakeRed());
+   nvgStrokeWidth( vg, strokeWidth);
+   nvgStroke( vg);
+
+   sprintf( buf, "%s%.0f",
+                 (mode & AntiAlias) ? "AA " : "No AA ",
+                 strokeWidth);
+
+   [context fontWithNameUTF8String:"sans"];
+
+   nvgFontFace( vg, "sans");
+   nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+   nvgTextColor( vg, CGColorMakeBlack());
+   nvgTextBackgroundColor( vg, CGColorMakeWhite());
+   nvgFontSize( vg, 13.0);
+   nvgText( vg, CGRectGetMidX( canvas),
+                CGRectGetMidY( canvas),
+                buf,
+                NULL);
+}
+
+
+static void   drawStuff0( CALayer *layer, CGContext *context)
+{
+   drawRect( layer, context, 0);
+}
+
+static void   drawStuff1( CALayer *layer, CGContext *context)
+{
+   drawRect( layer, context, 0x1);
+}
+
+static void   drawStuff2( CALayer *layer, CGContext *context)
+{
+   drawRect( layer, context, 0x2);
+}
+
+static void   drawStuff3( CALayer *layer, CGContext *context)
+{
+   drawRect( layer, context, 0x3);
+}
+
+
+static void   fillRect( CALayer *layer, CGContext *context, NSUInteger mode)
+{
+   struct NVGcontext    *vg;
+   CGRect               canvas;
+   CGRect               rect;
+   char                 buf[ 64];
+   CGFloat              strokeWidth;
+
+   vg     = CGContextGetNVGContext( context);
+   canvas = [layer canvas];
+   nvgResetScissor( vg); // see if it makes a difference
+
+   canvas = CGRectInset( canvas, 2.0, 2.0);
+
+   strokeWidth = 1.0;
+   if( mode & Thick)
+      strokeWidth = 2.5;
+
+   rect = CGRectMakeStrokeRect( canvas, strokeWidth, CGOverlap);
+   rect = CGRectMakeFillRect( rect, strokeWidth, CGOverlap);
+
+   nvgBeginPath( vg);
+   nvgShapeAntiAlias( vg, (mode & AntiAlias) ? 1 : 0);
+   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+   nvgFillColor( vg, CGColorMakeRed());
+   nvgFill( vg);
+
+   sprintf( buf, "%s%.0f",
+                 (mode & AntiAlias) ? "AA " : "No AA ",
+                 strokeWidth);
+
+   [context fontWithNameUTF8String:"sans"];
+
+   nvgFontFace( vg, "sans");
+   nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+   nvgTextColor( vg, CGColorMakeWhite());
+   nvgTextBackgroundColor( vg, CGColorMakeRed());
+
+   nvgFontSize( vg, 13.0);
+   nvgText( vg, CGRectGetMidX( canvas),
+                CGRectGetMidY( canvas),
+                buf,
+                NULL);
+}
+
+
+static void   fillStuff0( CALayer *layer, CGContext *context)
+{
+   fillRect( layer, context, 0x0);
+}
+
+static void   fillStuff1( CALayer *layer, CGContext *context)
+{
+   fillRect( layer, context, 0x1);
+}
+
+static void   fillStuff2( CALayer *layer, CGContext *context)
+{
+   fillRect( layer, context, 0x2);
+}
+
+static void   fillStuff3( CALayer *layer, CGContext *context)
+{
+   fillRect( layer, context, 0x3);
+}
+
+
+typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
+
+static CALayerDrawCallbackPointer_t   drawStuff[ 8] =
+{
+   (CGGraphicsLayerDrawCallback_t *) drawStuff0,
+   (CGGraphicsLayerDrawCallback_t *) drawStuff1,
+   (CGGraphicsLayerDrawCallback_t *) drawStuff2,
+   (CGGraphicsLayerDrawCallback_t *) drawStuff3,
+
+   (CGGraphicsLayerDrawCallback_t *) fillStuff0,
+   (CGGraphicsLayerDrawCallback_t *) fillStuff1,
+   (CGGraphicsLayerDrawCallback_t *) fillStuff2,
+   (CGGraphicsLayerDrawCallback_t *) fillStuff3
+};
+
+
+int   main( int argc, char *argv[])
+{
+   UIApplication   *app;
+   UIWindow        *window[ 8];
+   NSUInteger      i;
+
+   app = [UIApplication sharedInstance];
+
+   for( i = 0; i < 8; i++)
+   {
+      window[ i] = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 100, 100)];
+      [window[ i] setDrawCallback:drawStuff[ i]];
+      [window[ i] setBackgroundColor:CGColorMakeWhite()];
+      [app addWindow:window[ i]];
+   }
+   return( [app runApp]);
+}
+
+
+//
+//                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
+//                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
+//                  ╓#╜^*█⌐   `╕       █           ╓▌    `╙%w
+//               ╓ΦΓ      █    ╙⌐     ,█,,,Φ      ╓▌         ╙¥▄
+//            ,▄▀ █▄       █µ,╓╝,╓≤╗≡≡ª╨╨╨¥≡∞╗w╓,ª█,  ,       ]▄▀V,
+//          ,Φ└   ║"▀▄     ,▄▀╨"                 "╙¥▓▓       ▄▀  º▄¥,
+//        ,#▌Φ▓▄╓  Φ `█Q▄M╙                           ╙¥▄ ,▄▀ ╙▄⌐`  `Φ
+//       ▄▀   `V,"▀▀¼╓╩└                                 ╙¥▓╗ ,       ╙▄
+//      Φ       `¥═▄▀                            ╒          ▀▄          ▓
+//    .▓         ╓▓]V▄H       ▓                 ,Å            ▀,         ▀
+//    █      ,-ª▓╛  `██▀½      "▄  ,╓╓╓╓;╓▄▄▄▄╗▄█,             ╙▄         ▀
+//   █  `██▄   ▓. - Φ█═.~     ,≤█▄▀-      `   █└"▀▀▀▀▄╓╓╓╓       ▌    ██▄, █
+//  ║⌐  " ▀   ▓╨⌐   }▀`      ,█  `           █      .█▀▄▄███▄     ▌  ` ▀    ▌
+//  ▌        ▐M A   '┴      ▌                ▀        ╙█▌████▌    ╙▄        ║⌐
+// ║⌐        █⌐'║▄ Γr2«    ║▀                 ▄▄▄      ╙▌▄███      █         ▌
+// █]     ,▄▐H  ██████═ª  ╓` ▄█▀▀▀▀█▄        ████     ╓███` `╙╙║█  ▐H        █
+// █ "% ,▄▀ ║░╠K█═╣███^   ╛╓█▀      ▐█         ,╓╓═ª╙└   █      ╙█▄▐▌▓######▌╫
+// █║▄▄▄█▄▄▄║H:  "╙▀███▄╓▄,█▌╓▄,,▄∩  ██p$ΦΦ▀▀▀▀▀ΦΦΦR≡≥▄╓ ║▄       ╙j▌` ▄▀╙╗ `╫
+// █"      ╙▐H-═M ▄███████¥█H "^╙    '█, ,«^``     `     ║▌        ▐M▄▀    "Φ█
+// ║        !█▄▄████≤═^`╓█ █▌╓▀╦▄▀█   ╙█⌐               ╓█▌        ▓ `       █
+//  ▌      ,▄██╫██ ▄█═╜" █▌▐█╣Hj⌐ █    █▌╙¥w,           ██▄       ╓▌        ▐M
+//  ╢"▄▄#▀▀╙╟█Ü███▀`▀█  ║██J█▄▌jH █    ██    ╙▀W▄;    ,██  `╙w,   █▄     ,╓ █
+//   █╙     ▐███▌▀█w ▀█ ╠██████j▌║█▌   ▀██▄       `╙▓██▀w,     ╙╗█'`"▀█▀╙"`║`
+//   ╙▌     Φ████████▄██ ███████████    ═██▀W▄,   ╓█▀└         ╓▀ "    ╙▄ ╓▀
+//    ╙▄     ╙▀███╙█▄▐██▄,╙▀█████▄▀▄▀▄   ,█M╗ ▀▄██▀╙""*ⁿ═─≈-,,▄▌,        ▄▀
+//     `▌╙µ,▄Φ▀x███▄██████████▀V███▀╙└ ,▄#▌████▀`"*«,      .█▀▄▀▄,      ▄╛
+//       ▀Ö█  ;▓████████▄▄█▀▄╙W "V▄██▀▀│▄███▀└ ▀╦     "*═╥▄▀ ║,  ║▀▄  ,▓
+//        ╙W▀ '█████╨▀▀█████████   "▀▀████└      ╙▄   ,▄▀'   `▀▀╣H ▐▀▄▀
+//          ╙▄  ▀▀Γ╓▌  ▄▀ⁿ`╙▀███      ██▌         ╓█R▀▄A█        ▀▀▄▀
+//            ╙W,Φ╙  ║█        ▄╙╙ª%≡╦██≤≤╗╗≡≡╜▀▀   ╣▌   █╕     ,▄▀
+//              `▀▄M█┘        ║▀▌   ╫"    *Φ▄  █       Φ` ▀▌, ▄M╙
+//                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
+//                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
+//                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`

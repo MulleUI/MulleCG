@@ -1,14 +1,16 @@
 //
 // Copyright (c) 2020 Nat!, Mulle kybernetiK
 //
-#include "CGPath+nanovg.h"
-
 #include "include-private.h"
+
+#include "CGTypes.h"
+
+#include <assert.h>
 
 
 // TODO: this could just be part of nanovg-extensions.inc
 //       further more this could be added wholesale with nvg__appendCommands
-void   mvgAddCGPath( NVGcontext *vg, CGPathRef path)
+void   mvgAddCGPath( NVGcontext *vg, CGPath *path)
 {
    unsigned int    n;
    float           *f;
@@ -19,16 +21,38 @@ void   mvgAddCGPath( NVGcontext *vg, CGPathRef path)
    float           r;
    float           dir;
    float           a0, a1;
+   int             cmd;
+#ifndef NDEBUG
+   int            prev;
+   int            prevprev;
+
+   cmd      = -1;
+   prevprev = -1;
+#endif
 
    if( ! vg || ! path)
       return;
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wenum-compare"
+#endif
+
+   assert( CARotationDirectionCounterClockWise == NVG_CCW);
+   assert( CARotationDirectionClockWise == NVG_CW);
 
    n        = _mulle_floatarray_get_count( &path->_floats);
    f        = _mulle_floatarray_get_floats( &path->_floats);
    sentinel = &f[ n];
    while( f < sentinel)
    {
-      switch( (int) *f++)
+#ifndef NDEBUG
+      prevprev = prev;
+      prev     = cmd;
+#endif
+      cmd  = (int) *f++;
+
+      switch( cmd)
       {
       case CGPathMoveCommand:
          x = *f++;
@@ -70,12 +94,16 @@ void   mvgAddCGPath( NVGcontext *vg, CGPathRef path)
          nvgArc( vg, x, y, r, a0, a1, (int) dir);
          break;
 
-      case CGPathWindingCommand :
+      case CGPathFillStyleCommand :
+         assert( prev != CGPathFillStyleCommand);
+         assert( prevprev != CGPathFillStyleCommand);
          x = *f++;
          nvgPathWinding( vg, (int) x);
          break;
 
       case CGPathCloseSubpathCommand:
+         assert( prev != CGPathCloseSubpathCommand);
+         assert( prevprev != CGPathCloseSubpathCommand);
          nvgClosePath( vg);
          break;
       }

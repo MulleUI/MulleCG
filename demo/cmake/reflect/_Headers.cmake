@@ -35,6 +35,7 @@ src/include-private.h
 # contents selected with patternfile ??-header--project-only-headers
 #
 set( PROJECT_ONLY_HEADERS
+src/bengal.jpg.inc
 src/bitmap2.inc
 src/bitmap.inc
 src/blur.frag.inc

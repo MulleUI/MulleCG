@@ -27,7 +27,10 @@ typedef void    CGGPUFramebuffer;
 // With nvg you use the CGTextureID.
 //
 
-@interface CGContext( Texture)
+//
+// function will be implemented by +nanovg so this is a "future" @interface
+//
+@interface CGContext( TextureFuture)
 
 - (CGTextureID) textureIDWithRGBABytes:(void *) bytes
                         bitmapSize:(CGPixelSize) size

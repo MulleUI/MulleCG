@@ -131,9 +131,9 @@ int   main( int argc, char *argv[])
    if( argc == 2)
       bits = atoi( argv[ 1]);
    if( bits & 1)
-      [window setWillDrawViewsCallback:drawOpenGL_blue];
+      [window setWillRenderLayersCallback:drawOpenGL_blue];
    if( bits & 2)
-      [window setDidDrawViewsCallback:drawOpenGL_yellow];
+      [window setDidRenderLayersCallback:drawOpenGL_yellow];
    if( bits & 4)
       [window setDidRenderFrameCallback:drawOpenGL_magenta];
 

@@ -267,89 +267,85 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 }
 
 
+#if defined(__GNUC__) || defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wenum-compare"
+#endif
 
 - (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options
 {
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wenum-compare"
-#endif
-   assert( UIGraphicsSourceOver == NVG_SOURCE_OVER);
-   assert( UIGraphicsXor        == NVG_XOR);
-   assert( UIGraphicsCopy       == NVG_COPY);
+   MULLE_C_ASSERT( UIGraphicsSourceOver == NVG_SOURCE_OVER);
+   MULLE_C_ASSERT( UIGraphicsXor        == NVG_XOR);
+   MULLE_C_ASSERT( UIGraphicsCopy       == NVG_COPY);
 
    // Context Type assertions
-   assert(CGContextTypeFull == NVG_FULL_CONTEXT);
-   assert(CGContextTypePath == NVG_PATH_CONTEXT);
-   assert(CGContextTypeFont == NVG_FONT_CONTEXT);
+   MULLE_C_ASSERT( CGContextTypeFull == NVG_FULL_CONTEXT);
+   MULLE_C_ASSERT( CGContextTypePath == NVG_PATH_CONTEXT);
+   MULLE_C_ASSERT( CGContextTypeFont == NVG_FONT_CONTEXT);
 
    // Winding assertions
-   assert(CGWindingCCW == NVG_CCW);
-   assert(CGWindingCW == NVG_CW);
+   MULLE_C_ASSERT( CARotationDirectionCounterClockWise == NVG_CCW);
+   MULLE_C_ASSERT( CARotationDirectionClockWise == NVG_CW);
 
    // Solidity assertions
-   assert(CGSoliditySolid == NVG_SOLID);
-   assert(CGSolidityHole == NVG_HOLE);
+   MULLE_C_ASSERT( CGPathFillStyleSolid == NVG_SOLID);
+   MULLE_C_ASSERT( CGPathFillStyleHole == NVG_HOLE);
 
    // Line Cap assertions
-   assert(CGLineCapButt == NVG_BUTT);
-   assert(CGLineCapRound == NVG_ROUND);
-   assert(CGLineCapSquare == NVG_SQUARE);
-   assert(CGLineCapBevel == NVG_BEVEL);
-   assert(CGLineCapMiter == NVG_MITER);
+   MULLE_C_ASSERT( CGLineCapButt == NVG_BUTT);
+   MULLE_C_ASSERT( CGLineCapRound == NVG_ROUND);
+   MULLE_C_ASSERT( CGLineCapSquare == NVG_SQUARE);
+   MULLE_C_ASSERT( CGLineCapBevel == NVG_BEVEL);
+   MULLE_C_ASSERT( CGLineCapMiter == NVG_MITER);
 
    // Text Align assertions
-   assert(CGTextAlignLeft == NVG_ALIGN_LEFT);
-   assert(CGTextAlignCenter == NVG_ALIGN_CENTER);
-   assert(CGTextAlignRight == NVG_ALIGN_RIGHT);
-   assert(CGTextAlignTop == NVG_ALIGN_TOP);
-   assert(CGTextAlignMiddle == NVG_ALIGN_MIDDLE);
-   assert(CGTextAlignBottom == NVG_ALIGN_BOTTOM);
-   assert(CGTextAlignBaseline == NVG_ALIGN_BASELINE);
+   MULLE_C_ASSERT( CGTextAlignLeft == NVG_ALIGN_LEFT);
+   MULLE_C_ASSERT( CGTextAlignCenter == NVG_ALIGN_CENTER);
+   MULLE_C_ASSERT( CGTextAlignRight == NVG_ALIGN_RIGHT);
+   MULLE_C_ASSERT( CGTextAlignTop == NVG_ALIGN_TOP);
+   MULLE_C_ASSERT( CGTextAlignMiddle == NVG_ALIGN_MIDDLE);
+   MULLE_C_ASSERT( CGTextAlignBottom == NVG_ALIGN_BOTTOM);
+   MULLE_C_ASSERT( CGTextAlignBaseline == NVG_ALIGN_BASELINE);
 
    // Blend Factor assertions
-   assert(CGBlendFactorZero == NVG_ZERO);
-   assert(CGBlendFactorOne == NVG_ONE);
-   assert(CGBlendFactorSrcColor == NVG_SRC_COLOR);
-   assert(CGBlendFactorOneMinusSrcColor == NVG_ONE_MINUS_SRC_COLOR);
-   assert(CGBlendFactorDstColor == NVG_DST_COLOR);
-   assert(CGBlendFactorOneMinusDstColor == NVG_ONE_MINUS_DST_COLOR);
-   assert(CGBlendFactorSrcAlpha == NVG_SRC_ALPHA);
-   assert(CGBlendFactorOneMinusSrcAlpha == NVG_ONE_MINUS_SRC_ALPHA);
-   assert(CGBlendFactorDstAlpha == NVG_DST_ALPHA);
-   assert(CGBlendFactorOneMinusDstAlpha == NVG_ONE_MINUS_DST_ALPHA);
-   assert(CGBlendFactorSrcAlphaSaturate == NVG_SRC_ALPHA_SATURATE);
+   MULLE_C_ASSERT( CGBlendFactorZero == NVG_ZERO);
+   MULLE_C_ASSERT( CGBlendFactorOne == NVG_ONE);
+   MULLE_C_ASSERT( CGBlendFactorSrcColor == NVG_SRC_COLOR);
+   MULLE_C_ASSERT( CGBlendFactorOneMinusSrcColor == NVG_ONE_MINUS_SRC_COLOR);
+   MULLE_C_ASSERT( CGBlendFactorDstColor == NVG_DST_COLOR);
+   MULLE_C_ASSERT( CGBlendFactorOneMinusDstColor == NVG_ONE_MINUS_DST_COLOR);
+   MULLE_C_ASSERT( CGBlendFactorSrcAlpha == NVG_SRC_ALPHA);
+   MULLE_C_ASSERT( CGBlendFactorOneMinusSrcAlpha == NVG_ONE_MINUS_SRC_ALPHA);
+   MULLE_C_ASSERT( CGBlendFactorDstAlpha == NVG_DST_ALPHA);
+   MULLE_C_ASSERT( CGBlendFactorOneMinusDstAlpha == NVG_ONE_MINUS_DST_ALPHA);
+   MULLE_C_ASSERT( CGBlendFactorSrcAlphaSaturate == NVG_SRC_ALPHA_SATURATE);
 
    // Composite Operation assertions
-   assert(CGCompositeOperationSourceOver == NVG_SOURCE_OVER);
-   assert(CGCompositeOperationSourceIn == NVG_SOURCE_IN);
-   assert(CGCompositeOperationSourceOut == NVG_SOURCE_OUT);
-   assert(CGCompositeOperationAtop == NVG_ATOP);
-   assert(CGCompositeOperationDestinationOver == NVG_DESTINATION_OVER);
-   assert(CGCompositeOperationDestinationIn == NVG_DESTINATION_IN);
-   assert(CGCompositeOperationDestinationOut == NVG_DESTINATION_OUT);
-   assert(CGCompositeOperationDestinationAtop == NVG_DESTINATION_ATOP);
-   assert(CGCompositeOperationLighter == NVG_LIGHTER);
-   assert(CGCompositeOperationCopy == NVG_COPY);
-   assert(CGCompositeOperationXOR == NVG_XOR);
+   MULLE_C_ASSERT( CGCompositeOperationSourceOver == NVG_SOURCE_OVER);
+   MULLE_C_ASSERT( CGCompositeOperationSourceIn == NVG_SOURCE_IN);
+   MULLE_C_ASSERT( CGCompositeOperationSourceOut == NVG_SOURCE_OUT);
+   MULLE_C_ASSERT( CGCompositeOperationAtop == NVG_ATOP);
+   MULLE_C_ASSERT( CGCompositeOperationDestinationOver == NVG_DESTINATION_OVER);
+   MULLE_C_ASSERT( CGCompositeOperationDestinationIn == NVG_DESTINATION_IN);
+   MULLE_C_ASSERT( CGCompositeOperationDestinationOut == NVG_DESTINATION_OUT);
+   MULLE_C_ASSERT( CGCompositeOperationDestinationAtop == NVG_DESTINATION_ATOP);
+   MULLE_C_ASSERT( CGCompositeOperationLighter == NVG_LIGHTER);
+   MULLE_C_ASSERT( CGCompositeOperationCopy == NVG_COPY);
+   MULLE_C_ASSERT( CGCompositeOperationXOR == NVG_XOR);
 
    // Image Flags assertions
-   assert(CGImageFlagGenerateMipmaps == NVG_IMAGE_GENERATE_MIPMAPS);
-   assert(CGImageFlagRepeatX == NVG_IMAGE_REPEATX);
-   assert(CGImageFlagRepeatY == NVG_IMAGE_REPEATY);
-   assert(CGImageFlagFlipY == NVG_IMAGE_FLIPY);
-   assert(CGImageFlagPremultiplied == NVG_IMAGE_PREMULTIPLIED);
-   assert(CGImageFlagNearest == NVG_IMAGE_NEAREST);
-   assert(CGImageFlagMSAA == NVG_IMAGE_MSAA);
-   assert(CGImageFlagRBOLess == NVG_IMAGE_RBO_LESS);
+   MULLE_C_ASSERT( CGImageFlagGenerateMipmaps == NVG_IMAGE_GENERATE_MIPMAPS);
+   MULLE_C_ASSERT( CGImageFlagRepeatX == NVG_IMAGE_REPEATX);
+   MULLE_C_ASSERT( CGImageFlagRepeatY == NVG_IMAGE_REPEATY);
+   MULLE_C_ASSERT( CGImageFlagFlipY == NVG_IMAGE_FLIPY);
+   MULLE_C_ASSERT( CGImageFlagPremultiplied == NVG_IMAGE_PREMULTIPLIED);
+   MULLE_C_ASSERT( CGImageFlagNearest == NVG_IMAGE_NEAREST);
+   MULLE_C_ASSERT( CGImageFlagMSAA == NVG_IMAGE_MSAA);
+   MULLE_C_ASSERT( CGImageFlagRBOLess == NVG_IMAGE_RBO_LESS);
 
    // Tessellation assertions
-   assert(CGTessellationSubdivision == NVG_TESS_SUBDIVISION);
-   assert(CGTessellationAFD == NVG_TESS_AFD);
-
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
+   MULLE_C_ASSERT( CGTessellationSubdivision == NVG_TESS_SUBDIVISION);
+   MULLE_C_ASSERT( CGTessellationAFD == NVG_TESS_AFD);
 
    _nvgFlags  = (options & UIGraphicsEdgeAntiAliasing)  ? NVG_ANTIALIAS : 0;
    _nvgFlags |= (options & UIGraphicsUseStencilStrokes) ? NVG_STENCIL_STROKES : 0;
@@ -380,6 +376,9 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
       _framebufferBits |= GL_STENCIL_BUFFER_BIT;
 }
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 
 - (void *) gpuTextureForImageID:(NSInteger) textureID
@@ -499,6 +498,12 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
    [self bindFramebuffer:previous];
 
    return( layer);
+}
+
+
+- (void) reset
+{
+   nvgReset( _vg);
 }
 
 

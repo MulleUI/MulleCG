@@ -30,42 +30,42 @@ static void   drawRoundedStroke( CGContext *context, // Converted from struct NV
    endRadians   = 0.5 * M_PI_f;
    if( bits & RightConvave)
    {
-      rdir = NVG_CW;
+      rdir = CARotationDirectionClockWise;
    }
    else
    {
       rect = CGRectContract( rect, offset, CADirectionRight);
-      rdir = NVG_CCW;
+      rdir = CARotationDirectionCounterClockWise;
    }
 
    if( bits & LeftConcave)
    {
       rect = CGRectExpand( rect, offset, CADirectionLeft);
-      ldir = NVG_CW;
+      ldir = CARotationDirectionClockWise;
    }
    else
    {
-      ldir = NVG_CCW;
+      ldir = CARotationDirectionCounterClockWise;
    }
 
    CGContextBeginPath( context); // Converted from nvgBeginPath
 
    CGContextMoveTo( context, CGPointMake( rect.origin.x + offset, rect.origin.y)); // Converted from nvgMoveTo
 
-   CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + offset, rect.origin.y + radius), radius), // Converted from nvgArc
-               startRadians,
-               endRadians,
-               ldir);
+   CGContextArcRadians( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + offset, rect.origin.y + radius), radius), // Converted from nvgArc
+                                 startRadians,
+                                 endRadians,
+                                 ldir);
 
    // Draw the top edge of the rectangle to the beginning of the arc
    CGContextLineTo( context, CGPointMake( rect.origin.x + rect.size.width - offset, // Converted from nvgLineTo
                   rect.origin.y + rect.size.height));
    // Add a concave half circle on the right edge of the rectangle
-   CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + rect.size.width, // Converted from nvgArc
-               rect.origin.y + radius), radius),
-               endRadians,
-               startRadians,
-               rdir);
+   CGContextArcRadians( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + rect.size.width, // Converted from nvgArc
+                                 rect.origin.y + radius), radius),
+                                 endRadians,
+                                 startRadians,
+                                 rdir);
 //   CGContextLineTo( context, CGPointMake( rect.origin.x, rect.origin.y)); // Converted from nvgLineTo
    // Draw the left edge of the rectangle
 

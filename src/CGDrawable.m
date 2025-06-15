@@ -452,39 +452,55 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self,
    CGPoint             scale;
    CGPoint             factor;
 
-   size        = [self size];
-   xform       = CGRectReverseImageMapperTransform( rect, options->rotation, rect.size, size);
+   size  = [self size];
 
    if( ! options->flags.textureOverreach &&
-         options->scale != CGScaleNone
-         && fromRect.size.width != 0.0 && fromRect.size.height != 0.0)
+         options->scale != CGScaleNone)
    {
       //
       // Unfortunately OpenGL "overreaches" into neighboring texturing, when
       // scaling up the pixels... so we correct this, otherwise you get ugly
       // artifacts and borders...
-      //
-      factor.x      = 0.0;
-      factor.y      = 0.0;
-      scale.x       = rect.size.width  / fromRect.size.width;
-      scale.y       = rect.size.height / fromRect.size.height;
+      scale.x = rect.size.width  / fromRect.size.width;
       if( scale.x > 1.0)
+      {
          factor.x = scale.x < 2.0
                     ? (rect.size.width - fromRect.size.width) / fromRect.size.width / 2.0
                     : 0.5;
+         fromRect.origin.x += factor.x;
+         if( factor.x * 2.0 < fromRect.size.width)
+            fromRect.size.width -= factor.x * 2.0;
+         else
+            fromRect.size.width  = 1.0 / scale.x;
+      }
+
+      scale.y = rect.size.height / fromRect.size.height;
       if( scale.y > 1.0)
+      {
          factor.y = scale.y < 2.0
                     ? (rect.size.height - fromRect.size.height) / fromRect.size.height / 2.0
                     : 0.5;
 
-      fromRect.origin.x    += factor.x;
-      fromRect.origin.y    += factor.y;
-      fromRect.size.width  -= factor.x * 2.0;
-      fromRect.size.height -= factor.y * 2.0;
+         fromRect.origin.y += factor.y;
+         if( factor.y * 2.0 < fromRect.size.height)
+            fromRect.size.height -= factor.y * 2.0;
+         else
+            fromRect.size.height  = 1.0 / scale.y;
+      }
    }
+
    // if fromRect is { CGPointZero, [self size] }, then sectionRect should be
    // exactly rect, otherwise we get a subsection of rect
+   xform       = CGRectReverseImageMapperTransform( rect, options->rotation, rect.size, size);
    sectionRect = CGRectApplyAffineTransform( fromRect, xform);
+
+   // get fromOrigin texture coordinate
+   texturePoint.x = (CGRectGetMidX( sectionRect) - rect.origin.x) / rect.size.width;
+   texturePoint.y = (CGRectGetMidY( sectionRect) - rect.origin.y) / rect.size.height;
+
+   // hacky hack
+   if( sectionRect.size.width == 0.0 || sectionRect.size.height == 0.0)
+      return( CGRectMakeWithOriginAndSize( texturePoint, CGSizeMake( 0.5, 0.5)));
 
 //
 //  +----------+
@@ -494,18 +510,14 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self,
 //  |          |
 //  +----------+
 //
-   // reduce extent to fromRect.size
-   r.size.width  = rect.size.width  * (rect.size.width / sectionRect.size.width);
-   r.size.height = rect.size.height * (rect.size.height / sectionRect.size.height);
+// reduce extent to fromRect.size
 
-   // get fromOrigin texture coordinate
-   texturePoint.x = (CGRectGetMidX( sectionRect) - rect.origin.x) / rect.size.width;
-   texturePoint.y = (CGRectGetMidY( sectionRect) - rect.origin.y) / rect.size.height;
-
-   r.origin = CGRectGetOriginToTexturePointForRotationAndExtent( rect,
-                                                                 texturePoint,
-                                                                 options->rotation,
-                                                                 r.size);
+   r.size.width   = rect.size.width  * (rect.size.width / sectionRect.size.width);
+   r.size.height  = rect.size.height * (rect.size.height / sectionRect.size.height);
+   r.origin       = CGRectGetOriginToTexturePointForRotationAndExtent( rect,
+                                                                       texturePoint,
+                                                                       options->rotation,
+                                                                       r.size);
    return( r);
 }
 

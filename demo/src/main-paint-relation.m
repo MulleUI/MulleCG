@@ -3,8 +3,8 @@
 #import "import-private.h"
 
 
-#define COLS  4
-#define ROWS  4
+#define COLS  3
+#define ROWS  3
 
 
 
@@ -76,6 +76,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       {
          rect                    = CGRectIntegral( rects[ j][ i]);
 
+         // make 
+         strokeRect = CGRectMakeStrokeRect( rect, 1.0, CGOverlap);
+         CGContextBeginPath( context);
+         CGContextRect( context, strokeRect);
+         CGContextStrokeColor( context, CGColorMakeRed());
+         CGContextStrokeWidth( context, 1.0f);
+         CGContextStroke( context);
+
          fillOptions             = CGFillOptionsDefault;
          fillOptions.strokeWidth = strokeWidth;
          fillOptions.relation    = i;
@@ -84,7 +92,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          strokeOptions.relation  = j;
 
          //
-         fillRect = CGRectMakeFillRect( rect, strokeWidth, fillOptions.relation);
+         //
+         strokeRect = CGRectMakeStrokeRect( rect, strokeWidth, strokeOptions.relation);
+         fillRect   = CGRectMakeFillRect( strokeRect, strokeWidth, fillOptions.relation);
+
          CGContextBeginPath( context);
          CGContextRect( context, fillRect);
          CGContextFillPaintableOptions( context,
@@ -93,9 +104,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                         &fillOptions);
          CGContextFill( context);
 
-         //
-
-         strokeRect = CGRectMakeStrokeRect( rect, strokeWidth, strokeOptions.relation);
 
          CGContextBeginPath( context);
          CGContextRect( context, strokeRect);
@@ -128,7 +136,6 @@ int   main( int argc, char *argv[])
    window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 640, 400)];
    [window setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [window setBackgroundColor:CGColorMakeWhite()];
-   [window setFrameRateHz:0.5];
    [app addWindow:window];
 
    return( [app runApp]);

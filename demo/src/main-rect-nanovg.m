@@ -91,8 +91,8 @@ static void   fillRect( CALayer *layer, CGContext *context, NSUInteger mode)
    if( mode & Thick)
       strokeWidth = 2.5;
 
-   rect = CGRectMakeStrokeRect( canvas, strokeWidth, CGCover);
-   rect = CGRectMakeFillRect( rect, strokeWidth, CGCover);
+   rect = CGRectMakeStrokeRect( canvas, strokeWidth, CGOverlap);
+   rect = CGRectMakeFillRect( rect, strokeWidth, CGOverlap);
 
    nvgBeginPath( vg);
    nvgShapeAntiAlias( vg, (mode & AntiAlias) ? 1 : 0);

@@ -15,20 +15,6 @@ typedef NS_ENUM(NSUInteger, CGContextType)
 };
 
 
-typedef NS_ENUM(NSUInteger, CGWinding)
-{
-   CGWindingCCW = 1,            // Winding for solid shapes
-   CGWindingCW  = 2             // Winding for holes
-};
-
-
-typedef NS_ENUM(NSUInteger, CGSolidity)
-{
-   CGSoliditySolid = 1,         // CCW
-   CGSolidityHole  = 2          // CW
-};
-
-
 typedef NS_ENUM(NSUInteger, CGLineCap)
 {
    CGLineCapButt,
@@ -122,12 +108,119 @@ typedef NS_ENUM( NSUInteger, CGTextOptions)
 
 typedef NS_ENUM( NSUInteger, CGRelation)
 {
-   CGCover,
    CGInside,
    CGOutside,
    CGOverlap
 };
 
+
+// CGContextType string conversion functions
+static inline char   *_CGContextTypeUTF8String( NSUInteger value)
+{
+   switch( value)
+   {
+   case CGContextTypeFull : return( "Full");
+   case CGContextTypePath : return( "Path");
+   case CGContextTypeFont : return( "Font");
+   }
+   return( NULL);
+}
+
+static inline char   *CGContextTypeUTF8String( NSUInteger value)
+{
+   char   *s;
+
+   s = _CGContextTypeUTF8String( value);
+   return( s ? s : "???");
+}
+
+// CARotationDirection string conversion functions
+static inline char   *_CGWindingUTF8String( NSUInteger value)
+{
+   switch( value)
+   {
+   case CARotationDirectionCounterClockWise : return( "CCW");
+   case CARotationDirectionClockWise  : return( "CW");
+   }
+   return( NULL);
+}
+
+static inline char   *CGWindingUTF8String( NSUInteger value)
+{
+   char   *s;
+
+   s = _CGWindingUTF8String( value);
+   return( s ? s : "???");
+}
+
+// CGLineCap string conversion functions
+static inline char   *_CGLineCapUTF8String( NSUInteger value)
+{
+   switch( value)
+   {
+   case CGLineCapButt   : return( "Butt");
+   case CGLineCapRound  : return( "Round");
+   case CGLineCapSquare : return( "Square");
+   case CGLineCapBevel  : return( "Bevel");
+   case CGLineCapMiter  : return( "Miter");
+   }
+   return( NULL);
+}
+
+static inline char   *CGLineCapUTF8String( NSUInteger value)
+{
+   char   *s;
+
+   s = _CGLineCapUTF8String( value);
+   return( s ? s : "???");
+}
+
+// CGCompositeOperation string conversion functions
+static inline char   *_CGCompositeOperationUTF8String( NSUInteger value)
+{
+   switch( value)
+   {
+   case CGCompositeOperationSourceOver      : return( "SourceOver");
+   case CGCompositeOperationSourceIn        : return( "SourceIn");
+   case CGCompositeOperationSourceOut       : return( "SourceOut");
+   case CGCompositeOperationAtop            : return( "Atop");
+   case CGCompositeOperationDestinationOver : return( "DestinationOver");
+   case CGCompositeOperationDestinationIn   : return( "DestinationIn");
+   case CGCompositeOperationDestinationOut  : return( "DestinationOut");
+   case CGCompositeOperationDestinationAtop : return( "DestinationAtop");
+   case CGCompositeOperationLighter         : return( "Lighter");
+   case CGCompositeOperationCopy            : return( "Copy");
+   case CGCompositeOperationXOR             : return( "XOR");
+   }
+   return( NULL);
+}
+
+static inline char   *CGCompositeOperationUTF8String( NSUInteger value)
+{
+   char   *s;
+
+   s = _CGCompositeOperationUTF8String( value);
+   return( s ? s : "???");
+}
+
+// CGTessellation string conversion functions
+static inline char   *_CGTessellationUTF8String( NSUInteger value)
+{
+   switch( value)
+   {
+   case CGTessellationSubdivision : return( "Subdivision");
+   case CGTessellationAFD         : return( "AFD");
+   }
+   return( NULL);
+}
+
+static inline char   *CGTessellationUTF8String( NSUInteger value)
+{
+   char   *s;
+
+   s = _CGTessellationUTF8String( value);
+   return( s ? s : "???");
+}
 
 
 // this is only for a single bit in buttons
@@ -135,7 +228,6 @@ static inline char   *_CGRelationUTF8String( NSUInteger bit)
 {
    switch( bit)
    {
-   case CGCover   : return( "Cover");
    case CGInside  : return( "Inside");
    case CGOutside : return( "Outside");
    case CGOverlap : return( "Overlap");
@@ -153,14 +245,16 @@ static inline char   *CGRelationUTF8String( NSUInteger bit)
 }
 
 
+// You want to stroke a rectangle. By defaule CGOverlap (no compensation) will
+// draw half the strokeWidth _outside_ of your rectangle. You can correct the
+// positioning with `CGRectMakeStrokeRect`
 //
-// CGOverlap :  fill extends covers half the strokeWidth (i.e. no compensation)
-// CGInside  :  fill extends to stroke, but does not cover any portion
-// CGCover   :  fill extends to cover stroke, covers it
-// CGOutside :  same as CGCover
+// CGOverlap :  stroke extends over half the rect (i.e. no compensation)
+// CGInside  :  stroke does not extend over the rect
+// CGOutside :  stroke paints outside of rect
 //
 static inline CGRect
-   CGRectMakeFillRect( CGRect rect, CGFloat strokeWidth, CGRelation relation)
+   CGRectMakeStrokeRect( CGRect rect, CGFloat strokeWidth, CGRelation relation)
 {
    switch( relation)
    {
@@ -171,8 +265,7 @@ static inline CGRect
      rect.size.height -= strokeWidth;
      break;
 
-   case CGCover   :
-   case CGOutside :
+   case CGOutside   :
      rect.origin.x    -= strokeWidth / 2.0;
      rect.origin.y    -= strokeWidth / 2.0;
      rect.size.width  += strokeWidth;
@@ -185,34 +278,37 @@ static inline CGRect
 }
 
 
+
+// You made a stroke for a rectangle with CGRectMakeStrokeRect. Now you want
+// to fill the inside. You use CGRectMakeFillRect with the resule of
+// CGRectMakeStrokeRect and the following options:
 //
-// CGOverlap :  stroke extends over half the rect (i.e. no compensation)
-// CGInside  :  stroke does not extend over the rect
-// CGOutside :  stroke paints outside of rect
-// CGCover   :  same as CGInside
+// CGOverlap :  fill extends covers half the strokeWidth (i.e. no compensation)
+// CGInside  :  fill extends to stroke, but does not cover any portion
+// CGOverlap   :  fill extends to cover stroke completely
 //
 static inline CGRect
-   CGRectMakeStrokeRect( CGRect rect, CGFloat strokeWidth, CGRelation relation)
+   CGRectMakeFillRect( CGRect strokeRect, CGFloat strokeWidth, CGRelation relation)
 {
    switch( relation)
    {
    case CGInside  :
-   case CGCover   :
-     rect.origin.x    += strokeWidth / 2.0;
-     rect.origin.y    += strokeWidth / 2.0;
-     rect.size.width  -= strokeWidth;
-     rect.size.height -= strokeWidth;
+     strokeRect.origin.x    += strokeWidth / 2.0;
+     strokeRect.origin.y    += strokeWidth / 2.0;
+     strokeRect.size.width  -= strokeWidth;
+     strokeRect.size.height -= strokeWidth;
      break;
 
-   case CGOutside   :
-     rect.origin.x    -= strokeWidth / 2.0;
-     rect.origin.y    -= strokeWidth / 2.0;
-     rect.size.width  += strokeWidth;
-     rect.size.height += strokeWidth;
+   case CGOutside :
+     strokeRect.origin.x    -= strokeWidth / 2.0;
+     strokeRect.origin.y    -= strokeWidth / 2.0;
+     strokeRect.size.width  += strokeWidth;
+     strokeRect.size.height += strokeWidth;
+
    case CGOverlap :
      break;
    }
-   return( rect);
+   return( strokeRect);
 }
 
 
@@ -227,14 +323,14 @@ struct CGPaintOptions
 struct CGStrokeOptions
 {
    struct CGPaintOptions   paint;
-   CGRelation              relation;           // default: CGCover
+   CGRelation              relation;           // default: CGOverlap
 };
 
 
 struct CGFillOptions
 {
    struct CGPaintOptions   paint;
-   CGRelation              relation;        // default: CGCover
+   CGRelation              relation;        // default: CGOverlap
    CGFloat                 strokeWidth;    // default: 0.0 used by CGInside
 };
 

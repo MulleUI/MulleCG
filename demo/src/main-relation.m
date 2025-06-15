@@ -5,8 +5,8 @@
 #define COLS  2
 #define ROWS  2
 
-static CGRelation relations[4] = { CGCover, CGInside, CGOutside, CGOverlap };
-static char *relationLabels[4] = { "CGCover", "CGInside", "CGOutside", "CGOverlap" };
+static CGRelation relations[4] = { CGOverlap, CGInside, CGOutside, CGOverlap };
+static char *relationLabels[4] = { "CGOverlap", "CGInside", "CGOutside", "CGOverlap" };
 
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
@@ -94,7 +94,6 @@ int   main( int argc, char *argv[])
    window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 400, 400)];
    [window setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [window setBackgroundColor:CGColorMakeBlack()];
-   [window setFrameRateHz:0.5];
    [app addWindow:window];
 
    return( [app runApp]);

@@ -273,7 +273,7 @@ static inline void   mvgTranslate( NVGcontext *vg, CGPoint p)
 // Rotates current coordinate system.
 static inline void   mvgRotate( NVGcontext *vg, CARotation rotation)
 {
-   nvgRotate( vg, CARotationToRadians( rotation));
+   nvgRotate( vg, CARotationToRadiansAsRotation( rotation));
 }
 
 // Skews the current coordinate system along X axis.
@@ -614,7 +614,7 @@ static inline NVGpaint   mvgImagePattern( NVGcontext *vg,
                                 rect.origin.y,
                                 rect.size.width,
                                 rect.size.height,
-                                CARotationToRadians( rotation),
+                                CARotationToRadiansAsRotation( rotation),
                                 image,
                                 alpha));
 }
@@ -715,26 +715,35 @@ static inline void   mvgClosePath( NVGcontext *vg)
    nvgClosePath( vg);
 }
 
+
 // Sets the current sub-path winding, see NVGwinding and NVGsolidity.
-static inline void   mvgPathWinding( NVGcontext *vg, NSInteger dir)
+static inline void   mvgPathWinding( NVGcontext *vg, CGPathFillStyle style)
 {
-   nvgPathWinding( vg, dir);
+   assert( CGPathFillStyleSolid == style || CGPathFillStyleHole == style);
+
+   nvgPathWinding( vg, style);
 }
 
-// Creates new circle arc shaped sub-path
-static inline void   mvgArc( NVGcontext *vg, 
-                             CACircle circle,
-                             CAAngle a0, 
-                             CAAngle a1, 
-                             NSInteger dir)
+
+// Creates new circle arc shaped sub-path, unless ther is no rotation from the
+// starting angle, then we just move the point
+static inline void
+   mvgArc( NVGcontext *vg, CACircle circle, CAAngle angle, CARotation rotation)
 {
+   if( fabsf( rotation) < CA_EPSILON)
+   {
+      mvgMoveTo( vg, CACirclePointAtAngle( circle, angle));
+      return;
+   }
+
    nvgArc( vg, circle.center.x,
                circle.center.y,
                circle.radius,
-               CAAngleToRadians( a0),
-               CAAngleToRadians( a1),
-               dir);
+               CAAngleToRadians( angle),
+               CAAngleRotateToRadiansAsAngle( angle, rotation),
+               CARotationGetRotationDirection( rotation));
 }
+
 
 // Creates new rectangle shaped sub-path.
 static inline void   mvgRect( NVGcontext *vg, CGRect rect)

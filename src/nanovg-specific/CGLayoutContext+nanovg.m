@@ -45,18 +45,14 @@
 CGFont  *CGLayoutContextUseFontWithNameUTF8String( CGLayoutContext *self, char *name)
 {
    CGFont   *font;
-   char     *face;
 
+   // this method already does the defaultFontName lookup, so if we get
+   // nil back, absolutely unlikely, there is nothing we can do
    font = [self fontWithNameUTF8String:name];
-
-   // do not use CGContextFontFace, because it "uses" us
-   assert( self->_defaultFontName);
-   face = font ? name : self->_defaultFontName;
-   nvgFontFace( CGLayoutContextGetNVGContext( self), face);
+   if( font)
+      nvgFontFace( CGLayoutContextGetNVGContext( self), [font nameUTF8String]);
    return( font);
 }
-
-
 
 
 - (CGFont *) fontWithCData:(struct mulle_data) data
