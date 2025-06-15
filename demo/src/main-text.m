@@ -76,7 +76,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          rect.origin.y = CGRectGetMidY( canvas) - height / 2.0;
       }
 #if 0
-      CGContextStrokeColor( context, CGColorMakeWithRGBA( 0x80, 0, 0, 0xFF));
+      CGContextStrokeColor( context, CGColorMakeWithRGBABytes( 0x80, 0, 0, 0xFF));
       CGContextStrokeWidth( context, 0.5);
       CGContextBeginPath( context);
       CGContextRect( context, rect);

@@ -24,8 +24,8 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    CGContextFontFace( context, "sans");
    CGContextTextAlign( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE
-   CGContextTextColor( context, CGColorMakeWithRGBA( 0, 0, 0, 0xFF));
-   CGContextTextBackgroundColor( context, CGColorMakeWithRGBA( 0xFF, 0xFF, 0xFF, 0xFF));
+   CGContextTextColor( context, CGColorMakeWithRGBABytes( 0, 0, 0, 0xFF));
+   CGContextTextBackgroundColor( context, CGColorMakeWithRGBABytes( 0xFF, 0xFF, 0xFF, 0xFF));
  // TODO: use textColor
 
    CGContextFontSize( context, 20.0);

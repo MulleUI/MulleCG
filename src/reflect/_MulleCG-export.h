@@ -39,7 +39,6 @@
 #import "CGColorConstants.h"
 #import "CGContext+DrawingConveniences.h"
 #import "CGContext+Drawing.h"
-#import "CGContext+nanovgTexture.h"
 #import "CGContext+nanovg.h"
 #import "CGFramebuffer+nanovg.h"
 #import "CGLayoutContext+nanovg.h"

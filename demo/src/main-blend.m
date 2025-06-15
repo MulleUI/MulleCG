@@ -2,7 +2,7 @@
 
 #import "import-private.h"
 
-
+#define DRAW_GRID_ONLY     // debug something
 #define SPEED    60
 
 static int    modes[] =
@@ -100,7 +100,6 @@ static void   drawCirclesInRect( CGContext *context,
    CGRect              rects[ 2][ 2];
 
    drawGridInRect( context, rect);
-   CGContextFillRectWithColor( context, rect, CGColorMakeBlack());
 
 //   CGRectPartition2x2( rect, CGSizeZero, rects);
 //
@@ -191,14 +190,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
                                              (CGRect *) rects);
    for( j = 0; j < 11; j++)
    {
-      dstRGB   = modes[ j];
+      dstRGB = modes[ j];
       for( i = 0; i < 11; i++)
       {
          srcRGB = modes[ i];
          drawCirclesInRect( context,
                             frameNr,
                             j * 11 + i,
-                            CGRectIntegral( rects[ j][ i]),
+                            rects[ j][ i],
                             srcRGB,
                             srcAlpha,
                             dstRGB,
@@ -206,7 +205,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       }
    }
 
-   [context useDefaultFont];
 
    srcRGB = modes[ 0];
    dstRGB = modes[ 0];
@@ -224,24 +222,26 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    }
 
 found:
+   CGContextFontFace( context, NULL);
    CGContextFontSize( context, 12.0f);
-   CGContextTextColor( context, CGColorMakeBlack());
-   CGContextTextBackgroundColor( context, CGColorMakeWhite());
+   CGContextTextColor( context, CGColorMakeWhite());
+   CGContextTextBackgroundColor( context, CGColorMakeBlack());
+
    if( [context buttonStates])
       CGContextFormatInRect( context, CGRectInset( info, 2, 2),
-                           CGContentModeLeft,
-                           0,
-                           "srcRGB: %s dstRGB: %s",
-                           mode_name_for_mode( srcRGB),
-                           mode_name_for_mode( dstRGB));
-
-   CGContextFormatInRect( context, CGRectInset( info, 2, 2),
-                        CGContentModeRight,
-                        0,
-                        "%d (%d) srcAlpha: %s dstAlpha: %s",
-                        l * 11 + k, 11 * 11,
-                        mode_name_for_mode( srcAlpha),
-                        mode_name_for_mode( dstAlpha));
+                                      CGContentModeLeft,
+                                      0,
+                                      "srcRGB: %s dstRGB: %s",
+                                      mode_name_for_mode( srcRGB),
+                                      mode_name_for_mode( dstRGB));
+   else
+      CGContextFormatInRect( context, CGRectInset( info, 2, 2),
+                                      CGContentModeRight,
+                                      0,
+                                      "%d (%d) srcAlpha: %s dstAlpha: %s",
+                                      l * 11 + k, 11 * 11,
+                                      mode_name_for_mode( srcAlpha),
+                                      mode_name_for_mode( dstAlpha));
 
 
 //   [context useDefaultFont];

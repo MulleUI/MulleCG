@@ -17,7 +17,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect              rect;
    CGRect              rects[ 3][ 3];
    char                buf[ 128];
-   CGPaint             *paint;
    struct NVGcontext   *vg;
    unsigned int        i, j;
    NSUInteger          frameNr;
@@ -81,7 +80,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
             CGContextBeginPath( context);
             CGContextRect( context, rect);
-            CGContextFillPaintable( context, paint);
+            CGContextFillPaintableOptions( context, gradient, rect, NULL);
             CGContextFill( context);
 
             CGContextFontFace( context,"sans");

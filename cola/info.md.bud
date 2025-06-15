@@ -65,7 +65,7 @@ inside this rectangle, calculate the appropriate stroke rectangle:
 > #### Note
 >
 > Instead of `CGInside`, you can also use `CGOutside` to draw a border around
-> the rectangle or `CGCover` which is basically a nop operation and will make
+> the rectangle or `CGOverlap` which is basically a nop operation and will make
 > the half the border drawn on the inside and half the border on the inside.
 
 Now to compute the rectangle to fill this stroked rectangle use
@@ -73,6 +73,6 @@ Now to compute the rectangle to fill this stroked rectangle use
 
 > ### Note
 >
-> Instead of `CGInside` you can also use `CGCover` to cover the same space.
+> Instead of `CGInside` you can also use `CGOverlap` to cover the same space.
 > `CGOutside` is not really useful here.
 

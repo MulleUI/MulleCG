@@ -26,7 +26,7 @@
    options = (struct CGStrokeOptions)
    {
       .paint    = CGPaintOptionsDefault,
-      .relation = CGCover
+      .relation = CGOverlap
    };
    options.paint.alpha = alpha;
 
@@ -45,7 +45,7 @@
    options = (CGFillOptions)
    {
       .paint    = CGPaintOptionsDefault,
-      .relation = CGCover
+      .relation = CGOverlap
    };
    options.paint.alpha = alpha;
 

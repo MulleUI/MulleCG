@@ -6,6 +6,9 @@
 #include <time.h>
 
 
+// MEMO: this demo used to work at some time, currently in bad state
+//
+
 #define R   0xFF, 0x00, 0x00, 0xFF
 #define G   0x00, 0xFF, 0x00, 0xFF
 #define B   0x00, 0x00, 0xFF, 0xFF
@@ -33,42 +36,45 @@ static unsigned char    bitmap[4 * IH * IW] =
 
 #define ROWS     10
 #define COLUMNS  10
+#define SPACING  4
 
 static void  drawRotated( CGContext *context, CGImage *image, CGRect rect, NSInteger y, NSInteger x)
 {
    // Delete: Remove CGImagePaint variable
    // CGImagePaint   *imgPaint = [[[CGImagePaint alloc] initWithImage:image] autorelease];
 
-   CGPoint        relativePoint;
-   CAPolarPoint   rotatedPolarPoint;
-   CAPolarPoint   centerPolarPoint;
-   CGPoint        rotatedPoint;
+   CAPolarPoint      centerPolarPoint;
+   CAPolarPoint      rotatedPolarPoint;
+   CGPoint           relativePoint;
+   CGPoint           rotatedPoint;
    // texture is at 0.0, we calc the "scaled" texture point
-   CGPoint        centerPoint;
-   CGPoint        diffPoint;
-   CAAngle        angle;
-   CGFloat        scale;
+   CAAngle           angle;
    CGDrawableOptions options; // Add: Declare CGDrawableOptions
+   CGFloat           scale;
+   CGPoint           centerPoint;
+   CGPoint           diffPoint;
+   CGRect            imageRect;
 
-   angle             = CADegreesToAngle( y * 36 + x * 36.0 / 10);
+   angle             = CADegreesToAngle( y * 36 + x * 36.0 / COLUMNS);
    scale             = 4.0;
 
    // calculate position independent the amout of rotation for the
    // center point
-   centerPoint       = CGPointMake( rect.size.width / 2.0 / scale,  rect.size.height / 2.0 / scale);
+   centerPoint       = CGPointMake( rect.size.width / 2.0 / scale,
+                                    rect.size.height / 2.0 / scale);
    centerPolarPoint  = CAPolarPointMakeWithPoint( centerPoint);
-   rotatedPolarPoint = CAPolarPointAddRadians( centerPolarPoint, angle);
+   rotatedPolarPoint = CAPolarPointAddRadians( centerPolarPoint, CAAngleToRadians( angle));
    rotatedPoint      = CGPointMakeWithPolarPoint( rotatedPolarPoint);
    diffPoint         = CGPointMake( (rotatedPoint.x - centerPoint.x),
                                     (rotatedPoint.y - centerPoint.y));
    diffPoint.x      -= rect.size.width / scale;
    diffPoint.y      -= rect.size.height / scale;
 
-   fprintf( stderr, "%.2f : %s -> %s -> %s\n",
-                        angle,
-                        CGPointUTF8String( centerPoint),
-                        CGPointUTF8String( diffPoint),
-                        CGPointUTF8String( rotatedPoint));
+//   fprintf( stderr, "%.2f : %s -> %s -> %s\n",
+//                        angle,
+//                        CGPointUTF8String( centerPoint),
+//                        CGPointUTF8String( diffPoint),
+//                        CGPointUTF8String( rotatedPoint));
 
    // Update: Construct CGDrawableOptions and call drawRect:options:context:
    options = CGDrawableOptionsMakeWithCornerRadius( 0.0, // cornerRadius
@@ -80,7 +86,11 @@ static void  drawRotated( CGContext *context, CGImage *image, CGRect rect, NSInt
                                                     CGContentModeCenter); // contentMode
 
    // The drawRect:options:context: method handles the drawing with the specified options
-   [image drawRect:CGRectMake( rect.origin.x - diffPoint.x, rect.origin.y - diffPoint.y, rect.size.width / scale, rect.size.height / scale)
+   imageRect = CGRectMake( rect.origin.x - diffPoint.x,
+                           rect.origin.y - diffPoint.y,
+                           rect.size.width / scale,
+                           rect.size.height / scale);
+   [image drawRect:imageRect
            options:&options
            context:context];
 }
@@ -91,11 +101,12 @@ static void  drawUnscaled( CGContext *context, CGImage *image, CGRect rect, NSIn
 {
    // Delete: Remove CGImagePaint variable
    // CGImagePaint   *imgPaint = [[[CGImagePaint alloc] initWithImage:image] autorelease];
-   CGPoint    centerPoint;
-   CGPoint    diffPoint;
-   CGSize     size;
-   CGSize     step;
-   CGDrawableOptions options; // Add: Declare CGDrawableOptions
+   CGPoint             centerPoint;
+   CGPoint             diffPoint;
+   CGSize              size;
+   CGSize              step;
+   CGDrawableOptions   options; // Add: Declare CGDrawableOptions
+   CGRect              imageRect;
 
 
    diffPoint = CGPointMake( x, y);
@@ -107,7 +118,7 @@ static void  drawUnscaled( CGContext *context, CGImage *image, CGRect rect, NSIn
    centerPoint.x -= (rect.size.width - size.width) / 2.0;
    centerPoint.y -= (rect.size.height - size.height) / 2.0;
 
-   step      = CGSizeMake( rect.size.width / COLUMNS, rect.size.height / ROWS);
+   step    = CGSizeMake( rect.size.width / COLUMNS, rect.size.height / ROWS);
 
    // Update: Construct CGDrawableOptions and call drawRect:options:context:
    options = CGDrawableOptionsMakeWithCornerRadius( 0.0, // cornerRadius
@@ -118,7 +129,11 @@ static void  drawUnscaled( CGContext *context, CGImage *image, CGRect rect, NSIn
                                                     CGRepeatNone, // repeat
                                                     CGContentModeCenter); // contentMode
 
-   [image drawRect:CGRectMake( rect.origin.x - (COLUMNS / 2 - x) * step.width, rect.origin.y - (ROWS / 2 - y) * step.height, size.width * 4, size.height * 4)
+   imageRect = CGRectMake( rect.origin.x - (COLUMNS / 2 - x) * step.width,
+                           rect.origin.y - (ROWS / 2 - y) * step.height,
+                           size.width * 4,
+                           size.height * 4);
+   [image drawRect:imageRect
            options:&options
            context:context];
 }
@@ -128,11 +143,12 @@ static void  drawShifted( CGContext *context, CGImage *image, CGRect rect, NSInt
 {
    // Delete: Remove CGImagePaint variable
    // CGImagePaint   *imgPaint = [[[CGImagePaint alloc] initWithImage:image] autorelease];
-   CGSize     size;
-   CGPoint    point;
-   CGPoint    final;
-   CGSize     scale;
-   CGDrawableOptions options; // Add: Declare CGDrawableOptions
+   CGSize              size;
+   CGPoint             point;
+   CGPoint             final;
+   CGSize              scale;
+   CGRect              imageRect;
+   CGDrawableOptions   options; // Add: Declare CGDrawableOptions
 
 
    scale = CGSizeMake( 0.5, 0.5);
@@ -143,12 +159,12 @@ static void  drawShifted( CGContext *context, CGImage *image, CGRect rect, NSInt
                         (ROWS / 2 - y) * size.height);
    final = CGPointAdd( rect.origin, point);
 
-   fprintf( stderr, "[x=%td/y=%td] %s : s=%s -> p=%s -> f=%s\n",
-                        x, y,
-                        CGPointUTF8String( rect.origin),
-                        CGSizeUTF8String( size),
-                        CGPointUTF8String( point),
-                        CGPointUTF8String( final));
+//   fprintf( stderr, "[x=%td/y=%td] %s : s=%s -> p=%s -> f=%s\n",
+//                        x, y,
+//                        CGPointUTF8String( rect.origin),
+//                        CGSizeUTF8String( size),
+//                        CGPointUTF8String( point),
+//                        CGPointUTF8String( final));
 
    // Update: Construct CGDrawableOptions and call drawRect:options:context:
    options = CGDrawableOptionsMakeWithCornerRadius( 0.0, // cornerRadius
@@ -158,8 +174,11 @@ static void  drawShifted( CGContext *context, CGImage *image, CGRect rect, NSInt
                                                     CGFlipNone, // flip
                                                     CGRepeatNone, // repeat
                                                     CGContentModeCenter); // contentMode
-
-   [image drawRect:CGRectMake( final.x, final.y, rect.size.width / scale.width, rect.size.height / scale.height)
+   imageRect = CGRectMake( final.x,
+                           final.y,
+                           rect.size.width / scale.width,
+                           rect.size.height / scale.height);
+   [image drawRect:imageRect
            options:&options
            context:context];
 }
@@ -173,17 +192,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGImage             *image;
    CGRect              area;
    NSInteger           x, y;
+   NSInteger           onOff;
 
    canvas = [layer canvas];
-
-   // gray rectangle so we know something is drawn...
-   CGContextBeginPath( context);
-   {
-      CGContextRect( context, canvas);
-      CGContextStrokeWidth( context, 8);
-      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
-   }
-   CGContextStroke( context);
 
 
    // if we immediately reclaim the image (via release) after drawing it
@@ -195,25 +206,41 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    assert( image);
 
 
-   canvas    = CGRectInset( canvas, 4, 4);
+   canvas    = CGRectInset( canvas, SPACING, SPACING);
 
-   // get a rectangle inside canvas thats centered and as large as possible
+   // get a square inside canvas that is centered and as large as possible
    area.size = CGSizeAspectFillToSize( CGSizeMake( 1, 1), canvas.size);
    area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenter);
 
    // subdivide into 1010
-   CGRectPartitionIntoRowsAndColumns( area, CGSizeMake( 4, 4), 10, 10, (CGRect *) rects);
+   CGRectPartitionIntoRowsAndColumns( area, CGSizeMake( SPACING, SPACING), ROWS, COLUMNS, (CGRect *) rects);
+
+   // draw some kind of grif
+   for( y = 0; y < ROWS; y++)
+      for( x = 0; x < COLUMNS; x++)
+         CGContextFillRectWithColor( context, rects[ y][ x], CGColorMakeWhite());
 
 
    // row#
-   for( y = 0; y < 10; y++)
-      for( x = 0; x < 10; x++)
+   for( y = 0; y < ROWS; y++)
+   {
+      onOff = y & 0x1;
+      for( x = 0; x < COLUMNS; x++)
       {
-         drawShifted( context, image, rects[ y][ x], y, x);
+         onOff = ! onOff;
+         if( onOff)
+         {
+         // drawShifted( context, image, rects[ y][ x], y, x);
          // drawTransformed( context, image, rects[ y][ x], y, x);
          // drawRotated( context, image, rects[ y][ x], y, x);
-         //drawUnscaled( context, image, rects[ y][ x], y, x);
+            drawUnscaled( context, image, rects[ y][ x], y, x);
+         }
       }
+   }
+
+   // draw area just for fun or in case of bugs and nothing gets drawn by
+   // above code
+   CGContextStrokeRectWithColor( context, area, 1, CGColorMakeRed());
 
    return( YES);
 }

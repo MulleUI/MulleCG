@@ -41,8 +41,10 @@
 @end
 
 
-
+// will be provided by +nanovg
 @interface CGContext( RenderFuture)
+
++ (BOOL) supportsAntiAliasing;
 
 //
 // used to intermix OpenGL or other commands, this flushes commands
@@ -52,5 +54,22 @@
 - (void) flushRender;    // suspends and resumes
 - (void) resumeRender;
 - (void) changeRender:(struct CGFrameInfo *) info;
+- (void) reset;
+
+
+- (void *) gpuTextureForImageID:(NSInteger) textureID;
+- (CGImage *) resolveMultiSampleImage:(CGImage *) image;
+
+//
+// framebuffer needs to be bound here, and context must be active
+// you need to free the returned bitmap bytes
+//
+- (struct CGBitmap) readFramebufferBitmap:(CGPixelRect) rect
+                    framebufferBitmapType:(CGFramebufferBitmapType) type
+                                allocator:(struct mulle_allocator *) allocator;
+
+//
+- (struct CGBitmap) RGBABytesBitmapOfImage:(CGImage *) image
+                                 allocator:(struct mulle_allocator *) allocator;
 
 @end

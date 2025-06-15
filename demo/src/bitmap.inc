@@ -5,7 +5,7 @@
 #define W   0xFF, 0xFF, 0xFF, 0xFF
 #define _   0x00, 0x00, 0x00, 0xFF
 
-static unsigned char    bitmap[4 * 8*8] =
+static unsigned char    bitmap[4 * 8 * 8] =
 {
    B, B, B, B,  R, R, R, R,
    B, B, B, B,  R, R, R, R,

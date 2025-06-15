@@ -82,9 +82,9 @@ static void   drawArcHole( CGContext *context, CGRect rect) // Converted from st
    fprintf( stderr, "3: %s\n", CGPointUTF8String( intersectionPoint[ 3]));
 
    CGContextMoveTo( context, intersectionPoint[ 1]); // Converted from mvgMoveTo
-   CGContextArc( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 1], angle[ 0], NVG_CW); // Converted from mvgArc
+   CGContextArcRadians( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 1], angle[ 0], CARotationDirectionClockWise); // Converted from mvgArc
    CGContextLineTo( context, intersectionPoint[ 2]); // Converted from mvgLineTo
-   CGContextArc( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 2], angle[ 3], NVG_CW); // Converted from mvgArc
+   CGContextArcRadians( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 2], angle[ 3], CARotationDirectionClockWise); // Converted from mvgArc
    CGContextLineTo( context, intersectionPoint[ 1]); // Converted from mvgLineTo
 }
 

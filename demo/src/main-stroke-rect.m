@@ -67,7 +67,7 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
             break;
 
          case 1 :
-            fillRect = CGRectMakeFillRect( strokeRect, strokeWidth, CGCover);
+            fillRect = CGRectMakeFillRect( strokeRect, strokeWidth, CGOverlap);
             fillMode = "fCover";
             break;
 

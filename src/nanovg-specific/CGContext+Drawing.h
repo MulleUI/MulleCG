@@ -365,22 +365,45 @@ static inline void   CGContextClosePath( CGContext *context)
 }
 
 // Sets the current sub-path winding.
-static inline void   CGContextPathWinding( CGContext *context, NSInteger dir)
+static inline void   CGContextPathWinding( CGContext *context,
+                                           CGPathFillStyle style)
 {
    if( context)
-      mvgPathWinding( CGContextGetNVGContext( context), dir);
+      mvgPathWinding( CGContextGetNVGContext( context), style);
 }
 
 // Creates new circle arc shaped sub-path
 static inline void   CGContextArc( CGContext *context,
                                    CACircle circle,
-                                   CAAngle a0,
-                                   CAAngle a1,
-                                   NSInteger dir)
+                                   CAAngle angle,
+                                   CARotation rotation)
 {
    if( context)
-      mvgArc( CGContextGetNVGContext( context), circle, a0, a1, dir);
+   {
+      mvgArc( CGContextGetNVGContext( context), circle, angle, rotation);
+   }
 }
+
+
+// this is hackish for old demos
+static inline void   CGContextArcRadians( CGContext *context,
+                                          CACircle circle,
+                                          CGFloat radians1,
+                                          CGFloat radians2,
+                                          CARotationDirection dir)
+{
+   if( context)
+   {
+      nvgArc( CGContextGetNVGContext( context),
+                                      CACircleGetCenter( circle).x,
+                                      CACircleGetCenter( circle).y,
+                                      CACircleGetRadius( circle),
+                                      radians1,
+                                      radians2,
+                                      dir);
+   }
+}
+
 
 // Creates new rectangle shaped sub-path.
 static inline void   CGContextRect( CGContext *context, CGRect rect)

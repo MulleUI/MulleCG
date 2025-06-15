@@ -9,20 +9,26 @@
 #import "CGContext+DrawingConveniences.h"
 
 
+// this is kinda important for OpenGL. Where we need to clear, even if
+// there is no _backgroundPaint being set. its not bad default.
+#ifndef CG_NIL_PAINT_DRAWS_BLACK
+#define CG_NIL_PAINT_DRAWS_BLACK 1
+#endif
 
-static void   fillWithBoundsAndPaintable( CGContext *context,
-                                          CGRect rect,
-                                          id <CGPaintable> paintable)
+
+static void   fillWithPaintableInBounds( CGContext *context,
+                                         id <CGPaintable> paintable,
+                                         CGRect rect)
 {
-#ifdef NIL_PAINT_DRAWS_BLACK
    if( ! paintable)
    {
+#if CG_NIL_PAINT_DRAWS_BLACK
       CGContextFillColor( context, CGColorMakeBlack());
       CGContextFill( context);
+#endif
       return;
    }
-#endif
-   CGContextFillPaintable( context, paintable);
+   CGContextFillPaintableOptions( context, paintable, rect, NULL);
    CGContextFill( context);   
 }
 
@@ -34,7 +40,8 @@ void   CGContextFillRoundedRectVaryingWithPaintable( CGContext *context,
 {
    CGContextBeginPath( context);
    CGContextRoundedRectVarying( context, rect, cornerInsets);
-   fillWithBoundsAndPaintable( context, rect, paintable);
+   fillWithPaintableInBounds( context, paintable, rect);
+
 }
 
 
@@ -45,7 +52,8 @@ void   CGContextFillRoundedRectWithPaintable( CGContext *context,
 {
    CGContextBeginPath( context);
    CGContextRoundedRect( context, rect, cornerRadius);
-   fillWithBoundsAndPaintable( context, rect, paintable);
+   fillWithPaintableInBounds( context, paintable, rect);
+
 }
 
 
@@ -56,7 +64,7 @@ void   CGContextFillRectWithPaintable( CGContext *context,
 {
    CGContextBeginPath( context);
    CGContextRect( context, rect);
-   fillWithBoundsAndPaintable( context, rect, paintable);
+   fillWithPaintableInBounds( context, paintable, rect);
 }
 
 
@@ -69,34 +77,34 @@ void   CGContextFillCircleWithPaintable( CGContext *context,
    CGContextBeginPath( context);
    CGContextCircle( context, circle);
    rect = CACircleGetOuterRect( circle);
-   fillWithBoundsAndPaintable( context, rect, paintable);
+   fillWithPaintableInBounds( context, paintable, rect);
 }
 
 
-static void   strokeWithBoundsAndPaint( CGContext *context,
-                                        CGRect rect,
-                                        CGFloat strokeWidth,
-                                        id <CGPaintable> paintable)
+static void   strokeWithPaintableInBounds( CGContext *context,
+                                           id <CGPaintable> paintable,
+                                           CGRect rect,
+                                           CGFloat strokeWidth)
 {
    if( strokeWidth <= 0.0f)
       return;
 
-#ifdef NIL_PAINT_DRAWS_BLACK
    if( ! paintable)
    {
+#if CG_NIL_PAINT_DRAWS_BLACK
       CGContextStrokeWidth( context, strokeWidth);
       CGContextStrokeColor( context, CGColorMakeBlack());
       CGContextStroke( context);
+#endif
       return;
    }
-#endif
 
    CGContextStrokeWidth( context, strokeWidth);
    CGContextStrokePaintableOptions( context,
-                                        paintable,
-                                        rect,
-                                        strokeWidth,
-                                        NULL);
+                                    paintable,
+                                    rect,
+                                    strokeWidth,
+                                    NULL);
    CGContextStroke( context);
 }
 
@@ -109,7 +117,7 @@ void   CGContextStrokeRoundedRectVaryingWithPaintable( CGContext *context,
 {
    CGContextBeginPath( context);
    CGContextRoundedRectVarying( context, rect, cornerInsets);
-   strokeWithBoundsAndPaint( context, rect, strokeWidth, paintable);
+   strokeWithPaintableInBounds( context, paintable, rect, strokeWidth);
 }
 
 
@@ -121,7 +129,7 @@ void   CGContextStrokeRoundedRectWithPaintable( CGContext *context,
 {
    CGContextBeginPath( context);
    CGContextRoundedRect( context, rect, cornerRadius);
-   strokeWithBoundsAndPaint( context, rect, strokeWidth, paintable);
+   strokeWithPaintableInBounds( context, paintable, rect, strokeWidth);
 }
 
 
@@ -133,7 +141,7 @@ void   CGContextStrokeRectWithPaintable( CGContext *context,
 {
    CGContextBeginPath( context);
    CGContextRect( context, rect);
-   strokeWithBoundsAndPaint( context, rect, strokeWidth, paintable);
+   strokeWithPaintableInBounds( context, paintable, rect, strokeWidth);
 }
 
 
@@ -147,7 +155,7 @@ void   CGContextStrokeCircleWithPaintable( CGContext *context,
    CGContextBeginPath( context);
    CGContextCircle( context, circle);
    rect = CACircleGetOuterRect( circle);
-   strokeWithBoundsAndPaint( context, rect, strokeWidth, paintable);
+   strokeWithPaintableInBounds( context, paintable, rect, strokeWidth);
 }  
 
 
@@ -163,7 +171,7 @@ void   CGContextStrokeLineWithPaintable( CGContext *context,
    CGContextMoveTo( context, start);
    CGContextLineTo( context, end);
    rect = CGRectMakeWithPoints( start, end);
-   strokeWithBoundsAndPaint( context, rect, strokeWidth, paintable);
+   strokeWithPaintableInBounds( context, paintable, rect, strokeWidth);
 }
 
 
@@ -182,7 +190,7 @@ void   CGContextStrokeLineHWithPaintable( CGContext *context,
    CGContextMoveTo( context, start);
    CGContextLineTo( context, end);
    rect = CGRectMakeWithPoints( start, end);
-   strokeWithBoundsAndPaint( context, rect, strokeWidth, paintable);
+   strokeWithPaintableInBounds( context, paintable, rect, strokeWidth);
 }
 
 
@@ -200,6 +208,6 @@ void   CGContextStrokeLineVWithPaintable( CGContext *context,
    CGContextMoveTo( context, start);
    CGContextLineTo( context, end);
    rect = CGRectMakeWithPoints( start, end);
-   strokeWithBoundsAndPaint( context, rect, strokeWidth, paintable);
+   strokeWithPaintableInBounds( context, paintable, rect, strokeWidth);
 }
 

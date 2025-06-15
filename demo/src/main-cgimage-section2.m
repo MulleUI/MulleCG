@@ -5,15 +5,39 @@
 #include <string.h>
 #include <time.h>
 
-#include "bitmap.inc"
 
+#define R   0xFF, 0x00, 0x00, 0xFF
+#define G   0x00, 0xFF, 0x00, 0xFF
+#define B   0x00, 0x00, 0xFF, 0xFF
+#define Y   0xFF, 0xFF, 0x00, 0xFF
+#define W   0xFF, 0xFF, 0xFF, 0xFF
+#define _   0x00, 0x00, 0x00, 0xFF
+
+
+static unsigned char    bitmap[4 * 8 * 8] =
+{
+   B, G, R, W,  R, G, B, Y,
+   G, G, R, W,  R, G, B, B,
+   R, R, R, W,  R, G, G, G,
+   W, W, W, W,  R, R, R, R,
+
+   Y, Y, Y, Y,  W, W, W, W,
+   G, G, G, Y,  W, B, B, B,
+   B, B, G, Y,  W, B, R, R,
+   R, B, G, Y,  W, B, R, G
+};
+
+
+#define ROWS   8
+#define COLS   8
+#define SPACE  4
 
 static void   drawBitmap3( CALayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
    CGRect              canvas;
-   CGRect              rects[ 5][ 5];
-   CGRect              sections[ 5][ 5];
+   CGRect              rects[ ROWS][ COLS];
+   CGRect              sections[ ROWS][ COLS];
    CGImage             *image;
    NSUInteger          x, y;
 
@@ -32,18 +56,18 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon
    image = [[[CGImage alloc] initWithRGBABytes:bitmap
-                                    bitmapSize:CGPixelSizeMake( 5, 5)
+                                    bitmapSize:CGPixelSizeMake( 8, 8)
                                   textureFlags:NVG_IMAGE_NEAREST  // CGImageFlagRepeatX
                                        context:context] autorelease];
    assert( image);
 
 
-   canvas = CGRectInset( canvas, 4, 4);
+   canvas = CGRectInset( canvas, SPACE, SPACE);
 
-   CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( 4, 4), 5, 5, (CGRect *) rects);
+   CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( SPACE, SPACE), ROWS, COLS, (CGRect *) rects);
 
-   for( y = 0; y < 5; y++)
-      for( x = 0; x < 5; x++)
+   for( y = 0; y < ROWS; y++)
+      for( x = 0; x < COLS; x++)
          sections[ y][ x] = CGRectMake( 0, 0, x + 1, y + 1);
 
    options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
@@ -55,8 +79,8 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
                                                     CGContentModeCenter);
 
 
-   for( y = 0; y < 5; y++)
-      for( x = 0; x < 5; x++)
+   for( y = 0; y < ROWS; y++)
+      for( x = 0; x < COLS; x++)
          [image drawRect:rects[ y][ x]
                 fromRect:sections[ y][ x]
                  options:&options

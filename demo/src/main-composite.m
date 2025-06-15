@@ -185,15 +185,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
                             area,
                             modes[ mode]);
 
-         [context useDefaultFont];
          CGContextFontSize( context, 12.0f);
          CGContextTextColor( context, CGColorMakeBlack());
          CGContextTextBackgroundColor( context, CGColorMakeWhite());
          CGContextFormatInRect( context, CGRectInset( info, 2, 2),
-                              CGContentModeCenter,
-                              0,
-                              "%s",
-                              mode_name_for_mode( modes[ mode]));
+                                         CGContentModeCenter,
+                                         0,
+                                         "%s",
+                                         mode_name_for_mode( modes[ mode]));
       }
    }
 

@@ -68,7 +68,7 @@ struct MulleGlyphPathCallbacks
    void  (*bezier)( void *userinfo, CGPoint c1, CGPoint c2, CGPoint xy);
    void  (*begin)( void *userinfo);
    void  (*close)( void *userinfo);
-   void  (*winding)( void *userinfo, int solid_or_hole);
+   void  (*winding)( void *userinfo, CGPathFillStyle style);
 };
 
 
@@ -83,7 +83,7 @@ static inline void   MulleGlyphPathCallbacksInitNVG( struct MulleGlyphPathCallba
    callbacks->quad    = (void (*)(void *, CGPoint, CGPoint)) CGContextQuadTo; // Converted from nvgQuadTo
    callbacks->bezier  = (void (*)(void *, CGPoint, CGPoint, CGPoint)) CGContextBezierTo; // Converted from nvgBezierTo
    callbacks->close   = (void (*)(void *)) CGContextClosePath; // Converted from nvgClosePath
-   callbacks->winding = (void (*)(void *, int)) CGContextPathWinding; // Converted from nvgPathWinding
+   callbacks->winding = (void (*)(void *, CGPathFillStyle)) CGContextPathWinding; // Converted from nvgPathWinding
 }
 
 
@@ -98,7 +98,7 @@ static inline void   MulleGlyphPathCallbacksInitPath( struct MulleGlyphPathCallb
    callbacks->quad    = (void (*)(void *, CGPoint, CGPoint)) CGPathAddQuadTo;
    callbacks->bezier  = (void (*)(void *, CGPoint, CGPoint, CGPoint)) CGPathAddCurveTo;
    callbacks->close   = (void (*)(void *)) CGPathCloseSubpath;
-   callbacks->winding = (void (*)(void *, int )) CGPathAddWinding;
+   callbacks->winding = (void (*)(void *, CGPathFillStyle )) CGPathSetSubpathFillStyle;
 }
 
 

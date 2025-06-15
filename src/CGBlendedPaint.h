@@ -22,11 +22,11 @@ typedef NS_ENUM( NSUInteger, CGBlendedPaintBlendStyle)
 //
 @interface CGBlendedPaint : CGPaint
 
+@property( readonly) CGPaint     *paint;
+@property( readonly) CGPaint     *otherPaint;
 @property( readonly) CGFloat     blend;
 //@property( assign) CGBlendedPaintBlendStyle   blendStyle;
 @property( readonly) CARotation  rotation;
-@property( readonly) CGPaint     *paint;
-@property( readonly) CGPaint     *otherPaint;
 
 - (instancetype) initWithPaint:(CGPaint *) paint
                     otherPaint:(CGPaint *) otherPaint

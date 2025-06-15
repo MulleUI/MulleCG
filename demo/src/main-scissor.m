@@ -11,27 +11,42 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGRect              scissor;
    int                 i, j;
    CGFloat             factor;
+   CGFloat             rawFactor;
    BOOL                isScissoring;
+   CGAffineTransform   xform;
 
    isScissoring = ([context numberOfFrames] % 240) >= 120;
 
-   factor = ([context numberOfFrames] % 120) / 119.0;
-   factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
+   rawFactor = ([context numberOfFrames] % 120) / 119.0;
+   factor    = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), rawFactor);
 
-   canvas = CGRectInset( [layer canvas], 25, 25);
+   canvas  = [layer canvas];
 
-   rect    = CGRectIntegral( canvas);
-   CGContextStrokeRectWithColor( context, CGRectExtrude( rect, 1.0, 1.0), 2.0, CGColorMakeBlack());
+   // first scissor on top, hardly noticable but nice to check if intersection
+   // works
+   scissor = UIEdgeInsetsInsetRect( canvas, UIEdgeInsetsMake( 24, 0, 0, 0));
+   CGContextScissor( context, scissor);
 
-   scissor = rect;
-   rect    = CGRectInset( rect, rect.size.width / 4.0, rect.size.height / 4.0);
-   CGContextSave( context);
-   {
-      if( isScissoring)
-         CGContextIntersectScissor( context, scissor);
-      CGContextFillRectWithColor( context, CGRectExtrude( rect, rect.size.width * factor, rect.size.height * factor), CGColorMakeRed());
-   }
-   CGContextRestore( context);
+   scissor = CGRectInset( canvas, 100, 50);
+   scissor = CGRectIntegral( scissor);
+   rect    = CGRectInset( scissor, scissor.size.width / 4.0, scissor.size.height / 4.0);
+
+   if( isScissoring)
+      CGContextIntersectScissor( context, scissor);
+
+   xform = CGAffineTransformMakeRotationAroundPoint( CGRectGetCenter( rect), rawFactor);
+   CGContextTransform( context, &xform);
+   CGContextFillRectWithColor( context, CGRectExtrude( rect, rect.size.width * factor, rect.size.height * factor),
+                                        CGColorBySettingAlpha( CGColorMakeRed(), 0.75));
+
+   // draw some debug stuff unscissored or transformed
+   CGContextReset( context);
+
+   CGContextStrokeRectWithColor( context, CGRectExtrude( scissor, 1.0, 1.0), 2.0, CGColorMakeYellow());
+   CGContextFontSize( context, 16.0);
+   CGContextTextColor( context, CGColorMakeWhite());
+   CGContextTextBackgroundColor( context, CGColorMakeBlack());
+   CGContextText( context, CGPointMake( 4, 20), isScissoring ? "with scissor" : "no scissor", (size_t) -1);
 
    return( YES);
 }

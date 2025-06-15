@@ -10,6 +10,7 @@
 #import "CGContext+nanovg.h"
 #import "CGContext+DebugPrivate.h"
 #import "CGContext+Drawing.h"
+#import "CGContext+Render.h"
 #import "CGContext+CGImage.h"
 #import "CGContext+CGFramebuffer.h"
 #import "CGLayoutContext.h"

@@ -707,9 +707,7 @@ static void   mvgTextInRect( struct NVGcontext *vg,
 
    mvgSave( vg);
    {
-      origin    = CGSizePlaceInRect( info.bounds.size, rect, contentMode).origin;
-      origin.x -= info.bounds.origin.x;
-      origin.y -= info.bounds.origin.y;
+      origin = info.bounds.origin;
 
       nvgTextAlign( vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
       if( ! isnan( info.size))
