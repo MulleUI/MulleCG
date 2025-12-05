@@ -7,6 +7,7 @@ enum
    CGContextDebugRender           = 0x000008,  // like UIWindowDebugRender
    CGContextDebugRenderVerbose    = 0x008000,
 
+   CGContextDebugTraceDrawCalls   = UIGraphicsContextTraceDrawCalls,
    CGContextDebugDumpFrameToFile  = 0x08000000  // same bit as UIWindow
 };
 

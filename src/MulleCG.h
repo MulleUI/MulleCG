@@ -1,5 +1,7 @@
 #import "import.h"
 
+#define HAVE_IMPORT__MULLE_CG
+
 #define MULLE_CG_VERSION   ((0 << 20) | (0 << 8) | 1)
 
 #import "_MulleCG-export.h"

@@ -26,7 +26,7 @@ int   main( int argc, char *argv[])
 
    @autoreleasepool
    {
-      fake    = [FakeOSContext object];
+      fake    = [FakeOSContext instance];
       context = [[[CGContext alloc] initWithOSGraphicsContext:fake
                                                       shareID:0
                                                       options:0] autorelease];

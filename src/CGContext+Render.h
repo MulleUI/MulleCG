@@ -4,6 +4,8 @@
 // prefer a local CGContext over one in import.h
 #import "CGContext.h"
 
+#import "CGTypes.h"
+
 
 @protocol CGRenderObject
 
@@ -73,3 +75,18 @@
                                  allocator:(struct mulle_allocator *) allocator;
 
 @end
+
+
+// its here because i have no place for it
+// rarely used so static inline is likely beneficial
+static inline char   *CGTextMetricsUTF8String( CGTextMetrics metrics)
+{
+   char   *s;
+
+   s = MulleObjC_asprintf( "{ ascender: %.2f, descender: %.2f, lineHeight: %.2f }",
+                                    metrics.ascender,
+                                    metrics.descender,
+                                    metrics.lineHeight);
+   return( s);
+}
+

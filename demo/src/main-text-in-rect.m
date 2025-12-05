@@ -13,7 +13,7 @@ static void   drawTextOverRect( CGContext *context, CGRect canvas)
    CGRect   rect;
    CGRect   textRect;
 
-   rect= CGSizePlaceInRect( CGSizeMake( 200, 80), canvas, CGContentModeCenter);
+   rect= CGSizePlaceInRect( CGSizeMake( 200, 80), canvas, CGContentModeCenterPoint);
    CGContextFillRoundedRectWithColor( context, rect, 8.0, CGColorBySettingAlpha( CGColorMakeWhite(), 0.5));
 
    textRect = CGRectInset( rect, 4.0, 0.0);
@@ -39,7 +39,7 @@ static void   drawRectBehindText( CGContext *context, CGRect canvas)
    //      working on descender and ascender lineHeight, which is spitting
    //      in the soup again.
    pad       = 6.0f;
-   rect      = CGSizePlaceInRect( CGSizeMake( 200, 80), canvas, CGContentModeCenter);
+   rect      = CGSizePlaceInRect( CGSizeMake( 200, 80), canvas, CGContentModeCenterPoint);
    nopadRect = CGRectInset( rect, pad, pad);
    info      = CGContextTextBoundsOptions( context, "VfL Bochum 1848", (size_t) -1,
                                                         nopadRect,
@@ -50,7 +50,7 @@ static void   drawRectBehindText( CGContext *context, CGRect canvas)
    if( ! isnan( info.size))
       CGContextFontSize( context, info.size);
 
-   textRect       = CGSizePlaceInRect( info.bounds.size, rect, CGContentModeCenter);
+   textRect       = CGSizePlaceInRect( info.bounds.size, rect, CGContentModeCenterPoint);
    backgroundRect = CGRectExtrude( textRect, pad, pad);
    CGContextFillRoundedRectWithColor( context, backgroundRect, 8.0, CGColorBySettingAlpha( CGColorMakeWhite(), 0.5));
 
@@ -61,7 +61,7 @@ static void   drawRectBehindText( CGContext *context, CGRect canvas)
    // only BASELINE, LEFT does not do anything
    metrics            = CGContextTextMetrics( context);
    textRect.origin.y += metrics.ascender;
-   CGContextTextAlign( context, NVG_ALIGN_BASELINE | NVG_ALIGN_LEFT);
+   CGContextCombinedTextAlignment( context, NVG_ALIGN_BASELINE | NVG_ALIGN_LEFT);
    CGContextText( context, textRect.origin, "VfL Bochum 1848", (size_t) -1);
 }
 

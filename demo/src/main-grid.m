@@ -214,7 +214,7 @@ int   main( int argc, char *argv[])
 //      [window[ i] setSwapInterval:1];
       [window[ i] setFrameRate:UIWindowFrameRateUnsynced];
 
-      perf = [MulleUIPerf object];
+      perf = [MulleUIPerf instance];
       [window[ i] setFrameDelegate:perf];
    }
    return( [app runApp]);

@@ -335,7 +335,7 @@ int   main()
    [window setFrameRate:UIWindowFrameRateSynced];
    setupSceneInView( [window contentView]);
 
-   [window setFrameDelegate:[MulleUIPerf object]];
+   [window setFrameDelegate:[MulleUIPerf instance]];
    [app addWindow:window];
 
    return( [app runApp]);

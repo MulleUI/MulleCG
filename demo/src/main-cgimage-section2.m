@@ -76,7 +76,7 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipNone,
                                                     CGRepeatNone,
-                                                    CGContentModeCenter);
+                                                    CGContentModeCenterPoint);
 
 
    for( y = 0; y < ROWS; y++)

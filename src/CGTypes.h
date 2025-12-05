@@ -7,7 +7,7 @@
 #include "include.h"
 
 
-typedef NS_ENUM(NSUInteger, CGContextType)
+typedef NS_ENUM( NSUInteger, CGContextType)
 {
    CGContextTypeFull = 0,
    CGContextTypePath = 1,
@@ -15,7 +15,7 @@ typedef NS_ENUM(NSUInteger, CGContextType)
 };
 
 
-typedef NS_ENUM(NSUInteger, CGLineCap)
+typedef NS_ENUM( NSUInteger, CGLineCap)
 {
    CGLineCapButt,
    CGLineCapRound,
@@ -25,7 +25,14 @@ typedef NS_ENUM(NSUInteger, CGLineCap)
 };
 
 
-typedef NS_OPTIONS(NSUInteger, CGTextAlign)
+// Ventral (instead of left)
+// Central (replacing center).
+// Dorsal (instead of right)
+// Cranial (instead of top)
+// Medial (instead of middle)
+// Caudal
+
+typedef NS_OPTIONS( NSUInteger, CGCombinedTextAlign)
 {
    // Horizontal align
    CGTextAlignLeft    = 1<<0,   // Default, align text horizontally to left
@@ -33,11 +40,36 @@ typedef NS_OPTIONS(NSUInteger, CGTextAlign)
    CGTextAlignRight   = 1<<2,   // Align text horizontally to right
 
    // Vertical align
-   CGTextAlignTop     = 1<<3,   // Align text vertically to top
-   CGTextAlignMiddle  = 1<<4,   // Align text vertically to middle
-   CGTextAlignBottom  = 1<<5,   // Align text vertically to bottom
+   CGTextAlignTop      = 1<<3,   // Align text vertically to top
+   CGTextAlignMiddle   = 1<<4,   // Align text vertically to middle
+   CGTextAlignBottom   = 1<<5,   // Align text vertically to bottom
    CGTextAlignBaseline = 1<<6   // Default, align text vertically to baseline
+
+   // MEMO: needed cleanup:
+   // add these: UITextAlignmentBoundsMiddle,      // only for single line
+   //            UITextAlignmentVisualMiddle,
+   // then remove UITextTypes (or move to UITextTypes)
 };
+
+
+
+static inline int   CGTextAlignIsValid( CGCombinedTextAlign align)
+{
+   NSUInteger   halign;
+   NSUInteger   valign;
+
+   // 0 would be same as CGTextAlignLeft (due to code), but we dont like it
+   halign = align & (CGTextAlignLeft|CGTextAlignCenter|CGTextAlignRight);
+   if( mulle_c_popcount( halign) != 1)
+      return( 0);
+
+   // 0 is same as CGTextAlignBaseline (due to code), but we dont like it
+   valign = align & (CGTextAlignTop|CGTextAlignMiddle|CGTextAlignBottom|CGTextAlignBaseline);
+   if( mulle_c_popcount( valign) != 1)
+      return( 0);
+
+   return( align == (halign | valign));
+}
 
 
 typedef NS_OPTIONS(NSUInteger, CGBlendFactor)
@@ -320,6 +352,7 @@ struct CGPaintOptions
    NSUInteger   textureFlags;       // default: 0
 };
 
+// MEMO: keep it so you can cast CGFillOptions * to CGStrokeOptions *
 struct CGStrokeOptions
 {
    struct CGPaintOptions   paint;
@@ -358,6 +391,26 @@ typedef struct CGFillOptions     CGFillOptions;
 typedef struct CGStrokeOptions   CGStrokeOptions;
 
 
+static inline CGFillOptions   CGFillOptionsMake( CARotation rotation,
+                                                 CGFloat smoothness,
+                                                 CGFloat alpha,
+                                                 NSUInteger textureFlags,
+                                                 CGRelation relation,
+                                                 CGFloat strokeWidth)
+{
+   CGFillOptions   options;
+
+   options.paint.rotation     = rotation;
+   options.paint.smoothness   = smoothness;
+   options.paint.alpha        = alpha;
+   options.paint.textureFlags = textureFlags;
+   options.relation           = relation;
+   options.strokeWidth        = strokeWidth;
+   return( options);
+}
+
+
+
 static inline CGFillOptions   CGFillOptionsMakeWithRotation( CARotation rotation)
 {
    CGFillOptions   options = CGFillOptionsDefault;
@@ -382,6 +435,23 @@ static inline CGFillOptions   CGFillOptionsMakeWithRotationAndAlpha( CARotation 
 
    options.paint.rotation = rotation;
    options.paint.alpha    = alpha;
+   return( options);
+}
+
+
+static inline CGStrokeOptions   CGStrokeOptionsMake( CARotation rotation,
+                                                     CGFloat smoothness,
+                                                     CGFloat alpha,
+                                                     NSUInteger textureFlags,
+                                                     CGRelation relation)
+{
+   CGStrokeOptions   options;
+
+   options.paint.rotation     = rotation;
+   options.paint.smoothness   = smoothness;
+   options.paint.alpha        = alpha;
+   options.paint.textureFlags = textureFlags;
+   options.relation           = relation;
    return( options);
 }
 
@@ -518,5 +588,8 @@ static inline CGTextMetrics  CGTextMetricsMake( float ascender,
               .lineHeight = lineHeight
            });
 }
+
+// defined elsewhere
+//static inline char   *CGTextMetricsUTF8String( CGTextMetrics metrics)
 
 #endif

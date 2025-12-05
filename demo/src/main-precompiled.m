@@ -147,7 +147,7 @@ int   main( int argc, char *argv[])
                             styleMask:styleMask];
    [[window contentView] setDrawCallback:drawStuff];
    [window setFrameRateHz:60.0f];
-   [window setFrameDelegate:[MulleUIPerf object]];
+   [window setFrameDelegate:[MulleUIPerf instance]];
    [app addWindow:window];
 
 

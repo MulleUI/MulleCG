@@ -18,12 +18,12 @@ int   main( int argc, char *argv[])
 
    @autoreleasepool
    {
-      context = [CGLayoutContext object];
+      context = [CGLayoutContext instance];
 
       text    = "VfL Bochum 1848\nvs.\nWerder Bremen";
       [context useDefaultFont];
       [context setFontSize:16.0f];
-      [context setTextAlign:NVG_ALIGN_MIDDLE];
+      [context setCombinedTextAlignment:NVG_ALIGN_MIDDLE];
 
       // can't do anything else than NSLineBreakByWordWrapping currently
       for( mode = NSLineBreakByWordWrapping; mode <= NSLineBreakByWordWrapping; mode++)
@@ -35,6 +35,7 @@ int   main( int argc, char *argv[])
             printf( "%s breakRowWidth: %g:\n", NSLineBreakModeUTF8String( mode), breakRowWidth);
             n = [context getTextRows:rows
                                count:sizeof( rows) / sizeof( rows[ 0])
+                         textRowSize:sizeof( struct UITextRow)
                                 text:text
                               length:(NSUInteger) -1
                        breakRowWidth:breakRowWidth];

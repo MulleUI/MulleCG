@@ -310,7 +310,7 @@ static void   mulleFreetypeOutlineGlyphPath( FT_Outline *outline,
          // signedArea /= 2.0;
          if (outline->flags & FT_OUTLINE_REVERSE_FILL)
             signedArea *= -1;
-         (*callbacks->winding)( userinfo, signedArea > 0 ? NVG_SOLID : NVG_HOLE);
+         (*callbacks->winding)( userinfo, signedArea > 0 ? CGPathFillStyleSolid : CGPathFillStyleHole);
       }
    }
 }

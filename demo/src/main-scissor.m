@@ -18,7 +18,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    isScissoring = ([context numberOfFrames] % 240) >= 120;
 
    rawFactor = ([context numberOfFrames] % 120) / 119.0;
-   factor    = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), rawFactor);
+   factor    = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), rawFactor);
 
    canvas  = [layer canvas];
 

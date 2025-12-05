@@ -189,7 +189,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
          CGContextTextColor( context, CGColorMakeBlack());
          CGContextTextBackgroundColor( context, CGColorMakeWhite());
          CGContextFormatInRect( context, CGRectInset( info, 2, 2),
-                                         CGContentModeCenter,
+                                         CGContentModeCenterPoint,
                                          0,
                                          "%s",
                                          mode_name_for_mode( modes[ mode]));

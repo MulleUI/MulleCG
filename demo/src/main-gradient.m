@@ -30,7 +30,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    //                  NVGcolor icol, NVGcolor ocol);
    rect = rects[ 0][ 0];
    x       = (frameNr % 1000) / 999.0;
-   feather = rect.size.height / 2.0 * (1.0 - _CAQuadraticGetValue( CAQuadraticEaseIn, x));
+   feather = rect.size.height / 2.0 * (1.0 - _CACubicGetValue( CACubicEaseIn, x));
 //   fprintf( stderr, "feather : %g (%g)\n", feather, x);
 //   feather = 20.0;
 
@@ -90,7 +90,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    rect   = rects[ 1][ 1];
    radius = CGRectGetOuterRadius( rect);
-   radius = radius * _CAQuadraticGetValue( CAQuadraticEaseOut, x);
+   radius = radius * _CACubicGetValue( CACubicEaseOut, x);
    paint  = [CGGradient radialGradientWithCircle:CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), radius) // Converted from nvgRadialGradient
                                            color:CGColorMakeBlue()
                                      innerRadius:0.0

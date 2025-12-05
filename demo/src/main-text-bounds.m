@@ -229,7 +229,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
          // write info line
          CGContextFontSize( context, 12); // Converted from nvgFontSize
-         CGContextTextAlign( context, NVG_ALIGN_LEFT|NVG_ALIGN_BOTTOM); // Converted from nvgTextAlign
+         CGContextCombinedTextAlignment( context, NVG_ALIGN_LEFT|NVG_ALIGN_BOTTOM); // Converted from nvgTextAlign
          sprintf( buf, "align: %s | %s",
                      CGHAlignmentUTF8String( alignment),
                      CGVAlignmentUTF8String( alignment));

@@ -169,7 +169,7 @@
    CGContextFontFace( self, fontNameUTF8String);
 //   nvgFontFace( vg, fontNameUTF8String ? fontNameUTF8String : "sans");
    CGContextFontSize( self, fontSize != 0.0 ? fontSize : 10.0);
-   CGContextTextAlign( self, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+   CGContextCombinedTextAlignment( self, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
    CGContextFillColor( self, CGColorMakeWithHexColor( color));
 
    CGContextTextBox( self, position, INFINITY, s, (size_t) -1);
@@ -185,7 +185,7 @@
    char   icon_utf8[ 8];
    char   *end;
 
-   CGContextTextAlign( self, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+   CGContextCombinedTextAlignment( self, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
    end = (char *) mulle_utf32_as_utf8( icon, icon_utf8);
    CGContextText( self, point, icon_utf8, end - icon_utf8);
 }

@@ -12,6 +12,7 @@ endif()
 #
 set( SOURCES
 nanovg/src/nanovg.c
+nanovg/src/nanovg-trace-functions.c
 src/CGBlendedPaint+Drawing.m
 src/CGBlendedPaint.m
 src/CGColor+UTF8String.m
@@ -46,7 +47,7 @@ src/nanovg-specific/CGImagePaint+nanovg.m
 src/nanovg-specific/CGImage+nanovg.m
 src/nanovg-specific/CGLayoutContext+nanovg.m
 src/nanovg-specific/CGPaint+DrawingConveniences.m
-src/nanovg-specific/CGPaint+nanovg.m
+src/nanovg-specific/CGPaintable.m
 src/nanovg-specific/CGPath+nanovg.c
 src/nanovg-specific/nanovg+UTF8String.m
 src/opengl-specific/CGContext+OpenGLShader.m

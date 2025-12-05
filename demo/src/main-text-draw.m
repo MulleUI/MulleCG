@@ -84,7 +84,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
             rect = CGRectInset( rect, 2, 2);
 
-            CGContextTextAlign( context, alignment); // Converted from nvgTextAlign
+            CGContextCombinedTextAlignment( context, alignment); // Converted from nvgTextAlign
 
             switch( y * 3 + x)
             {
@@ -93,7 +93,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             case 2 : contentMode = CGContentModeTopRight; break;
 
             case 3 : contentMode = CGContentModeLeft; break;
-            case 4 : contentMode = CGContentModeCenter; break;
+            case 4 : contentMode = CGContentModeCenterPoint; break;
             case 5 : contentMode = CGContentModeRight; break;
 
             case 6 : contentMode = CGContentModeBottomLeft; break;

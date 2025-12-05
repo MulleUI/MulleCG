@@ -47,9 +47,9 @@
    return( YES);
 }
 
+
 static struct
 {
-   mulle_thread_mutex_t                      _freeTypeLock;
    struct mulle_container_keyvaluecallback   _gpuTextureMapCallback;
    struct mulle_container_keyvaluecallback   _shaderMapCallback;
    NSUInteger                                _contextID; // unsafe but just for debugging
@@ -63,8 +63,6 @@ static struct
    if( MulleObjCClassGetID( self) != @selector( CGContext))
       return;
 
-   mulle_thread_mutex_init( &Self._freeTypeLock);
-
    Self._gpuTextureMapCallback.keycallback   = mulle_container_keycallback_nonowned_pointer;
    Self._gpuTextureMapCallback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
 
@@ -77,8 +75,6 @@ static struct
 {
    if( MulleObjCClassGetID( self) != @selector( CGContext))
       return;
-
-   mulle_thread_mutex_done( &Self._freeTypeLock);
 }
 
 
@@ -119,10 +115,7 @@ static struct
 
    if( _backend != UIGraphicsBackendNone)
    {
-      mulle_thread_mutex_do( Self._freeTypeLock)
-      {
-         [self _initNanoVGWithGraphicsOptions:options];
-      }
+      [self _initNanoVGWithGraphicsOptions:options];
 
       if( ! _vg)
       {
@@ -168,9 +161,6 @@ static struct
 
 - (void) finalize
 {
-   // do this first as it releases resource, which still want
-   // nanovg arounf
-   [super finalize];
 
    if( _backend != UIGraphicsBackendNone)
    { 
@@ -179,6 +169,8 @@ static struct
 
       assert( ! _isRendering);
    }
+
+   [self _finalizeResourceStorage:&_resourceStorage];
 
    CGContextLog("");
 
@@ -190,13 +182,10 @@ static struct
    [self deleteGPUFramebuffers];
    [self deleteShaders];
 
-   // so the problem here is, we are rele
+   [super finalize];
    if( _backend != UIGraphicsBackendNone)
    {
-      mulle_thread_mutex_do( Self._freeTypeLock)
-      {
-         [self _finalizeNanoVG];
-      }
+      [self _finalizeNanoVG];
    }
 }
 
@@ -227,19 +216,19 @@ static struct
 
 
 #ifdef DEBUG
-- (void) mulleGainAccess
+- (void) mulleGainAccessWithUniquingSet:(struct mulle_pointerset *) uniquing
 {
-   [super mulleGainAccess];
+   [super mulleGainAccessWithUniquingSet:uniquing];
 
    // renderedFramebuffers are in limbo, let them stay like these
 }
 
 
-- (void) mulleRelinquishAccess
+- (void) mulleRelinquishAccessWithUniquingSet:(struct mulle_pointerset *) uniquing
 {
    // renderedFramebuffers are in limbo, let them stay like these
 
-   [super mulleRelinquishAccess];
+   [super mulleRelinquishAccessWithUniquingSet:uniquing];
 }
 #endif
 

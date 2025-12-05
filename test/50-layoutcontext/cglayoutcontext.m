@@ -2,6 +2,29 @@
 
 #import <MulleCG/MulleCG.h>
 
+//
+// Notes on visualBoundsOfText and padding:
+//
+// Fontstash (in fons__getGlyph) adds 2px border around each glyph in the texture
+// atlas: one pixel to prevent texture leaking, and one for interpolation/anti-aliasing.
+//
+// When creating the render quad (in fons__getQuad), fontstash already insets the
+// coordinates by 1 pixel (xoff+1, yoff+1, x0+1, y0+1, x1-1, y1-1) to account for
+// the interpolation border.
+//
+// Therefore, the FONSquad coordinates passed to nvgTextVisualBounds already have
+// 1 pixel of padding removed, leaving 1 pixel of the original 2px border. This
+// remaining pixel contains the anti-aliasing/interpolation data that is actually
+// rendered.
+//
+// nvgTextVisualBounds should NOT apply additional +1/-1 adjustments to q.x0/x1/y0/y1
+// because that would remove the anti-aliasing pixels and make the bounds too small.
+// If adjustment is needed, it should be done at a higher level in the layout code.
+//
+// See: nanovg/src/fontstash.h fons__getQuad() lines 1503-1511
+//      nanovg/src/fontstash.h fons__getGlyph() line 1370: pad = iblur+2
+//
+
 
 int   main( int argc, char *argv[])
 {
@@ -15,21 +38,21 @@ int   main( int argc, char *argv[])
 
    @autoreleasepool
    {
-      context = [CGLayoutContext object];
+      context = [CGLayoutContext instance];
 
       text    = "Vfl Bochum 1848";
       [context useDefaultFont];
       [context setFontSize:16.0f];
-      [context setTextAlign:NVG_ALIGN_MIDDLE];
+      [context setCombinedTextAlignment:NVG_ALIGN_LEFT|NVG_ALIGN_MIDDLE];
 
       [context getTextBounds:&bounds
                         text:text
                       length:(NSUInteger) -1];
-      printf( "%s\n", CGRectUTF8String( bounds));
+      printf( "bounds: %s\n", CGRectUTF8String( bounds));
 
       vbounds = [context visualBoundsOfText:text
                                      length:(NSUInteger) -1];
-      printf( "%s\n", CGRectUTF8String( vbounds));
+      printf( "vbounds: %s\n", CGRectUTF8String( vbounds));
 
       n = [context getGlyphPositions:positions
                                count:32
@@ -38,7 +61,7 @@ int   main( int argc, char *argv[])
 
       printf( "%tu:\n", n);
       for( i = 0; i < n; i++)
-         printf( "\t['%c' %g %g/%g %g/%g]\n",
+         printf( "\t{ .str[0] ='%c' .x = %g, .minx = %g, .maxx = %g, .miny = %g, .maxy = %g }\n",
                      *positions[ i].str,
                      positions[ i].x,
                      positions[ i].minx,

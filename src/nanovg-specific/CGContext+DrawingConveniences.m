@@ -538,18 +538,19 @@ static CGTextBoundsInfo   _mvgComputeTextRect( struct NVGcontext *vg,
                                                CGContentMode contentMode,
                                                CGTextOptions options)
 {
-   CGRect             vbounds;
-   CGRect             coverage;
-   CGFloat            hfactor;
-   float              ascender;
-   CGFloat            vfactor;
+   CGContentMode      fillContentMode;
    CGFloat            factor;
+   CGFloat            hfactor;
    CGFloat            maxFactor;
+   CGFloat            vfactor;
+   CGRect             coverage;
+   CGRect             vbounds;
+   CGRect             placement;
+   CGTextBoundsInfo   result;
+   float              ascender;
+   float              fontSize;
    float              lineHeight;
    int                binSearch;
-   CGContentMode      fillContentMode;
-   CGTextBoundsInfo   result;
-   float              fontSize;
 
    assert( s);
    assert( length != (size_t) -1);
@@ -586,6 +587,7 @@ static CGTextBoundsInfo   _mvgComputeTextRect( struct NVGcontext *vg,
          break;
 
       default :
+         // use current fontSize whatever it is
          fontSize = NAN;
          break;
       }
@@ -617,7 +619,7 @@ static CGTextBoundsInfo   _mvgComputeTextRect( struct NVGcontext *vg,
          break;
 
       case CGContentModeScaleAspectFit : // scale so everything fits
-         contentMode = CGContentModeCenter;
+         contentMode = CGContentModeCenterPoint;
          hfactor     = fabsf( rect.size.width / coverage.size.width);
          vfactor     = fabsf( rect.size.height / coverage.size.height);
          if( hfactor < vfactor)
@@ -631,7 +633,7 @@ static CGTextBoundsInfo   _mvgComputeTextRect( struct NVGcontext *vg,
          break;
 
       case CGContentModeScaleAspectFill  : // scale font so either w or h fits
-         contentMode = CGContentModeCenter;
+         contentMode = CGContentModeCenterPoint;
          hfactor     = fabsf( rect.size.width / coverage.size.width);
          vfactor     = fabsf( rect.size.height / coverage.size.height);
          if( hfactor > vfactor)
@@ -668,8 +670,8 @@ static CGTextBoundsInfo   _mvgComputeTextRect( struct NVGcontext *vg,
          }
       }
 
-      coverage = CGSizePlaceInRect( coverage.size, rect, contentMode);
-      result   = CGTextBoundsInfoMake( coverage, fontSize);
+      placement = CGSizePlaceInRect( coverage.size, rect, contentMode);
+      result    = CGTextBoundsInfoMake( placement, fontSize);  // ????
    }
    while( 0);
    mvgRestore( vg);
@@ -691,10 +693,11 @@ static void   mvgTextInRect( struct NVGcontext *vg,
                              CGContentMode contentMode,
                              CGTextOptions options)
 {
-   CGPoint               origin;
-   float                 ascender;
-   float                 descender;
-   CGTextBoundsInfo  info;
+   CGPoint            origin;
+   CGTextBoundsInfo   info;
+   float              ascender;
+   float              descender;
+
    if( ! vg || ! s)
       return;
 
@@ -724,7 +727,7 @@ static void   mvgTextInRect( struct NVGcontext *vg,
          case CGContentModeTopRight    : origin.y -= ascender; break;
 
          case CGContentModeLeft        :
-         case CGContentModeCenter :
+         case CGContentModeCenterPoint :
          case CGContentModeRight       : origin.y = CGRectGetMidY( rect) - ascender; break;
 
          case CGContentModeBottomLeft  :
@@ -747,13 +750,13 @@ static CGPoint   _mvgTLAdjustmentForVisualBounds( struct NVGcontext *vg,
                                                   int alignment,
                                                   CGTextOptions options)
 {
+   CGPoint   adjust;
+   CGRect    coverage;
+   float     ascender;
+   float     bounds[ 6];
+   float     lineh;
    int       halign;
    int       valign;
-   float     ascender;
-   float     lineh;
-   float     bounds[ 6];
-   CGRect    coverage;
-   CGPoint   adjust;
 
    adjust = CGPointZero;
    if( ! s)

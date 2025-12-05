@@ -43,7 +43,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    // get a rectangle inside canvas thats centered and as large as possible
    area.size = CGSizeAspectFillToSize( CGSizeMake( 1, 1), canvas.size);
-   area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenter);
+   area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenterPoint);
 
    // subdivide into 2x2
    CGRectPartition2x2( area, CGSizeMake( 4, 4), rects);
@@ -54,7 +54,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipNone,
                                                     CGRepeatNone,
-                                                    CGContentModeCenter);
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 0][ 0]
            options:&options
            context:context];
@@ -65,7 +65,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipHorizontally,
                                                     CGRepeatNone,
-                                                    CGContentModeCenter);
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 0][ 1]
            options:&options
            context:context];
@@ -76,7 +76,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipVertically,
                                                     CGRepeatNone,
-                                                    CGContentModeCenter);
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 1][ 0]
            options:&options
            context:context];
@@ -87,7 +87,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipBoth,
                                                     CGRepeatNone,
-                                                    CGContentModeCenter);
+                                                    CGContentModeCenterPoint);
    [image drawRect:rects[ 1][ 1]
            options:&options
            context:context];

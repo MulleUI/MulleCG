@@ -47,7 +47,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    {
       x         = (frameNr % 120) / 119.0f;
       rotation += x;
-//      rotation += _CAQuadraticGetValue( ((struct CAQuadratic) {  0.0, 0.010f, 0.990f, 1.0f }), x);
+//      rotation += _CACubicGetValue( ((struct CACubic) {  0.0, 0.010f, 0.990f, 1.0f }), x);
    }
 
    canvas = [layer canvas];

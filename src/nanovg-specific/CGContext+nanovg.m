@@ -29,41 +29,54 @@
 
 @implementation CGLayoutContext ( OpenGL)
 
+extern mulle_thread_mutex_t   CGLayoutContextFreeTypeLock;
+
+
 - (void) _initializeNanoVG:(NSUInteger) flags
 {
+   mulle_thread_mutex_do( CGLayoutContextFreeTypeLock)
+   {
+      _nvgFlags = flags;
 #ifdef NANOVG_GL3_IMPLEMENTATION
-   _vg  = nvgCreateGL3( _nvgFlags);
+      _vg  = nvgCreateGL3( _nvgFlags);
 #else
 # ifdef NANOVG_GLES2_IMPLEMENTATION
-   _vg  = nvgCreateGLES2( _nvgFlags);
+      _vg  = nvgCreateGLES2( _nvgFlags);
 # else
 #  ifdef NANOVG_GLES3_IMPLEMENTATION
-   _vg  = nvgCreateGLES3( _nvgFlags);
+      _vg  = nvgCreateGLES3( _nvgFlags);
 #  else
 #   error "Any of NANOVG_GL3/GLES2/GLES3_IMPLEMENTATION must be defined"
 #  endif
 # endif
 #endif
+   }
    assert( _vg);
 }
 
 
 - (void) _finalizeNanoVG
 {
+   if( ! _vg)
+      return;
+
+   mulle_thread_mutex_do( CGLayoutContextFreeTypeLock)
+   {
 #ifdef NANOVG_GL3_IMPLEMENTATION
-   nvgDeleteGL3( _vg);
-   _vg = NULL;
+      nvgDeleteGL3( _vg);
+      _vg = NULL;
 #else
 # ifdef NANOVG_GLES2_IMPLEMENTATION
-   nvgDeleteGLES2(_vg);
-   _vg = NULL;
+      nvgDeleteGLES2(_vg);
+      _vg = NULL;
 # else
 #  ifdef NANOVG_GLES3_IMPLEMENTATION
-   nvgDeleteGLES3(_vg);
-   _vg = NULL;
+      nvgDeleteGLES3(_vg);
+      _vg = NULL;
 #  endif
 # endif
 #endif
+   }
 }
 
 @end
@@ -274,6 +287,8 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
 
 - (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options
 {
+   NSUInteger   flags;
+
    MULLE_C_ASSERT( UIGraphicsSourceOver == NVG_SOURCE_OVER);
    MULLE_C_ASSERT( UIGraphicsXor        == NVG_XOR);
    MULLE_C_ASSERT( UIGraphicsCopy       == NVG_COPY);
@@ -288,8 +303,9 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
    MULLE_C_ASSERT( CARotationDirectionClockWise == NVG_CW);
 
    // Solidity assertions
-   MULLE_C_ASSERT( CGPathFillStyleSolid == NVG_SOLID);
-   MULLE_C_ASSERT( CGPathFillStyleHole == NVG_HOLE);
+   // **THIS IS NO LONGER TRUE***
+   // MULLE_C_ASSERT( CGPathFillStyleSolid == NVG_SOLID);
+   // MULLE_C_ASSERT( CGPathFillStyleHole == NVG_HOLE);
 
    // Line Cap assertions
    MULLE_C_ASSERT( CGLineCapButt == NVG_BUTT);
@@ -347,29 +363,37 @@ BOOL   CGContextResetBackendError( CGContext *ctxt)
    MULLE_C_ASSERT( CGTessellationSubdivision == NVG_TESS_SUBDIVISION);
    MULLE_C_ASSERT( CGTessellationAFD == NVG_TESS_AFD);
 
-   _nvgFlags  = (options & UIGraphicsEdgeAntiAliasing)  ? NVG_ANTIALIAS : 0;
-   _nvgFlags |= (options & UIGraphicsUseStencilStrokes) ? NVG_STENCIL_STROKES : 0;
-   _nvgFlags |= (options & UIGraphicsUseClearType)      ? NVG_CLEARTYPE : 0;
+   flags  = (options & UIGraphicsEdgeAntiAliasing)  ? NVG_ANTIALIAS : 0;
+   flags |= (options & UIGraphicsUseStencilStrokes) ? NVG_STENCIL_STROKES : 0;
+   flags |= (options & UIGraphicsUseClearType)      ? NVG_CLEARTYPE : 0;
+   flags |= (options & UIGraphicsNoDrawing)         ? NVG_NO_DRAWING : 0;
 #ifdef DEBUG
-   _nvgFlags |= NVG_DEBUG;
+   flags |= NVG_DEBUG;
 #endif
 
-#ifdef NANOVG_GL3_IMPLEMENTATION
-   _nvgFlags |= (options & UIGraphicsUseMSAA) ? NVG_MSAA : 0;
-   _vg        = nvgCreateGL3( _nvgFlags);
+#if defined( NANOVG_GL3_IMPLEMENTATION) || defined( NANOVG_GLES3_IMPLEMENTATION)
+   flags |= (options & UIGraphicsUseMSAA) ? NVG_MSAA : 0;
 #endif
-#ifdef NANOVG_GLES2_IMPLEMENTATION
-   _vg        = nvgCreateGLES2( _nvgFlags);
-#endif
-#ifdef NANOVG_GLES3_IMPLEMENTATION
-   _nvgFlags |= (options & UIGraphicsUseMSAA) ? NVG_MSAA : 0;
-   _vg        = nvgCreateGLES3( _nvgFlags);
-#endif
+
+   [self _initializeNanoVG:flags];
 
    assert( _vg);
 #ifdef DEBUG
    fprintf( stderr, "nanovg context          : %s\n", [self nanovgInfoUTF8String]);
 #endif
+
+   // we always set this
+#ifndef NVG_TRACECODE_DISABLED
+   nvgTraceName( _vg, _nameUTF8String);
+#endif
+   if( options & UIGraphicsTraceDrawCalls)
+   {
+#ifndef NVG_TRACECODE_DISABLED
+      nvgTrace( _vg, stderr);
+#else
+      mulle_fprintf( "nvg trace not available (NVG_TRACECODE_DISABLED)\n");
+#endif
+   }
 
    _framebufferBits = GL_COLOR_BUFFER_BIT;
    if( options & UIGraphicsUseStencilStrokes)

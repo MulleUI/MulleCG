@@ -555,7 +555,7 @@ int   main( int argc, char *argv[])
       [window setSwapInterval:swapInterval];
       [window setFrameRate:frameRate];
 
-      perf = [MulleUIPerf object];
+      perf = [MulleUIPerf instance];
       [window setFrameDelegate:perf];
 
       [app addWindow:window];

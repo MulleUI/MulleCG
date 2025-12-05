@@ -11,7 +11,7 @@
 @class CGImage;
 
 
-@interface NSObject( CGLayerForward)
+@interface NSObject( CGLayer_Forward)
 
 - (BOOL) isMultiSample;
 
@@ -305,7 +305,7 @@ static inline float  CGContextGetBackAndForthAnimationFactor( CGContext *context
       factor = n / ((float) halfRate);  // 0: 0 1: 0.5 2: 1
    else
       factor = 1.0f - ((n - halfRate) / (float) halfRate);  // 3: 0.5
-   factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
+   factor = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
    return( factor);
 }
 

@@ -52,7 +52,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGContextFontSize( context, canvas.size.height);
    CGContextTextColor( context, CGColorMakeWhite());
    CGContextTextBackgroundColor( context, CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0));
-   CGContextTextAlign( context, CGTextAlignCenter|CGTextAlignBottom); // Converted from NVG_ALIGN_CENTER|NVG_ALIGN_BOTTOM
+   CGContextCombinedTextAlignment( context, CGTextAlignCenter|CGTextAlignBottom); // Converted from NVG_ALIGN_CENTER|NVG_ALIGN_BOTTOM
    CGContextText( context, CGPointMake( CGRectGetMidX( canvas), CGRectGetMaxY( canvas)), "|y|", (size_t) -1);
 
    return( YES);

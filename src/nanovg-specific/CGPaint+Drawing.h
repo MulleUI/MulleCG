@@ -7,25 +7,12 @@
 #import "CGTypes.h"
 #import "CGDrawable.h"
 #import "CGPaint.h"
+#import "CGPaintable.h"
+
 
 @class CGContext;
 @class CGImage;
 
-
-@protocol CGPaintable
-
-- (NVGpaint) NVGpaintWithBounds:(CGRect) rect
-                   paintOptions:(struct CGPaintOptions *) options
-                        context:(CGContext *) context;
-
-- (CGImage *) image;
-- (CGImage *) otherImage;
-
-@end 
-
-
-@interface CGPaint( CGPaintable)  < CGPaintable>
-@end
 
 
 //
@@ -136,50 +123,11 @@ void  CGContextDrawBitmapDrawableInRect( CGContext *context,
                                          CGRect patternRect,
                                          CGDrawableOptions *options);
 
-
-// CGPaint+nanovg.m
-
-void   CGContextFillPaintableOptions( CGContext *context,
-                                      id <CGPaintable> paintable,
-                                      CGRect  bounds,
-                                      CGFillOptions *options);
-
-void   CGContextStrokePaintableOptions( CGContext *context,
-                                        id <CGPaintable> paint,
-                                        CGRect  bounds,
-                                        CGFloat strokeWidth,
-                                        CGStrokeOptions *options);
-
-//
-// paint often carry the "rect" within them, so this is the easy way...
-//
-static inline void   CGContextFillPaintable( CGContext *context, id <CGPaintable> paint)
-{
-   CGContextFillPaintableOptions( context,
-                                  paint,
-                                  CGRectMake( -INFINITY, -INFINITY, INFINITY, INFINITY),
-                                  NULL);
-}
-
-
-static inline void   CGContextStrokePaintable( CGContext *context, id <CGPaintable> paint, CGFloat strokeWidth)
-{
-   CGContextStrokePaintableOptions( context,
-                                    paint,
-                                    CGRectMake( -INFINITY, -INFINITY, INFINITY, INFINITY),
-                                    strokeWidth,
-                                    NULL);
-}
-
-
 void  CGContextDrawBitmapDrawableInRect( CGContext *context,
                                          id <CGBitmapDrawable> drawable,
                                          CGRect rect,
                                          CGRect patternRect,
                                          CGDrawableOptions *options);
-
-
-
 
 
 #endif

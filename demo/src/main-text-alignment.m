@@ -37,7 +37,7 @@ static char  *nvgHAlignmentUTF8String( int alignment)
    case CGTextAlignLeft   : return( "CGTextAlignLeft"); // Converted from NVG_ALIGN_LEFT
    case CGTextAlignCenter : return( "CGTextAlignCenter"); // Converted from NVG_ALIGN_CENTER
    case CGTextAlignRight  : return( "CGTextAlignRight"); // Converted from NVG_ALIGN_RIGHT
-   default               : return( "*invalid*");
+   default                : return( "*invalid*");
    }
 }
 
@@ -50,7 +50,7 @@ static char  *nvgVAlignmentUTF8String( int alignment)
    case CGTextAlignMiddle   : return( "CGTextAlignMiddle"); // Converted from NVG_ALIGN_MIDDLE
    case CGTextAlignBottom   : return( "CGTextAlignBottom"); // Converted from NVG_ALIGN_BOTTOM
    case CGTextAlignBaseline : return( "CGTextAlignBaseline"); // Converted from NVG_ALIGN_BASELINE
-   default                 : return( "*invalid*");
+   default                  : return( "*invalid*");
    }
 }
 
@@ -58,9 +58,9 @@ static void   nvgStrokeGlyphPosition( CGContext *context, NVGglyphPosition *posi
 {
    CGContextBeginPath( context); // Converted from nvgBeginPath
    CGContextRect( context, CGRectMake( position->minx, // Converted from nvgRect
-                position->miny,
-                position->maxx - position->minx,
-                position->maxy - position->miny));
+                                       position->miny,
+                                       position->maxx - position->minx,
+                                       position->maxy - position->miny));
    CGContextStrokeColor( context, color); // Converted from nvgStrokeColor
    CGContextStrokeWidth( context, 1.0); // Converted from nvgStrokeWidth
    CGContextStroke( context); // Converted from nvgStroke
@@ -197,7 +197,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
             rect = CGRectInset( rect, 2, 2);
 
-            CGContextTextAlign( context, alignments[ x]); // Converted from nvgTextAlign
+            CGContextCombinedTextAlignment( context, alignments[ x]); // Converted from nvgTextAlign
 
             switch( y)
             {

@@ -66,6 +66,12 @@ static struct CGFrameInfo   emptyInfo;
    // not 100% sure why this is written this way
    _isRendering = YES;
 
+   MULLE_C_ASSERT( UIGraphicsContextTraceDrawCalls == CGContextDebugTraceDrawCalls);
+
+   // doesn't stack
+   if( (info->debuggingFlags | _debuggingFlags) & CGContextDebugTraceDrawCalls)
+      nvgTrace( CGContextGetNVGContext( self), stderr);
+
    assert( info);
    assert( info->window.pixelRatio != 0.0);
 
@@ -198,6 +204,10 @@ static struct CGFrameInfo   emptyInfo;
    [self suspendRender];
 
    framebuffer = [self _endRender];
+
+   // this doesn't stack
+   if( (_currentFrameInfo.debuggingFlags | _debuggingFlags) & CGContextDebugTraceDrawCalls)
+      nvgTrace( CGContextGetNVGContext( self), NULL);
 
    if( framebuffer)
    {

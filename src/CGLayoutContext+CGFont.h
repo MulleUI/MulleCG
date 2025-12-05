@@ -31,8 +31,8 @@
 - (void) _doneFontCache;
 - (void) _resetFontCache;
 
-- (void) mulleGainAccessToFonts           MULLE_OBJC_THREADSAFE_METHOD;
-- (void) mulleRelinquishAccessToFonts     MULLE_OBJC_THREADSAFE_METHOD;
+- (void) mulleGainAccessToFontsWithUniquingSet:(struct mulle_pointerset *) uniquing        MULLE_OBJC_THREADSAFE_METHOD;
+- (void) mulleRelinquishAccessToFontsWithUniquingSet:(struct mulle_pointerset *) uniquing  MULLE_OBJC_THREADSAFE_METHOD;
 
 @end
 

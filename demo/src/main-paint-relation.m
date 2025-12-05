@@ -31,7 +31,7 @@ static void   drawRectBehindText( CGContext *context,
    CGContextTextColor( context, CGColorMakeWhite());
    CGContextTextBackgroundColor( context, CGColorMakeGray());
 
-   CGContextTextAlign( context, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+   CGContextCombinedTextAlignment( context, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
    CGContextText( context, info.bounds.origin, label, (size_t) -1);
 }
 
@@ -116,7 +116,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          CGContextStroke( context);
 
          //
-         drawRectBehindText( context, rect, CGRelationUTF8String( i), CGContentModeCenter);
+         drawRectBehindText( context, rect, CGRelationUTF8String( i), CGContentModeCenterPoint);
          drawRectBehindText( context, rect, CGRelationUTF8String( j), CGContentModeTopLeft);
       }
    }

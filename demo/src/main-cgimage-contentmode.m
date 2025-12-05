@@ -57,7 +57,7 @@ static NSInteger   contentMode[ 12] =
 {
    CGContentModeScaleToFill,  CGContentModeScaleAspectFit, CGContentModeScaleAspectFill,
    CGContentModeTopLeft, CGContentModeTop, CGContentModeTopRight,
-   CGContentModeLeft, CGContentModeCenter, CGContentModeRight,
+   CGContentModeLeft, CGContentModeCenterPoint, CGContentModeRight,
    CGContentModeBottomLeft, CGContentModeBottom, CGContentModeBottomRight
 };
 
@@ -101,7 +101,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    // get a rectangle inside canvas thats centered and as large as possible
    area.size = CGSizeAspectFitToSize( CGSizeMake( 1, 1), canvas.size);
-   area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenter);
+   area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenterPoint);
 
    // subdivide into rows and columns
    CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( 4, 4), ROWS, COLUMNS, (CGRect *) rects);

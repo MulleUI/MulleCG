@@ -46,6 +46,7 @@ src/main-cglayer.m
 src/main-circle-hole.m
 src/main-composite.m
 src/main-custom-paint.m
+src/main-cyclic-arrow.m
 src/main-dial.m
 src/main-draw-hole.m
 src/main-draw.m
@@ -95,6 +96,7 @@ src/main-rounded-stroke.m
 src/main-scissor.m
 src/main-segments.m
 src/main-shader.m
+src/main-sine-fill.m
 src/main-stroke-fill.m
 src/main-stroke-rect.m
 src/main-suspend-resume.m
@@ -108,6 +110,7 @@ src/main-text-in-rect.m
 src/main-text.m
 src/main-text-multiline.m
 src/main-text-nanovg.m
+src/main-text-origin.m
 src/main-text-simple.m
 src/main-texture.m
 src/parse_uniform.c

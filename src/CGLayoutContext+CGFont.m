@@ -131,26 +131,28 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 }
 
 
-- (void) mulleGainAccessToFonts
+- (void) mulleGainAccessToFontsWithUniquingSet:(struct mulle_pointerset *) uniquing
 {
    char    *name;
    CGFont  *font;
 
    mulle_map_for( &_fontMap, name, font)
    {
-      [font mulleGainAccess];
+      if( mulle_pointerset_insert( uniquing, self))
+         [font mulleGainAccessWithUniquingSet:uniquing];
    }
 }
 
 
-- (void) mulleRelinquishAccessToFonts
+- (void) mulleRelinquishAccessToFontsWithUniquingSet:(struct mulle_pointerset *) uniquing
 {
    char    *name;
    CGFont  *font;
 
    mulle_map_for( &_fontMap, name, font)
    {
-      [font mulleRelinquishAccess];
+      if( mulle_pointerset_insert( uniquing, self))
+         [font mulleRelinquishAccessWithUniquingSet:uniquing];
    }
 }
 

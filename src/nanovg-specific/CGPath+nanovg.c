@@ -6,29 +6,24 @@
 #include "CGTypes.h"
 
 #include <assert.h>
+#include <math.h>
 
 
-// TODO: this could just be part of nanovg-extensions.inc
-//       further more this could be added wholesale with nvg__appendCommands
 void   mvgAddCGPath( NVGcontext *vg, CGPath *path)
 {
-   unsigned int    n;
-   float           *f;
-   float           *sentinel;
-   float           x, y;
-   float           x1, y1;
-   float           x2, y2;
-   float           r;
-   float           dir;
-   float           a0, a1;
-   int             cmd;
-#ifndef NDEBUG
-   int            prev;
-   int            prevprev;
-
-   cmd      = -1;
-   prevprev = -1;
-#endif
+   unsigned int          n;
+   float                 *f;
+   float                 *sentinel;
+   float                 x, y;
+   float                 x1, y1;
+   float                 x2, y2;
+   int                   cmd;
+   CGPoint               current_point;
+   CGPoint               start_point;
+   CACircle              circle;
+   CAAngle               start_angle, end_angle;
+   CARotationDirection   rotation_dir;
+   int                   nvg_dir;
 
    if( ! vg || ! path)
       return;
@@ -41,15 +36,18 @@ void   mvgAddCGPath( NVGcontext *vg, CGPath *path)
    assert( CARotationDirectionCounterClockWise == NVG_CCW);
    assert( CARotationDirectionClockWise == NVG_CW);
 
+   // broken paths draw nothing
+   current_point.x = -INFINITY;
+   current_point.y = -INFINITY;
+   start_point.x   = +INFINITY;  // easier for debug
+   start_point.y   = -INFINITY;  // keep negative
+
    n        = _mulle_floatarray_get_count( &path->_floats);
    f        = _mulle_floatarray_get_floats( &path->_floats);
    sentinel = &f[ n];
+
    while( f < sentinel)
    {
-#ifndef NDEBUG
-      prevprev = prev;
-      prev     = cmd;
-#endif
       cmd  = (int) *f++;
 
       switch( cmd)
@@ -58,6 +56,8 @@ void   mvgAddCGPath( NVGcontext *vg, CGPath *path)
          x = *f++;
          y = *f++;
          nvgMoveTo( vg, x, y);
+
+         start_point = CGPointMake( x, y);  // need or close
          break;
 
       case CGPathLineCommand:
@@ -84,28 +84,40 @@ void   mvgAddCGPath( NVGcontext *vg, CGPath *path)
          nvgQuadTo( vg, x1, y1, x, y);
          break;
 
-      case CGPathArcCommand :
-         x   = *f++;
-         y   = *f++;
-         r   = *f++;
-         a0  = *f++;
-         a1  = *f++;
-         dir = *f++;
-         nvgArc( vg, x, y, r, a0, a1, (int) dir);
-         break;
+      case CGPathCircleSegmentCommand:
+         // Extract data
+         x1     = *f++;
+         y1     = *f++;
+         x      = *f++;
+         y      = *f++;
 
-      case CGPathFillStyleCommand :
-         assert( prev != CGPathFillStyleCommand);
-         assert( prevprev != CGPathFillStyleCommand);
-         x = *f++;
-         nvgPathWinding( vg, (int) x);
+         // MEMO: nvgArcTo does something different :/
+         // nvgArcTo( vg, x1, y1, x, y);
+
+         circle      = CACircleMakeWithCenterAndPerimeter( CGPointMake(x1, y1), CGPointMake(x, y));
+
+         // Get angles using CACircle functions
+         start_angle = CACircleAngleAtPoint( circle, current_point);
+         end_angle   = CACircleAngleAtPoint( circle, CGPointMake(x, y)); // Fixed: was end_point
+
+         // Use existing function to determine rotation direction
+         rotation_dir = CAAngleGetRotationDirection( start_angle, end_angle);
+         nvg_dir      = (rotation_dir == CARotationDirectionCounterClockWise) ? NVG_CCW : NVG_CW;
+         nvgArc( vg, x1, y1, circle.radius, start_angle, end_angle, nvg_dir);
          break;
 
       case CGPathCloseSubpathCommand:
-         assert( prev != CGPathCloseSubpathCommand);
-         assert( prevprev != CGPathCloseSubpathCommand);
          nvgClosePath( vg);
-         break;
+         x = start_point.x;
+         y = start_point.y;
+         break;  // do not advance current point
+
+      case CGPathFillStyleCommand :
+         x1 = *f++;
+         nvgPathWinding( vg, x1 == CGPathFillStyleSolid ? NVG_SOLID : NVG_HOLE);
+         continue;  // do not advance current point
+
       }
+      current_point = CGPointMake( x, y);
    }
 }

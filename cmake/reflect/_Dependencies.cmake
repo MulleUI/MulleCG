@@ -26,7 +26,7 @@ else()
             ${CMAKE_STATIC_LIBRARY_PREFIX}freetyped${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
             ${CMAKE_STATIC_LIBRARY_PREFIX}freetyped${CMAKE_STATIC_LIBRARY_SUFFIX}
             freetyped
-            NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH
+            NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_FIND_ROOT_PATH
          )
          if( NOT FREETYPE_LIBRARY AND NOT DEPENDENCY_IGNORE_SYSTEM_LIBARIES)
             find_library( FREETYPE_LIBRARY NAMES
@@ -41,7 +41,7 @@ else()
             ${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
             ${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_STATIC_LIBRARY_SUFFIX}
             freetype
-            NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH
+            NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_FIND_ROOT_PATH
          )
          if( NOT FREETYPE_LIBRARY AND NOT DEPENDENCY_IGNORE_SYSTEM_LIBARIES)
             find_library( FREETYPE_LIBRARY NAMES
@@ -65,7 +65,9 @@ else()
          # intentionally left blank
       else()
          # Disable with: `mulle-sourcetree mark freetype no-require-link`
-         message( SEND_ERROR "FREETYPE_LIBRARY was not found")
+         message( SEND_ERROR "FREETYPE_LIBRARY was not found in ${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_STATIC_LIBRARY_SUFFIX}
+freetype")
       endif()
    endif()
 endif()
@@ -85,7 +87,7 @@ else()
          ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
          ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-gfx${CMAKE_STATIC_LIBRARY_SUFFIX}
          mulle-gfx
-         NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH
+         NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_FIND_ROOT_PATH
       )
       if( NOT MULLE__GFX_LIBRARY AND NOT DEPENDENCY_IGNORE_SYSTEM_LIBARIES)
          find_library( MULLE__GFX_LIBRARY NAMES
@@ -138,7 +140,9 @@ else()
          endforeach()
       else()
          # Disable with: `mulle-sourcetree mark mulle-gfx no-require-link`
-         message( SEND_ERROR "MULLE__GFX_LIBRARY was not found")
+         message( SEND_ERROR "MULLE__GFX_LIBRARY was not found in ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+${CMAKE_STATIC_LIBRARY_PREFIX}mulle-gfx${CMAKE_STATIC_LIBRARY_SUFFIX}
+mulle-gfx")
       endif()
    endif()
 endif()
@@ -158,7 +162,7 @@ else()
          ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
          ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIBase${CMAKE_STATIC_LIBRARY_SUFFIX}
          MulleUIBase
-         NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH
+         NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_FIND_ROOT_PATH
       )
       if( NOT MULLE_UI_BASE_LIBRARY AND NOT DEPENDENCY_IGNORE_SYSTEM_LIBARIES)
          find_library( MULLE_UI_BASE_LIBRARY NAMES
@@ -224,7 +228,9 @@ else()
          endif()
       else()
          # Disable with: `mulle-sourcetree mark MulleUIBase no-require-link`
-         message( SEND_ERROR "MULLE_UI_BASE_LIBRARY was not found")
+         message( SEND_ERROR "MULLE_UI_BASE_LIBRARY was not found in ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
+${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIBase${CMAKE_STATIC_LIBRARY_SUFFIX}
+MulleUIBase")
       endif()
    endif()
 endif()

@@ -27,6 +27,8 @@
 
 - (struct CGTextMetrics) visualTextMetrics;
 
+@property( assign, getter=isTracingDrawCalls) BOOL   traceDrawCalls MULLE_OBJC_THREADSAFE_METHOD;
+
 @end
 
 

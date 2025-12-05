@@ -36,7 +36,7 @@ static void   drawRectBehindText( CGContext *context, CGRect canvas, char *label
    CGContextTextColor( context, CGColorMakeWhite());
    CGContextTextBackgroundColor( context, CGColorMakeGray());
 
-   CGContextTextAlign( context, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+   CGContextCombinedTextAlignment( context, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
    CGContextText( context, info.bounds.origin, label, (size_t) -1);
 }
 

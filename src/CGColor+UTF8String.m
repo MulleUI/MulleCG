@@ -69,3 +69,5 @@ char   *CGColorUTF8String( CGColor color)
                                                        hexColor);
    return( s ? s : MulleObjC_asprintf( "#%08tx", hexColor));
 }
+
+

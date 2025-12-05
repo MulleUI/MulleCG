@@ -29,7 +29,7 @@ static void   fillWithPaintableInBounds( CGContext *context,
       return;
    }
    CGContextFillPaintableOptions( context, paintable, rect, NULL);
-   CGContextFill( context);   
+   //CGContextFill( context);
 }
 
 
@@ -53,7 +53,6 @@ void   CGContextFillRoundedRectWithPaintable( CGContext *context,
    CGContextBeginPath( context);
    CGContextRoundedRect( context, rect, cornerRadius);
    fillWithPaintableInBounds( context, paintable, rect);
-
 }
 
 
@@ -105,7 +104,6 @@ static void   strokeWithPaintableInBounds( CGContext *context,
                                     rect,
                                     strokeWidth,
                                     NULL);
-   CGContextStroke( context);
 }
 
 

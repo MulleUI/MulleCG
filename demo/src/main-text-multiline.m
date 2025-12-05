@@ -140,6 +140,7 @@ static void   dump_row_glyphs_to_file( FILE *fp,
                                        struct UITextRow *rows,
                                        NSUInteger i,
                                        struct Info *info,
+                                       char *text,
                                        CGContext *context)
 {
    struct UIGlyphPosition   positions[ 64];
@@ -148,7 +149,7 @@ static void   dump_row_glyphs_to_file( FILE *fp,
 
    m = [context getGlyphPositions:positions
                             count:sizeof( positions) / sizeof( positions[ 0])
-                             text:UITextRowGetUTF8Characters( &rows[ i])
+                             text:UITextRowGetUTF8Characters( &rows[ i], text)
                            length:UITextRowGetLength( &rows[ i])];
 
    if( cleartype)
@@ -241,7 +242,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    //CGContextShapeAntiAlias( context, 0);
    CGContextClearType( context, info->isClearType);
-   CGContextTextAlign( context, CGTextAlignLeft | info->verticalAlignment); // Converted from NVG_ALIGN_LEFT | info->verticalAlignment
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | info->verticalAlignment); // Converted from NVG_ALIGN_LEFT | info->verticalAlignment
    CGContextFontSize( context, info->fontSize);
 
    info->metrics       = [context textMetrics];
@@ -265,6 +266,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    //
    n = [context getTextRows:rows
                       count:sizeof( rows) / sizeof( rows[ 0])
+                textRowSize:sizeof( struct UITextRow)
                        text:text
                      length:(NSUInteger) -1
               breakRowWidth:info->area.size.width];
@@ -303,10 +305,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    for( i = 0; i < n; i++)
    {
-      CGContextText( context, CGPointMake( x, y), rows[ i].start, rows[ i].end - rows[ i].start);
+      CGContextText( context, CGPointMake( x, y), &text[ rows[ i].range.location], rows[ i].range.length);
 
       if( dump_glyphs)
-         dump_row_glyphs_to_file( stdout, rows, i, info,  context);
+         dump_row_glyphs_to_file( stdout, rows, i, info, text, context);
       y += info->visualMetrics.lineHeight;
    }
 
