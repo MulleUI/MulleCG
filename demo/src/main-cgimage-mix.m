@@ -83,7 +83,7 @@ static void  drawRotated( CGContext *context, CGImage *image, CGRect rect, NSInt
                                                     CGScaleNone, // scale (use CGScaleNone as we are setting size explicitly)
                                                     CGFlipNone, // flip
                                                     CGRepeatNone, // repeat
-                                                    CGContentModeCenter); // contentMode
+                                                    CGContentModeCenterPoint); // contentMode
 
    // The drawRect:options:context: method handles the drawing with the specified options
    imageRect = CGRectMake( rect.origin.x - diffPoint.x,
@@ -127,7 +127,7 @@ static void  drawUnscaled( CGContext *context, CGImage *image, CGRect rect, NSIn
                                                     CGScaleNone, // scale (use CGScaleNone as we are setting size explicitly)
                                                     CGFlipNone, // flip
                                                     CGRepeatNone, // repeat
-                                                    CGContentModeCenter); // contentMode
+                                                    CGContentModeCenterPoint); // contentMode
 
    imageRect = CGRectMake( rect.origin.x - (COLUMNS / 2 - x) * step.width,
                            rect.origin.y - (ROWS / 2 - y) * step.height,
@@ -173,7 +173,7 @@ static void  drawShifted( CGContext *context, CGImage *image, CGRect rect, NSInt
                                                     CGScaleNone, // scale (use CGScaleNone as we are setting size explicitly)
                                                     CGFlipNone, // flip
                                                     CGRepeatNone, // repeat
-                                                    CGContentModeCenter); // contentMode
+                                                    CGContentModeCenterPoint); // contentMode
    imageRect = CGRectMake( final.x,
                            final.y,
                            rect.size.width / scale.width,
@@ -210,7 +210,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    // get a square inside canvas that is centered and as large as possible
    area.size = CGSizeAspectFillToSize( CGSizeMake( 1, 1), canvas.size);
-   area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenter);
+   area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenterPoint);
 
    // subdivide into 1010
    CGRectPartitionIntoRowsAndColumns( area, CGSizeMake( SPACING, SPACING), ROWS, COLUMNS, (CGRect *) rects);

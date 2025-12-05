@@ -86,7 +86,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                             start, end);
             CGContextTextColor( context, CGColorMakeBlack()); // Converted from nvgTextColor
             CGContextTextBackgroundColor( context, CGColorMakeWhite()); // Converted from nvgTextBackgroundColor
-            CGContextTextInRect( context, buf, (size_t) -1, bottomRect, CGContentModeCenter, 0); // Converted from mvgTextInRect
+            CGContextTextInRect( context, buf, (size_t) -1, bottomRect, CGContentModeCenterPoint, 0); // Converted from mvgTextInRect
 
             // mvgMoveTo( vg, CGRectGetTop( topRect));
 

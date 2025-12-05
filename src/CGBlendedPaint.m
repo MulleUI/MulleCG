@@ -45,7 +45,7 @@
    _paint = [paint copy];
    // for "rotation" only animation, this isn't unlikely
    if( ! otherPaint || otherPaint == paint)
-      _otherPaint = [paint retain];
+      _otherPaint = [_paint retain]; // retain out copy
    else
       _otherPaint = [otherPaint copy];
 
@@ -63,24 +63,6 @@
 
    [super dealloc];
 }
-
-
-// MEMO: never do this for paints
-// - (void) mulleGainAccess
-// {
-//    [super mulleGainAccess];
-//    [self->_paint mulleGainAccess];  
-//    [self->_otherPaint mulleGainAccess];  
-// }
-// 
-// 
-// - (void) mulleRelinquishAccess
-// {
-//    [self->_otherPaint mulleRelinquishAccess];  
-//    [self->_paint mulleRelinquishAccess];  
-//    [super mulleRelinquishAccess];
-// }
-// 
 
 
 - (CGPaint *) rotatedPaint:(CARotation) rotation

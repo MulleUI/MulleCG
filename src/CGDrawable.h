@@ -171,7 +171,7 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeDefault( void)
                                                   CGScaleNone,
                                                   CGFlipNone,
                                                   CGRepeatAsIs,
-                                                  CGContentModeCenter));
+                                                  CGContentModeCenterPoint));
 }
 
 
@@ -183,7 +183,7 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeScaleToFit( void)
                                                   CGScaleToFit,
                                                   CGFlipNone,
                                                   CGRepeatAsIs,
-                                                  CGContentModeCenter));
+                                                  CGContentModeCenterPoint));
 }                
 
 

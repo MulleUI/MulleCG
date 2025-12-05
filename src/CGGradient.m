@@ -78,7 +78,7 @@
 
 - (CGFloat) alpha
 {
-   return( CGColorGetAlpha( _startColor) + CGColorGetAlpha( _endColor) / 2.0);
+   return( (CGColorGetAlpha( _startColor) + CGColorGetAlpha( _endColor)) / 2.0);
 }
 
 

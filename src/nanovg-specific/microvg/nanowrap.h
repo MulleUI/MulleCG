@@ -9,6 +9,8 @@
 
 #include <assert.h>
 
+#include "CGTypes.h"
+
 
 // This is the nanovg header wrapped for mulle-geometry and mulle-color types.
 // In order to not have to "think" too much which functions are available in
@@ -53,7 +55,7 @@ typedef NSInteger    CGFontID;      // -1 == invalid
 typedef struct CGTextBoundsInfo
 {
    CGRect   bounds;
-   float    size;
+   float    size;    // can be fontPixelSize or width depending on use (:-/)
 } CGTextBoundsInfo;
 
 #define CGTextBoundsInfoNull \
@@ -206,7 +208,6 @@ static inline void   mvgMiterLimit( NVGcontext *vg, CGFloat limit)
 }
 
 // Sets the stroke width of the stroke style.
-// If size is -1, then don't do anthing
 static inline void   mvgStrokeWidth( NVGcontext *vg, CGFloat size)
 {
    assert( size >= 0.0);
@@ -721,7 +722,7 @@ static inline void   mvgPathWinding( NVGcontext *vg, CGPathFillStyle style)
 {
    assert( CGPathFillStyleSolid == style || CGPathFillStyleHole == style);
 
-   nvgPathWinding( vg, style);
+   nvgPathWinding( vg, style == CGPathFillStyleSolid ? NVG_SOLID: NVG_HOLE);
 }
 
 
@@ -872,10 +873,7 @@ static inline void   mvgResetFallbackFonts( NVGcontext *vg, char *baseFont)
 }
 
 
-// Sets the font size of current text style.
-// FreeType is like 1/64 rez, but nanovg is only 1/10
-//
-static inline CGFloat  mvgFontSize( NVGcontext *vg, CGFloat size)
+static inline CGFloat  mvgRoundedFontSize( CGFloat size)
 {
    NSUInteger   tenth = (NSUInteger) 10 * size;
 
@@ -884,8 +882,20 @@ static inline CGFloat  mvgFontSize( NVGcontext *vg, CGFloat size)
    if( tenth >= 2044 * 10)    // not more than 2044pt only one char per atlas!
       tenth = 2044 * 10;
    size = tenth / 10.0f;
-   nvgFontSize( vg, size);
    return( size);
+}
+
+
+// Sets the font size of current text style.
+// FreeType is like 1/64 rez, but nanovg is only 1/10
+//
+static inline CGFloat  mvgFontSize( NVGcontext *vg, CGFloat size)
+{
+   CGFloat   computed;
+
+   computed = mvgRoundedFontSize( size);
+   nvgFontSize( vg, computed);
+   return( computed);
 }
 
 // Sets the blur of current text style.
@@ -907,8 +917,10 @@ static inline void   mvgTextLineHeight( NVGcontext *vg, CGFloat lineHeight)
 }
 
 // Sets the text align of current text style.
-static inline void   mvgTextAlign( NVGcontext *vg, NSUInteger align)
+static inline void   mvgTextAlign( NVGcontext *vg, CGCombinedTextAlign align)
 {
+   assert( CGTextAlignIsValid( align));
+
    nvgTextAlign( vg, align);
 }
 
@@ -1014,9 +1026,9 @@ static inline CGRect   mvgTextVisualBounds( NVGcontext *vg,
    end = (length == (size_t) -1) ? NULL : &s[ length];
    nvgTextVisualBounds( vg, point.x, point.y, s, end, bounds);
    return( CGRectMake( bounds[ 0],
-                          bounds[ 1],
-                          bounds[ 2] - bounds[ 0],
-                          bounds[ 3] - bounds[ 1]));
+                       bounds[ 1],
+                       bounds[ 2] - bounds[ 0],
+                       bounds[ 3] - bounds[ 1]));
 }
 
 
@@ -1061,31 +1073,160 @@ static inline NSUInteger
    char   *end;
 
    assert( s);
+   assert( positions != NULL || maxPositions == 0);
 
    end = (length == (size_t) -1) ? NULL : &s[ length];
    return( nvgTextGlyphPositions( vg, point.x, point.y,
                                       s, end,
-                                      (NVGglyphPosition *) positions, maxPositions));
+                                      (NVGglyphPosition *) positions,
+                                      maxPositions));
 }
 
 
-
-// Breaks the specified text into lines.
-static inline NSInteger   mvgTextBreakLines( NVGcontext *vg, 
-                                             char *s,
-                                             size_t length,
-                                             CGFloat breakRowWidth, 
-                                             struct UITextRow* rows,
-                                             NSInteger maxRows)
+static inline NSUInteger   _mvgTextBreakLinesInPlace( NVGcontext *vg,
+                                                      char *s,
+                                                      size_t length,
+                                                      CGFloat breakRowWidth,
+                                                      struct UITextRow *rows,
+                                                      NSUInteger maxRows,
+                                                      size_t textRowSize)
 {
-   char   *end;
+   char                *end;
+   NSUInteger          count;
+   char                *address;
+   char                *sentinel;
+   struct UITextRow    *p;
+   struct NVGtextRow   *nvg_rows;
+   struct NVGtextRow   *q;
+   float               minx;
+   float               maxx;
+   float               width;
+   NSRange             range;
 
    assert( s);
 
+   if( maxRows > INT_MAX)
+      maxRows = INT_MAX;
+
+   end      = (length == (size_t) -1) ? NULL : &s[ length];
+   nvg_rows = (NVGtextRow *) rows;
+   count    = nvgTextBreakLines( vg, s,
+                                     end,
+                                     breakRowWidth,
+                                     nvg_rows,
+                                     (int) maxRows);
+
+   if( rows)
+   {
+      // super pedantic, but now we can also have UITextRow being
+      // bigger than NVGtextRow and still do it in place
+
+      q        = &nvg_rows[ count];
+      address  = &((char *) rows)[ count * textRowSize];
+      sentinel = (char *) rows;
+      while( address > sentinel)
+      {
+         address  = &address[ - (int) textRowSize];
+         p        = (struct UITextRow *) address;
+         --q;
+
+         range    = NSRangeMake( q->start - s, q->end - q->start);
+         minx     = q->minx;
+         maxx     = q->maxx;
+         width    = q->width;
+
+         p->range = range;
+         p->minx  = minx;
+         p->maxx  = maxx;
+         p->width = width;
+      }
+   }
+
+   return( count);
+}
+
+
+static inline NSUInteger   _mvgTextBreakLinesAlloca( NVGcontext *vg,
+                                                    char *s,
+                                                    size_t length,
+                                                    CGFloat breakRowWidth,
+                                                    struct UITextRow *rows,
+                                                    NSUInteger maxRows,
+                                                    size_t textRowSize)
+{
+   char                *end;
+   NSUInteger          count;
+   char                *address;
+   char                *sentinel;
+   struct UITextRow    *p;
+   struct NVGtextRow   *q;
+
+   assert( s);
+   assert( rows);
+
    end = (length == (size_t) -1) ? NULL : &s[ length];
-   return( nvgTextBreakLines( vg, s, end,
-                                  breakRowWidth,
-                                  (NVGtextRow *) rows, maxRows));
+   mulle_alloca_do( nvg_rows, NVGtextRow, maxRows)
+   {
+      if( maxRows > INT_MAX)
+         maxRows = INT_MAX;
+      count = nvgTextBreakLines( vg, s,
+                                     end,
+                                     breakRowWidth,
+                                     nvg_rows,
+                                     (int) maxRows);
+
+
+      q        = &nvg_rows[ count];
+      address  = &((char *) rows)[ count * textRowSize];
+      sentinel = (char *) rows;
+      while( address > sentinel)
+      {
+         address  = &address[ - (int) textRowSize];
+         p        = (struct UITextRow *) address;
+         --q;
+
+         p->range       = NSRangeMake( q->start - s, q->end - q->start);
+         p->minx        = q->minx;
+         p->maxx        = q->maxx;
+         p->width       = q->width;
+      }
+   }
+
+   return( count);
+}
+
+
+// Breaks the specified text into lines.
+static inline NSUInteger   mvgTextBreakLines( NVGcontext *vg,
+                                              char *s,
+                                              size_t length,
+                                              CGFloat breakRowWidth,
+                                              struct UITextRow *rows,
+                                              NSUInteger maxRows,
+                                              size_t textRowSize)
+{
+   NSInteger   count;
+
+   assert( s);
+
+   // if we don't write into rows, or rows are large enough
+   // do it inplace. MEMO: is this really worth it ?
+   if( ! rows || textRowSize >= sizeof( NVGtextRow))
+   {
+      count = _mvgTextBreakLinesInPlace( vg, s, length,
+                                             breakRowWidth,
+                                             rows,
+                                             maxRows,
+                                             textRowSize);
+      return( count);
+   }
+
+   count = _mvgTextBreakLinesAlloca( vg, s, length,
+                                            breakRowWidth,
+                                            rows,
+                                            maxRows,
+                                            textRowSize);
+   return( count);
 }
 
 

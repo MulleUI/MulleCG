@@ -59,7 +59,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    useClearType = factor >= 0.5f;
    CGContextClearType( context, useClearType);
 
-   CGContextTextAlign( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE
    CGContextTextColor( context, TEXT_COLOR);
 
    for( height = MIN_HEIGHT;; height = height >= MAX_HEIGHT ? MAX_HEIGHT : height + 1)

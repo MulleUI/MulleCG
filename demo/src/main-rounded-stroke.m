@@ -97,7 +97,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
                                               { 0x20F020CF, 0xF02020CF } };
 
    factor = ([context numberOfFrames] % 120) / 119.0;
-   factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
+   factor = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
    // Delete: vg     = CGContextGetNVGContext( context);
    canvas = CGRectInset( [layer canvas], 25, 25);

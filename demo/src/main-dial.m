@@ -187,7 +187,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGFloat             percentage;
 
 // Delete:   vg     = CGContextGetNVGContext( context);
-   canvas = CGSizePlaceInRect( CGSizeMake( 400, 200), [layer canvas], CGContentModeCenter);
+   canvas = CGSizePlaceInRect( CGSizeMake( 400, 200), [layer canvas], CGContentModeCenterPoint);
    rect   = CGRectIntegral( canvas);
 
    percentage = CGContextGetBackAndForthAnimationFactor( context, 120.f * 10.0);

@@ -11,6 +11,22 @@
 // we want "import.h" always anyway
 #import "import.h"
 
+
+// because this is CGTypes is a "C" header, and UITextAlignment is in "ObjC"
+// we have this here
+static inline CGCombinedTextAlign   UITextAlignmentToTextAlign( UITextAlignment alignment)
+{
+   switch( alignment)
+   {
+   default                    : return( CGTextAlignLeft   | CGTextAlignBaseline);
+   case UITextAlignmentRight  : return( CGTextAlignRight  | CGTextAlignBaseline);
+   case UITextAlignmentCenter : return( CGTextAlignCenter | CGTextAlignBaseline);
+   }
+}
+
+
+
+
 //
 // This is the UIGraphicsDrawing protocol. It probably would be better named
 // UIGraphicsContextDrawing.Its used by UIPureWindow for blitting stuff
@@ -58,6 +74,5 @@ static inline void   CGContextDrawIconInRect( CGContext *self,
 // Sets the font face based on specified name.
 static inline void   CGContextFontFace( CGLayoutContext *context, char *fontname)
 {
-   [context useFontWithNameUTF8String:fontname];
+    [context useFontWithNameUTF8String:fontname];
 }
-

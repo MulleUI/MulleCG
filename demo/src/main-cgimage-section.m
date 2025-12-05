@@ -67,7 +67,7 @@ static void   drawBitmap2( CALayer *layer, CGContext *context)
                                                     CGScaleToFit,
                                                     CGFlipNone,
                                                     CGRepeatNone,
-                                                    CGContentModeCenter);
+                                                    CGContentModeCenterPoint);
 
    // extend middle
    assert( COLUMNS == 4);

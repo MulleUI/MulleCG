@@ -17,7 +17,7 @@ CGDrawableOptions   CGDrawableOptionsDefault =
    .scale             = CGScaleNone,
    .flags.flip        = CGFlipNone,
    .flags.repeat      = CGRepeatAsIs,
-   .flags.contentMode = CGContentModeCenter
+   .flags.contentMode = CGContentModeCenterPoint
 };
 
 
@@ -29,7 +29,7 @@ CGDrawableOptions   CGDrawableOptionsScaleToFit =
    .scale             = CGScaleToFit,
    .flags.flip        = CGFlipNone,
    .flags.repeat      = CGRepeatAsIs,
-   .flags.contentMode = CGContentModeCenter
+   .flags.contentMode = CGContentModeCenterPoint
 };
 
 
@@ -534,7 +534,7 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self,
 
    assert( options->scale             == CGScaleToFit || CGSizeEqualToSize( rect.size, fromRect.size));
    assert( options->flags.repeat      == CGRepeatNone || options->flags.repeat == CGRepeatAsIs);
-   assert( options->flags.contentMode == CGContentModeCenter);
+   assert( options->flags.contentMode == CGContentModeCenterPoint);
 
    r = CGDrawablePatternRect( self, rect, fromRect, options);
 

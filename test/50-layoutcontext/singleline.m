@@ -15,12 +15,12 @@ int   main( int argc, char *argv[])
 
    @autoreleasepool
    {
-      context = [CGLayoutContext object];
+      context = [CGLayoutContext instance];
 
       text    = "VfL Bochum 1848";
       [context useDefaultFont];
       [context setFontSize:16.0f];
-      [context setTextAlign:NVG_ALIGN_MIDDLE];
+      [context setCombinedTextAlignment:NVG_ALIGN_MIDDLE];
 
       [context getTextBounds:&bounds
                         text:text

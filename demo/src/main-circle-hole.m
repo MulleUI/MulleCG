@@ -53,11 +53,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       factor = 1.0 - (frameNr - 120) / 119.0;
    else
       factor = frameNr / 119.0;
-   factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
+   factor = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
    vg   = CGContextGetNVGContext( context);
    rect = CGRectInset( [layer canvas], 25, 25);
-   rect = CGSizePlaceInRect( CGSizeMake( rect.size.width, 200), rect, CGContentModeCenter);
+   rect = CGSizePlaceInRect( CGSizeMake( rect.size.width, 200), rect, CGContentModeCenterPoint);
 
    drawSplitRectWithHole( vg, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
    return( YES);

@@ -141,7 +141,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                         buf,
                         (size_t) -1,
                         CGRectInset( rect, 4, 4),
-                        CGContentModeCenter,
+                        CGContentModeCenterPoint,
                         0);
       }
 

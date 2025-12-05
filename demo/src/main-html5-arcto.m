@@ -24,7 +24,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       factor = 1.0 - (frameNr - 120) / 119.0;
    else
       factor = frameNr / 119.0;
-   factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
+   factor = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
    CGPoint    p01;
    CGPoint    p12;

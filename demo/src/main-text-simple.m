@@ -15,7 +15,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    [context useFontWithNameUTF8String:"sans"];
 
    CGContextClearType( context, 1);
-   CGContextTextAlign( context, CGTextAlignCenter | CGTextAlignMiddle); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE
+   CGContextCombinedTextAlignment( context, CGTextAlignCenter | CGTextAlignMiddle); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE
    CGContextTextColor( context, CGColorMakeOrange());
    CGContextTextBackgroundColor( context, CGColorMakeBlack());
 
@@ -30,7 +30,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGContextFormat( context, CGRectGetCenter( canvas), "O");
 
    CGContextClearType( context, 0);
-   CGContextTextAlign( context, CGTextAlignLeft| CGTextAlignBottom); // Converted from NVG_ALIGN_LEFT| NVG_ALIGN_BOTTOM
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft| CGTextAlignBottom); // Converted from NVG_ALIGN_LEFT| NVG_ALIGN_BOTTOM
    CGContextTextColor( context, CGColorMakeWhite());
    CGContextFontSize( context, 14.0f);
    CGContextFormat( context, CGPointOffset( CGRectGetBottomLeft( canvas), 20, -20),

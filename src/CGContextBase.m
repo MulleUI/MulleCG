@@ -72,7 +72,7 @@ static struct
 - (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) os_context
 {
    return( [self initWithOSGraphicsContext:os_context
-                                      nameUTF8String:NULL]);
+                            nameUTF8String:NULL]);
 }
 
 
@@ -80,13 +80,6 @@ static struct
 {
    abort();
    return( nil);
-}
-
-
-- (void) finalize
-{
-   [self _finalizeResourceStorage:&_resourceStorage];
-   [super finalize];
 }
 
 
@@ -99,16 +92,21 @@ static struct
 }
 
 
-- (void) mulleGainAccess
+
+- (void) mulleGainAccessWithUniquingSet:(struct mulle_pointerset *) uniquing
 {
-   [super mulleGainAccess];
-   [self mulleGainAccessToResources];  // -> CGContext+CGFramebuffer
+   [super mulleGainAccessWithUniquingSet:uniquing];
+
+   [self mulleGainAccessToResourcesWithUniquingSet:uniquing];  // -> CGContext+CGFramebuffer
 }
 
-- (void) mulleRelinquishAccess
+
+- (void) mulleRelinquishAccessWithUniquingSet:(struct mulle_pointerset *) uniquing
 {
-   [self mulleRelinquishAccessToResources]; // -> CGContext+CGFramebuffer
-   [super mulleRelinquishAccess];
+   assert( mulle_pointerset_get( uniquing, self) == self);
+
+   [self  mulleRelinquishAccessToResourcesWithUniquingSet:uniquing]; // -> CGContext+CGFramebuffer
+   [super mulleRelinquishAccessWithUniquingSet:uniquing];
 }
 
 

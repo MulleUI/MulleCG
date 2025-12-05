@@ -68,7 +68,6 @@ struct NVGcontext;
 @end
 
 
-
 //
 // use these functions, during rendering where we assume self->_vg is not
 // suddenly changed by someone

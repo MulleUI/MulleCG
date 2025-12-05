@@ -50,7 +50,7 @@ int   main( int argc, char *argv[])
 
    @autoreleasepool
    {
-      window  = [FakeOSContext object];
+      window  = [FakeOSContext instance];
       context = [[[CGContext alloc] initWithOSGraphicsContext:window
                                                       shareID:0
                                                       options:0] autorelease];

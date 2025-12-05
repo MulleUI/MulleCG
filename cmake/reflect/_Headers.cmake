@@ -51,6 +51,7 @@ src/CGPaint+Private.h
 # contents selected with patternfile ??-header--project-only-headers
 #
 set( PROJECT_ONLY_HEADERS
+nanovg/src/nanovg-trace-support.inc
 src/_NotoEmoji-VariableFont_wght.ttf.inc
 src/_NotoSans-Bold.ttf.inc
 src/_NotoSans-Italic-VariableFont_wdth,wght.ttf.inc
@@ -92,6 +93,7 @@ nanovg/src/fontstash.h
 nanovg/src/nanovg_gl.h
 nanovg/src/nanovg_gl_utils.h
 nanovg/src/nanovg.h
+nanovg/src/nanovg-trace-functions.h
 nanovg/src/stb_image.h
 nanovg/src/stb_truetype.h
 src/CGBlendedPaint.h
@@ -132,6 +134,7 @@ src/nanovg-specific/CGFramebuffer+nanovg.h
 src/nanovg-specific/CGLayoutContext+nanovg.h
 src/nanovg-specific/CGPaint+DrawingConveniences.h
 src/nanovg-specific/CGPaint+Drawing.h
+src/nanovg-specific/CGPaintable.h
 src/nanovg-specific/CGPath+nanovg.h
 src/nanovg-specific/microvg/nanowrap.h
 src/nanovg-specific/nanovg+UTF8String.h

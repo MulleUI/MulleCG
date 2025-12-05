@@ -20,7 +20,7 @@ static void   drawArc( CGContext *context,
    else
       factor = frameNr / 119.0;
 
-   factor = _CAQuadraticGetValue( ((struct CAQuadratic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
+   factor = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
    r  = CGRectGetHeight( rect);
    p0 = CGRectGetTop( rect);                                                // RED
@@ -93,7 +93,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    rect   = CGRectIntegral( [layer canvas]);
    CGContextFillRectWithColor( context, rect, CGColorMake( 1.0, 1.0, 1.0, 1.0));
 
-   canvas = CGSizePlaceInRect( CGSizeMake( 200, 100), [layer canvas], CGContentModeCenter);
+   canvas = CGSizePlaceInRect( CGSizeMake( 200, 100), [layer canvas], CGContentModeCenterPoint);
    rect   = CGRectIntegral( canvas);
    CGContextStrokeRectWithColor( context, rect, 3.0, CGColorMake( 0.0, 0.0, 0.0, 0.2));
 

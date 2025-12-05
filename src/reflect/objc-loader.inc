@@ -44,6 +44,7 @@
       { @selector( CGPaint), @selector( CGPaintable) },      // df22fbd2;CGPaint;faf2d5d6;CGPaintable
       { @selector( CGPaint), @selector( Drawing) },      // df22fbd2;CGPaint;53946657;Drawing
       { @selector( CGPaint), MULLE_OBJC_NO_CATEGORYID },      // df22fbd2;CGPaint;;
+      { @selector( CGPaintable), MULLE_OBJC_NO_CATEGORYID },      // faf2d5d6;CGPaintable;;
       { @selector( CGRadialGradient), @selector( nanovg) },      // 74b8ddc9;CGRadialGradient;df06d543;nanovg
       { @selector( CGRadialGradient), MULLE_OBJC_NO_CATEGORYID },      // 74b8ddc9;CGRadialGradient;;
       { @selector( CGSharedGPUTexture), MULLE_OBJC_NO_CATEGORYID },      // e7d245f1;CGSharedGPUTexture;;

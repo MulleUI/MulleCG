@@ -102,7 +102,7 @@ int   main( int argc, char *argv[])
    // turning this on boosts from 1100 to 1400! (with -O0 sic!)
    [window setKeepOSGraphicsContextActive:YES];
 
-   [window setFrameDelegate:[MulleUIPerf object]];
+   [window setFrameDelegate:[MulleUIPerf instance]];
 
    return( [app runWindow:window]);
 }

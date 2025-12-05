@@ -12,32 +12,67 @@
 
 @implementation CGLayoutContext
 
+mulle_thread_mutex_t   CGLayoutContextFreeTypeLock;
+
++ (void) initialize
+{
+   // don't rerun for subclass
+   if( MulleObjCClassGetID( self) != @selector( CGLayoutContext))
+      return;
+
+   mulle_thread_mutex_init( &CGLayoutContextFreeTypeLock);
+}
+
+
++ (void) deinitialize
+{
+   if( MulleObjCClassGetID( self) != @selector( CGLayoutContext))
+      return;
+
+   mulle_thread_mutex_done( &CGLayoutContextFreeTypeLock);
+}
+
+
 - (instancetype) init
 {
+   CGLayoutContext  *context;
+
    // in CGLayoutContext+nanovg.m
-   return( [self initWithOSGraphicsContext:nil
-                            nameUTF8String:NULL]);
+   context = [self initWithOSGraphicsContext:nil
+                              nameUTF8String:NULL];
+
+   // do this as a layoutContext wont get a beginFrame and then we could
+   // not save graphicsState
+   CGContextSave( context);
+   CGContextReset( context);
+   return( context);
 }
 
 
 - (void) dealloc
 {
+   [self _finalizeNanoVG];
+
    [self _doneFontCache];
    [super dealloc];
 }
 
 
-- (void) mulleGainAccess
+- (void) mulleGainAccessWithUniquingSet:(struct mulle_pointerset *) uniquing
 {
-   [super mulleGainAccess];
-   [self mulleGainAccessToFonts];
+   assert( mulle_pointerset_get( uniquing, self) == self);
+
+   [super mulleGainAccessWithUniquingSet:uniquing];
+   [self mulleGainAccessToFontsWithUniquingSet:uniquing];
 }
 
 
-- (void) mulleRelinquishAccess
+- (void) mulleRelinquishAccessWithUniquingSet:(struct mulle_pointerset *) uniquing
 {
-   [self mulleRelinquishAccessToFonts];
-   [super mulleRelinquishAccess];
+   assert( mulle_pointerset_get( uniquing, self) == self);
+
+   [self mulleRelinquishAccessToFontsWithUniquingSet:uniquing];
+   [super mulleRelinquishAccessWithUniquingSet:uniquing];
 }
 
 //
@@ -49,10 +84,15 @@
    CGContextFontSize( self, size);
 }
 
-
-- (void) setTextAlign:(NSUInteger) align
+- (void) setTextAlignment:(UITextAlignment) align
 {
-   CGContextTextAlign( self, align);
+   CGContextTextAlignment( self, align);
+}
+
+
+- (void) setCombinedTextAlignment:(NSUInteger) align
+{
+   CGContextCombinedTextAlignment( self, align);
 }
 
 
@@ -79,6 +119,7 @@
 {
    return( _hasLoadedFont);
 }
+
 
 - (void) useDefaultFont
 {
@@ -117,7 +158,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
 
    fontSize = roundf( size.height);
 
-   [self setTextAlign:NVG_ALIGN_LEFT | NVG_ALIGN_TOP];
+   [self setCombinedTextAlignment:NVG_ALIGN_LEFT | NVG_ALIGN_TOP];
 
    while( fontSize > 1.0)
    {
@@ -178,7 +219,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
    {
       // we can not do scaled conversion
       //nvgResetTransform( _vg);
-      CGContextTextAlign( self, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
+      CGContextCombinedTextAlignment( self, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
       // MEMO: text alignment is used
 
       mulle_alloca_do( positions, struct UIGlyphPosition, length)
@@ -265,8 +306,10 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
 }
 
 
+// TODO: rename to maxCount or so
 - (NSInteger) getTextRows:(struct UITextRow *) rows
                     count:(NSUInteger) count
+              textRowSize:(size_t) textRowSize
                      text:(char *) text
                    length:(NSUInteger) length
             breakRowWidth:(CGFloat) breakRowWidth
@@ -277,7 +320,8 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
                                           length,
                                           breakRowWidth,
                                           rows,
-                                          count));
+                                          count,
+                                          textRowSize));
 }
 
 
@@ -314,6 +358,20 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
    // observed -2.5 to -1.0 for rect.orgin.x
 
    return( rect);
+}
+
+
+- (void *) pushGraphicsState
+{
+   CGContextSave( self);
+   return( NULL);
+}
+
+
+- (void) popGraphicsState:(void *) state
+{
+   assert( state == NULL); // i mean come on...
+   CGContextRestore( self);
 }
 
 @end

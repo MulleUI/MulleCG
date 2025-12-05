@@ -48,7 +48,13 @@
 // Functions that forward to mvg
 // ###
 
-// Begin drawing a new frame
+//
+// Begin drawing a new frame. This will completely reset the CGContextSave/
+// CGContextRestore stack! Drawing commands can actually do this in the
+// middle of rendering (see CAOpenGLLayer). Therefore be careful with your
+// CGContextSave/CGContextRestore scope. (preferably keep it to one
+// -drawWithContext: method scope.
+//
 static inline void   CGContextBeginFrame( CGContext *context, CGSize windowSize, CGFloat devicePixelRatio)
 {
    if( context)
@@ -268,7 +274,7 @@ static inline CGTextureID CGContextCreateImageRGBA( CGContext *context,
                                  size.height,
                                  textureFlags,
                                  data);
-   return CGTextureIDInvalid;
+   return( CGTextureIDInvalid);
 }
 
 // Updates image data specified by image handle.
@@ -283,7 +289,7 @@ static inline CGPixelSize CGContextImageSize( CGContext *context, CGTextureID im
 {
    if( context)
       return mvgImageSize( CGContextGetNVGContext( context), image);
-   return CGPixelSizeZero;
+   return( CGPixelSizeZero);
 }
 
 // Deletes created image.
@@ -369,7 +375,9 @@ static inline void   CGContextPathWinding( CGContext *context,
                                            CGPathFillStyle style)
 {
    if( context)
+   {
       mvgPathWinding( CGContextGetNVGContext( context), style);
+   }
 }
 
 // Creates new circle arc shaped sub-path
@@ -454,6 +462,11 @@ static inline void   CGContextStroke( CGContext *context)
       mvgStroke( CGContextGetNVGContext( context));
 }
 
+// AI love these names mores
+//#define CGContextStrokePath      CGContextStroke
+//#define CGContextFillPath        CGContextFill
+//#define CGContextMoveTo          CGContextMoveToPoint
+//#define CGContextLineTo          CGContextLineToPoint
 
 // ***
 // Begin of CGLayoutContext
@@ -530,25 +543,50 @@ static inline void   CGContextFontBlur( CGLayoutContext *context, CGFloat blur)
 }
 
 // Sets the letter spacing of current text style.
-static inline void   CGContextTextLetterSpacing( CGLayoutContext *context, CGFloat spacing)
+static inline void   CGContextTextLetterSpacing( CGLayoutContext *context,
+                                                 CGFloat spacing)
 {
    if( context)
       mvgTextLetterSpacing( CGLayoutContextGetNVGContext( context), spacing);
 }
 
 // Sets the line height of current text style.
-static inline void   CGContextTextLineHeight( CGLayoutContext *context, CGFloat lineHeight)
+static inline void   CGContextTextLineHeight( CGLayoutContext *context,
+                                              CGFloat lineHeight)
 {
    if( context)
       mvgTextLineHeight( CGLayoutContextGetNVGContext( context), lineHeight);
 }
 
+
+
 // Sets the text align of current text style.
-static inline void   CGContextTextAlign( CGLayoutContext *context, NSUInteger align)
+static inline void   CGContextCombinedTextAlignment( CGLayoutContext *context,
+                                                CGCombinedTextAlign align)
 {
    if( context)
       mvgTextAlign( CGLayoutContextGetNVGContext( context), align);
 }
+
+
+// Sets the text align of current text style.
+static inline void   CGContextTextAlignment( CGLayoutContext *context,
+                                             UITextAlignment alignment)
+{
+   CGCombinedTextAlign   align;
+
+   if( ! context)
+      return;
+
+   switch( alignment)
+   {
+   default                    : align = CGTextAlignLeft   | CGTextAlignBaseline; break;
+   case UITextAlignmentRight  : align = CGTextAlignRight  | CGTextAlignBaseline; break;
+   case UITextAlignmentCenter : align = CGTextAlignCenter | CGTextAlignBaseline; break;
+   }
+   mvgTextAlign( CGLayoutContextGetNVGContext( context), align);
+}
+
 
 // Sets the font face based on specified id(font handle).
 static inline void   CGContextFontFaceId( CGLayoutContext *context, CGFontID fontID)
@@ -607,10 +645,14 @@ static inline CGRect   CGContextTextBoxBounds( CGLayoutContext *context,
                                                size_t length,
                                                CGFloat breakRowWidth)
 {
-   CGRect   bbox = CGRectNull;
+   CGRect       bbox = CGRectNull;
+   NVGcontext   *nvg;
 
    if( context)
-      mvgTextBoxBounds( CGLayoutContextGetNVGContext( context), point, s, length, breakRowWidth, &bbox);
+   {
+      nvg = CGLayoutContextGetNVGContext( context);
+      mvgTextBoxBounds( nvg, point, s, length, breakRowWidth, &bbox);
+   }
    return( bbox);
 }
 
@@ -622,28 +664,36 @@ static inline NSUInteger   CGContextTextGlyphPositions( CGLayoutContext *context
                                                         struct UIGlyphPosition *positions,
                                                         NSInteger maxPositions)
 {
-   if( context)
-      return mvgTextGlyphPositions( CGLayoutContextGetNVGContext( context),
-                                    point,
-                                    s,
-                                    length,
-                                    positions,
-                                    maxPositions);
-   return 0;
+   if( ! context)
+      return 0;
+
+   return( mvgTextGlyphPositions( CGLayoutContextGetNVGContext( context),
+                                  point,
+                                  s,
+                                  length,
+                                  positions,
+                                  maxPositions));
 }
 
 // Breaks the specified text into lines.
-static inline NSInteger   CGContextTextBreakLines( CGLayoutContext *context,
-                                                   char *s,
-                                                   size_t length,
-                                                   CGFloat breakRowWidth,
-                                                   struct UITextRow* rows,
-                                                   NSInteger maxRows)
+// if rows is NULL, will calculate number of rows up to maxRows
+static inline NSUInteger   CGContextTextBreakLines( CGLayoutContext *context,
+                                                    char *s,
+                                                    size_t length,
+                                                    CGFloat breakRowWidth,
+                                                    struct UITextRow* rows,
+                                                    NSInteger maxRows,
+                                                    size_t UITextRowSize)
 {
-   if( context)
-      return mvgTextBreakLines( CGLayoutContextGetNVGContext( context), s, length, breakRowWidth, rows, maxRows);
-   return 0;
+   NVGcontext   *nvg;
+
+   if( ! context)
+      return( 0);
+
+   nvg = CGLayoutContextGetNVGContext( context);
+   return( mvgTextBreakLines( nvg, s, length, breakRowWidth, rows, maxRows, UITextRowSize));
 }
+
 
 // Get text metrics
 // Returns the vertical metrics based on the current text style.

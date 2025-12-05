@@ -399,7 +399,7 @@ int   main( int argc, char *argv[])
       [window[ i] setSwapInterval:0];
       [window[ i] setFrameRate:UIWindowFrameRateUnsynced];
 
-      perf = [MulleUIPerf object];
+      perf = [MulleUIPerf instance];
       [window[ i] setFrameDelegate:perf];
 
       [app addWindow:window[ i]];

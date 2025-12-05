@@ -52,7 +52,7 @@ int   main( int argc, char *argv[])
       0.7
    };
 
-   gradient = [CGGradient object];
+   gradient = [CGGradient instance];
    test_gradient( gradient, "none");
    gradient = [CGGradient gradientWithStartColor:CGColorMakeBlueViolet()
                                         endColor:CGColorMakeBlueViolet()];

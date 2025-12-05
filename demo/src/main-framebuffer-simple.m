@@ -23,7 +23,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    canvas = [layer canvas];
    rect   = CGRectInset( canvas, 20, 20);
 
-   MulleUICLog( "****** >>>>>> ****** >>>>>> *******");
+   //MulleUICLog( "****** >>>>>> ****** >>>>>> *******");
 #ifndef NO_FRAMEBUFFER
    // Create a framebuffer matching our canvas size
 
@@ -61,9 +61,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                  options:NULL
                  context:context];
 #else
-   drawRedWhiteBlueFlag( context, rect);
+   drawRedWhiteGreenFlag( context, rect);
 #endif
-   MulleUICLog( "****** <<<<<< ****** <<<<<<< *******");
+   //MulleUICLog( "****** <<<<<< ****** <<<<<<< *******");
    return( YES);
 }
 

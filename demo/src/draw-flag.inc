@@ -40,3 +40,15 @@ static void   drawRedWhiteBlueFlag( CGContext *context, CGRect canvas)
 
    drawFlag( context, canvas, colors);
 }
+
+
+static void   drawRedWhiteGreenFlag( CGContext *context, CGRect canvas)
+{
+   CGColor   colors[ 3];
+
+   colors[ 0] = CGColorMakeRed();
+   colors[ 1] = CGColorMakeWhite();
+   colors[ 2] = CGColorMakeGreen();
+
+   drawFlag( context, canvas, colors);
+}

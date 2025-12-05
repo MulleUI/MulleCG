@@ -368,7 +368,7 @@ static void   drawButton( CALayer *layer, CGContext *context)
          CGContextTextInRect( context, CGRectUTF8String( rect),
                         (size_t) -1,
                         CGRectPlaceBelowRect( rect, 0.0, 16.0f),
-                        CGContentModeCenter,
+                        CGContentModeCenterPoint,
                         0);
       }
 }

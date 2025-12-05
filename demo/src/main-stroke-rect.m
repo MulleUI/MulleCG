@@ -100,7 +100,7 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
                            CGRectUTF8String( strokeRect));
 
          CGContextFontFace( context, "sans");
-         CGContextTextAlign( context, CGTextAlignCenter | CGTextAlignTop); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_TOP
+         CGContextCombinedTextAlignment( context, CGTextAlignCenter | CGTextAlignTop); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_TOP
          CGContextTextColor( context, CGColorMakeBlack());
          CGContextTextBackgroundColor( context, CGColorMake( 0.0, 1.0, 0.0, 0.75));
          CGContextFontSize( context, 12.0);

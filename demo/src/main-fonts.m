@@ -23,7 +23,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    // Delete: vg = CGContextGetNVGContext( context); // No longer needed
 
    CGContextFontFace( context, "sans");
-   CGContextTextAlign( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE
    CGContextTextColor( context, CGColorMakeWithRGBABytes( 0, 0, 0, 0xFF));
    CGContextTextBackgroundColor( context, CGColorMakeWithRGBABytes( 0xFF, 0xFF, 0xFF, 0xFF));
  // TODO: use textColor

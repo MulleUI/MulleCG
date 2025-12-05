@@ -470,64 +470,6 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
 }
 
 
-#if 0
-//
-// we have to handle this manually because we have to skip our renderedLayers
-// which are in limbo
-//
-static void   addRenderedFramebuffersToPointerArray( CGContext *self,
-                                                     struct mulle__pointerarray *array)
-{
-   CGFramebuffer   *framebuffer;
-
-   // this function is only supposed to be called during thread transfership
-   // so locking or atomicity can not be a problem here
-   framebuffer = _mulle_atomic_pointer_read_nonatomic( &self->_scratchRenderedFramebuffer);
-   if( framebuffer)
-      mulle__pointerarray_add( array, framebuffer, NULL);
-   framebuffer = _mulle_atomic_pointer_read_nonatomic( &self->_drawnRenderedFramebuffer);
-   if( framebuffer)
-      mulle__pointerarray_add( array, framebuffer, NULL);
-   mulle__pointerarray_add_pointerarray( array, &self->_deletedFramebuffers, mulle_range_make_all(), NULL);
-}
-
-
-- (void) mulleGainAccessToResources
-{
-   struct MulleUIResourceStorage   *storage = [self _resourceStorage];
-   id                              resource;
-   void                            *key;
-
-   mulle__pointerarray_do( array)
-   {
-      addRenderedFramebuffersToPointerArray( self, array);
-      mulle__pointermap_for( &storage->_resources, key, resource)
-      {
-         if( mulle__pointerarray_find( array, resource) == mulle_not_found_e)
-            [resource mulleGainAccess];
-      }
-   }
-}
-
-
-- (void) mulleRelinquishAccessToResources
-{
-   struct MulleUIResourceStorage   *storage = [self _resourceStorage];
-   id                              resource;
-   void                            *key;
-
-   mulle__pointerarray_do( array)
-   {
-      addRenderedFramebuffersToPointerArray( self, array);
-      mulle__pointermap_for( &storage->_resources, key, resource)
-      {
-         if( mulle__pointerarray_find( array, resource) == mulle_not_found_e)
-            [resource mulleRelinquishAccess];
-      }
-   }
-}
-#endif
-
 
 //////
 
