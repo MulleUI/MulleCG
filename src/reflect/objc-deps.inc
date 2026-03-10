@@ -1,4 +1,4 @@
-      { @selector( MulleObjCLoader), @selector( MulleUIBase) },      // 47a9beb6;MulleObjCLoader;3ebba954;MulleUIBase
+      { @selector( MulleObjCDeps), @selector( MulleUIBase) },      // 47a9beb6;MulleObjCDeps;3ebba954;MulleUIBase
       { @selector( CGBitmapDrawable), MULLE_OBJC_NO_CATEGORYID },      // ac0569ab;CGBitmapDrawable;;
       { @selector( CGBlendedPaint), @selector( Drawing) },      // f164885b;CGBlendedPaint;53946657;Drawing
       { @selector( CGBlendedPaint), @selector( nanovg) },      // f164885b;CGBlendedPaint;df06d543;nanovg

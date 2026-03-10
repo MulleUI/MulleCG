@@ -157,22 +157,21 @@ static BOOL   checkCompileErrors( GLuint shader, int type, char *name)
    GLint   logSize;
 
    glGetShaderiv( shader, GL_COMPILE_STATUS, &success);
-   if( success != GL_TRUE)
+   if( success == GL_TRUE)
+      return( YES);
+
+   logSize = 0;
+   glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
+   mulle_alloca_do( tmp, char, logSize < 16 ? 16 : logSize)
    {
-      logSize = 0;
-      glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
-      mulle_alloca_do( tmp, char, logSize < 16 ? 16 : logSize)
-      {
-         strcpy( tmp, "???");
-         glGetShaderInfoLog( shader, logSize, NULL, tmp);
-         fprintf( stderr, "%s shader \"%s\" compile error: %s\n",
-                          name,
-                          CGShaderTypeUTF8String( type),
-                          tmp);
-         return( NO);
-      }
+      strcpy( tmp, "???");
+      glGetShaderInfoLog( shader, logSize, NULL, tmp);
+      fprintf( stderr, "%s shader \"%s\" compile error: %s\n",
+                       name,
+                       CGShaderTypeUTF8String( type),
+                       tmp);
    }
-   return( YES);
+   return( NO);
 }
 
 

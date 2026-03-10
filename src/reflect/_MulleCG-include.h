@@ -15,14 +15,29 @@
 #define _mulle_cg_include_h__
 
 // To remove the following dependency (headers and library) completely:
+//   `mulle-sde dependency remove mulle-freetype`
+// (Use EC95C26A-AB1C-4D1D-8CCD-5DFB1C697C9B instead of mulle-freetype, if there are duplicate entries)
+//
+// You can tweak the following #include with these commands:
+//    remove #include: `mulle-sde dependency mark mulle-freetype no-header`
+//    rename              : `mulle-sde dependency|library set mulle-freetype include whatever.h`
+//    reorder             : `mulle-sde dependency move mulle-freetype <up|down>`
+//    toggle objc         : `mulle-sde dependency mark mulle-freetype [no-]import`
+//    toggle public       : `mulle-sde dependency mark mulle-freetype [no-]public`
+//    toggle optional     : `mulle-sde dependency mark mulle-freetype [no-]require`
+//    remove for platform : `mulle-sde dependency mark mulle-freetype no-platform-<uname>`
+//        (use `mulle-sourcetree-to-c --unames` to list known values)
+#include <mulle-freetype/mulle-freetype.h>   // mulle-freetype
+
+// To remove the following dependency (headers and library) completely:
 //   `mulle-sde dependency remove mulle-gfx`
-// (Use AAD57ACB-563B-40C7-87EF-B36F773799F2 instead of mulle-gfx, if there are duplicate entries)
+// (Use 299E9095-A620-49C5-A8AC-8B0C6B8D5DDA instead of mulle-gfx, if there are duplicate entries)
 //
 // You can tweak the following #include with these commands:
 //    remove #include: `mulle-sde dependency mark mulle-gfx no-header`
 //    rename              : `mulle-sde dependency|library set mulle-gfx include whatever.h`
 //    reorder             : `mulle-sde dependency move mulle-gfx <up|down>`
-//    toggle #include: `mulle-sde dependency mark mulle-gfx [no-]import`
+//    toggle objc         : `mulle-sde dependency mark mulle-gfx [no-]import`
 //    toggle public       : `mulle-sde dependency mark mulle-gfx [no-]public`
 //    toggle optional     : `mulle-sde dependency mark mulle-gfx [no-]require`
 //    remove for platform : `mulle-sde dependency mark mulle-gfx no-platform-<uname>`

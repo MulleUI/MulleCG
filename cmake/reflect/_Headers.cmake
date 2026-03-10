@@ -18,13 +18,18 @@ src/mulle-color
 src/nanovg-specific
 src/nanovg-specific/microvg
 src/opengl-specific
-nanovg/src
+mulle-nanovg/src/reflect
+mulle-nanovg/src/generic
+mulle-nanovg/src/d3d11_shaders
+mulle-nanovg/src
+mulle-nanovg/src/mnvg_bitcode
 )
 
 #
 # contents selected with patternfile ??-header--private-generated-headers
 #
 set( PRIVATE_GENERATED_HEADERS
+mulle-nanovg/src/reflect/_mulle-nanovg-include-private.h
 src/reflect/_MulleCG-import-private.h
 src/reflect/_MulleCG-include-private.h
 )
@@ -33,6 +38,7 @@ src/reflect/_MulleCG-include-private.h
 # contents selected with patternfile ??-header--private-generic-headers
 #
 set( PRIVATE_GENERIC_HEADERS
+mulle-nanovg/src/generic/include-private.h
 src/generic/import-private.h
 src/generic/include-private.h
 )
@@ -51,7 +57,28 @@ src/CGPaint+Private.h
 # contents selected with patternfile ??-header--project-only-headers
 #
 set( PROJECT_ONLY_HEADERS
-nanovg/src/nanovg-trace-support.inc
+mulle-nanovg/src/d3d11_shaders/D3D11PixelShaderAA.h
+mulle-nanovg/src/d3d11_shaders/D3D11PixelShader.h
+mulle-nanovg/src/d3d11_shaders/D3D11VertexShader.h
+mulle-nanovg/src/fontstash.h
+mulle-nanovg/src/mnvg_bitcode/ios.h
+mulle-nanovg/src/mnvg_bitcode/macos.h
+mulle-nanovg/src/mnvg_bitcode/simulator.h
+mulle-nanovg/src/mnvg_bitcode/tvos.h
+mulle-nanovg/src/mulle-nanovg.h
+mulle-nanovg/src/nanovg_d3d11.h
+mulle-nanovg/src/nanovg-framebuffer.h
+mulle-nanovg/src/nanovg_gl.h
+mulle-nanovg/src/nanovg_gl_utils.h
+mulle-nanovg/src/nanovg_mtl.h
+mulle-nanovg/src/nanovg-trace-functions.h
+mulle-nanovg/src/nanovg-trace-support.inc
+mulle-nanovg/src/nanovg_vk.h
+mulle-nanovg/src/nanovg_vk_utils.h
+mulle-nanovg/src/shader/fill.frag.inc
+mulle-nanovg/src/shader/fill.vert.inc
+mulle-nanovg/src/stb_image.h
+mulle-nanovg/src/stb_truetype.h
 src/_NotoEmoji-VariableFont_wght.ttf.inc
 src/_NotoSans-Bold.ttf.inc
 src/_NotoSans-Italic-VariableFont_wdth,wght.ttf.inc
@@ -71,6 +98,8 @@ src/nanovg-specific/microvg/nanovg-extensions.inc
 # contents selected with patternfile ??-header--public-generated-headers
 #
 set( PUBLIC_GENERATED_HEADERS
+mulle-nanovg/src/reflect/_mulle-nanovg-include.h
+mulle-nanovg/src/reflect/_mulle-nanovg-provide.h
 src/reflect/_MulleCG-export.h
 src/reflect/_MulleCG-import.h
 src/reflect/_MulleCG-include.h
@@ -81,6 +110,7 @@ src/reflect/_MulleCG-provide.h
 # contents selected with patternfile ??-header--public-generic-headers
 #
 set( PUBLIC_GENERIC_HEADERS
+mulle-nanovg/src/generic/include.h
 src/generic/import.h
 src/generic/include.h
 )
@@ -89,13 +119,7 @@ src/generic/include.h
 # contents selected with patternfile ??-header--public-headers
 #
 set( PUBLIC_HEADERS
-nanovg/src/fontstash.h
-nanovg/src/nanovg_gl.h
-nanovg/src/nanovg_gl_utils.h
-nanovg/src/nanovg.h
-nanovg/src/nanovg-trace-functions.h
-nanovg/src/stb_image.h
-nanovg/src/stb_truetype.h
+mulle-nanovg/src/nanovg.h
 src/CGBlendedPaint.h
 src/CGColor+MulleObjC.h
 src/CGColor+UTF8String.h
@@ -120,7 +144,7 @@ src/CGPaint.h
 src/CGTypes.h
 src/_MulleCGBackend.h
 src/MulleCG.h
-src/MulleObjCLoader+MulleCG.h
+src/MulleObjCDeps+MulleCG.h
 src/mulle-color/CGColorConstants.h
 src/mulle-color/CGColorDiff.h
 src/mulle-color/CGColorNames.h

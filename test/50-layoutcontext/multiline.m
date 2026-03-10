@@ -23,7 +23,7 @@ int   main( int argc, char *argv[])
       text    = "VfL Bochum 1848\nvs.\nWerder Bremen";
       [context useDefaultFont];
       [context setFontSize:16.0f];
-      [context setCombinedTextAlignment:NVG_ALIGN_MIDDLE];
+      [context setCombinedTextAlignment:NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE];
 
       // can't do anything else than NSLineBreakByWordWrapping currently
       for( mode = NSLineBreakByWordWrapping; mode <= NSLineBreakByWordWrapping; mode++)
@@ -40,14 +40,14 @@ int   main( int argc, char *argv[])
                               length:(NSUInteger) -1
                        breakRowWidth:breakRowWidth];
 
-            bounds = [context getTextRowBounds:rows
-                                         count:n];
+            bounds = [context boundsOfTextRows:rows
+                                          count:n];
 
             printf( "\t%tu: %s\n", n, CGRectUTF8String( bounds));
             for( i = 0; i < n; i++)
             {
                printf( "\t\t\"%.*s\" w=%g minx=%g maxx=%g\n",
-                           (int) (rows[ i].end - rows[ i].start), rows[ i].start,
+                           (int) rows[ i].range.length, &text[ rows[ i].range.location],
                            rows[ i].width,
                            rows[ i].minx,
                            rows[ i].maxx);

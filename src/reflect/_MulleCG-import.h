@@ -13,13 +13,13 @@
 
 // To remove the following dependency (headers and library) completely:
 //   `mulle-sde dependency remove MulleUIBase`
-// (Use 32A083E2-BE1B-4C33-8631-E8C87FDE9913 instead of MulleUIBase, if there are duplicate entries)
+// (Use 7C2E96F2-78B7-47A6-82D6-463D97BB521B instead of MulleUIBase, if there are duplicate entries)
 //
 // You can tweak the following #import with these commands:
 //    remove #import      : `mulle-sde dependency mark MulleUIBase no-header`
 //    rename              : `mulle-sde dependency|library set MulleUIBase include whatever.h`
 //    reorder             : `mulle-sde dependency move MulleUIBase <up|down>`
-//    toggle #import      : `mulle-sde dependency mark MulleUIBase [no-]import`
+//    toggle objc         : `mulle-sde dependency mark MulleUIBase [no-]import`
 //    toggle public       : `mulle-sde dependency mark MulleUIBase [no-]public`
 //    toggle optional     : `mulle-sde dependency mark MulleUIBase [no-]require`
 //    remove for platform : `mulle-sde dependency mark MulleUIBase no-platform-<uname>`

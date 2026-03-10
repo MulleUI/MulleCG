@@ -322,10 +322,14 @@ static inline float  CGContextGetLinearAnimationFactor( CGContext *context, NSUI
 // defined in nanovg-specifics
 
 
+MULLE_CG_GLOBAL
 char   *CGNVGBackendErrorUTF8String( void);
+MULLE_CG_GLOBAL
 char   *_CGNVGBackendErrorShortUTF8String( void *error);
+MULLE_CG_GLOBAL
 char   *_CGNVGBackendErrorUTF8String( void *error);
 
+MULLE_CG_GLOBAL
 void  _CGContextCheckBackendError( CGContext *ctxt, char *str);
 
 static inline void   CGContextCheckBackendError( CGContext *ctxt, char *str)

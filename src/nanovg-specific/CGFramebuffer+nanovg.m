@@ -34,9 +34,9 @@
 
    vg              = CGContextGetNVGContext( context);
    _gpuFramebuffer = nvgluCreateFramebuffer( vg,
-                                            bitmapSize.width,
-                                            bitmapSize.height,
-                                            textureFlags);
+                                             bitmapSize.width,
+                                             bitmapSize.height,
+                                             textureFlags);
    if( ! _gpuFramebuffer)
    {
       [self release];

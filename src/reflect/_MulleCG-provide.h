@@ -14,7 +14,6 @@
 
 
 #include "nanovg.h"
-#include "nanovg-trace-functions.h"
 #include "CGColorDiff.h"
 #include "CGColorNames.h"
 #include "CGColor.h"

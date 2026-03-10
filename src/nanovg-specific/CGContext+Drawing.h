@@ -776,8 +776,6 @@ static inline void   CGContextTextBox( CGContext *context,
 }
 
 
-
-
 //
 // MEMO: these functions are likely duplicates of our CGAffineTransform ones
 //
@@ -787,7 +785,3 @@ static inline void   CGContextAddCGPath( CGContext *context, CGPathRef path)
    if( context)
       mvgAddCGPath( CGContextGetNVGContext( context), path);
 }
-
-
-
-

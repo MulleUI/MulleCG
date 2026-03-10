@@ -24,6 +24,10 @@ SET( RESOLVE_INSTALLABLE_HEADER_SYMLINKS ON CACHE BOOL "Copy headers as files")
 
 include( Files)
 
+# mulle-nanovg is embedded: don't install its generic include.h as it would
+# overwrite MulleCG's own include.h for consumers
+list( REMOVE_ITEM INSTALL_PUBLIC_HEADERS "mulle-nanovg/src/generic/include.h")
+
 include( IDESupport OPTIONAL)
 
 ### Library

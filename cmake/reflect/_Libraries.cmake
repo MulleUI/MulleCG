@@ -12,12 +12,12 @@ if( MULLE_TRACE_INCLUDE)
 endif()
 
 #
-# Generated from sourcetree: 4edeaf88-96fa-49de-a075-3e49d3d939b3;GL;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-platform-darwin,no-update;
+# Generated from sourcetree: A8A86960-7E98-4D08-89B9-6B6F73C369F5;GL;no-all-load,no-build,no-cmake-platform-windows,no-delete,no-dependency,no-fs,no-header,no-import,no-platform-darwin,no-update;
 # Disable with : `mulle-sourcetree mark GL `
 # Disable for this platform: `mulle-sourcetree mark GL no-cmake-platform-${MULLE_UNAME}`
 # Disable for a sdk: `mulle-sourcetree mark GL no-cmake-sdk-<name>`
 #
-if( NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if( NOT (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR ${CMAKE_SYSTEM_NAME} MATCHES "Windows"))
    if( COLLECT_OS_SPECIFIC_LIBRARIES_AS_NAMES)
       list( APPEND OS_SPECIFIC_LIBRARIES "GL")
    else()
@@ -54,22 +54,25 @@ if( NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
                # use explicit path to avoid "surprises"
                if( IS_DIRECTORY "${_TMP_GL_DIR}")
                   list( INSERT CMAKE_MODULE_PATH 0 "${_TMP_GL_DIR}")
-                  # we only want top level INHERIT_OBJC_LOADERS, so disable them
-                  if( NOT NO_INHERIT_OBJC_LOADERS)
-                     set( NO_INHERIT_OBJC_LOADERS OFF)
+                  # we only want top level INHERIT_OBJC_DEPS, so disable them
+                  if( NOT NO_INHERIT_OBJC_DEPS)
+                     set( NO_INHERIT_OBJC_DEPS OFF)
                   endif()
-                  list( APPEND _TMP_INHERIT_OBJC_LOADERS ${NO_INHERIT_OBJC_LOADERS})
-                  set( NO_INHERIT_OBJC_LOADERS ON)
+                  list( APPEND _TMP_INHERIT_OBJC_DEPS ${NO_INHERIT_OBJC_DEPS})
+                  set( NO_INHERIT_OBJC_DEPS ON)
                   #
                   include( "${_TMP_GL_DIR}/DependenciesAndLibraries.cmake" OPTIONAL)
                   #
-                  list( GET _TMP_INHERIT_OBJC_LOADERS -1 NO_INHERIT_OBJC_LOADERS)
-                  list( REMOVE_AT _TMP_INHERIT_OBJC_LOADERS -1)
+                  list( GET _TMP_INHERIT_OBJC_DEPS -1 NO_INHERIT_OBJC_DEPS)
+                  list( REMOVE_AT _TMP_INHERIT_OBJC_DEPS -1)
                   list( REMOVE_ITEM CMAKE_MODULE_PATH "${_TMP_GL_DIR}")
                   #
                   unset( GL_DEFINITIONS)
+                  unset( GL_RENDEZVOUS_GLOBALS)
                   include( "${_TMP_GL_DIR}/Definitions.cmake" OPTIONAL)
                   list( APPEND INHERITED_DEFINITIONS ${GL_DEFINITIONS})
+                  include( "${_TMP_GL_DIR}/Definitions.cmake" OPTIONAL)
+                  list( APPEND RENDEZVOUS_GLOBALS ${GL_RENDEZVOUS_GLOBALS})
                   break()
                else()
                   message( STATUS "${_TMP_GL_DIR} not found")
@@ -85,7 +88,7 @@ endif()
 
 
 #
-# Generated from sourcetree: 4f8c9930-b601-4bed-9ef6-59002def0b11;m;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-update;
+# Generated from sourcetree: A6069A59-7634-4A6F-B5A9-CEB38DFE6F6C;m;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-update;
 # Disable with : `mulle-sourcetree mark m `
 # Disable for this platform: `mulle-sourcetree mark m no-cmake-platform-${MULLE_UNAME}`
 # Disable for a sdk: `mulle-sourcetree mark m no-cmake-sdk-<name>`
@@ -126,22 +129,25 @@ else()
             # use explicit path to avoid "surprises"
             if( IS_DIRECTORY "${_TMP_M_DIR}")
                list( INSERT CMAKE_MODULE_PATH 0 "${_TMP_M_DIR}")
-               # we only want top level INHERIT_OBJC_LOADERS, so disable them
-               if( NOT NO_INHERIT_OBJC_LOADERS)
-                  set( NO_INHERIT_OBJC_LOADERS OFF)
+               # we only want top level INHERIT_OBJC_DEPS, so disable them
+               if( NOT NO_INHERIT_OBJC_DEPS)
+                  set( NO_INHERIT_OBJC_DEPS OFF)
                endif()
-               list( APPEND _TMP_INHERIT_OBJC_LOADERS ${NO_INHERIT_OBJC_LOADERS})
-               set( NO_INHERIT_OBJC_LOADERS ON)
+               list( APPEND _TMP_INHERIT_OBJC_DEPS ${NO_INHERIT_OBJC_DEPS})
+               set( NO_INHERIT_OBJC_DEPS ON)
                #
                include( "${_TMP_M_DIR}/DependenciesAndLibraries.cmake" OPTIONAL)
                #
-               list( GET _TMP_INHERIT_OBJC_LOADERS -1 NO_INHERIT_OBJC_LOADERS)
-               list( REMOVE_AT _TMP_INHERIT_OBJC_LOADERS -1)
+               list( GET _TMP_INHERIT_OBJC_DEPS -1 NO_INHERIT_OBJC_DEPS)
+               list( REMOVE_AT _TMP_INHERIT_OBJC_DEPS -1)
                list( REMOVE_ITEM CMAKE_MODULE_PATH "${_TMP_M_DIR}")
                #
                unset( M_DEFINITIONS)
+               unset( M_RENDEZVOUS_GLOBALS)
                include( "${_TMP_M_DIR}/Definitions.cmake" OPTIONAL)
                list( APPEND INHERITED_DEFINITIONS ${M_DEFINITIONS})
+               include( "${_TMP_M_DIR}/Definitions.cmake" OPTIONAL)
+               list( APPEND RENDEZVOUS_GLOBALS ${M_RENDEZVOUS_GLOBALS})
                break()
             else()
                message( STATUS "${_TMP_M_DIR} not found")
@@ -156,7 +162,7 @@ endif()
 
 
 #
-# Generated from sourcetree: 8be56cd3-eb2f-4805-ae2a-bb7b14522a8b;harfbuzz;no-all-load,no-build,no-cmake-inherit,no-delete,no-dependency,no-fs,no-header,no-import,no-share,no-update;
+# Generated from sourcetree: 621A82EA-D483-4833-946E-C0378C64A8D3;harfbuzz;no-all-load,no-build,no-cmake-inherit,no-delete,no-dependency,no-fs,no-header,no-import,no-share,no-update;
 # Disable with : `mulle-sourcetree mark harfbuzz `
 # Disable for this platform: `mulle-sourcetree mark harfbuzz no-cmake-platform-${MULLE_UNAME}`
 # Disable for a sdk: `mulle-sourcetree mark harfbuzz no-cmake-sdk-<name>`
@@ -183,6 +189,41 @@ else()
       else()
          # Disable with: `mulle-sourcetree mark harfbuzz no-require-link`
          message( SEND_ERROR "HARFBUZZ_LIBRARY was not found in harfbuzz")
+      endif()
+   endif()
+endif()
+
+
+#
+# Generated from sourcetree: A27C54A1-29E8-4F6C-AABA-946577B282CC;opengl32;no-all-load,no-build,no-cmake-inherit,no-delete,no-dependency,no-fs,no-header,no-import,no-share,no-update,only-platform-windows;
+# Disable with : `mulle-sourcetree mark opengl32 `
+# Disable for this platform: `mulle-sourcetree mark opengl32 no-cmake-platform-${MULLE_UNAME}`
+# Disable for a sdk: `mulle-sourcetree mark opengl32 no-cmake-sdk-<name>`
+#
+if( ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   if( COLLECT_OS_SPECIFIC_LIBRARIES_AS_NAMES)
+      list( APPEND OS_SPECIFIC_LIBRARIES "opengl32")
+   else()
+      if( NOT OPENGL32_LIBRARY)
+         find_library( OPENGL32_LIBRARY NAMES
+            opengl32
+         )
+         message( STATUS "OPENGL32_LIBRARY is ${OPENGL32_LIBRARY}")
+         #
+         # The order looks ascending, but due to the way this file is read
+         # it ends up being descending, which is what we need.
+         #
+         if( OPENGL32_LIBRARY)
+            #
+            # Add OPENGL32_LIBRARY to OS_SPECIFIC_LIBRARIES list.
+            # Disable with: `mulle-sourcetree mark opengl32 no-cmake-add`
+            #
+            list( APPEND OS_SPECIFIC_LIBRARIES ${OPENGL32_LIBRARY})
+            # intentionally left blank
+         else()
+            # Disable with: `mulle-sourcetree mark opengl32 no-require-link`
+            message( SEND_ERROR "OPENGL32_LIBRARY was not found in opengl32")
+         endif()
       endif()
    endif()
 endif()

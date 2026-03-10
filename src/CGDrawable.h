@@ -210,7 +210,7 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeScaleToFit( void)
 
 - (CGRect) canvas;      // always 0,0, size
 - (CGRect) bounds;      // usually same as canvas for bitmaps
-- (BOOL) isRepeating;   // ususally NO, used by repeating bitmaps
+- (BOOL) isRepeating;   // ususually NO, used by repeating bitmaps
 
 @end
 
@@ -267,20 +267,20 @@ PROTOCOLCLASS_INTERFACE( CGVectorDrawable, CGDrawable)
 
 - (CGRect) canvas;      // always 0,0, size
 - (CGRect) bounds;      // usually same as canvas for bitmaps
-- (BOOL) isRepeating;   // ususally NO, used by repeating bitmaps
+- (BOOL) isRepeating;   // ususually NO, used by repeating bitmaps
 
 PROTOCOLCLASS_END()
 
 
-MULLE_CG_EXTERN_GLOBAL
+MULLE_CG_GLOBAL
 CGPoint  CGRectGetCenterAtAngle( CGRect patternRect, CAAngle angle);
 
-MULLE_CG_EXTERN_GLOBAL
+MULLE_CG_GLOBAL
 CGPoint  CGRectGetCenterAtAngleWithScaling( CGRect patternRect,
                                                  CAAngle rotation,
                                                  CGVector scaleFactor);
 
-MULLE_CG_EXTERN_GLOBAL
+MULLE_CG_GLOBAL
 CGSize   CGBitmapDrawableGetBitmapExtent( id <CGBitmapDrawable> self,
                                           CGSize size,
                                           CGSize bitmapSize,

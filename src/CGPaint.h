@@ -3,7 +3,7 @@
 //
 #import "import.h"
 
-
+#import "CGColor.h"
 
 @class CGContext;
 @class CGImage;

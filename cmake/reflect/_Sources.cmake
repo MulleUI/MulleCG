@@ -11,8 +11,11 @@ endif()
 # contents selected with patternfile ??-source--sources
 #
 set( SOURCES
-nanovg/src/nanovg.c
-nanovg/src/nanovg-trace-functions.c
+mulle-nanovg/src/mulle-nanovg.c
+mulle-nanovg/src/nanovg.c
+mulle-nanovg/src/nanovg_d3d11.c
+mulle-nanovg/src/nanovg_mtl.m
+mulle-nanovg/src/nanovg-trace-functions.c
 src/CGBlendedPaint+Drawing.m
 src/CGBlendedPaint.m
 src/CGColor+UTF8String.m
@@ -59,5 +62,5 @@ src/opengl-specific/CGFramebuffer+OpenGL.m
 # contents selected with patternfile ??-source--stage2-sources
 #
 set( STAGE2_SOURCES
-src/MulleObjCLoader+MulleCG.m
+src/MulleObjCDeps+MulleCG.m
 )

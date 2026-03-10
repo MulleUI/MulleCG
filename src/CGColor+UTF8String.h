@@ -45,7 +45,12 @@
 // we want "import.h" always anyway
 #import "import.h"
 
+// Ensure MULLE_CG_GLOBAL is defined
+#ifndef MULLE_CG_GLOBAL
+# include "include.h"
+#endif
 
+MULLE_CG_GLOBAL
 char  *CGColorUTF8String( CGColor color);
 
 // @property( assign) NSUInteger  value;

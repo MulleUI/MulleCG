@@ -21,6 +21,7 @@
    CGImage       *image;
    CGTextureID   textureID;
    NVGcontext    *vg;
+   NVGpaint      nvgPaint;
 
    assert( options);
    assert( options->alpha >= 0.0 && options->alpha <= 1.0);
@@ -31,14 +32,13 @@
    if( ! context || textureID == CGTextureIDInvalid)
       return( (NVGpaint){ 0});
 
-   vg = CGContextGetNVGContext( context);
-   return( nvgImagePattern( vg, rect.origin.x,
-                                rect.origin.y,
-                                rect.size.width,
-                                rect.size.height,
-                                CARotationToRadiansAsRotation( options->rotation + _rotation),
-                                textureID,
-                                options->alpha * _alpha));
+   vg       = CGContextGetNVGContext( context);
+   nvgPaint = mvgImagePattern( vg, textureID,
+                                   rect,
+                                   options->rotation + _rotation,
+                                   options->alpha * _alpha);
+
+   return( nvgPaint);
 }
 
 @end
