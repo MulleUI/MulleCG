@@ -1,4 +1,4 @@
 src/mulle-color/**
 !src/mulle-color/*.[hc]
-
+mulle-nanovg/demo/**
 

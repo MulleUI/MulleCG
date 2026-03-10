@@ -15,6 +15,8 @@
 #ifndef MULLE_CG_GLVERSION
 # ifdef __APPLE__
 #  define MULLE_CG_GLVERSION   MULLE_CG_GL3_2
+# elif defined( _WIN32) || defined( __MINGW32__)
+#  define MULLE_CG_GLVERSION   MULLE_CG_GL3_2
 # else
 #  define MULLE_CG_GLVERSION   MULLE_CG_GLES2
 # endif

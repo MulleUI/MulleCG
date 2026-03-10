@@ -93,7 +93,7 @@
 
 
 
-MULLE_CG_EXTERN_GLOBAL
+MULLE_CG_GLOBAL
 CGGradient  *CGGradientCreateWithRotation( CGColor startColor,
                                            CGColor endColor,
                                            CARotation rotation);

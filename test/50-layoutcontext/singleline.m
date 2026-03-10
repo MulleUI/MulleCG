@@ -20,7 +20,7 @@ int   main( int argc, char *argv[])
       text    = "VfL Bochum 1848";
       [context useDefaultFont];
       [context setFontSize:16.0f];
-      [context setCombinedTextAlignment:NVG_ALIGN_MIDDLE];
+      [context setCombinedTextAlignment:NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE];
 
       [context getTextBounds:&bounds
                         text:text

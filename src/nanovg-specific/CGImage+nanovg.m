@@ -40,6 +40,7 @@ static void   assertImageInNVGcontext( CGImage *self, NVGcontext *vg)
                    paintOptions:(struct CGPaintOptions *) options
                         context:(CGContext *) context
 {   
+   NVGpaint       nvgPaint;
    CGTextureID    textureID;
    CGImage        *image;
    NVGcontext     *vg;
@@ -52,14 +53,12 @@ static void   assertImageInNVGcontext( CGImage *self, NVGcontext *vg)
    if( ! context || textureID == CGTextureIDInvalid)
       return( (NVGpaint){ 0});
 
-   vg = CGContextGetNVGContext( context);
-   return( nvgImagePattern( vg, rect.origin.x,
-                                rect.origin.y,
-                                rect.size.width,
-                                rect.size.height,
-                                options->rotation + [image rotation],  // rotation
-                                textureID,
-                                options->alpha * [image alpha]));
+   vg       = CGContextGetNVGContext( context);
+   nvgPaint = mvgImagePattern( vg, textureID,
+                                   rect,
+                                   options->rotation + [image rotation],
+                                   options->alpha * [image alpha]);
+   return( nvgPaint);
 }
 
 // inherit the rest from CGPaint

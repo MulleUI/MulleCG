@@ -35,7 +35,7 @@
 #import "CGPaint+UIGraphicsDrawing.h"
 #import "CGPaint.h"
 #import "CGTypes.h"
-#import "MulleObjCLoader+MulleCG.h"
+#import "MulleObjCDeps+MulleCG.h"
 #import "CGColorConstants.h"
 #import "CGContext+DrawingConveniences.h"
 #import "CGContext+Drawing.h"

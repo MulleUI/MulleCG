@@ -2,7 +2,7 @@
 #define mulle_core_graphics_include_h__
 
 /* This is a central include file to keep dependencies out of the library
-   C files. It is usally included by .h files only.
+   C files. It is usually included by .h files only.
 
    The advantage is that now .c and .h files become motile. They can
    be moved to other projects and don't need to be edited. Also less typing...
@@ -18,6 +18,8 @@
 #ifndef _POSIX_SOURCE
 # define _POSIX_SOURCE
 #endif
+
+#include <mulle-c11/mulle-c11.h>
 
 #include "_MulleCGBackend.h"
 
@@ -92,8 +94,16 @@ typedef struct NVGcolor   CGColor;
    sourcetree, then you don't need it.
  */
 
-#ifndef MULLE_CG_EXTERN_GLOBAL
-# define MULLE_CG_EXTERN_GLOBAL MULLE_C_EXTERN_GLOBAL
+#ifdef MULLE_CG_BUILD
+# define MULLE_CG_GLOBAL        MULLE_C_GLOBAL
+# define MULLE_CG_GLOBAL_VAR    MULLE_C_GLOBAL_VAR
+#else
+# if defined( MULLE_CG_INCLUDE_DYNAMIC) || (defined( MULLE_INCLUDE_DYNAMIC) && ! defined( MULLE_CG_INCLUDE_STATIC))
+#  define MULLE_CG_GLOBAL       MULLE_C_EXTERN_GLOBAL
+# else
+#  define MULLE_CG_GLOBAL       extern
+# endif
+# define MULLE_CG_GLOBAL_VAR
 #endif
 
 
@@ -114,6 +124,7 @@ typedef struct NVGcolor   CGColor;
 # include <mulle-buffer/mulle-buffer.h>
 # include <mulle-container/mulle-container.h>
 # include <mulle-geometry/mulle-geometry.h>
+# include <mulle-hexcolor/mulle-hexcolor.h>
 # include "CGColor.h"
 # include "CGColorConstants.h"
 # include "CGColorDiff.h"

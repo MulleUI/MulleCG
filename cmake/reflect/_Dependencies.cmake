@@ -12,69 +12,106 @@ if( MULLE_TRACE_INCLUDE)
 endif()
 
 #
-# Generated from sourcetree: e670491e-d104-45c1-a5e0-798bd854f01f;freetype;no-all-load,no-cmake-inherit,no-cmake-searchpath,no-header,no-import,no-inplace,only-liftheaders;Debug:freetyped,Release:freetype
-# Disable with : `mulle-sourcetree mark freetype no-link`
-# Disable for this platform: `mulle-sourcetree mark freetype no-cmake-platform-${MULLE_UNAME}`
-# Disable for a sdk: `mulle-sourcetree mark freetype no-cmake-sdk-<name>`
+# Set library preference based on BUILD_SHARED_LIBS
+#
+if( BUILD_SHARED_LIBS)
+   set( MULLE_PREFERRED_LIBRARY_PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}")
+   set( MULLE_PREFERRED_LIBRARY_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
+   set( MULLE_FALLBACK_LIBRARY_PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
+   set( MULLE_FALLBACK_LIBRARY_SUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+else()
+   set( MULLE_PREFERRED_LIBRARY_PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
+   set( MULLE_PREFERRED_LIBRARY_SUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+   set( MULLE_FALLBACK_LIBRARY_PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}")
+   set( MULLE_FALLBACK_LIBRARY_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
+
+#
+# Generated from sourcetree: EC95C26A-AB1C-4D1D-8CCD-5DFB1C697C9B;mulle-freetype;no-all-load,no-cmake-loader,no-cmake-searchpath,no-import;
+# Disable with : `mulle-sourcetree mark mulle-freetype no-link`
+# Disable for this platform: `mulle-sourcetree mark mulle-freetype no-cmake-platform-${MULLE_UNAME}`
+# Disable for a sdk: `mulle-sourcetree mark mulle-freetype no-cmake-sdk-<name>`
 #
 if( COLLECT_DEPENDENCY_LIBRARIES_AS_NAMES)
-   list( APPEND DEPENDENCY_LIBRARIES "Debug:freetyped")
+   list( APPEND DEPENDENCY_LIBRARIES "mulle-freetype")
 else()
-   if( NOT FREETYPE_LIBRARY)
-      if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-         find_library( FREETYPE_LIBRARY NAMES
-            ${CMAKE_STATIC_LIBRARY_PREFIX}freetyped${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-            ${CMAKE_STATIC_LIBRARY_PREFIX}freetyped${CMAKE_STATIC_LIBRARY_SUFFIX}
-            freetyped
-            NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_FIND_ROOT_PATH
+   if( NOT MULLE__FREETYPE_LIBRARY)
+      find_library( MULLE__FREETYPE_LIBRARY NAMES
+         ${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-freetype${CMAKE_DEBUG_POSTFIX}${MULLE_PREFERRED_LIBRARY_SUFFIX}
+         ${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-freetype${MULLE_PREFERRED_LIBRARY_SUFFIX}
+         ${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-freetype${CMAKE_DEBUG_POSTFIX}${MULLE_FALLBACK_LIBRARY_SUFFIX}
+         ${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-freetype${MULLE_FALLBACK_LIBRARY_SUFFIX}
+         mulle-freetype
+         NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_FIND_ROOT_PATH
+      )
+      if( NOT MULLE__FREETYPE_LIBRARY AND NOT DEPENDENCY_IGNORE_SYSTEM_LIBARIES)
+         find_library( MULLE__FREETYPE_LIBRARY NAMES
+            ${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-freetype${CMAKE_DEBUG_POSTFIX}${MULLE_PREFERRED_LIBRARY_SUFFIX}
+            ${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-freetype${MULLE_PREFERRED_LIBRARY_SUFFIX}
+            ${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-freetype${CMAKE_DEBUG_POSTFIX}${MULLE_FALLBACK_LIBRARY_SUFFIX}
+            ${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-freetype${MULLE_FALLBACK_LIBRARY_SUFFIX}
+            mulle-freetype
          )
-         if( NOT FREETYPE_LIBRARY AND NOT DEPENDENCY_IGNORE_SYSTEM_LIBARIES)
-            find_library( FREETYPE_LIBRARY NAMES
-               ${CMAKE_STATIC_LIBRARY_PREFIX}freetyped${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-               ${CMAKE_STATIC_LIBRARY_PREFIX}freetyped${CMAKE_STATIC_LIBRARY_SUFFIX}
-               freetyped
-            )
-         endif()
       endif()
-      if( NOT FREETYPE_LIBRARY)
-         find_library( FREETYPE_LIBRARY NAMES
-            ${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-            ${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_STATIC_LIBRARY_SUFFIX}
-            freetype
-            NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_FIND_ROOT_PATH
-         )
-         if( NOT FREETYPE_LIBRARY AND NOT DEPENDENCY_IGNORE_SYSTEM_LIBARIES)
-            find_library( FREETYPE_LIBRARY NAMES
-               ${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-               ${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_STATIC_LIBRARY_SUFFIX}
-               freetype
-            )
-         endif()
-      endif()
-      message( STATUS "FREETYPE_LIBRARY is ${FREETYPE_LIBRARY}")
+      message( STATUS "MULLE__FREETYPE_LIBRARY is ${MULLE__FREETYPE_LIBRARY}")
       #
       # The order looks ascending, but due to the way this file is read
       # it ends up being descending, which is what we need.
       #
-      if( FREETYPE_LIBRARY)
+      if( MULLE__FREETYPE_LIBRARY)
          #
-         # Add FREETYPE_LIBRARY to DEPENDENCY_LIBRARIES list.
-         # Disable with: `mulle-sourcetree mark freetype no-cmake-add`
+         # Add MULLE__FREETYPE_LIBRARY to DEPENDENCY_LIBRARIES list.
+         # Disable with: `mulle-sourcetree mark mulle-freetype no-cmake-add`
          #
-         list( APPEND DEPENDENCY_LIBRARIES ${FREETYPE_LIBRARY})
-         # intentionally left blank
+         list( APPEND DEPENDENCY_LIBRARIES ${MULLE__FREETYPE_LIBRARY})
+         #
+         # Inherit information from dependency.
+         # Encompasses: no-cmake-searchpath,no-cmake-dependency,no-cmake-loader
+         # Disable with: `mulle-sourcetree mark mulle-freetype no-cmake-inherit`
+         #
+         # temporarily expand CMAKE_MODULE_PATH
+         get_filename_component( _TMP_MULLE__FREETYPE_ROOT "${MULLE__FREETYPE_LIBRARY}" DIRECTORY)
+         get_filename_component( _TMP_MULLE__FREETYPE_ROOT "${_TMP_MULLE__FREETYPE_ROOT}" DIRECTORY)
+         #
+         #
+         # Search for "Definitions.cmake" and "DependenciesAndLibraries.cmake" to include.
+         # Disable with: `mulle-sourcetree mark mulle-freetype no-cmake-dependency`
+         #
+         foreach( _TMP_MULLE__FREETYPE_NAME "mulle-freetype")
+            set( _TMP_MULLE__FREETYPE_DIR "${_TMP_MULLE__FREETYPE_ROOT}/include/${_TMP_MULLE__FREETYPE_NAME}/cmake")
+            # use explicit path to avoid "surprises"
+            if( IS_DIRECTORY "${_TMP_MULLE__FREETYPE_DIR}")
+               list( INSERT CMAKE_MODULE_PATH 0 "${_TMP_MULLE__FREETYPE_DIR}")
+               #
+               include( "${_TMP_MULLE__FREETYPE_DIR}/DependenciesAndLibraries.cmake" OPTIONAL)
+               #
+               list( REMOVE_ITEM CMAKE_MODULE_PATH "${_TMP_MULLE__FREETYPE_DIR}")
+               #
+               unset( MULLE__FREETYPE_DEFINITIONS)
+               unset( MULLE__FREETYPE_RENDEZVOUS_GLOBALS)
+               include( "${_TMP_MULLE__FREETYPE_DIR}/Definitions.cmake" OPTIONAL)
+               list( APPEND INHERITED_DEFINITIONS ${MULLE__FREETYPE_DEFINITIONS})
+               include( "${_TMP_MULLE__FREETYPE_DIR}/Definitions.cmake" OPTIONAL)
+               list( APPEND RENDEZVOUS_GLOBALS ${MULLE__FREETYPE_RENDEZVOUS_GLOBALS})
+               break()
+            else()
+               message( STATUS "${_TMP_MULLE__FREETYPE_DIR} not found")
+            endif()
+         endforeach()
       else()
-         # Disable with: `mulle-sourcetree mark freetype no-require-link`
-         message( SEND_ERROR "FREETYPE_LIBRARY was not found in ${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_STATIC_LIBRARY_SUFFIX}
-freetype")
+         # Disable with: `mulle-sourcetree mark mulle-freetype no-require-link`
+         message( SEND_ERROR "MULLE__FREETYPE_LIBRARY was not found in ${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-freetype${CMAKE_DEBUG_POSTFIX}${MULLE_PREFERRED_LIBRARY_SUFFIX}
+${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-freetype${MULLE_PREFERRED_LIBRARY_SUFFIX}
+${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-freetype${CMAKE_DEBUG_POSTFIX}${MULLE_FALLBACK_LIBRARY_SUFFIX}
+${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-freetype${MULLE_FALLBACK_LIBRARY_SUFFIX}
+mulle-freetype")
       endif()
    endif()
 endif()
 
 
 #
-# Generated from sourcetree: AAD57ACB-563B-40C7-87EF-B36F773799F2;mulle-gfx;no-all-load,no-cmake-loader,no-cmake-searchpath,no-import,no-singlephase;
+# Generated from sourcetree: 299E9095-A620-49C5-A8AC-8B0C6B8D5DDA;mulle-gfx;no-all-load,no-cmake-loader,no-cmake-searchpath,no-import,no-singlephase;
 # Disable with : `mulle-sourcetree mark mulle-gfx no-link`
 # Disable for this platform: `mulle-sourcetree mark mulle-gfx no-cmake-platform-${MULLE_UNAME}`
 # Disable for a sdk: `mulle-sourcetree mark mulle-gfx no-cmake-sdk-<name>`
@@ -84,15 +121,19 @@ if( COLLECT_DEPENDENCY_LIBRARIES_AS_NAMES)
 else()
    if( NOT MULLE__GFX_LIBRARY)
       find_library( MULLE__GFX_LIBRARY NAMES
-         ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-         ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-gfx${CMAKE_STATIC_LIBRARY_SUFFIX}
+         ${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${MULLE_PREFERRED_LIBRARY_SUFFIX}
+         ${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-gfx${MULLE_PREFERRED_LIBRARY_SUFFIX}
+         ${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${MULLE_FALLBACK_LIBRARY_SUFFIX}
+         ${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-gfx${MULLE_FALLBACK_LIBRARY_SUFFIX}
          mulle-gfx
          NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_FIND_ROOT_PATH
       )
       if( NOT MULLE__GFX_LIBRARY AND NOT DEPENDENCY_IGNORE_SYSTEM_LIBARIES)
          find_library( MULLE__GFX_LIBRARY NAMES
-            ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-            ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-gfx${CMAKE_STATIC_LIBRARY_SUFFIX}
+            ${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${MULLE_PREFERRED_LIBRARY_SUFFIX}
+            ${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-gfx${MULLE_PREFERRED_LIBRARY_SUFFIX}
+            ${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${MULLE_FALLBACK_LIBRARY_SUFFIX}
+            ${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-gfx${MULLE_FALLBACK_LIBRARY_SUFFIX}
             mulle-gfx
          )
       endif()
@@ -131,8 +172,11 @@ else()
                list( REMOVE_ITEM CMAKE_MODULE_PATH "${_TMP_MULLE__GFX_DIR}")
                #
                unset( MULLE__GFX_DEFINITIONS)
+               unset( MULLE__GFX_RENDEZVOUS_GLOBALS)
                include( "${_TMP_MULLE__GFX_DIR}/Definitions.cmake" OPTIONAL)
                list( APPEND INHERITED_DEFINITIONS ${MULLE__GFX_DEFINITIONS})
+               include( "${_TMP_MULLE__GFX_DIR}/Definitions.cmake" OPTIONAL)
+               list( APPEND RENDEZVOUS_GLOBALS ${MULLE__GFX_RENDEZVOUS_GLOBALS})
                break()
             else()
                message( STATUS "${_TMP_MULLE__GFX_DIR} not found")
@@ -140,8 +184,10 @@ else()
          endforeach()
       else()
          # Disable with: `mulle-sourcetree mark mulle-gfx no-require-link`
-         message( SEND_ERROR "MULLE__GFX_LIBRARY was not found in ${CMAKE_STATIC_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-${CMAKE_STATIC_LIBRARY_PREFIX}mulle-gfx${CMAKE_STATIC_LIBRARY_SUFFIX}
+         message( SEND_ERROR "MULLE__GFX_LIBRARY was not found in ${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${MULLE_PREFERRED_LIBRARY_SUFFIX}
+${MULLE_PREFERRED_LIBRARY_PREFIX}mulle-gfx${MULLE_PREFERRED_LIBRARY_SUFFIX}
+${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-gfx${CMAKE_DEBUG_POSTFIX}${MULLE_FALLBACK_LIBRARY_SUFFIX}
+${MULLE_FALLBACK_LIBRARY_PREFIX}mulle-gfx${MULLE_FALLBACK_LIBRARY_SUFFIX}
 mulle-gfx")
       endif()
    endif()
@@ -149,7 +195,7 @@ endif()
 
 
 #
-# Generated from sourcetree: 32A083E2-BE1B-4C33-8631-E8C87FDE9913;MulleUIBase;no-singlephase;
+# Generated from sourcetree: 7C2E96F2-78B7-47A6-82D6-463D97BB521B;MulleUIBase;no-singlephase;
 # Disable with : `mulle-sourcetree mark MulleUIBase no-link`
 # Disable for this platform: `mulle-sourcetree mark MulleUIBase no-cmake-platform-${MULLE_UNAME}`
 # Disable for a sdk: `mulle-sourcetree mark MulleUIBase no-cmake-sdk-<name>`
@@ -159,15 +205,19 @@ if( COLLECT_ALL_LOAD_DEPENDENCY_LIBRARIES_AS_NAMES)
 else()
    if( NOT MULLE_UI_BASE_LIBRARY)
       find_library( MULLE_UI_BASE_LIBRARY NAMES
-         ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-         ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIBase${CMAKE_STATIC_LIBRARY_SUFFIX}
+         ${MULLE_PREFERRED_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${MULLE_PREFERRED_LIBRARY_SUFFIX}
+         ${MULLE_PREFERRED_LIBRARY_PREFIX}MulleUIBase${MULLE_PREFERRED_LIBRARY_SUFFIX}
+         ${MULLE_FALLBACK_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${MULLE_FALLBACK_LIBRARY_SUFFIX}
+         ${MULLE_FALLBACK_LIBRARY_PREFIX}MulleUIBase${MULLE_FALLBACK_LIBRARY_SUFFIX}
          MulleUIBase
          NO_CMAKE_SYSTEM_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_FIND_ROOT_PATH
       )
       if( NOT MULLE_UI_BASE_LIBRARY AND NOT DEPENDENCY_IGNORE_SYSTEM_LIBARIES)
          find_library( MULLE_UI_BASE_LIBRARY NAMES
-            ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-            ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIBase${CMAKE_STATIC_LIBRARY_SUFFIX}
+            ${MULLE_PREFERRED_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${MULLE_PREFERRED_LIBRARY_SUFFIX}
+            ${MULLE_PREFERRED_LIBRARY_PREFIX}MulleUIBase${MULLE_PREFERRED_LIBRARY_SUFFIX}
+            ${MULLE_FALLBACK_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${MULLE_FALLBACK_LIBRARY_SUFFIX}
+            ${MULLE_FALLBACK_LIBRARY_PREFIX}MulleUIBase${MULLE_FALLBACK_LIBRARY_SUFFIX}
             MulleUIBase
          )
       endif()
@@ -206,30 +256,35 @@ else()
                list( REMOVE_ITEM CMAKE_MODULE_PATH "${_TMP_MULLE_UI_BASE_DIR}")
                #
                unset( MULLE_UI_BASE_DEFINITIONS)
+               unset( MULLE_UI_BASE_RENDEZVOUS_GLOBALS)
                include( "${_TMP_MULLE_UI_BASE_DIR}/Definitions.cmake" OPTIONAL)
                list( APPEND INHERITED_DEFINITIONS ${MULLE_UI_BASE_DEFINITIONS})
+               include( "${_TMP_MULLE_UI_BASE_DIR}/Definitions.cmake" OPTIONAL)
+               list( APPEND RENDEZVOUS_GLOBALS ${MULLE_UI_BASE_RENDEZVOUS_GLOBALS})
                break()
             else()
                message( STATUS "${_TMP_MULLE_UI_BASE_DIR} not found")
             endif()
          endforeach()
          #
-         # Search for "MulleObjCLoader+<name>.h" in include directory.
+         # Search for "MulleObjCDeps+<name>.h" in include directory.
          # Disable with: `mulle-sourcetree mark MulleUIBase no-cmake-loader`
          #
-         if( NOT NO_INHERIT_OBJC_LOADERS)
+         if( NOT NO_INHERIT_OBJC_DEPS)
             foreach( _TMP_MULLE_UI_BASE_NAME "MulleUIBase")
-               set( _TMP_MULLE_UI_BASE_FILE "${_TMP_MULLE_UI_BASE_ROOT}/include/${_TMP_MULLE_UI_BASE_NAME}/MulleObjCLoader+${_TMP_MULLE_UI_BASE_NAME}.h")
+               set( _TMP_MULLE_UI_BASE_FILE "${_TMP_MULLE_UI_BASE_ROOT}/include/${_TMP_MULLE_UI_BASE_NAME}/MulleObjCDeps+${_TMP_MULLE_UI_BASE_NAME}.h")
                if( EXISTS "${_TMP_MULLE_UI_BASE_FILE}")
-                  list( APPEND INHERITED_OBJC_LOADERS ${_TMP_MULLE_UI_BASE_FILE})
+                  list( APPEND INHERITED_OBJC_DEPS ${_TMP_MULLE_UI_BASE_FILE})
                   break()
                endif()
             endforeach()
          endif()
       else()
          # Disable with: `mulle-sourcetree mark MulleUIBase no-require-link`
-         message( SEND_ERROR "MULLE_UI_BASE_LIBRARY was not found in ${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}
-${CMAKE_STATIC_LIBRARY_PREFIX}MulleUIBase${CMAKE_STATIC_LIBRARY_SUFFIX}
+         message( SEND_ERROR "MULLE_UI_BASE_LIBRARY was not found in ${MULLE_PREFERRED_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${MULLE_PREFERRED_LIBRARY_SUFFIX}
+${MULLE_PREFERRED_LIBRARY_PREFIX}MulleUIBase${MULLE_PREFERRED_LIBRARY_SUFFIX}
+${MULLE_FALLBACK_LIBRARY_PREFIX}MulleUIBase${CMAKE_DEBUG_POSTFIX}${MULLE_FALLBACK_LIBRARY_SUFFIX}
+${MULLE_FALLBACK_LIBRARY_PREFIX}MulleUIBase${MULLE_FALLBACK_LIBRARY_SUFFIX}
 MulleUIBase")
       endif()
    endif()
