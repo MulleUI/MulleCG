@@ -9,12 +9,8 @@
 
 static float nvg__absf(float a)  { return a >= 0.0f ? a : -a; }
 static float nvg__minf(float a, float b) { return a < b ? a : b; }
-
-
-#define NVG_KAPPA90 0.5522847493f   // Length proportional to radius of a cubic bezier handle for 90deg arcs.
-
-
-void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
+#define 0.5522847493f 0.5522847493f   // Length proportional to radius of a cubic bezier handle for 90deg arcs.
+void xxnvgRoundedRectVarying(CGContext *context, float x, float y, float w, float h,
                                             float radTopLeft, float radTopRight,
                                             float radBottomRight, float radBottomLeft)
 {
@@ -31,10 +27,10 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
    float rxTR = nvg__minf( nvg__absf( radTopRight), halfw);
    float ryTR = nvg__minf( nvg__absf( radTopRight), halfh);
 
-   float kappaTL = (radTopLeft < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
-   float kappaBL = (radBottomLeft < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
-   float kappaBR = (radBottomRight < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
-   float kappaTR = (radTopRight < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
+   float kappaTL = (radTopLeft < 0) ? 0.5522847493f : 1-0.5522847493f;
+   float kappaBL = (radBottomLeft < 0) ? 0.5522847493f : 1-0.5522847493f;
+   float kappaBR = (radBottomRight < 0) ? 0.5522847493f : 1-0.5522847493f;
+   float kappaTR = (radTopRight < 0) ? 0.5522847493f : 1-0.5522847493f;
 
    CGPoint   c1;
    CGPoint   c2;
@@ -42,11 +38,11 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
 
    // draw top left (end) to bottom left (start)
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
 
    p = CGPointMake( x,
                     y + h - ryBL);
-   mvgMoveTo( vg, p);
+   mvgMoveTo( context, p);
 
    // draw bottom left corner
    if( radBottomLeft < 0.0)
@@ -114,7 +110,7 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
    }
    p  = CGPointMake( x + w - rxTR, y);
 
-   mvgBezierTo( vg, c1, c2, p);
+   mvgBezierTo( context, c1, c2, p);
 
    // draw top right to top left line
    p  = CGPointMake( x + rxTL, y);
@@ -137,18 +133,18 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
    }
    p  = CGPointMake( x, y + rxTL);
 
-   mvgBezierTo( vg, c1, c2, p);
+   mvgBezierTo( context, c1, c2, p);
 
-   mvgClosePath( vg);
+   mvgClosePath( context);
 
 }
 
-static inline void   xmvgRoundedRectVarying( NVGcontext *vg,
+static inline void   xmvgRoundedRectVarying( CGContext *context,
                                              CGRect rect,
                                              struct MulleCornerInsets corners)
 {
-   nvgStrokeWidth( vg, 2.0);
-   xxnvgRoundedRectVarying( vg, rect.origin.x,
+   CGContextStrokeWidth( context, 2.0);
+   xxCGContextRoundedRectVarying( context, rect.origin.x,
                                 rect.origin.y,
                                 rect.size.width,
                                 rect.size.height,
@@ -156,15 +152,13 @@ static inline void   xmvgRoundedRectVarying( NVGcontext *vg,
                                 corners.tr,
                                 corners.br,
                                 corners.bl);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x808080FF));
-   nvgStroke( vg);//   nvgFillColor( vg, CGColorMakeRed());
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x808080FF));
+   CGContextStroke( context);//   CGContextFillColor( context, CGColorMakeRed());
 }
 
 #endif
-
-
 #if 0
-void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
+void xxnvgRoundedRectVarying(CGContext *context, float x, float y, float w, float h,
                                              float radTopLeft, float radTopRight,
                                              float radBottomRight, float radBottomLeft)
 {
@@ -181,10 +175,10 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
    float rxTR = nvg__minf( nvg__absf( radTopRight), halfw);
    float ryTR = nvg__minf( nvg__absf( radTopRight), halfh);
 
-   float kappaTL = (radTopLeft < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
-   float kappaBL = (radBottomLeft < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
-   float kappaBR = (radBottomRight < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
-   float kappaTR = (radTopRight < 0) ? NVG_KAPPA90 : 1-NVG_KAPPA90;
+   float kappaTL = (radTopLeft < 0) ? 0.5522847493f : 1-0.5522847493f;
+   float kappaBL = (radBottomLeft < 0) ? 0.5522847493f : 1-0.5522847493f;
+   float kappaBR = (radBottomRight < 0) ? 0.5522847493f : 1-0.5522847493f;
+   float kappaTR = (radTopRight < 0) ? 0.5522847493f : 1-0.5522847493f;
 
    CGPoint   c1;
    CGPoint   c2;
@@ -192,19 +186,19 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
 
    // draw top left (end) to bottom left (start)
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    p = CGPointMake( x,
                     y + ryTL);
-   mvgMoveTo( vg, p);
+   mvgMoveTo( context, p);
    p = CGPointMake( x,
                     y + h - ryBL);
-   mvgLineTo( vg, p);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xF02020FF));
-   nvgStroke( vg);
+   mvgLineTo( context, p);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xF02020FF));
+   CGContextStroke( context);
 
    // draw bottom left corner
-   nvgBeginPath( vg);
-   mvgMoveTo( vg, p);
+   CGContextBeginPath( context);
+   mvgMoveTo( context, p);
 
    if( radBottomLeft < 0.0)
    {
@@ -224,23 +218,23 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
                      y + h);
 
    mvgBezierTo(  vg, c1, c2, p);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xF08020FF));
-   nvgStroke( vg);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xF08020FF));
+   CGContextStroke( context);
 
-   mvgFillCircleWithColor( vg, c1, 2.0, CGColorMakeRed());
-   mvgFillCircleWithColor( vg, c2, 2.0, CGColorMakeGreen());
+   mvgFillCircleWithColor( context, c1, 2.0, CGColorMakeRed());
+   mvgFillCircleWithColor( context, c2, 2.0, CGColorMakeGreen());
 
    // draw bottom left to bottom right corner
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    mvgMoveTo(    vg, p);
    p = CGPointMake( x + w - rxBR, y + h);
    mvgLineTo(    vg, p);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x20F020FF));
-   nvgStroke( vg);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x20F020FF));
+   CGContextStroke( context);
 
    // draw bottom right corner
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    mvgMoveTo(    vg, p);
 
    if( radBottomRight < 0.0)
@@ -261,22 +255,22 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
                      y + h - ryBR);
 
    mvgBezierTo(  vg, c1, c2, p);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xF080F0FF));
-   nvgStroke( vg);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xF080F0FF));
+   CGContextStroke( context);
 
-   mvgFillCircleWithColor( vg, c1, 2.0, CGColorMakeRed());
-   mvgFillCircleWithColor( vg, c2, 2.0, CGColorMakeGreen());
+   mvgFillCircleWithColor( context, c1, 2.0, CGColorMakeRed());
+   mvgFillCircleWithColor( context, c2, 2.0, CGColorMakeGreen());
 
    // draw bottom right to top right line
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    mvgMoveTo(    vg, p);
    p  = CGPointMake( x + w, y + ryTR);
    mvgLineTo(    vg, p);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x2020F0FF));
-   nvgStroke( vg);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x2020F0FF));
+   CGContextStroke( context);
 
    // draw top right corner
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    mvgMoveTo(    vg, p);
 
    if( radTopRight < 0.0)
@@ -295,24 +289,22 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
    }
    p  = CGPointMake( x + w - rxTR, y);
 
-   mvgBezierTo( vg, c1, c2, p);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x404060FF));
-   nvgStroke( vg);
+   mvgBezierTo( context, c1, c2, p);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x404060FF));
+   CGContextStroke( context);
 
-   mvgFillCircleWithColor( vg, c1, 2.0, CGColorMakeRed());
-   mvgFillCircleWithColor( vg, c2, 2.0, CGColorMakeGreen());
-
-
+   mvgFillCircleWithColor( context, c1, 2.0, CGColorMakeRed());
+   mvgFillCircleWithColor( context, c2, 2.0, CGColorMakeGreen());
    // draw top right to top left line
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    mvgMoveTo(    vg, p);
    p  = CGPointMake( x + rxTL, y);
    mvgLineTo(    vg, p);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xF080F0FF));
-   nvgStroke( vg);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xF080F0FF));
+   CGContextStroke( context);
 
    // draw top left corner
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    mvgMoveTo(    vg, p);
 
    if( radTopLeft < 0.0)
@@ -331,18 +323,16 @@ void xxnvgRoundedRectVarying(NVGcontext* vg, float x, float y, float w, float h,
    }
    p  = CGPointMake( x, y + rxTL);
 
-   mvgBezierTo( vg, c1, c2, p);
-   nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x404060FF));
-   nvgStroke( vg);
+   mvgBezierTo( context, c1, c2, p);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x404060FF));
+   CGContextStroke( context);
 
-   mvgFillCircleWithColor( vg, c1, 2.0, CGColorMakeRed());
-   mvgFillCircleWithColor( vg, c2, 2.0, CGColorMakeGreen());
+   mvgFillCircleWithColor( context, c1, 2.0, CGColorMakeRed());
+   mvgFillCircleWithColor( context, c2, 2.0, CGColorMakeGreen());
 }
 #endif
 
-
-
-static void   drawRoundedRect( CGContext *context, CGRect canvas, struct MulleCornerInsets insets) // Converted from struct NVGcontext *vg
+static void   drawRoundedRect( CGContext *context, CGRect canvas, struct MulleCornerInsets insets) // Converted from struct CGContext *context
 {
    CGRect    rect;
 
@@ -350,25 +340,21 @@ static void   drawRoundedRect( CGContext *context, CGRect canvas, struct MulleCo
 
    // insets are flipped, because rect is flipped!
 
-   CGContextBeginPath( context); // Converted from nvgBeginPath
-   CGContextRoundedRectVarying( context, rect, insets); // Converted from nvgRoundedRectVarying
-   CGContextStrokeWidth( context, 8); // Converted from nvgStrokeWidth
-   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xF0C0C0FF)); // Converted from nvgStrokeColor
-   CGContextStroke( context);//   CGContextFillColor( context, CGColorMakeRed()); // Converted from nvgStroke, nvgFillColor
-
-
+   CGContextBeginPath( context);
+   CGContextRoundedRectVarying( context, rect, insets);
+   CGContextStrokeWidth( context, 8);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xF0C0C0FF));
+   CGContextStroke( context);//   CGContextFillColor( context, CGColorMakeRed());, nvgFillColor
    CGContextBeginPath( context); // Converted from mvgBeginPath
    CGContextRoundedRectVarying( context, rect, insets); // Converted from mvgRoundedRectVarying
    CGContextStrokeWidth( context, 2); // Converted from mvgStrokeWidth
    CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x808080FF)); // Converted from mvgStrokeColor
    CGContextStroke( context);//   CGContextFillColor( context, CGColorMakeRed()); // Converted from mvgStroke, nvgFillColor
 
-//   CGContextFill( context); // Converted from nvgFill
+//   CGContextFill( context);
 
 //   CGContextStrokeRectWithColor( context, rect, 1.0, CGColorMakeGray()); // Converted from mvgStrokeRectWithColor
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                  *context = _context;
@@ -401,8 +387,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    return( YES);
 }
 
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -416,8 +400,6 @@ int   main( int argc, char *argv[])
 
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

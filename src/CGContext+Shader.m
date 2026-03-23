@@ -157,8 +157,7 @@ static struct
    {
       if( _debuggingFlags & 0x2)
          MulleUILog( "release shader \"%s\"", name);
-      glDeleteProgram( (GLuint) (uintptr_t) shaderID);
-      CGContextCheckBackendError( self, "after glDeleteProgram");
+      [self _deleteShader:(CGShaderID) (uintptr_t) shaderID];
    }
 
    mulle_map_reset( &_shaderMap);

@@ -4,30 +4,26 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 #define SPEED    240
 
 static int    modes[] =
 {
-   NVG_SOURCE_OVER,
-   NVG_SOURCE_IN,
-   NVG_SOURCE_OUT,
-   NVG_ATOP,
+   CGCompositeOperationSourceOver,
+   CGCompositeOperationSourceIn,
+   CGCompositeOperationSourceOut,
+   CGCompositeOperationAtop,
 
-   NVG_DESTINATION_OVER,
-   NVG_DESTINATION_IN,
-   NVG_DESTINATION_OUT,
-   NVG_DESTINATION_ATOP,
+   CGCompositeOperationDestinationOver,
+   CGCompositeOperationDestinationIn,
+   CGCompositeOperationDestinationOut,
+   CGCompositeOperationDestinationAtop,
 
-   NVG_LIGHTER,
-   NVG_COPY,
-   NVG_XOR,
+   CGCompositeOperationLighter,
+   CGCompositeOperationCopy,
+   CGCompositeOperationXOR,
 
    1848
 };
-
-
 static char   *mode_names[] =
 {
    "SOURCE_OVER",
@@ -45,8 +41,6 @@ static char   *mode_names[] =
    "XOR",
    "*CUSTOM*"
 };
-
-
 static char   *mode_name_for_mode( int mode)
 {
    unsigned int  i;
@@ -56,8 +50,6 @@ static char   *mode_name_for_mode( int mode)
          return( mode_names[ i]);
    abort();
 }
-
-
 
 static void   drawGridInRect( CGContext  *context, CGRect rect)
 {
@@ -89,10 +81,6 @@ static void   drawGridInRect( CGContext  *context, CGRect rect)
            options:NULL
            context:context];
 }
-
-
-
-
 static void   drawCirclesInRect( CGContext *context,
                                  NSUInteger step,
                                  CGRect rect,
@@ -115,7 +103,7 @@ static void   drawCirclesInRect( CGContext *context,
 
       if( factor >= 2.0 / 3)
       {
-         CGContextGlobalCompositeOperation( context, NVG_COPY);
+         CGContextGlobalCompositeOperation( context, CGCompositeOperationCopy);
          drawGridInRect( context, rect);
       }
 
@@ -125,7 +113,7 @@ static void   drawCirclesInRect( CGContext *context,
       radius += radius / 4.0;
 
       if( operation == 1848)
-         CGContextGlobalCompositeBlendFuncSeparate( context, NVG_DST_COLOR, NVG_SRC_ALPHA, NVG_SRC_COLOR, NVG_ZERO);
+         CGContextGlobalCompositeBlendFuncSeparate( context, CGBlendFactorDstColor, CGBlendFactorSrcAlpha, CGBlendFactorSrcColor, CGBlendFactorZero);
       else
          CGContextGlobalCompositeOperation( context, operation);
       factor = CGContextGetBackAndForthAnimationFactor( context, SPEED);
@@ -147,8 +135,6 @@ static void   drawCirclesInRect( CGContext *context,
    }
    CGContextRestore( context);
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
@@ -198,8 +184,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -207,8 +191,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            60.0f));
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

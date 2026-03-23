@@ -13,15 +13,7 @@
 #define _mulle_c_g__provide_h__
 
 
-#include "nanovg.h"
-#include "CGColorDiff.h"
-#include "CGColorNames.h"
-#include "CGColor.h"
-#include "mulle-color.h"
-#include "CGAffineTransform+nanovg.h"
-#include "CGPath+nanovg.h"
-#include "nanowrap.h"
-#include "nanovg+UTF8String.h"
+// no headers
 //
 // MULLE_MATCH_TO_C_IGNORE_HEADERS=fontstash.h:nanovg_gl.h:nanovg_gl_utils.h:stb_image.h:stb_truetype.h:nanovg-extensions.inc
 //

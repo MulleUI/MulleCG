@@ -12,7 +12,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    float               canvas_x, canvas_y, canvas_w, canvas_h;
    float               rect_x, rect_y, rect_w, rect_h;
    float               x, y;
-   struct NVGcontext   *vg = CGContextGetNVGContext( context); // Get the nvg context
 
    canvas_rect = [layer canvas];
    canvas_x = canvas_rect.origin.x;
@@ -20,32 +19,32 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    canvas_w = canvas_rect.size.width;
    canvas_h = canvas_rect.size.height;
 
-   nvgFillColor( vg, nvgRGB(0, 0, 0)); // Black background
-   nvgFill( vg);
+   CGContextFillColor( context, CGColorMakeWithRGBBytes(0, 0, 0)); // Black background
+   CGContextFill( context);
 
    // inviso
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, 0 * canvas_w / 3, -1.0);
-   nvgLineTo( vg, (0 * canvas_w / 3) + canvas_w / 3, -1.0);
-   nvgStrokeColor( vg, nvgRGB(255, 0, 0)); // Red line
-   nvgStrokeWidth( vg, 2.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(0 * canvas_w / 3, -1.0));
+   CGContextLineTo( context,CGPointMake((0 * canvas_w / 3) + canvas_w / 3, -1.0));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 0, 0)); // Red line
+   CGContextStrokeWidth( context, 2.0);
+   CGContextStroke( context);
 
    // semiviso
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, 1 * canvas_w / 3, -0.0);
-   nvgLineTo( vg, (1 * canvas_w / 3) + canvas_w / 3, -0.0);
-   nvgStrokeColor( vg, nvgRGB(0, 255, 0)); // Green line
-   nvgStrokeWidth( vg, 2.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(1 * canvas_w / 3, -0.0));
+   CGContextLineTo( context,CGPointMake((1 * canvas_w / 3) + canvas_w / 3, -0.0));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(0, 255, 0)); // Green line
+   CGContextStrokeWidth( context, 2.0);
+   CGContextStroke( context);
 
    // viso
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, 2 * canvas_w / 3, +1.0);
-   nvgLineTo( vg, (2 * canvas_w / 3) + canvas_w / 3, +1.0);
-   nvgStrokeColor( vg, nvgRGB(0, 0, 255)); // Blue line
-   nvgStrokeWidth( vg, 2.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(2 * canvas_w / 3, +1.0));
+   CGContextLineTo( context,CGPointMake((2 * canvas_w / 3) + canvas_w / 3, +1.0));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(0, 0, 255)); // Blue line
+   CGContextStrokeWidth( context, 2.0);
+   CGContextStroke( context);
 
    // Calculate inset rect using float variables
    float inset_amount = 50.0;
@@ -54,89 +53,87 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    rect_w = canvas_w - 2 * inset_amount;
    rect_h = canvas_h - 2 * inset_amount;
 
-   nvgShapeAntiAlias( vg, YES);
+   CGContextShapeAntiAlias( context, YES);
 
    // Horizontal lines in inset rect
    x = rect_x + 0 * (rect_w / 4);
    y = rect_y;
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, x, y);
-   nvgLineTo( vg, x + rect_w / 4, y);
-   nvgStrokeColor( vg, nvgRGB(255, 255, 255)); // White line
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(x, y));
+   CGContextLineTo( context, CGPointMake(x + rect_w / 4, y));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 255, 255)); // White line
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
 
    x = rect_x + 1 * (rect_w / 4);
    y = rect_y + 0.5;
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, x, y);
-   nvgLineTo( vg, x + rect_w / 4, y);
-   nvgStrokeColor( vg, nvgRGB(255, 255, 255)); // White line
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(x, y));
+   CGContextLineTo( context, CGPointMake(x + rect_w / 4, y));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 255, 255)); // White line
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
 
-   nvgShapeAntiAlias( vg, NO);
+   CGContextShapeAntiAlias( context, NO);
    x = rect_x + 2 * (rect_w / 4);
    y = rect_y;
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, x, y);
-   nvgLineTo( vg, x + rect_w / 4, y);
-   nvgStrokeColor( vg, nvgRGB(255, 255, 255)); // White line
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(x, y));
+   CGContextLineTo( context, CGPointMake(x + rect_w / 4, y));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 255, 255)); // White line
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
 
    x = rect_x + 3 * (rect_w / 4);
    y = rect_y + 0.5;
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, x, y);
-   nvgLineTo( vg, x + rect_w / 4, y); // Corrected to x + rect_w / 4
-   nvgStrokeColor( vg, nvgRGB(255, 255, 255)); // White line
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(x, y));
+   CGContextLineTo( context, CGPointMake(x + rect_w / 4, y)); // Corrected to x + rect_w / 4
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 255, 255)); // White line
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
 
    // Vertical lines in inset rect
-   nvgShapeAntiAlias( vg, YES);
+   CGContextShapeAntiAlias( context, YES);
    x = rect_x;
    y = rect_y + 0 * (rect_h / 4);
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, x, y);
-   nvgLineTo( vg, x, y + rect_h / 4);
-   nvgStrokeColor( vg, nvgRGB(255, 255, 255)); // White line
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(x, y));
+   CGContextLineTo( context, CGPointMake(x, y + rect_h / 4));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 255, 255)); // White line
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
 
    x = rect_x + 0.5;
    y = rect_y + 1 * (rect_h / 4);
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, x, y);
-   nvgLineTo( vg, x, y + rect_h / 4);
-   nvgStrokeColor( vg, nvgRGB(255, 255, 255)); // White line
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(x, y));
+   CGContextLineTo( context, CGPointMake(x, y + rect_h / 4));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 255, 255)); // White line
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
 
-   nvgShapeAntiAlias( vg, NO);
+   CGContextShapeAntiAlias( context, NO);
    x = rect_x;
    y = rect_y + 2 * (rect_h / 4);
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, x, y);
-   nvgLineTo( vg, x, y + rect_h / 4);
-   nvgStrokeColor( vg, nvgRGB(255, 255, 255)); // White line
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(x, y));
+   CGContextLineTo( context, CGPointMake(x, y + rect_h / 4));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 255, 255)); // White line
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
 
    x = rect_x + 0.5;
    y = rect_y + 3 * (rect_h / 4);
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, x, y);
-   nvgLineTo( vg, x, y + rect_h / 4);
-   nvgStrokeColor( vg, nvgRGB(255, 255, 255)); // White line
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(x, y));
+   CGContextLineTo( context, CGPointMake(x, y + rect_h / 4));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 255, 255)); // White line
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
 
    return( NO);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -144,8 +141,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            0.0f));
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

@@ -6,36 +6,29 @@
 #import "import-private.h"
 
 #include <string.h>
-
-
-static char  *nvgHAlignmentUTF8String( int alignment)
+static char  *cgHAlignmentUTF8String( int alignment)
 {
-   switch( alignment & (CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight)) // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT
+   switch( alignment & (CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight)) // Converted from CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight
    {
-   case CGTextAlignLeft   : return( "CGTextAlignLeft"); // Converted from NVG_ALIGN_LEFT
-   case CGTextAlignCenter : return( "CGTextAlignCenter"); // Converted from NVG_ALIGN_CENTER
-   case CGTextAlignRight  : return( "CGTextAlignRight"); // Converted from NVG_ALIGN_RIGHT
+   case CGTextAlignLeft   : return( "CGTextAlignLeft"); // Converted from CGTextAlignLeft
+   case CGTextAlignCenter : return( "CGTextAlignCenter"); // Converted from CGTextAlignCenter
+   case CGTextAlignRight  : return( "CGTextAlignRight"); // Converted from CGTextAlignRight
    default               : return( "*invalid*");
    }
 }
-
-
-static char  *nvgVAlignmentUTF8String( int alignment)
+static char  *cgVAlignmentUTF8String( int alignment)
 {
-   switch( alignment & (CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline)) // Converted from NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE
+   switch( alignment & (CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline)) // Converted from CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline
    {
-   case CGTextAlignTop      : return( "CGTextAlignTop"); // Converted from NVG_ALIGN_TOP
-   case CGTextAlignMiddle   : return( "CGTextAlignMiddle"); // Converted from NVG_ALIGN_MIDDLE
-   case CGTextAlignBottom   : return( "CGTextAlignBottom"); // Converted from NVG_ALIGN_BOTTOM
-   case CGTextAlignBaseline : return( "CGTextAlignBaseline"); // Converted from NVG_ALIGN_BASELINE
+   case CGTextAlignTop      : return( "CGTextAlignTop"); // Converted from CGTextAlignTop
+   case CGTextAlignMiddle   : return( "CGTextAlignMiddle"); // Converted from CGTextAlignMiddle
+   case CGTextAlignBottom   : return( "CGTextAlignBottom"); // Converted from CGTextAlignBottom
+   case CGTextAlignBaseline : return( "CGTextAlignBaseline"); // Converted from CGTextAlignBaseline
    default                 : return( "*invalid*");
    }
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   // Delete: struct NVGcontext    *vg;
    CGFont               *font;
    CGRect               canvas;
    CGRect               rects[ 3][ 3];
@@ -49,7 +42,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    float                glyphBounds[ 4];
    float                bounds[ 4];
    CGPoint              origin;
-   NVGglyphPosition     positions[ 32];
+   CGGlyphPosition     positions[ 32];
    int                  i;
    int                  nGlyphs;
    CGPoint              adjust;
@@ -58,11 +51,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGContentMode        contentMode;
 
    frameNr   = [context numberOfFrames];
-   alignment = CGTextAlignCenter | CGTextAlignMiddle; // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE
+   alignment = CGTextAlignCenter | CGTextAlignMiddle; // Converted from CGTextAlignCenter | CGTextAlignMiddle
 
-   // Delete: vg     = CGContextGetNVGContext( context);
-   CGContextFontFace( context, "sans"); // Converted from nvgFontSize
-   CGContextFontSize( context, 32.0); // Converted from nvgFontSize
+   CGContextFontFace( context, "sans");
+   CGContextFontSize( context, 32.0);
 
    canvas = [layer canvas];
    canvas = CGRectInset( canvas, 4, 4);
@@ -78,13 +70,13 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          rect = rects[ y][ x];
          CGContextStrokeRectWithColor( context, rect, 1.0, CGColorMakeGray()); // Converted from mvgStrokeRectWithColor
 
-         CGContextSave( context); // Converted from nvgSave
+         CGContextSave( context);
          {
-            CGContextScissor( context, rect); // Converted from nvgScissor
+            CGContextScissor( context, rect);
 
             rect = CGRectInset( rect, 2, 2);
 
-            CGContextCombinedTextAlignment( context, alignment); // Converted from nvgTextAlign
+            CGContextCombinedTextAlignment( context, alignment);
 
             switch( y * 3 + x)
             {
@@ -101,17 +93,15 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             case 8 : contentMode = CGContentModeBottomRight; break;
             }
 
-            CGContextTextColor( context, CGColorMakeWithHSVA( (y * 3 + x) / 9.0, 1.0, 1.0, 1.0)); // Converted from nvgTextColor
-            CGContextTextBackgroundColor( context, CGColorMakeWhite()); // Converted from nvgTextBackgroundColor
+            CGContextTextColor( context, CGColorMakeWithHSVA( (y * 3 + x) / 9.0, 1.0, 1.0, 1.0));
+            CGContextTextBackgroundColor( context, CGColorMakeWhite());
             CGContextTextInRect( context, s, (size_t) -1, rect, contentMode, CGTextOptionAlignVisually); // Converted from mvgTextInRect
          }
-         CGContextRestore( context); // Converted from nvgRestore
+         CGContextRestore( context);
       }
    }
    return( YES);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -124,8 +114,6 @@ void   setupScene( UIWindow *window)
    [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -151,8 +139,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

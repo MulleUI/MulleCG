@@ -1,45 +1,39 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 static BOOL   precompile = YES;
 static BOOL   cache = YES;
 
-void   drawSplitRectWithHole( NVGcontext* vg, CGRect rect, CGFloat x, CGFloat radius)
+void   drawSplitRectWithHole( CGContext *context, CGRect rect, CGFloat x, CGFloat radius)
 {
     CGFloat y = CGRectGetMidY( rect);
     CGFloat angle = asinf( rect.size.height / (2 * radius));
 
-    nvgBeginPath(vg);
-    nvgMoveTo(vg, CGRectGetMinX( rect), CGRectGetMinY( rect));
-    nvgLineTo(vg, x - radius * cosf(angle), CGRectGetMinY( rect));
-    nvgArc(vg, x, y, radius, M_PI_f + angle, M_PI_f - angle, NVG_CCW);
-    nvgLineTo(vg, CGRectGetMinX( rect), CGRectGetMaxY( rect));
-    nvgLineTo(vg, CGRectGetMinX( rect), CGRectGetMinY( rect));
+    CGContextBeginPath( context);
+    CGContextMoveTo( context, CGPointMake(CGRectGetMinX( rect), CGRectGetMinY( rect)));
+    CGContextLineTo( context, CGPointMake(x - radius * cosf(angle), CGRectGetMinY( rect)));
+    CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( x, y), radius), CARadiansToAngle( M_PI_f + angle), -2 * angle);
+    CGContextLineTo( context, CGPointMake(CGRectGetMinX( rect), CGRectGetMaxY( rect)));
+    CGContextLineTo( context, CGPointMake(CGRectGetMinX( rect), CGRectGetMinY( rect)));
 
-    nvgMoveTo(vg, x + radius * cosf(angle), CGRectGetMinY( rect));
-    nvgLineTo(vg, CGRectGetMaxX( rect), CGRectGetMinY( rect));
-    nvgLineTo(vg, CGRectGetMaxX( rect), CGRectGetMaxY( rect));
-    nvgLineTo(vg, x + radius * cosf(angle), CGRectGetMaxY( rect));
-    nvgArc(vg, x, y, radius, angle, -angle, NVG_CCW);
-    nvgClosePath(vg);
+    CGContextMoveTo( context, CGPointMake(x + radius * cosf(angle), CGRectGetMinY( rect)));
+    CGContextLineTo( context, CGPointMake(CGRectGetMaxX( rect), CGRectGetMinY( rect)));
+    CGContextLineTo( context, CGPointMake(CGRectGetMaxX( rect), CGRectGetMaxY( rect)));
+    CGContextLineTo( context, CGPointMake(x + radius * cosf(angle), CGRectGetMaxY( rect)));
+    CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( x, y), radius), CARadiansToAngle( angle), -2 * angle);
+    CGContextClosePath( context);
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                  *context = _context;
-   struct NVGcontext          *vg;
    CGRect                     contentRect;
    CGRect                     rect;
    CGFloat                    hue;
    NSUInteger                 frameNr;
-   static struct NVGcontext   *pathContext;
+   static CGContext   *pathContext;
    NSUInteger                 i;
    CGFloat                    steps;
 
-   vg          = CGContextGetNVGContext( context);
    contentRect = CGRectInset( [layer canvas], 25, 25);
    rect        = CGSizePlaceInRect( CGSizeMake( 100, 100), contentRect, CGContentModeLeft);
 
@@ -53,7 +47,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       drawSplitRectWithHole( pathContext, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
       if( precompile)
       {
-         nvgPrecompilePath( pathContext);
+         // TODO: CGContextPrecompilePath( pathContext);
          MulleUICLog( "Precompile path");
       }
    }
@@ -64,19 +58,17 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    steps = (contentRect.size.width - CGRectGetMidX( rect) * 2.0) / (CGFloat) STEPS;
    for( i = 0; i < STEPS; i++)
    {
-      nvgTranslate( vg, steps, 0.0f);
+      CGContextTranslate( context, CGPointMake(steps, 0.0f));
       if( cache)
-         nvgCopyPath( vg, pathContext);
+         { /* TODO: CGContextCopyPath( context, pathContext); */ }
       else
-         drawSplitRectWithHole( vg, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
-      nvgStrokeColor( vg, CGColorMakeWithHSL( fmodf( hue + i / 100.0, 1.0), 1.0, 0.5));
-      nvgStrokeWidth( vg, 3.0);
-      nvgStroke( vg);
+         drawSplitRectWithHole( context, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
+      CGContextStrokeColor( context, CGColorMakeWithHSL( fmodf( hue + i / 100.0, 1.0), 1.0, 0.5));
+      CGContextStrokeWidth( context, 3.0);
+      CGContextStroke( context);
    }
    return( YES);
 }
-
-
 static void   usage( void)
 {
    fprintf( stderr, "\n"
@@ -92,8 +84,6 @@ static void   usage( void)
 "\n");
    exit( 1);
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -149,12 +139,8 @@ int   main( int argc, char *argv[])
    [window setFrameRateHz:60.0f];
    [window setFrameDelegate:[MulleUIPerf instance]];
    [app addWindow:window];
-
-
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

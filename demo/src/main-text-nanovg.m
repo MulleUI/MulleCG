@@ -1,141 +1,131 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
-static void   metricsDraw( struct NVGcontext *vg, float x, float y, float w, float fontSize)
+static void   metricsDraw( struct CGContext *context, float x, float y, float w, float fontSize)
 {
    float   ascender, descender, lineHeight;
 
       // Set the font size
-   nvgFontSize(vg, fontSize);
+   CGContextFontSize( context, fontSize);
 
    // Set text alignment to default left and baseline
-   nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE); // Reverted to original NVG_ALIGN_* constants
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Reverted to original NVG_ALIGN_* constants
 
-   nvgTextMetrics( vg, &ascender, &descender, &lineHeight);
+   CGContextTextMetrics( context, &ascender, &descender, &lineHeight);
 
    // Set the stroke color to gray and draw bounds markers
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
 
-   nvgMoveTo( vg, x, y -ascender);
-   nvgLineTo( vg, x + w, y -ascender);
+   CGContextMoveTo( context, CGPointMake(x, y -ascender));
+   CGContextLineTo( context, CGPointMake(x + w, y -ascender));
 
    // nvg descender is negative
-   nvgMoveTo( vg, x, y - descender);
-   nvgLineTo( vg, x + w, y - descender);
+   CGContextMoveTo( context, CGPointMake(x, y - descender));
+   CGContextLineTo( context, CGPointMake(x + w, y - descender));
 
-   nvgStrokeColor( vg, nvgRGB( 0, 64, 0)); // green color
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes( 0, 64, 0)); // green color
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
 
    mulle_printf( "font ascender,descender,lineHeight : %g %g %g\n", ascender, -descender, lineHeight);
 }
-
-
-static void   visualMetricsDraw( struct NVGcontext *vg, float x, float y, float w, float fontSize)
+static void   visualMetricsDraw( struct CGContext *context, float x, float y, float w, float fontSize)
 {
    float   ascender, descender, lineHeight;
 
       // Set the font size
-   nvgFontSize(vg, fontSize);
+   CGContextFontSize( context, fontSize);
 
    // Set text alignment to default left and baseline
-   nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE); // Reverted to original NVG_ALIGN_* constants
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Reverted to original NVG_ALIGN_* constants
 
-   nvgTextVisualMetrics( vg, &ascender, &descender, &lineHeight);
+   CGContextTextVisualMetrics( context, &ascender, &descender, &lineHeight);
 
    // Set the stroke color to gray and draw bounds markers
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
 
-   nvgMoveTo( vg, x, y -ascender);
-   nvgLineTo( vg, x + w, y -ascender);
+   CGContextMoveTo( context, CGPointMake(x, y -ascender));
+   CGContextLineTo( context, CGPointMake(x + w, y -ascender));
 
-   nvgMoveTo( vg, x, y - descender);
-   nvgLineTo( vg, x + w, y - descender);
+   CGContextMoveTo( context, CGPointMake(x, y - descender));
+   CGContextLineTo( context, CGPointMake(x + w, y - descender));
 
-   nvgStrokeColor( vg, nvgRGB( 0, 64, 0)); // green color
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes( 0, 64, 0)); // green color
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
 
    mulle_printf( "visual ascender,descender,lineHeight : %g %g %g\n", ascender, -descender, lineHeight);
 }
-
-
-static void   codyDraw( struct NVGcontext *vg, float x, float y, char *s, float fontSize, BOOL visual)
+static void   codyDraw( struct CGContext *context, float x, float y, char *s, float fontSize, BOOL visual)
 {
    // Set the font size
-   nvgFontSize(vg, fontSize);
+   CGContextFontSize( context, fontSize);
 
    // Set text alignment to default left and baseline
-   nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE); // Reverted to original NVG_ALIGN_* constants
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Reverted to original NVG_ALIGN_* constants
 
    // Measure the text bounds
    float bounds[6]= {0};
    if( visual)
-      nvgTextVisualBounds(vg, x, y, s, NULL, bounds);
+      CGContextTextVisualBounds( context, x, y, s, NULL, bounds);
    else
-      nvgTextBounds(vg, x, y, s, NULL, bounds);
+      CGContextTextBoundsInfo( context, x, y, s, NULL, bounds);
 
    // Calculate width and height of the text
    float textWidth = bounds[2] - bounds[0];
    float textHeight = bounds[3] - bounds[1];
 
    // draw strokes and fills w/o antialiasing
-   nvgShapeAntiAlias( vg, 1);
+   CGContextShapeAntiAlias( context, 1);
 
    // Set the background color to yellow and draw a rectangle covering the text area
-   nvgBeginPath(vg);
-   nvgRect(vg, bounds[0], bounds[1], textWidth, textHeight);
-   nvgFillColor(vg, nvgRGB(255, 255, 255)); // White color
-   nvgFill(vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake(bounds[0], bounds[1], textWidth, textHeight));
+   CGContextFillColor( context, CGColorMakeWithRGBBytes(255, 255, 255)); // White color
+   CGContextFill( context);
 
    if( visual)
    {
       // Set the stroke color to gray and draw bounds markers
-      nvgBeginPath( vg);
+      CGContextBeginPath( context);
 
-      nvgMoveTo( vg, bounds[0], bounds[4]);
-      nvgLineTo( vg, bounds[ 0] + textWidth, bounds[4]);
+      CGContextMoveTo( context, CGPointMake(bounds[0], bounds[4]));
+      CGContextLineTo( context, CGPointMake(bounds[ 0] + textWidth, bounds[4]));
 
-      nvgMoveTo( vg, bounds[ 0], bounds[5]);
-      nvgLineTo( vg, bounds[ 0] + textWidth, bounds[5]);
+      CGContextMoveTo( context, CGPointMake(bounds[ 0], bounds[5]));
+      CGContextLineTo( context, CGPointMake(bounds[ 0] + textWidth, bounds[5]));
 
-      nvgMoveTo( vg, bounds[ 0], y);
-      nvgLineTo( vg, bounds[ 0] + textWidth, y);
+      CGContextMoveTo( context, CGPointMake(bounds[ 0], y));
+      CGContextLineTo( context, CGPointMake(bounds[ 0] + textWidth, y));
 
-      nvgStrokeColor( vg, nvgRGB( 64, 64, 0)); // yellow color
-      nvgStrokeWidth( vg, 1.0);
-      nvgStroke( vg);
+      CGContextStrokeColor( context, CGColorMakeWithRGBBytes( 64, 64, 0)); // yellow color
+      CGContextStrokeWidth( context, 1.0);
+      CGContextStroke( context);
    }
 
    // Set the stroke color to red and draw a rectangle around the text
-   nvgBeginPath( vg);
-   nvgRect( vg, bounds[0] - 1, bounds[1] - 1, textWidth + 2, textHeight + 2);
-   nvgStrokeColor( vg, nvgRGB(255, 0, 0)); // Red color
-   nvgStrokeWidth( vg, 1.0);
-   nvgStroke( vg);
-
-
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake(bounds[0] - 1, bounds[1] - 1, textWidth + 2, textHeight + 2));
+   CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 0, 0)); // Red color
+   CGContextStrokeWidth( context, 1.0);
+   CGContextStroke( context);
    // Set the fill color to black and draw the 'y' character
-   nvgFillColor(vg, nvgRGB(0, 0, 0)); // Black color
-   nvgText(vg, x, y, s, NULL);
+   CGContextFillColor( context, CGColorMakeWithRGBBytes(0, 0, 0)); // Black color
+   CGContextText( context, x, y, s, NULL);
 
    mulle_printf( "textW/H : %g %g\n", textWidth, textHeight);
    mulle_printf( "bounds  : %g %g %g %g (%g %g)\n", bounds[ 0], bounds[ 1], bounds[ 2], bounds[ 3], bounds[ 4], bounds[ 5]);
 }
-
-
-static void codyDraw2(struct NVGcontext *vg, float x, float y, char *s, float fontSize) {
+static void codyDraw2(struct CGContext *context, float x, float y, char *s, float fontSize) {
     // Set the font size
-    nvgFontSize(vg, fontSize);
+    CGContextFontSize( context, fontSize);
 
     // Set text alignment to default left and baseline
-    nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE); // Reverted to original NVG_ALIGN_* constants
+    CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Reverted to original NVG_ALIGN_* constants
 
     // Measure the glyph positions
-    NVGglyphPosition glyphs[100]; // Assuming the string is not longer than 100 characters
-    int numGlyphs = nvgTextGlyphPositions(vg, x, y, s, NULL, glyphs, 100);
+    CGGlyphPosition glyphs[100]; // Assuming the string is not longer than 100 characters
+    int numGlyphs = CGContextTextGlyphPositions( context, x, y, s, NULL, glyphs, 100);
 
     // Calculate the bounding box from the glyph positions
     float minX = glyphs[0].x;
@@ -155,68 +145,60 @@ static void codyDraw2(struct NVGcontext *vg, float x, float y, char *s, float fo
     float textHeight = maxY - minY;
 
     // Draw strokes and fills without antialiasing
-    nvgShapeAntiAlias(vg, 0);
+    CGContextShapeAntiAlias( context, 0);
 
     // Set the background color to white and draw a rectangle covering the text area
-    nvgBeginPath(vg);
-    nvgRect(vg, minX, minY, textWidth, textHeight);
-    nvgFillColor(vg, nvgRGB(255, 255, 255)); // White color
-    nvgFill(vg);
+    CGContextBeginPath( context);
+    CGContextRect( context, CGRectMake(minX, minY, textWidth, textHeight));
+    CGContextFillColor( context, CGColorMakeWithRGBBytes(255, 255, 255)); // White color
+    CGContextFill( context);
 
     // Set the stroke color to red and draw a rectangle around the text
-    nvgBeginPath(vg);
-    nvgRect(vg, minX - 1, minY - 1, textWidth + 2, textHeight + 2);
-    nvgStrokeColor(vg, nvgRGB(255, 0, 0)); // Red color
-    nvgStrokeWidth(vg, 1.0);
-    nvgStroke(vg);
+    CGContextBeginPath( context);
+    CGContextRect( context, CGRectMake(minX - 1, minY - 1, textWidth + 2, textHeight + 2));
+    CGContextStrokeColor( context, CGColorMakeWithRGBBytes(255, 0, 0)); // Red color
+    CGContextStrokeWidth( context, 1.0);
+    CGContextStroke( context);
 
     // Set the fill color to black and draw the text
-    nvgFillColor(vg, nvgRGB(0, 0, 0)); // Black color
-    nvgText(vg, x, y, s, NULL);
+    CGContextFillColor( context, CGColorMakeWithRGBBytes(0, 0, 0)); // Black color
+    CGContextText( context, x, y, s, NULL);
 
    mulle_printf( "textW/H    : %g %g\n", textWidth, textHeight);
    mulle_printf( "minX/maxX  : %g %g\n", minX, maxX);
    mulle_printf( "minY/maxY  : %g %g\n", minY, maxY);
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
    float               fontSize;
    char                *text[] = { "y", "|", "`", "_" };
    NSUInteger          i, n;
 
-
-   vg = CGContextGetNVGContext( context);
-
    fontSize = 20.0;
 
-   metricsDraw( vg, 100 - 20, 50, 4 * (fontSize + fontSize / 2) + 20, fontSize);
+   metricsDraw( context, 100 - 20, 50, 4 * (fontSize + fontSize / 2) + 20, fontSize);
 
-   codyDraw( vg, 100 + 0 * (fontSize + fontSize / 2), 50, "y", fontSize, NO);
-   codyDraw( vg, 100 + 1 * (fontSize + fontSize / 2), 50, "|", fontSize, NO);
-   codyDraw( vg, 100 + 2 * (fontSize + fontSize / 2), 50, "`", fontSize, NO);
-   codyDraw( vg, 100 + 3 * (fontSize + fontSize / 2), 50, "_", fontSize, NO);
+   codyDraw( context, 100 + 0 * (fontSize + fontSize / 2), 50, "y", fontSize, NO);
+   codyDraw( context, 100 + 1 * (fontSize + fontSize / 2), 50, "|", fontSize, NO);
+   codyDraw( context, 100 + 2 * (fontSize + fontSize / 2), 50, "`", fontSize, NO);
+   codyDraw( context, 100 + 3 * (fontSize + fontSize / 2), 50, "_", fontSize, NO);
 
-   visualMetricsDraw( vg, 100 - 20, 125, 4 * (fontSize + fontSize / 2) + 20, fontSize);
+   visualMetricsDraw( context, 100 - 20, 125, 4 * (fontSize + fontSize / 2) + 20, fontSize);
 
-   codyDraw( vg, 100 + 0 * (fontSize + fontSize / 2), 125, "y", fontSize, YES);
-   codyDraw( vg, 100 + 1 * (fontSize + fontSize / 2), 125, "|", fontSize, YES);
-   codyDraw( vg, 100 + 2 * (fontSize + fontSize / 2), 125, "`", fontSize, YES);
-   codyDraw( vg, 100 + 3 * (fontSize + fontSize / 2), 125, "_", fontSize, YES);
+   codyDraw( context, 100 + 0 * (fontSize + fontSize / 2), 125, "y", fontSize, YES);
+   codyDraw( context, 100 + 1 * (fontSize + fontSize / 2), 125, "|", fontSize, YES);
+   codyDraw( context, 100 + 2 * (fontSize + fontSize / 2), 125, "`", fontSize, YES);
+   codyDraw( context, 100 + 3 * (fontSize + fontSize / 2), 125, "_", fontSize, YES);
 
-   metricsDraw( vg, 100 - 20, 200, 4 * (fontSize + fontSize / 2) + 20, fontSize);
+   metricsDraw( context, 100 - 20, 200, 4 * (fontSize + fontSize / 2) + 20, fontSize);
 
-   codyDraw2( vg, 100 + 0 * (fontSize + fontSize / 2), 200, "y", fontSize);
-   codyDraw2( vg, 100 + 1 * (fontSize + fontSize / 2), 200, "|", fontSize);
-   codyDraw2( vg, 100 + 2 * (fontSize + fontSize / 2), 200, "`", fontSize);
-   codyDraw2( vg, 100 + 3 * (fontSize + fontSize / 2), 200, "_", fontSize);
+   codyDraw2( context, 100 + 0 * (fontSize + fontSize / 2), 200, "y", fontSize);
+   codyDraw2( context, 100 + 1 * (fontSize + fontSize / 2), 200, "|", fontSize);
+   codyDraw2( context, 100 + 2 * (fontSize + fontSize / 2), 200, "`", fontSize);
+   codyDraw2( context, 100 + 3 * (fontSize + fontSize / 2), 200, "_", fontSize);
 
    return( NO);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -224,8 +206,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            0.0f));
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

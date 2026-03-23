@@ -1,8 +1,6 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 enum
 {
    LeftConvex   = 0x0,
@@ -11,7 +9,7 @@ enum
    RightConvave = 0x2
 };
 
-static void   drawRoundedStroke( CGContext *context, // Converted from struct NVGcontext *vg
+static void   drawRoundedStroke( CGContext *context, // Converted from struct CGContext *context
                                  CGRect rect,
                                  CGColor color,
                                  NSUInteger bits)
@@ -48,43 +46,38 @@ static void   drawRoundedStroke( CGContext *context, // Converted from struct NV
       ldir = CARotationDirectionCounterClockWise;
    }
 
-   CGContextBeginPath( context); // Converted from nvgBeginPath
+   CGContextBeginPath( context);
 
-   CGContextMoveTo( context, CGPointMake( rect.origin.x + offset, rect.origin.y)); // Converted from nvgMoveTo
+   CGContextMoveTo( context, CGPointMake( rect.origin.x + offset, rect.origin.y));
 
-   CGContextArcRadians( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + offset, rect.origin.y + radius), radius), // Converted from nvgArc
+   CGContextArcRadians( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + offset, rect.origin.y + radius), radius),
                                  startRadians,
                                  endRadians,
                                  ldir);
 
    // Draw the top edge of the rectangle to the beginning of the arc
-   CGContextLineTo( context, CGPointMake( rect.origin.x + rect.size.width - offset, // Converted from nvgLineTo
+   CGContextLineTo( context, CGPointMake( rect.origin.x + rect.size.width - offset,
                   rect.origin.y + rect.size.height));
    // Add a concave half circle on the right edge of the rectangle
-   CGContextArcRadians( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + rect.size.width, // Converted from nvgArc
+   CGContextArcRadians( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + rect.size.width,
                                  rect.origin.y + radius), radius),
                                  endRadians,
                                  startRadians,
                                  rdir);
-//   CGContextLineTo( context, CGPointMake( rect.origin.x, rect.origin.y)); // Converted from nvgLineTo
+//   CGContextLineTo( context, CGPointMake( rect.origin.x, rect.origin.y));
    // Draw the left edge of the rectangle
 
-   CGContextLineTo( context, CGPointMake( rect.origin.x + rect.size.width - offset, rect.origin.y)); // Converted from nvgLineTo
+   CGContextLineTo( context, CGPointMake( rect.origin.x + rect.size.width - offset, rect.origin.y));
 
-//   CGContextClosePath( context); // Converted from nvgClosePath
+//   CGContextClosePath( context);
    CGContextFillColor( context, color); // Converted from mvgFillColor
    CGContextFill( context); // Converted from mvgFill
-
-
    CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + offset, rect.origin.y), 2.0), CGColorMakeRed()); // Converted from mvgFillCircleWithColor
    CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( CGPointMake( rect.origin.x + offset, rect.origin.y + radius), 2.0), CGColorMakeBlue()); // Converted from mvgFillCircleWithColor
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                  *context = _context;
-   // Delete: struct NVGcontext          *vg;
    CGRect                     canvas;
    CGRect                     rect;
    struct MulleCornerInsets   insets;
@@ -99,7 +92,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    factor = ([context numberOfFrames] % 120) / 119.0;
    factor = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
-   // Delete: vg     = CGContextGetNVGContext( context);
    canvas = CGRectInset( [layer canvas], 25, 25);
    CGRectPartition2x2( canvas, CGSizeMake( 100, 50), rects);
 
@@ -131,8 +123,6 @@ int   main( int argc, char *argv[])
 
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

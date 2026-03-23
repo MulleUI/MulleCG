@@ -4,39 +4,25 @@
 
 #include <string.h>
 #include <time.h>
-
-
 static void   drawFilledRect( CGContext *context, CGRect rect, CGColor color)
 {
-   struct NVGcontext *vg = CGContextGetNVGContext( context);
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
-      nvgRect( vg, rect.origin.x,
-                   rect.origin.y,
-                   rect.size.width,
-                   rect.size.height);
-      nvgFillColor( vg, color);
+      CGContextRect( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
+      CGContextFillColor( context, color);
    }
-   nvgFill( vg);
+   CGContextFill( context);
 }
-
-
 static void   drawStrokedRect( CGContext *context, CGRect rect, CGColor color)
 {
-   struct NVGcontext *vg = CGContextGetNVGContext( context);
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    {
-      nvgRect( vg, rect.origin.x,
-                   rect.origin.y,
-                   rect.size.width,
-                   rect.size.height);
-      nvgStrokeWidth( vg, 1.0);
-      nvgStrokeColor( vg, color);
+      CGContextRect( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
+      CGContextStrokeWidth( context, 1.0);
+      CGContextStrokeColor( context, color);
    }
-   nvgStroke( vg);
+   CGContextStroke( context);
 }
-
-
 
 static char* cpToUTF8(int cp, char* str)
 {
@@ -58,20 +44,14 @@ static char* cpToUTF8(int cp, char* str)
    }
    return str;
 }
-
-
 static inline CGFloat   CGSizeGetMax( CGSize size)
 {
    return( size.width > size.height ? size.width : size.height);
 }
-
-
 static inline CGFloat   CGSizeGetMin( CGSize size)
 {
    return( size.width < size.height ? size.width : size.height);
 }
-
-
 static inline CGFloat   CGRectGetCornerRadiusValue( CGRect rect, CGFloat factor)
 {
    CGFloat   corner;
@@ -80,16 +60,12 @@ static inline CGFloat   CGRectGetCornerRadiusValue( CGRect rect, CGFloat factor)
    corner *= factor;
    return( corner);
 }
-
-
 // "inspired" by:
 //
 // https://www.vecteezy.com/vector-art/957623-modern-rounded-web-interface-buttons-set
 //
 static void   drawFancyButtonBackground( CGContext *context, CGRect rect, CGColor color1, CGColor color2)
 {
-   struct NVGcontext *vg = CGContextGetNVGContext( context);
-   NVGpaint   paint;
    CGFloat    corner;
 
    /*
@@ -98,30 +74,16 @@ static void   drawFancyButtonBackground( CGContext *context, CGRect rect, CGColo
 
    corner = CGRectGetCornerRadiusValue( rect, 0.5);
 
-   nvgBeginPath( vg);
-   nvgRoundedRect( vg, rect.origin.x,
-                       rect.origin.y,
-                       rect.size.width,
-                       rect.size.height,
-                       corner);
+   CGContextBeginPath( context);
+   CGContextRoundedRect( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height), corner);
 
-   paint = nvgLinearGradient( vg,
-                              CGRectGetMinX( rect),
-                              CGRectGetMinY( rect),
-                              CGRectGetMinX( rect),   // sic!, we dont want change across x
-                              CGRectGetMaxY( rect),
-                              color1,
-                              color2);
-   nvgFillPaint( vg, paint);
-   nvgFill( vg);
+   CGContextSetFillLinearGradient( context, CGPointMake( CGRectGetMinX( rect), CGRectGetMinY( rect)), CGPointMake( CGRectGetMinX( rect), CGRectGetMaxY( rect)), color1, color2);
+   CGContextFill( context);
+   CGContextFill( context);
 }
-
-
 
 static void   drawFancyButtonHighlight( CGContext *context, CGRect rect)
 {
-   struct NVGcontext *vg = CGContextGetNVGContext( context);
-   NVGpaint   paint;
    CGFloat    corner;
 
    /*
@@ -129,78 +91,43 @@ static void   drawFancyButtonHighlight( CGContext *context, CGRect rect)
     */
 
    corner = CGRectGetCornerRadiusValue( rect, 0.5);
-
-
-   nvgBeginPath( vg);
-   nvgRoundedRectVarying( vg, rect.origin.x,
-                              rect.origin.y,
-                              rect.size.width,
-                              rect.size.height,
-                              corner,
-                              corner,
-                              0.0,
-                              0.0);
+   CGContextBeginPath( context);
+   CGContextRoundedRectVarying( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height), MulleCornerInsetsMake( corner, corner, 0.0, 0.0));
 
    // now subtract the next rect to get a highlight shape
-   nvgPathWinding(vg, NVG_HOLE); // sets nvgRoundedRect as a hole
+   CGContextPathWinding( context, CGPathFillStyleHole); // sets nvgRoundedRect as a hole
 
-   nvgRoundedRectVarying( vg, rect.origin.x,
-                              rect.origin.y + 8,
-                              rect.size.width,
-                              rect.size.height - 8,
-                              corner,
-                              corner,
-                              0.0,
-                              0.0);
+   CGContextRoundedRectVarying( context, CGRectMake( rect.origin.x, rect.origin.y + 8, rect.size.width, rect.size.height - 8), MulleCornerInsetsMake( corner, corner, 0.0, 0.0));
 
-   paint = nvgLinearGradient( vg,
-                              CGRectGetMinX( rect),
-                              CGRectGetMinY( rect),
-                              CGRectGetMinX( rect),
-                              CGRectGetMinY( rect) + corner,
-                              CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.8),
-                              CGColorMakeTransparent());
-//   nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
-   nvgFillPaint( vg, paint);
-   nvgFill( vg);
+   CGContextSetFillLinearGradient( context, CGPointMake( CGRectGetMinX( rect), CGRectGetMinY( rect)), CGPointMake( CGRectGetMinX( rect), CGRectGetMinY( rect) + corner), CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.8), CGColorMakeTransparent());
+//   CGContextGlobalCompositeOperation( context, CGCompositeOperationLighter);
+   CGContextFill( context);
+   CGContextFill( context);
 }
-
-
 static void   drawFancyButtonLine( CGContext *context, CGRect rect, CGColor color)
 {
-   struct NVGcontext *vg = CGContextGetNVGContext( context);
    CGFloat    corner;
 
    corner = CGRectGetCornerRadiusValue( rect, 0.5);
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
 
-   nvgRoundedRect( vg, rect.origin.x,
-                       rect.origin.y,
-                       rect.size.width,
-                       rect.size.height,
-                       corner);
+   CGContextRoundedRect( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height), corner);
 
-   nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
-   nvgStrokeColor( vg, color);
-   nvgStrokeWidth( vg, 1.5);
-   nvgStroke( vg);
+   CGContextGlobalCompositeOperation( context, CGCompositeOperationSourceOver);
+   CGContextStrokeColor( context, color);
+   CGContextStrokeWidth( context, 1.5);
+   CGContextStroke( context);
 }
-
-
 static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 6])
 {
-   NVGpaint   paint;
    CGFloat    corner;
    CGRect     innerRect;
    CGRect     lineRect;
    CGRect     outerRect;
    CGRect     middleRect;
    CGFont     *font;
-
-   struct NVGcontext *vg = CGContextGetNVGContext( context);
-
-   nvgSave( vg);
+   CGContextSave( context);
    {
       /*
        * outer
@@ -228,7 +155,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
 
       // draw text
       // recognize that nvgText layout is somewhat broken, if using
-      // NVG_ALIGN_CENTER and NVG_ALIGN_RIGHT
+      // CGTextAlignCenter and CGTextAlignRight
       //
       char     icon[8];
       float    iw = 0;
@@ -271,41 +198,27 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
                                                MulleEdgeInsetsMake( 0, 8, 0, 0));
             drawStrokedRect( context, iconRect, CGColorMakeGray());
 
-            nvgBeginPath( vg);
-            nvgCircle( vg, CGRectGetMidX( iconRect), CGRectGetMidY( iconRect), iconRect.size.width / 2.0);
+            CGContextBeginPath( context);
+            CGContextCircle( context, CACircleMakeWithCenterAndRadius( CGPointMake( CGRectGetMidX( iconRect), CGRectGetMidY( iconRect)), iconRect.size.width / 2.0));
 #if 0
-            paint = nvgLinearGradient( vg,
-                                       CGRectGetMinX( iconRect),
-                                       CGRectGetMinY( iconRect),
-                                       CGRectGetMinX( iconRect),
-                                       CGRectGetMaxY( iconRect),
-                                       CGColorMakeWithRGBA( 0.6, 0.6, 0.6, 0.6),
-                                       CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.2));
+   CGContextSetFillLinearGradient( context, CGPointMake( CGRectGetMinX( iconRect), CGRectGetMinY( iconRect)), CGPointMake( CGRectGetMinX( iconRect), CGRectGetMaxY( iconRect)), CGColorMakeWithRGBA( 0.6, 0.6, 0.6, 0.6), CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.2));
 #else
-            paint = nvgRadialGradient( vg,
-                                       CGRectGetMidX( iconRect) - iconRect.size.width / 8.0,
-                                       CGRectGetMidY( iconRect) - iconRect.size.width / 8.0,
-                                       iconRect.size.width / 8.0,
-                                       iconRect.size.width / 2.0,
-                                       CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.6),
-                                       CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.2)),
+   CGContextSetFillRadialGradient( context, CACircleMakeWithCenterAndRadius( CGPointMake( CGRectGetMidX( iconRect) - iconRect.size.width / 8.0, CGRectGetMidY( iconRect) - iconRect.size.width / 8.0), iconRect.size.width / 2.0), CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.2), iconRect.size.width / 8.0, CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.6)),
 #endif
-            nvgFillPaint( vg, paint);
-            nvgFill( vg);
-            nvgStrokeColor( vg, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 0.8));
-            nvgStroke( vg);
+            CGContextFill( context);
+            CGContextFill( context);
+            CGContextStrokeColor( context, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 0.8));
+            CGContextStroke( context);
 
             iconRect = CGRectInset( iconRect, iconRect.size.width / 8.0, iconRect.size.width / 8.0);
 
-            nvgFontSize( vg, iconRect.size.height);
-            nvgFontFace( vg, "icons");
-
-
+            CGContextFontSize( context, iconRect.size.height);
+            CGContextFontFace( context, "icons");
             iconText = cpToUTF8( preicon, icon);
 
-            nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
-            nvgTextColor( vg, colors[ 3]);
-            nvgTextBackgroundColor( vg, CGColorMultiplyAlpha( colors[ 1], 0.2));
+            CGContextGlobalCompositeOperation( context, CGCompositeOperationLighter);
+            CGContextTextColor( context, colors[ 3]);
+            CGContextTextBackgroundColor( context, CGColorMultiplyAlpha( colors[ 1], 0.2));
             CGContextTextInRect( context, iconText,
                                (size_t) -1,
                                iconRect,
@@ -319,10 +232,10 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
          font = [context fontWithNameUTF8String:"sans"];
          assert( font);
 
-         nvgFontFace(vg, "sans");
-         nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
-         nvgTextColor( vg, CGColorMultiplyAlpha( colors[ 3], 0.9));
-         nvgTextBackgroundColor( vg, CGColorMultiplyAlpha( colors[ 1], 1.0));
+         CGContextFontFace( context, "sans");
+         CGContextGlobalCompositeOperation( context, CGCompositeOperationSourceOver);
+         CGContextTextColor( context, CGColorMultiplyAlpha( colors[ 3], 0.9));
+         CGContextTextBackgroundColor( context, CGColorMultiplyAlpha( colors[ 1], 1.0));
          CGContextTextInRect( context, text,
                             (size_t) -1,
                             CGRectInset( textRect, 4, 4),
@@ -331,10 +244,8 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
       }
       MulleLayoutDone( &layout);
    }
-   nvgRestore( vg);
+   CGContextRestore( context);
 }
-
-
 static void   drawButton( CALayer *layer, CGContext *context)
 {
    CGRect              canvas;
@@ -342,7 +253,6 @@ static void   drawButton( CALayer *layer, CGContext *context)
    CGRect              rect;
    NSUInteger          x, y;
    CGColor             colors[ 6];
-   NVGcontext          *vg;
 
    canvas = [layer canvas];
    canvas = CGRectInset( canvas, 16, 16);
@@ -360,11 +270,10 @@ static void   drawButton( CALayer *layer, CGContext *context)
          rect = CGRectIntegral( rects[ y][ x]);
          drawFancyButton( context, rect, colors);
 
-         vg = CGContextGetNVGContext( context);
-         nvgFontSize( vg, 14.0f);
-         nvgFontFace( vg, "sans");
-         nvgTextColor( vg, CGColorMakeWhite());
-         nvgTextBackgroundColor( vg, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 1.0));
+         CGContextFontSize( context, 14.0f);
+         CGContextFontFace( context, "sans");
+         CGContextTextColor( context, CGColorMakeWhite());
+         CGContextTextBackgroundColor( context, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 1.0));
          CGContextTextInRect( context, CGRectUTF8String( rect),
                         (size_t) -1,
                         CGRectPlaceBelowRect( rect, 0.0, 16.0f),
@@ -372,8 +281,6 @@ static void   drawButton( CALayer *layer, CGContext *context)
                         0);
       }
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -384,8 +291,6 @@ void   setupScene( UIWindow *window)
    [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawButton];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow         *window;
@@ -405,10 +310,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

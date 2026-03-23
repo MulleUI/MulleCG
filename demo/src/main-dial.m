@@ -4,8 +4,6 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 static inline void mvgRoundedSector(CGContext *context, // Changed parameter type
                                     CACircle innerCircle,
                                     CACircle outerCircle,
@@ -50,15 +48,11 @@ static inline void mvgRoundedSector(CGContext *context, // Changed parameter typ
 //   reducedStartAngle = CAAngleSubtractRadians( startAngle, deltaAngleInner);
 //   compensatedInnerStart = CACirclePointAtAngle( innerCircle, increasedEndAngle);
 //   compensatedOuterStart = CACirclePointAtAngle( outerCircle, increasedStartAngle);
-
-
    reducedInnerEndAngle   = CAAngleSubtractRadians( endAngle, deltaAngleInner);
    reducedOuterEndAngle   = CAAngleSubtractRadians( endAngle, deltaAngleOuter);
 
 //   increasedInnerEndAngle = CAAngleAddRadians( endAngle, deltaAngleInner);
 //   increasedOuterEndAngle = CAAngleAddRadians( endAngle, deltaAngleOuter);
-
-
    innerEnd            = CACirclePointAtAngle( innerCircle, endAngle);
    outerEnd            = CACirclePointAtAngle( outerCircle, endAngle);
    middleEnd           = CACirclePointAtAngle( midCircle, endAngle);
@@ -102,23 +96,19 @@ static inline void mvgRoundedSector(CGContext *context, // Changed parameter typ
        CGContextLineTo( context, middleStart); // Converted from mvgLineTo
    CGContextArcTo( context, outerStart, compensatedOuterStart, outerCornerRadius); // Converted from mvgArcTo
 
-   CGContextArcRadians( context, outerCircle, increasedOuterStartAngle, reducedOuterEndAngle, CARotationDirectionClockWise); // Converted from mvgArc
+   CGContextArc( context, outerCircle, increasedOuterStartAngle, reducedOuterEndAngle - increasedOuterStartAngle);
 
    CGContextArcTo( context, outerEnd, middleEnd, outerCornerRadius); // Converted from mvgArcTo
    if( outerCornerRadius < halfDistance)
        CGContextLineTo( context, middleEnd); // Converted from mvgLineTo
    CGContextArcTo( context, innerEnd, compensatedInnerEnd, innerCornerRadius); // Converted from mvgArcTo
 
-   CGContextArcRadians( context, innerCircle, reducedInnerEndAngle, increasedInnerStartAngle, CARotationDirectionCounterClockWise); // Converted from mvgArc
+   CGContextArc( context, innerCircle, reducedInnerEndAngle, increasedInnerStartAngle - reducedInnerEndAngle);
 
 #if 0
    CGContextClosePath( context); // Converted from mvgClosePath
 #endif
 }
-
-
-
-
 
 static void   drawDial( CGContext *context, // Changed parameter type
                         CGRect rect,
@@ -128,16 +118,12 @@ static void   drawDial( CGContext *context, // Changed parameter type
                         CGFloat fill,
                         CGColor color)
 {
-// Delete:   struct NVGcontext   *vg;
    CACircle            outerCircle;
    CACircle            innerCircle;
    CGPoint             startPoint;
    CGPoint             endPoint;
    CGFloat             space;
    CGFloat             radians;
-
-// Delete:   vg          = CGContextGetNVGContext( context);
-
    outerCircle = CGRectGetInnerCircle( rect);
    innerCircle = CACircleInset( outerCircle, width);
 
@@ -166,8 +152,8 @@ static void   drawDial( CGContext *context, // Changed parameter type
    mvgRoundedSector( context, innerCircle, outerCircle, startAngle, endAngle, 10.0); // Changed function call
 #else
    CGContextBeginPath( context); // Converted from mvgBeginPath
-   CGContextArc( context, innerCircle, startAngle, endAngle, NVG_CW); // Converted from mvgArc
-   CGContextArc( context, outerCircle, endAngle, startAngle, NVG_CCW); // Converted from mvgArc
+   CGContextArc( context, innerCircle, startAngle, endAngle - startAngle);
+   CGContextArc( context, outerCircle, endAngle, startAngle - endAngle);
    CGContextClosePath( context); // Converted from mvgClosePath
 #endif
 //   CGContextFillWithColor( context, CGColorMakeLightGray()); // Converted from mvgFillWithColor
@@ -176,17 +162,13 @@ static void   drawDial( CGContext *context, // Changed parameter type
    CGContextStroke( context);
 }
 
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-// Delete:   struct NVGcontext   *vg;
    CGRect              canvas;
    CGRect              rect;
    CGFloat             percentage;
 
-// Delete:   vg     = CGContextGetNVGContext( context);
    canvas = CGSizePlaceInRect( CGSizeMake( 400, 200), [layer canvas], CGContentModeCenterPoint);
    rect   = CGRectIntegral( canvas);
 
@@ -198,8 +180,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    return( YES);
 }
 
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -207,8 +187,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            60.0f));
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

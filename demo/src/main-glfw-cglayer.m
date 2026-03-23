@@ -19,7 +19,7 @@
 #define H   64
 #define S   4     // stroke width of circle
 
-static void   draw( struct NVGcontext *vg)
+static void   draw( struct CGContext *context)
 {
 #ifdef _CGLMACRO_H
    CGLContextObj  cgl_ctx = CGLGetCurrentContext();
@@ -32,23 +32,21 @@ static void   draw( struct NVGcontext *vg)
    // glViewport and nvgBeginFrame are usually done by
    // -[CGContext beginRender],
    glViewport( 0, 0, W, H);
-   nvgBeginFrame( vg, W, H, 1.0);
+   CGContextBeginFrame( context, CGSizeMake( W, H), 1.0);
    {
-      nvgBeginPath( vg);
+      CGContextBeginPath( context);
       {
-         nvgCircle( vg, W / 2.0 ,H / 2.0, W / 2.0 - S / 2.0);
-         nvgStrokeColor( vg, CGColorMakeWithRGB( 0.85f, 0.85f, 0.85f));
-         nvgStrokeWidth( vg, S);
+         CGContextCircle( context, CACircleMakeWithCenterAndRadius( CGPointMake( W / 2.0, H / 2.0), W / 2.0 - S / 2.0));
+         CGContextStrokeColor( context, CGColorMakeWithRGB( 0.85f, 0.85f, 0.85f));
+         CGContextStrokeWidth( context, S);
       }
-      nvgStroke( vg);
+      CGContextStroke( context);
    }
 
    // nvgEndFrame is usually done by -[CGContext endRender]
    // it flushes the accumulated draw commands into the framebuffer
-   nvgEndFrame( vg);
+   CGContextEndFrame( context);
 }
-
-
 
 int   main( int argc, char *argv[])
 {
@@ -115,7 +113,7 @@ int   main( int argc, char *argv[])
          [cgLayer _bindToContext];
 
          // some OpenGL and NanoVG code to draw something
-         draw( CGContextGetNVGContext( context));
+         draw( context);
 
          // afterwards we can read the contents, here we dump the with
          // mulle_rgba_dump into a BMP file named dump-0000.bmp
@@ -133,10 +131,6 @@ int   main( int argc, char *argv[])
 
    return( 0);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
@@ -172,8 +166,6 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-
 
 // #1#
 // it isn't really, it's an implicit

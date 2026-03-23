@@ -4,8 +4,6 @@
 
 #include <string.h>
 #include <time.h>
-
-
 //
 // This demo was used to debug CGGradientNVGpaintForRect, so that the
 // rotation of the linear gradient looks smooth
@@ -19,7 +17,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect              rect;
    CGRect              rects[ 3][ 3];
    char                buf[ 128];
-   NVGpaint            paint;
    unsigned int        i, j;
    NSUInteger          frameNr;
    double              x;
@@ -51,15 +48,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
 
    canvas = [layer canvas];
-   // Delete: vg     = CGContextGetNVGContext( context);
 
-   CGContextBeginPath( context); // Converted from nvgBeginPath
+   CGContextBeginPath( context);
    {
       CGContextRect( context, canvas); // Converted from mvgRect
       CGContextStrokeWidth( context, 8); // Converted from mvgStrokeWidth
       CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF)); // Converted from mvgStrokeColor
    }
-   CGContextStroke( context); // Converted from nvgStroke
+   CGContextStroke( context);
 
    CGRectPartition3x3( CGRectInset( canvas, 50, 50), CGSizeMake( 75, 75), rects);
 
@@ -108,8 +104,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
    return( YES);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -120,8 +114,6 @@ void   setupScene( UIWindow *window)
    [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow         *window;
@@ -142,10 +134,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

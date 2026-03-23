@@ -4,8 +4,6 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 #define MIN_HEIGHT   5
 #define MAX_HEIGHT   100
 #define LOOP         1
@@ -59,7 +57,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    useClearType = factor >= 0.5f;
    CGContextClearType( context, useClearType);
 
-   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from CGTextAlignLeft | CGTextAlignBaseline
    CGContextTextColor( context, TEXT_COLOR);
 
    for( height = MIN_HEIGHT;; height = height >= MAX_HEIGHT ? MAX_HEIGHT : height + 1)
@@ -105,8 +103,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    if( argc > 1)
@@ -116,8 +112,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            5.0f));
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

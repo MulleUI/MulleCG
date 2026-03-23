@@ -3,12 +3,8 @@
 #import "import-private.h"
 
 #import <string.h>
-
-
 #define PARTICLE_COUNT  10000
 #define PARTICLE_SIZE   10
-
-
 #define STROKE          0
 #define FILL            1
 
@@ -61,8 +57,6 @@
    CGColor   color;
 }
 @end
-
-
 @implementation ParticleLayer
 
 - (instancetype) initWithFrame:(CGRect) frame
@@ -92,9 +86,7 @@
    self->color = CGColorMakeWithRGB( r, g, b);
    return( self);
 }
-
-
-static inline void   ParticleDraw( ParticleLayer *p, NVGcontext *vg)
+static inline void   ParticleDraw( ParticleLayer *p, CGContext *context)
 {
    CGFloat   size;
 
@@ -104,27 +96,20 @@ static inline void   ParticleDraw( ParticleLayer *p, NVGcontext *vg)
    size = PARTICLE_SIZE;
 #endif
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
 #if CIRCLE
-   nvgCircle( vg, p->location.x,
-                  p->location.y,
-                  size);
+   CGContextCircle( context, CACircleMakeWithCenterAndRadius( CGPointMake( p->location.x, p->location.y), size));
 #else
-   nvgRect( vg, p->location.x,
-                p->location.y,
-                size,
-                size);
+   CGContextRect( context, CGRectMake( p->location.x, p->location.y, size, size));
 #endif
 #if DRAW_METHOD == STROKE
-   nvgStrokeColor( vg, p->color);
-   nvgStroke( vg);
+   CGContextStrokeColor( context, p->color);
+   CGContextStroke( context);
 #else
-   nvgFillColor( vg, p->color);
-   nvgFill( vg);
+   CGContextFillColor( context, p->color);
+   CGContextFill( context);
 #endif
 }
-
-
 static inline void   ParticleUpdate( ParticleLayer *p, CGSize canvasSize)
 {
    p->location.x += p->velocity.dx;
@@ -135,49 +120,43 @@ static inline void   ParticleUpdate( ParticleLayer *p, CGSize canvasSize)
   if (p->location.y < 0 || p->location.y > canvasSize.height)
      p->velocity.dy = -p->velocity.dy;
 }
-
-
 - (BOOL) drawInContext:(CGContext *) context
 {
-   NVGcontext   *vg;
    CGRect       canvas;
    NSUInteger   i;
 
    if( ! [super drawInContext:context])
       return( NO);
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [self canvas];
 
-   nvgShapeAntiAlias( vg, SHAPE_ANTIALIAS);
+   CGContextShapeAntiAlias( context, SHAPE_ANTIALIAS);
 
 //enum NVGcompositeOperation {
-//	NVG_SOURCE_OVER,
-//	NVG_SOURCE_IN,          // saturate to black ?
-//	NVG_SOURCE_OUT,         // flitter
-//	NVG_ATOP,               // normaaahl
-//	NVG_DESTINATION_OVER,   // schwarz
-//	NVG_DESTINATION_IN,     // schwarz
-//	NVG_DESTINATION_OUT,    // schwarz vom hintergrund
-//	NVG_DESTINATION_ATOP,   // kleiner flitter
-//	NVG_LIGHTER,   // brightness --> saturate to white
-//	NVG_COPY,   // rahmen effect
-//	NVG_XOR,    // flitter effect
+//	CGCompositeOperationSourceOver,
+//	CGCompositeOperationSourceIn,          // saturate to black ?
+//	CGCompositeOperationSourceOut,         // flitter
+//	CGCompositeOperationAtop,               // normaaahl
+//	CGCompositeOperationDestinationOver,   // schwarz
+//	CGCompositeOperationDestinationIn,     // schwarz
+//	CGCompositeOperationDestinationOut,    // schwarz vom hintergrund
+//	CGCompositeOperationDestinationAtop,   // kleiner flitter
+//	CGCompositeOperationLighter,   // brightness --> saturate to white
+//	CGCompositeOperationCopy,   // rahmen effect
+//	CGCompositeOperationXOR,    // flitter effect
 //};
 
-   // nvgGlobalCompositeOperation( vg, NVG_ATOP);
+   // CGContextGlobalCompositeOperation( context, CGCompositeOperationAtop);
 
-   nvgStrokeWidth( vg, PARTICLE_SIZE / 4);
+   CGContextStrokeWidth( context, PARTICLE_SIZE / 4);
 
    ParticleUpdate( self, canvas.size);
-   ParticleDraw( self, vg);
+   ParticleDraw( self, context);
 
    return( YES);
 }
 
 @end
-
-
 
 void   setupSceneInView( UIView *contentView)
 {
@@ -192,8 +171,6 @@ void   setupSceneInView( UIView *contentView)
       [contentView addLayer:layer];
    }
 }
-
-
 int   main()
 {
    UIWindow       *window;
@@ -215,8 +192,6 @@ int   main()
 
    return( [app runApp]);
 }
-
-
 
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,

@@ -17,11 +17,6 @@
 
 #include "_MulleCG-include-private.h"
 
-/* You can add some more include statements here */
-
-#include "_MulleCGBackend.h"
-
-#include "nanovg_gl.h"
-#include "nanovg_gl_utils.h"
+/* You can add more include statements here */
 
 #endif

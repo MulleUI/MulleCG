@@ -4,8 +4,6 @@
 
 #include <string.h>
 #include <time.h>
-
-
 static CABasicAnimation   *animation;
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
@@ -17,7 +15,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect              rect;
    CGRect              rects[ 3][ 3];
    char                buf[ 128];
-   struct NVGcontext   *vg;
    unsigned int        i, j;
    NSUInteger          frameNr;
 
@@ -43,7 +40,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
               : 0.25f;
 
    canvas = [layer canvas];
-   vg     = CGContextGetNVGContext( context);
 
    CGContextBeginPath( context);
    {
@@ -103,8 +99,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
    return( YES);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -115,8 +109,6 @@ void   setupScene( UIWindow *window)
    [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow         *window;
@@ -137,10 +129,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
@@ -176,5 +164,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

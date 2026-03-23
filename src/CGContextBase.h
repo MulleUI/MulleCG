@@ -1,13 +1,9 @@
 //
 // Copyright (c) 2023 Nat!, Mulle kybernetiK
 //
-#ifdef __has_include
-# if __has_include( "NSObject.h")
-#  import "NSObject.h"
-# endif
-#endif
-
 #import "import.h"
+
+#include "CGBackend.h"
 
 // CGGraphicsContextProvideris a `id <UIOSWindow>` usually, but we don't know.
 // We also don't know how to activate the context (though we could), but the
@@ -15,8 +11,6 @@
 // that for us
 //
 
-
-struct NVGcontext;
 
 
 
@@ -30,10 +24,11 @@ struct NVGcontext;
 //
 @interface CGContextBase : MulleObject < MulleUIResourceMap, MulleUINamedObject>
 {
-   struct NVGcontext               *_vg;
+   struct CGBackend                _cgBackend;   // context at offset 0; functions follow (backend-defined)
 
    struct MulleUIResourceStorage   _resourceStorage;
-   int                             _nvgFlags; // used for nvgCreate
+   NSUInteger                      _backendFlags;      // backend-specific flags (e.g. nvgCreate flags)
+   void                            *_backendDevicePointer;  // D3D11/Vulkan/Metal device (nil for OpenGL)
    mulle_atomic_pointer_t          _atomicState;
 }
 
@@ -63,27 +58,38 @@ struct NVGcontext;
 // and preferably only do pointer comparisons
 - (NSThread *) activeThread                            MULLE_OBJC_THREADSAFE_METHOD;
 
-- (struct NVGcontext *) nvgContext;
+- (void *) backendContext;
 
 @end
 
 
 //
-// use these functions, during rendering where we assume self->_vg is not
+// use these functions during rendering where we assume _cgBackend.context is not
 // suddenly changed by someone
 //
 MULLE_C_CONST_RETURN
-static inline struct NVGcontext   *CGContextBaseGetNVGContext( CGContextBase *self)
+static inline void   *CGContextBaseGetBackendContext( CGContextBase *self)
 {
    if( ! self)
       return( NULL);
-   return( ((struct{ @defs( CGContextBase); } *) self)->_vg);
+   return( ((struct{ @defs( CGContextBase); } *) self)->_cgBackend.context);
 }
 
+MULLE_C_CONST_RETURN
+static inline void   *_CGContextBaseGetBackendContext( CGContextBase *self)
+{
+   return( ((struct{ @defs( CGContextBase); } *) self)->_cgBackend.context);
+}
 
 MULLE_C_CONST_RETURN
-static inline struct NVGcontext   *_CGContextBaseGetNVGContext( CGContextBase *self)
+static inline struct CGFunctionTable *_CGContextBaseGetFunctionTable( CGContextBase *self)
 {
-   return( ((struct{ @defs( CGContextBase); } *) self)->_vg);
+   return( &((struct{ @defs( CGContextBase); } *) self)->_cgBackend.functions);
+}
+
+MULLE_C_CONST_RETURN
+static inline struct CGBackendFunctionTable *_CGContextBaseGetBackendFunctionTable( CGContextBase *self)
+{
+   return( &((struct{ @defs( CGContextBase); } *) self)->_cgBackend.backendFunctions);
 }
 

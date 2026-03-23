@@ -1,7 +1,6 @@
 //
 // Copyright (c) <|YEAR|> Nat!, Mulle kybernetiK
 //
-// prefer a local CGPaint over one in import.h
 #ifdef __has_include
 # if __has_include( "CGPaint.h")
 #  import "CGPaint.h"
@@ -39,6 +38,19 @@
 // will use linear gradients, these functions may be somewhat
 // cheaper than using a CGGradient
 //
+void   CGContextFillGradientColors( CGContext *context,
+                                    CGRect rect,
+                                    CGColor startColor,
+                                    CGColor endColor,
+                                    CGFloat colorRotation);
+
+void   CGContextStrokeGradientColors( CGContext *context,
+                                      CGRect rect,
+                                      CGColor startColor,
+                                      CGColor endColor,
+                                      CGFloat colorRotation,
+                                      CGFloat strokeWidth);
+
 void   CGContextFillRoundedRectWithGradientColors( CGContext *context,
                                                    CGRect rect,
                                                    CGFloat cornerRadius,

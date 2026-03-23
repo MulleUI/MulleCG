@@ -1,12 +1,8 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 #define ROWS   8
 #define COLS   10
-
-
 static void   drawGridInRect( CGContext  *context, CGRect rect)
 {
 #define B   { 0xF8, 0xF8, 0xF8, 0xFF }
@@ -34,11 +30,8 @@ static void   drawGridInRect( CGContext  *context, CGRect rect)
            options:NULL
            context:context];
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
    CGRect              canvas;
    CGRect              rows[ ROWS];
    CGRect              subrows[ 3];
@@ -52,9 +45,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    NSUInteger          j;
    CGColor             colors[ 2];
    CGImage             *image;
-
-   vg = CGContextGetNVGContext( context);
-
    canvas = [layer canvas];
 
    drawGridInRect( context, canvas);
@@ -101,8 +91,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -110,10 +98,6 @@ int   main( int argc, char *argv[])
                                            NULL, 
                                            0.1f));   
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

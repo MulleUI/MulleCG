@@ -1,12 +1,8 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 #define AntiAlias  1
 #define Thick      2
-
-
 
 // MEMO: this is just a test to see how one can draw many bordered rectangles
 //       efficiently, without having to use intermediate textures.
@@ -23,7 +19,7 @@
 #define drawRectColorOrderedFill     1  // 171-174 fps
 
 // ca. 48-50fps
-static void   strokeRect1( struct NVGcontext *vg,
+static void   strokeRect1( struct CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
@@ -31,53 +27,47 @@ static void   strokeRect1( struct NVGcontext *vg,
 {
    rect = CGRectMakeStrokeRect( rect, strokeWidth, CGInside);
 
-   nvgBeginPath( vg);
-   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-   nvgStrokeColor( vg, color);
-   nvgStrokeWidth( vg, strokeWidth);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, rect);
+   CGContextStrokeColor( context, color);
+   CGContextStrokeWidth( context, strokeWidth);
+   CGContextStroke( context);
 }
-
-
 // ca. 66 fps
-static void   strokeRect2( struct NVGcontext *vg,
+static void   strokeRect2( struct CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
                            CGFloat strokeWidth)
 {
-   nvgBeginPath( vg);
-   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-   nvgFillColor( vg, color);
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, rect);
+   CGContextFillColor( context, color);
+   CGContextFill( context);
 
    rect = CGRectInset( rect, strokeWidth, strokeWidth);
-   nvgBeginPath( vg);
-   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-   nvgFillColor( vg, backgroundColor);
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, rect);
+   CGContextFillColor( context, backgroundColor);
+   CGContextFill( context);
 }
-
-
 // ca. 39-40 fps
-static void   strokeRect3( struct NVGcontext *vg,
+static void   strokeRect3( struct CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
                            CGFloat strokeWidth)
 {
-   nvgBeginPath( vg);
-   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+   CGContextBeginPath( context);
+   CGContextRect( context, rect);
    rect = CGRectInset( rect, strokeWidth, strokeWidth);
-   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-   nvgPathWinding( vg, NVG_HOLE); // affect last nvgRect
-   nvgFillColor( vg, color);
-   nvgFill( vg);
+   CGContextRect( context, rect);
+   CGContextPathWinding( context, CGPathFillStyleHole); // affect last nvgRect
+   CGContextFillColor( context, color);
+   CGContextFill( context);
 }
-
-
 // ca. 47-49 fps
-static void   strokeRect4( struct NVGcontext *vg,
+static void   strokeRect4( struct CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
@@ -86,40 +76,32 @@ static void   strokeRect4( struct NVGcontext *vg,
 
    rect = CGRectMakeStrokeRect( rect, strokeWidth, CGInside);
 
-   nvgBeginPath( vg);
-   nvgMoveTo( vg, CGRectGetMinX( rect), CGRectGetMinY( rect));
-   nvgLineTo( vg, CGRectGetMaxX( rect), CGRectGetMinY( rect));
-   nvgLineTo( vg, CGRectGetMaxX( rect), CGRectGetMaxY( rect));
-   nvgLineTo( vg, CGRectGetMinX( rect), CGRectGetMaxY( rect));
-   nvgClosePath( vg);
-   nvgStrokeColor( vg, color);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextMoveTo( context, CGPointMake(CGRectGetMinX( rect), CGRectGetMinY( rect)));
+   CGContextLineTo( context, CGPointMake(CGRectGetMaxX( rect), CGRectGetMinY( rect)));
+   CGContextLineTo( context, CGPointMake(CGRectGetMaxX( rect), CGRectGetMaxY( rect)));
+   CGContextLineTo( context, CGPointMake(CGRectGetMinX( rect), CGRectGetMaxY( rect)));
+   CGContextClosePath( context);
+   CGContextStrokeColor( context, color);
+   CGContextStroke( context);
 }
-
-
 // here we just fill a rect for reference
 // ca. 125-127 fps
-static void   fillRect( struct NVGcontext *vg,
+static void   fillRect( struct CGContext *context,
                         CGRect rect,
                         CGColor color,
                         CGColor backgroundColor,
                         CGFloat strokeWidth)
 {
-   nvgBeginPath( vg);
-   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-   nvgFillColor( vg, color);
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, rect);
+   CGContextFillColor( context, color);
+   CGContextFill( context);
 }
-
-
-
-
 static inline NSUInteger  getColorIndex( NSUInteger i, NSUInteger j)
 {
    return ((j & 1) << 1) | (i & 1);
 }
-
-
 static inline CGColor  getColor( NSUInteger i, NSUInteger j)
 {
    switch( getColorIndex( i, j))
@@ -130,16 +112,12 @@ static inline CGColor  getColor( NSUInteger i, NSUInteger j)
    default : return( CGColorMakeRed());
    }
 }
-
-
 static struct
 {
    CGPoint       origin;
    CADirection   direction;
    CGFloat       energy;
 } muncher;
-
-
 static CGRect   munch( CGRect rect, NSUInteger i, NSUInteger j)
 {
    NSUInteger   colorIndex;
@@ -208,11 +186,8 @@ static CGRect   munch( CGRect rect, NSUInteger i, NSUInteger j)
    return( CGRectInset( rect, -4, -4));
 }
 
-
-
 static void   drawRectColor( CALayer *layer, CGContext *context, NSUInteger mode)
 {
-   struct NVGcontext   *vg;
    CGRect              canvas;
    CGRect              rect;
    CGFloat             strokeWidth;
@@ -221,24 +196,23 @@ static void   drawRectColor( CALayer *layer, CGContext *context, NSUInteger mode
    CGColor             color;
    NSUInteger          colorIndex;
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
 
    strokeWidth = 1.5;
-   nvgStrokeWidth( vg, strokeWidth);
+   CGContextStrokeWidth( context, strokeWidth);
 
    wh = CGSizeMake( floorf( canvas.size.width / 100.0),
                     floorf( canvas.size.height / 70.0));
    for( j = 0; j < 70; j++)
    {
-      nvgShapeAntiAlias( vg, j >= 35);
+      CGContextShapeAntiAlias( context, j >= 35);
       for( i = 0; i < 100; i++)
       {
          rect       = CGRectMake( i * wh.width, j * wh.height, wh.width, wh.height);
          rect       = CGRectInset( rect, 1, 1);
          rect       = munch( rect, i, j);
          color      = getColor( i, j);
-         TestRectDrawFunction( vg, rect, color, CGColorMakeWhite(), strokeWidth);
+         TestRectDrawFunction( context, rect, color, CGColorMakeWhite(), strokeWidth);
       }
    }
 }
@@ -247,7 +221,6 @@ static void   drawRectColor( CALayer *layer, CGContext *context, NSUInteger mode
 // can't turn on/off ShapeAntiAlias here because we are producing one big mesh
 static void   drawRectColorOrdered( CALayer *layer, CGContext *context, NSUInteger mode)
 {
-   struct NVGcontext    *vg;
    CGRect               canvas;
    CGRect               rect;
    CGFloat              strokeWidth;
@@ -256,11 +229,10 @@ static void   drawRectColorOrdered( CALayer *layer, CGContext *context, NSUInteg
    CGColor              color;
    CGColor              colors[ 4];
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
 
    strokeWidth = 1.5;
-   nvgStrokeWidth( vg, strokeWidth);
+   CGContextStrokeWidth( context, strokeWidth);
 
    wh = CGSizeMake( floorf( canvas.size.width / 100.0),
                     floorf( canvas.size.height / 70.0));
@@ -271,7 +243,7 @@ static void   drawRectColorOrdered( CALayer *layer, CGContext *context, NSUInteg
    colors[ 3] = CGColorMakeRed();
    for( k = 0; k < 4; k++)
    {
-      nvgBeginPath( vg);
+      CGContextBeginPath( context);
       for( j = 0; j < 70; j++)
       {
          for( i = 0; i < 100; i++)
@@ -283,26 +255,23 @@ static void   drawRectColorOrdered( CALayer *layer, CGContext *context, NSUInteg
             rect = CGRectInset( rect, 1, 1);
             rect = munch( rect, i, j);
             rect = CGRectMakeStrokeRect( rect, strokeWidth, CGInside);
-            nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+            CGContextRect( context, rect);
          }
       }
-      nvgShapeAntiAlias( vg, 1);
+      CGContextShapeAntiAlias( context, 1);
 #if drawRectColorOrderedFill
-      nvgFillColor( vg, colors[ k]);
-      nvgFill( vg);
+      CGContextFillColor( context, colors[ k]);
+      CGContextFill( context);
 #else
-      nvgStrokeColor( vg, colors[ k]);
-      nvgStrokeWidth( vg, strokeWidth);
-      nvgStroke( vg);
+      CGContextStrokeColor( context, colors[ k]);
+      CGContextStrokeWidth( context, strokeWidth);
+      CGContextStroke( context);
 #endif
    }
 }
-
-
 // 90 fps
 static void   drawRectColorOrderedWithFill( CALayer *layer, CGContext *context, NSUInteger mode)
 {
-   struct NVGcontext    *vg;
    CGRect               canvas;
    CGRect               rect;
    CGFloat              strokeWidth;
@@ -311,11 +280,10 @@ static void   drawRectColorOrderedWithFill( CALayer *layer, CGContext *context, 
    CGColor              color;
    CGColor              colors[ 4];
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
 
    strokeWidth = 1.5;
-   nvgStrokeWidth( vg, strokeWidth);
+   CGContextStrokeWidth( context, strokeWidth);
 
    wh = CGSizeMake( floorf( canvas.size.width / 100.0),
                     floorf( canvas.size.height / 70.0));
@@ -326,7 +294,7 @@ static void   drawRectColorOrderedWithFill( CALayer *layer, CGContext *context, 
    colors[ 3] = CGColorMakeRed();
    for( k = 0; k < 4; k++)
    {
-      nvgBeginPath( vg);
+      CGContextBeginPath( context);
       for( j = 0; j < 70; j++)
       {
          for( i = 0; i < 100; i++)
@@ -338,16 +306,16 @@ static void   drawRectColorOrderedWithFill( CALayer *layer, CGContext *context, 
             rect = CGRectInset( rect, 1, 1);
             rect = munch( rect, i, j);
 
-            nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+            CGContextRect( context, rect);
          }
       }
-      nvgShapeAntiAlias( vg, 1);
-      nvgFillColor( vg, colors[ k]);
-      nvgFill( vg);
+      CGContextShapeAntiAlias( context, 1);
+      CGContextFillColor( context, colors[ k]);
+      CGContextFill( context);
    }
 
    // now clear out holes
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    for( j = 0; j < 70; j++)
    {
       for( i = 0; i < 100; i++)
@@ -356,30 +324,24 @@ static void   drawRectColorOrderedWithFill( CALayer *layer, CGContext *context, 
          rect = CGRectInset( rect, 1, 1);
          rect = munch( rect, i, j);
          rect = CGRectInset( rect, strokeWidth, strokeWidth);
-         nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+         CGContextRect( context, rect);
       }
    }
-   nvgShapeAntiAlias( vg, 1);
-   nvgFillColor( vg, CGColorMakeWhite());
-   nvgFill( vg);
+   CGContextShapeAntiAlias( context, 1);
+   CGContextFillColor( context, CGColorMakeWhite());
+   CGContextFill( context);
 }
-
-
 
 static void   drawStuff0( CALayer *layer, CGContext *context)
 {
    TestRectDrawAlgorithm( layer, context, 0);
 }
-
-
 typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 1] =
 {
    (CGGraphicsLayerDrawCallback_t *) drawStuff0
 };
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -406,8 +368,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

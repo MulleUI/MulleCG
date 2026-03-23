@@ -3,25 +3,19 @@
 #import "import-private.h"
 
 #include <stdio.h>
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   struct NVGcontext   *vg;
    CGRect              canvas;
    float               bounds[ 4];
    CGFont              *font;
-
-   vg = CGContextGetNVGContext( context);
-
    font = [context fontWithNameUTF8String:"sans"];
    assert( font);
 
-   nvgFontFace( vg, "sans");
-   nvgFontSize( vg, 12.0);
+   CGContextFontFace( context, "sans");
+   CGContextFontSize( context, 12.0);
 
-   nvgTextBounds( vg, 0, 0, "abc", NULL, bounds);
+   CGContextTextBoundsInfo( context, 0, 0, "abc", NULL, bounds);
    fprintf( stderr, "abc: %.1f %.1f %.1f %1f\n",
                     bounds[ 0],
                     bounds[ 1],
@@ -29,7 +23,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
                     bounds[ 3]);
 
    // has space in back
-   nvgTextBounds( vg, 0, 0, "abc ", NULL, bounds);
+   CGContextTextBoundsInfo( context, 0, 0, "abc ", NULL, bounds);
    fprintf( stderr, "abc : %.1f %.1f %.1f %1f\n",
                     bounds[ 0],
                     bounds[ 1],
@@ -39,8 +33,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    exit( 0);
    return( NO);
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow        *window;
@@ -55,8 +47,6 @@ int   main( int argc, char *argv[])
    [window setDrawCallback:drawStuff];
    return( UIApplicationRunWindow( window));
 }
-
-
 
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,

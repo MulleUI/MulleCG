@@ -1,11 +1,3 @@
-#define MULLE_CG_INCLUDE_BARE
-
-#ifdef __has_include
-# if __has_include( "CGColor.h")
-#  import "CGColor.h"
-# endif
-#endif
-
 #import "import.h"
 
 

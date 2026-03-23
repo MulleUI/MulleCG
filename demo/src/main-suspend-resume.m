@@ -1,28 +1,22 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
    CGRect              canvas;
-
-   vg = CGContextGetNVGContext( context);
-
    canvas               = [layer canvas];
    canvas.size.height  /= 3.0;
 
    // draw red stripe first then suspend and resume
    // pixels...
    // red stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
+   CGContextBeginPath( context);
+   CGContextRect( context, canvas.origin.x,
                 canvas.origin.y,
                 canvas.size.width,
                 canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.95, 0.0, 0.0, 1.0));
-   nvgFill( vg);
+   CGContextFillColor( context, CGColorMakeWithRGBA( 0.95, 0.0, 0.0, 1.0));
+   CGContextFill( context);
 
    [context suspendRender];
 
@@ -33,30 +27,28 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    [context resumeRender];
 
    // white stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
+   CGContextBeginPath( context);
+   CGContextRect( context, canvas.origin.x,
                 canvas.origin.y + canvas.size.height * 1,
                 canvas.size.width,
                 canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 1.0, 1.0, 1.0, 1.0));
-   nvgFill( vg);
+   CGContextFillColor( context, CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 1.0));
+   CGContextFill( context);
 
    [context suspendRender];
 
    [context resumeRender];
    
    // blue stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
+   CGContextBeginPath( context);
+   CGContextRect( context, canvas.origin.x,
                 canvas.origin.y + canvas.size.height * 2,
                 canvas.size.width,
                 canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.0, 0.0, 1.0, 1.0));
-   nvgFill( vg);
+   CGContextFillColor( context, CGColorMakeWithRGBA( 0.0, 0.0, 1.0, 1.0));
+   CGContextFill( context);
    return( YES);
 }
-
-
 
 int   main( int argc, char *argv[])
 {
@@ -65,8 +57,6 @@ int   main( int argc, char *argv[])
                                            NULL, 
                                           100.0f));     
 }
-
-
 
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,

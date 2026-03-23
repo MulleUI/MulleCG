@@ -1,6 +1,4 @@
 #import "import.h"
-
-
 @interface CustomPaint : CGPaint
 {
    CGPaint   *_paint;
@@ -8,8 +6,6 @@
    CGFloat   _strokeWidth;
 }
 @end
-
-
 @implementation CustomPaint
 
 - (CGPaint *) initWithPaint:(CGPaint *) paint
@@ -22,8 +18,6 @@
 
    return( self);
 }
-
-
 + (CGPaint *) paintWithPaint:(CGPaint *) paint
                  strokeWidth:(CGFloat) strokeWidth
 {
@@ -41,16 +35,12 @@
    obj = [obj autorelease];
    return( obj);
 }
-
-
 - (void *) forward:(void *) param
 {
    return( mulle_objc_object_call_variable_inline( _paint,
                                                            (mulle_objc_methodid_t) _cmd,
                                                            param));
 }
-
-
 - (CGPaint *) rotatedPaint:(CARotation) rotation
 {
    CGPaint  *paint;
@@ -60,8 +50,6 @@
                             strokeWidth:_strokeWidth]);
 
 }
-
-
 - (void) fillWithBounds:(CGRect) bounds
               CGContext:(CGContext *) context
 {
@@ -74,11 +62,8 @@
 
 @end
 
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
    CGRect              canvas;
    CGRect              rect;
    CGPaint             *customPaint;
@@ -93,7 +78,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       factor = frameNr / 119.0;
 //   factor = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
    rect   = CGRectInset( canvas, 50, 50);
 
@@ -106,8 +90,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -115,10 +97,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            60.0f));
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

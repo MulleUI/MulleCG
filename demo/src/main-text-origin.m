@@ -6,8 +6,6 @@
 #import "import-private.h"
 
 #include <string.h>
-
-
 // the "dynamic" property extends CGGraphicsLayer, so it
 // can store this value at runtime
 // @interface CGGraphicsLayer( Dynamic)
@@ -31,8 +29,6 @@
 // @property( assign) NSUInteger   glyph;
 //
 // @end
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect       canvas;
@@ -40,8 +36,8 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    canvas = [layer canvas];
 
-   CGContextFontSize( context, 32.0); // Converted from nvgFontSize
-   CGContextSave( context); // Converted from nvgSave
+   CGContextFontSize( context, 32.0);
+   CGContextSave( context);
    {
       CGContextStrokeLineHWithColor( context, CGPointMake( 0, CGRectGetMidY( canvas)),
                                               CGRectGetWidth( canvas),
@@ -71,7 +67,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 //   glyph = [layer glyph];
 //   if( glyph)
 //   {
-//      CGContextFontSize( context, 12.0); // Converted from nvgFontSize
+//      CGContextFontSize( context, 12.0);
 //      CGContextTextBackgroundColor( context, CGColorMakeWhite());
 //      CGContextTextColor( context, CGColorMakeBlack());
 //      CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignTop);
@@ -81,8 +77,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( YES);
 }
-
-
 // static UIMouseMotionEvent  *handleMouseMotionEvent( UIView *view,
 //                                                     UIMouseMotionEvent *event)
 // {
@@ -90,8 +84,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 //    [view setNeedsDisplay];
 //    return( event);  // don't consume event
 // }
-
-
 
 void   setupScene( UIWindow *window)
 {
@@ -110,8 +102,6 @@ void   setupScene( UIWindow *window)
    // mouse tracking events
    // [view becomeFirstResponder];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -139,8 +129,6 @@ int   main( int argc, char *argv[])
 
    return( [app runApp]);
 }
-
-
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
 //                  ╓#╜^*█⌐   `╕       █           ╓▌    `╙%w

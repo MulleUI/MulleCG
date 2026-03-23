@@ -1,9 +1,9 @@
 #import "import.h"
+#import "CGTypes.h"
 
 
 @class CGContext;
 
-#include "nanowrap.h"
 
 //
 // CGFont is created and maintained by CGContext, you should not keep a

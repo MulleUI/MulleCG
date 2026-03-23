@@ -4,16 +4,12 @@
 
 #include <string.h>
 #include <time.h>
-
-
 #define R   0xFF, 0x00, 0x00, 0xFF
 #define G   0x00, 0xFF, 0x00, 0xFF
 #define B   0x00, 0x00, 0xFF, 0xFF
 #define Y   0xFF, 0xFF, 0x00, 0xFF
 #define W   0xFF, 0xFF, 0xFF, 0xFF
 #define _   0x00, 0x00, 0x00, 0xFF
-
-
 static unsigned char    bitmap[4 * 8 * 8] =
 {
    B, G, R, W,  R, G, B, Y,
@@ -26,8 +22,6 @@ static unsigned char    bitmap[4 * 8 * 8] =
    B, B, G, Y,  W, B, R, R,
    R, B, G, Y,  W, B, R, G
 };
-
-
 #define ROWS   8
 #define COLS   8
 #define SPACE  4
@@ -51,17 +45,13 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
       CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
    CGContextStroke( context);
-
-
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon
    image = [[[CGImage alloc] initWithRGBABytes:bitmap
                                     bitmapSize:CGPixelSizeMake( 8, 8)
-                                  textureFlags:NVG_IMAGE_NEAREST  // CGImageFlagRepeatX
+                                  textureFlags:CGImageFlagNearest  // CGImageFlagRepeatX
                                        context:context] autorelease];
    assert( image);
-
-
    canvas = CGRectInset( canvas, SPACE, SPACE);
 
    CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( SPACE, SPACE), ROWS, COLS, (CGRect *) rects);
@@ -77,8 +67,6 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
                                                     CGFlipNone,
                                                     CGRepeatNone,
                                                     CGContentModeCenterPoint);
-
-
    for( y = 0; y < ROWS; y++)
       for( x = 0; x < COLS; x++)
          [image drawRect:rects[ y][ x]
@@ -86,8 +74,6 @@ static void   drawBitmap3( CALayer *layer, CGContext *context)
                  options:&options
                  context:context];
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -98,8 +84,6 @@ void   setupScene( UIWindow *window)
    [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawBitmap3];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow         *window;
@@ -119,10 +103,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

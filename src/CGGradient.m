@@ -11,7 +11,6 @@
 #import "CGPaint+Private.h"
 #import "CGGradient+Private.h"
 #import "CGColor+UTF8String.h"
-#include "CGColorDiff.h"
 
 
 @implementation NSObject( CGGradient)
@@ -650,6 +649,7 @@ static Class  CGBoxGradientClass;
 
 - (CGGradient *) rotatedGradient:(CARotation) rotation
 {
+   MULLE_C_UNUSED( rotation);
    return( self);
 }
 
@@ -704,6 +704,7 @@ static Class  CGRadialGradientClass;
 
 - (CGGradient *) rotatedGradient:(CARotation) rotation
 {
+   MULLE_C_UNUSED( rotation);
    return( self);
 }
 
@@ -731,6 +732,10 @@ static Class  CGRadialGradientClass;
                                      endPoint:(CGPoint) endPoint
                                      endColor:(CGColor) endColor
 {
+   MULLE_C_UNUSED( startPoint);
+   MULLE_C_UNUSED( startColor);
+   MULLE_C_UNUSED( endPoint);
+   MULLE_C_UNUSED( endColor);
    return( MulleObjCObjectPerformSelector1( CGLinearGradientClass, _cmd, (id) _param));
 }
 
@@ -756,6 +761,11 @@ static Class  CGRadialGradientClass;
                                     feather:(CGFloat) feather
                                featherColor:(CGColor) endColor
 {
+   MULLE_C_UNUSED( rect);
+   MULLE_C_UNUSED( cornerRadius);
+   MULLE_C_UNUSED( color);
+   MULLE_C_UNUSED( feather);
+   MULLE_C_UNUSED( endColor);
    return( MulleObjCObjectPerformSelector1( CGBoxGradientClass, _cmd, (id) _param));
 }
 
@@ -765,6 +775,10 @@ static Class  CGRadialGradientClass;
                              innerRadius:(CGFloat) innerRadius
                                innerColor:(CGColor) innerColor
 {
+   MULLE_C_UNUSED( circle);
+   MULLE_C_UNUSED( outerColor);
+   MULLE_C_UNUSED( innerRadius);
+   MULLE_C_UNUSED( innerColor);
    return( MulleObjCObjectPerformSelector1( CGRadialGradientClass, _cmd, (id) _param));
 }
 

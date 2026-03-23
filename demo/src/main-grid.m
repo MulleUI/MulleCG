@@ -23,11 +23,8 @@ static void   draw_texture( CGFramebuffer *self, CGContext *context)
    }
    CGContextStroke( context);
 }
-
-
 static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger mode)
 {
-   struct NVGcontext             *vg;
    CGRect                        canvas;
    CGRect                        rect;
    CGFloat                       strokeWidth;
@@ -37,14 +34,12 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
    CGColor                       colors[ 4];
    CGFramebuffer                       *cgLayer;
    CGPixelSize       bitmapSize;
-   NVGpaint                      imgPaint;
    struct CGFramebufferRenderInfo      memo;
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
 
    strokeWidth = 1.0;
-   nvgStrokeWidth( vg, strokeWidth);
+   CGContextStrokeWidth( context, strokeWidth);
 
    wh = CGSizeMake( floorf( canvas.size.width / 100.0),
                     floorf( canvas.size.height / 70.0));
@@ -66,8 +61,6 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
       fprintf( stderr, "No CGFramebuffer for you\n");
       return;
    }
-
-
    [cgLayer beginFBRenderWithBackgroundColor:CGColorMakeClear()
                                devicePixelRatio:1.0
                                 layerRenderInfo:&memo];
@@ -87,14 +80,8 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
    }
 #endif
 
-   imgPaint = nvgImagePattern( vg, 0,
-                                   0,
-                                   wh.width, // * (x / 10.0), // - (rect.size.width  / 4 * (y - 1)),
-                                   wh.height, // * (y / 10.0), // - (rect.size.height / 4 * (y - 1)),
-                                   0,
-                                   [cgLayer textureID],
-                                   1.0);
-   CGContextFillImageOptions( context, cgLayer, CGRectMakeWithSize( wh), NULL);
+   CGContextSetFillImagePattern( context, [cgLayer textureID], CGRectMake( 0, 0, wh.width, wh.height), 0, 1.0);
+   CGContextFillPaintableOptions( context, cgLayer, CGRectMakeWithSize( wh), NULL);
    CGContextCheckBackendError( context, "after CGContextFillPaintable");
 
    for( j = 0; j < 70; j++)
@@ -131,7 +118,6 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
 // 1600 fps (1700 filled)
 static void   drawGrid( CALayer *layer, CGContext *context, NSUInteger mode)
 {
-   struct NVGcontext    *vg;
    CGRect               canvas;
    CGRect               rect;
    CGFloat              strokeWidth;
@@ -140,37 +126,36 @@ static void   drawGrid( CALayer *layer, CGContext *context, NSUInteger mode)
    CGColor              color;
    CGColor              colors[ 4];
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
 
    strokeWidth = 1.0;
-   nvgStrokeWidth( vg, strokeWidth);
+   CGContextStrokeWidth( context, strokeWidth);
 
    wh = CGSizeMake( floorf( canvas.size.width / 100.0),
                     floorf( canvas.size.height / 70.0));
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
    for( j = 0; j < 70; j++)
    {
       rect = CGRectMake( CGRectGetMinX( canvas), j * wh.height, canvas.size.width, wh.height);
       rect = CGRectMakeStrokeRect( rect, strokeWidth, CGInside);
-      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+      CGContextRect( context, rect);
    }
 
    for( i = 0; i < 100; i++)
    {
       rect = CGRectMake( i * wh.width, CGRectGetMinY( canvas), wh.width, canvas.size.height);
       rect = CGRectMakeStrokeRect( rect, strokeWidth, CGInside);
-      nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+      CGContextRect( context, rect);
    }
-   nvgShapeAntiAlias( vg, 1);
+   CGContextShapeAntiAlias( context, 1);
 #if drawFill
-   nvgFillColor( vg, CGColorMakeBlue());
-   nvgFill( vg);
+   CGContextFillColor( context, CGColorMakeBlue());
+   CGContextFill( context);
 #else
-   nvgStrokeColor( vg, CGColorMakeBlack());
-   nvgStrokeWidth( vg, strokeWidth);
-   nvgStroke( vg);
+   CGContextStrokeColor( context, CGColorMakeBlack());
+   CGContextStrokeWidth( context, strokeWidth);
+   CGContextStroke( context);
 #endif
 }
 #endif
@@ -179,16 +164,12 @@ static void   drawStuff0( CALayer *layer, CGContext *context)
 {
    drawGridWithLayer( layer, context, 0);
 }
-
-
 typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 1] =
 {
    (CGGraphicsLayerDrawCallback_t *) drawStuff0
 };
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -219,8 +200,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

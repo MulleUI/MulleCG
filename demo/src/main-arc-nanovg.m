@@ -6,13 +6,9 @@
 #import "import-private.h"
 
 #include <string.h>
-
-
 #define ROWS      2
 #define COLUMNS   4
 #define SPACING   10
-
-
 static double  angles[] =
 {
    -CA_2xPI,
@@ -24,8 +20,6 @@ static double  angles[] =
    CA_2xPI
 };
 #define n_angles  (sizeof( angles) / sizeof( angles[ 0]))
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CAPolarPoint        polar;
@@ -68,27 +62,27 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       for( j = 0; j < ROWS; j++)
       {
          if( j & 0x1)
-            dir = NVG_CCW;
+            dir = CGPathFillStyleHole;
          else
-            dir = NVG_CW;
+            dir = CARotationDirectionClockWise;
 
          rect = CGRectIntegral( rects[ j][ i]);
 
          CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeBlack()); // Converted from mvgStrokeRectWithColor
          CGRectDivide( rect, &bottomRect, &topRect, 20, CADirectionBottom);
 
-         CGContextSave( context); // Converted from nvgSave
+         CGContextSave( context);
          {
             CGContextIntersectScissor( context, rect); // Converted from mvgIntersectScissor
 
             // draw label
-            sprintf( buf, "%s %.2g - %.2g", dir == NVG_CW ? "CW" : "CCW",
+            sprintf( buf, "%s %.2g - %.2g", dir == CARotationDirectionClockWise ? "CW" : "CCW",
                                             start, end);
-            CGContextTextColor( context, CGColorMakeBlack()); // Converted from nvgTextColor
-            CGContextTextBackgroundColor( context, CGColorMakeWhite()); // Converted from nvgTextBackgroundColor
+            CGContextTextColor( context, CGColorMakeBlack());
+            CGContextTextBackgroundColor( context, CGColorMakeWhite());
             CGContextTextInRect( context, buf, (size_t) -1, bottomRect, CGContentModeCenterPoint, 0); // Converted from mvgTextInRect
 
-            // mvgMoveTo( vg, CGRectGetTop( topRect));
+            // mvgMoveTo( context, CGRectGetTop( topRect));
 
             centerPoint = CGRectGetCenter( topRect);
             radius      = CGRectGetInnerRadius( topRect) - 4.0;
@@ -104,38 +98,36 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
             switch( startingPoint)
             {
-            case 0 : CGContextBeginPath( context); // Converted from nvgBeginPath
+            case 0 : CGContextBeginPath( context);
                      break;
 
             case 1 : CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( centerPoint, 4.0), CGColorMakeDarkGray()); // Converted from mvgFillCircleWithColor
-                     CGContextBeginPath( context); // Converted from nvgBeginPath
+                     CGContextBeginPath( context);
                      CGContextMoveTo( context, centerPoint); // Converted from mvgMoveTo
                      break;
 
             case 2 : CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( leftPoint, 4.0), CGColorMakeDarkGray()); // Converted from mvgFillCircleWithColor
-                     CGContextBeginPath( context); // Converted from nvgBeginPath
+                     CGContextBeginPath( context);
                      CGContextMoveTo( context, leftPoint); // Converted from mvgMoveTo
                      break;
 
             case 3 : CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( rightPoint, 4.0), CGColorMakeDarkGray()); // Converted from mvgFillCircleWithColor
-                     CGContextBeginPath( context); // Converted from nvgBeginPath
+                     CGContextBeginPath( context);
                      CGContextMoveTo( context, rightPoint); // Converted from mvgMoveTo
                      break;
             }
 
-            nvgArc( CGContextGetNVGContext( context),
-                                   centerPoint.x,
-                                   centerPoint.y,
-                                   radius,
-                                   start,
-                                   end,
-                                   dir); // Converted from nvgArc
+            CGContextArcRadians( context,
+                          CACircleMakeWithCenterAndRadius( centerPoint, radius),
+                          start,
+                          end,
+                          dir);
             color = CGColorMakeWithHSL( 0.2 + ((i + (j * 4)) / 7.0) * 0.6,
                                         1.0,
                                         0.6);
-            CGContextStrokeColor( context, color); // Converted from nvgStrokeColor
-            CGContextStrokeWidth( context, 3); // Converted from nvgStrokeWidth
-            CGContextStroke( context); // Converted from nvgStroke
+            CGContextStrokeColor( context, color);
+            CGContextStrokeWidth( context, 3);
+            CGContextStroke( context);
 
 //            // little check to see if start = end sets moveTo, indeed it does
 //            CGContextBeginPath( context);
@@ -152,13 +144,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 //            CGContextStroke( context);
 
          }
-         CGContextRestore( context); // Converted from nvgRestore
+         CGContextRestore( context);
       }
    }
    return( YES);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -169,8 +159,6 @@ void   setupScene( UIWindow *window)
    [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
-
-
 static void   usage( void)
 {
    fprintf( stderr, "\n"
@@ -184,8 +172,6 @@ static void   usage( void)
 "\n");
    exit( 1);
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow       *window;
@@ -239,10 +225,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

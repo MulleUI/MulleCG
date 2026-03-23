@@ -4,11 +4,7 @@
 
 #include <string.h>
 #include <time.h>
-
-
 #include "bitmap2.inc"
-
-
 static void   draw_triangle_with_centroid( CGContext *context,
                                            CGPoint center,
                                            CGSize  size,
@@ -45,8 +41,6 @@ static void   draw_triangle_with_centroid( CGContext *context,
       CGContextTranslate( context, CGPointMake( -massCenter.x * scale,
                 -massCenter.y * scale));
       CGContextScale( context, CGVectorMake( scale, scale));
-
-
       CGContextBeginPath( context);
       CGContextMoveTo( context, points[ 0]);
       CGContextLineTo( context, points[ 1]);
@@ -61,8 +55,6 @@ static void   draw_triangle_with_centroid( CGContext *context,
    }
    CGContextRestore( context);
 }
-
-
 static inline void   draw_triangle( CGContext *context,
                                     CGPoint center,
                                     CGSize  size,
@@ -71,15 +63,12 @@ static inline void   draw_triangle( CGContext *context,
 {
    draw_triangle_with_centroid( context, center, size, rotation, paint, 0.0, nil, YES);
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    NSUInteger   frameNr;
    CARotation   rotation;
    CGRect       canvas;
    CGRect       rect;
-   NVGcontext   *vg;
    CGRect       rects[ 2][ 2];
    NSUInteger   i, j;
    CGPaint      *paint;
@@ -94,7 +83,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    rotation = (frameNr % 120) / 120.0f + 0.25;
 
    canvas   = [layer canvas];
-   vg       = CGContextGetNVGContext( context);
 
    CGRectPartition2x2( CGRectInset( canvas, 10, 10),
                        CGSizeMake( 10, 10),
@@ -140,8 +128,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -149,10 +135,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            30.0f));
 }
-
-
-
-
 
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
@@ -189,5 +171,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-

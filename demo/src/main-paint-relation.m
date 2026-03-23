@@ -1,12 +1,8 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 #define COLS  3
 #define ROWS  3
-
-
 
 static void   drawRectBehindText( CGContext *context,
                                   CGRect canvas,
@@ -31,11 +27,9 @@ static void   drawRectBehindText( CGContext *context,
    CGContextTextColor( context, CGColorMakeWhite());
    CGContextTextBackgroundColor( context, CGColorMakeGray());
 
-   CGContextCombinedTextAlignment( context, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignTop);
    CGContextText( context, info.bounds.origin, label, (size_t) -1);
 }
-
-
 #define SPACE  20.0
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
@@ -103,8 +97,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                         rect,
                                         &fillOptions);
          CGContextFill( context);
-
-
          CGContextBeginPath( context);
          CGContextRect( context, strokeRect);
          CGContextStrokePaintableOptions( context,
@@ -124,8 +116,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    return( YES);
 }
 
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -140,8 +130,6 @@ int   main( int argc, char *argv[])
 
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

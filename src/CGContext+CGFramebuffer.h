@@ -1,17 +1,8 @@
 //
 // Copyright (c) <|YEAR|> Nat!, Mulle kybernetiK
 //
-// prefer a local CGContext over one in import.h
-#ifdef __has_include
-# if __has_include( "CGContext.h")
-#  import "CGContext.h"
-# endif
-#endif
-#ifdef __has_include
-# if __has_include( "CGFramebuffer.h")
-#  import "CGFramebuffer.h"
-# endif
-#endif
+#import "CGContext.h"
+#import "CGFramebuffer.h"
 
 // we want "import.h" always anyway
 #import "import.h"
@@ -69,6 +60,8 @@ CGPixelSize
 
 @interface CGContext( CGFramebufferFuture)
 
+- (CGPixelSize) bitmapSizeOfFramebuffer:(struct CGContextFramebuffer) fb;
+
 //
 // framebuffer needs to be bound here, and context must be active
 // you need to free the returned bitmap bytes
@@ -80,5 +73,17 @@ CGPixelSize
 //
 - (struct CGBitmap) RGBABytesBitmapOfImage:(CGImage *) image
                                  allocator:(struct mulle_allocator *) allocator;
+
+@end
+
+
+// provided by GPU backend (e.g. MulleCGNanoVG)
+@interface CGContext( CGFramebufferGPU)
+
+- (void) bindGPUFramebuffer:(void *) framebuffer;
+- (void) bindDefaultGPUFramebuffer;
+- (void) clearFramebufferBits:(NSUInteger) bits
+                        color:(CGColor) color;
+- (NSUInteger) framebufferBitsWithColorBit:(BOOL) flag;
 
 @end

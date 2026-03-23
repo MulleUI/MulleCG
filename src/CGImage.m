@@ -4,7 +4,6 @@
 
 #import "CGTypes.h"
 #import "CGContext.h"
-#import "CGContext+CGFramebuffer.h"
 #import "CGContext+Texture.h"
 #import "CGContext+DebugPrivate.h"
 #import "CGImage+DebugPrivate.h"
@@ -693,7 +692,7 @@ static struct
    if( isFlipped)
    {
       convertedEncoding = CGBitmapEncodingFlipYRGBABytes;
-      textureFlags     ^= NVG_IMAGE_FLIPY;
+      textureFlags     ^= CGTextureFlipY;
    }
 
    convertedBitmapInfo = CGBitmapInfoMake( bitmap.info.size, 0, convertedEncoding);
@@ -797,8 +796,8 @@ static struct
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
 {
-   return( [_context RGBABytesBitmapOfImage:self
-                                  allocator:allocator]);
+   MULLE_C_UNUSED( allocator);
+   return( (struct CGBitmap){ 0 });  // implemented by nanovg backend
 }
 
 // this is a hack, until we properly turn multisample layers into standard

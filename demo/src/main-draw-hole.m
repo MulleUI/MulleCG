@@ -2,8 +2,6 @@
 
 #import "import-private.h"
 
-
-
 // this demo shows how to draw "holes". Notice how the first nvgPathWinding
 // is completely ignored. It doesn't really (seem) to matter, if you do
 // hole / solid or solid / hole, the result is the same.
@@ -36,8 +34,6 @@ static void   drawCheckboard( CGRect  rect, CGContext *context)
            options:NULL
            context:context];
 }
-
-
 static void   drawRect( CGContext *context, CGRect rect, int slim)
 {
    CGRect   drawRect;
@@ -56,16 +52,12 @@ static void   drawRect( CGContext *context, CGRect rect, int slim)
    CGContextRoundedRect( context, drawRect, 3.0);
 #endif
 }
-
-
 static void   drawCircle( CGContext *context, CGRect rect, CGFloat animation)
 {
    rect = CGRectInset( rect, 20, 20);
    rect = CGRectInset( rect, animation, animation);
    CGContextCircle( context, CGRectGetInnerCircle( rect));
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect              rects[ 2][ 4];
@@ -102,7 +94,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeBlack());
 
          CGContextBeginPath( context);
-         mode[ 0] = i < 2 ? CGPathFillStyleSolid : CGPathFillStyleHole; // Converted from NVG_SOLID/NVG_HOLE
+         mode[ 0] = i < 2 ? CGPathFillStyleSolid : CGPathFillStyleHole; // Converted from CGPathFillStyleSolid/CGPathFillStyleHole
          CGContextPathWinding( context, mode[ 0]);
 
          if( reverse)
@@ -110,7 +102,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          else
             drawRect( context, rect, slim);
 
-         mode[ 1] = (i & 0x1) ? CGPathFillStyleSolid : CGPathFillStyleHole; // Converted from NVG_SOLID/NVG_HOLE
+         mode[ 1] = (i & 0x1) ? CGPathFillStyleSolid : CGPathFillStyleHole; // Converted from CGPathFillStyleSolid/CGPathFillStyleHole
          CGContextPathWinding( context, mode[ 1]);
 
          if( reverse)
@@ -118,19 +110,17 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          else
             drawCircle( context, rect, animation);
 
-         mode[ 2] = j ? CGPathFillStyleSolid : CGPathFillStyleHole; // Converted from NVG_SOLID/NVG_HOLE
+         mode[ 2] = j ? CGPathFillStyleSolid : CGPathFillStyleHole; // Converted from CGPathFillStyleSolid/CGPathFillStyleHole
          CGContextPathWinding( context, mode[ 2]);
-
-
          paint = [CGPaint paintWithStartColor:CGColorMake( j / 1.0, i / 3.0, 0.0, 1.0)
                                      endColor:CGColorMakeLightGray()];
          [paint fillWithBounds:rect
                        context:context];
 
          sprintf( buf, "%c%c%c %s%s",
-            mode[ 0] == CGPathFillStyleHole ? 'H' : 'S', // Converted from NVG_HOLE
-            mode[ 1] == CGPathFillStyleHole ? 'H' : 'S', // Converted from NVG_HOLE
-            mode[ 2] == CGPathFillStyleHole ? 'H' : 'S', // Converted from NVG_HOLE
+            mode[ 0] == CGPathFillStyleHole ? 'H' : 'S', // Converted from CGPathFillStyleHole
+            mode[ 1] == CGPathFillStyleHole ? 'H' : 'S', // Converted from CGPathFillStyleHole
+            mode[ 2] == CGPathFillStyleHole ? 'H' : 'S', // Converted from CGPathFillStyleHole
             slim ? "s" : "f",
             reverse ? "r" : "n");
 
@@ -147,8 +137,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -156,10 +144,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            60.0f));
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

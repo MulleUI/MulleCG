@@ -1,27 +1,20 @@
 #import "import.h"
 
 #import <string.h>
-
-
 #define FONT_SIZE   10
-
-
 static BOOL   drawStuff( CGGraphicsLayer *self, CGContext *context)
 {
    CGRect              rect;
    CGRect              textRect;
 
    [context useFontWithNameUTF8String:"mono"];
-   // Delete: vg = CGContextGetNVGContext( context);
-
-
    rect = CGRectMake( 100, 100, FONT_SIZE * 10, FONT_SIZE * 10);
    rect = CGRectIntegral( rect);
 
-   CGContextBeginPath( context); // Converted from nvgBeginPath
-   CGContextRect( context, rect); // Converted from nvgRect
-   CGContextFillColor( context, CGColorMakeBlack()); // Converted from nvgFillColor
-   CGContextFill( context); // Converted from nvgFill
+   CGContextBeginPath( context);
+   CGContextRect( context, rect);
+   CGContextFillColor( context, CGColorMakeBlack());
+   CGContextFill( context);
 
    CGContextSave( context); // Converted from mvgSave
    {

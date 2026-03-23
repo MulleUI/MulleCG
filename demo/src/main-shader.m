@@ -5,8 +5,6 @@
 #import "import-private.h"
 
 #define DRAW_TEXTURE
-
-
 static char   vertexShaderSource[] =
 #include "rect.vert.inc"
 ;
@@ -14,11 +12,7 @@ static char   vertexShaderSource[] =
 static char   fragmentShaderSource[] =
 #include "blur.frag.inc"
 ;
-
-
 #include "bitmap2.inc"
-
-
 static struct CGShaderUTF8Sources   monochromeShaderSources =
 {
    "blur",
@@ -27,8 +21,6 @@ static struct CGShaderUTF8Sources   monochromeShaderSources =
    NULL,
    NULL
 };
-
-
 @interface DemoLayer : CAOpenGLLayer
 {
    GLuint      _VBO;
@@ -36,8 +28,6 @@ static struct CGShaderUTF8Sources   monochromeShaderSources =
    CGShaderID  _shaderProgram;
 }
 @end
-
-
 @implementation DemoLayer
 
 - (void) initShaderProgramWithContext:(CGContext *) context
@@ -46,8 +36,6 @@ static struct CGShaderUTF8Sources   monochromeShaderSources =
    CGContextCheckBackendError( context, "after compileShaderWithShaderSources");
    assert( _shaderProgram);
 }
-
-
 - (void) initVertexBufferWithContext:(CGContext *) context
 {
     // set up vertex data (and buffer(s)) and configure vertex attributes
@@ -82,11 +70,7 @@ static struct CGShaderUTF8Sources   monochromeShaderSources =
    // don't unbind VAOs (nor VBOs) when it's not directly necessary.
    // glBindVertexArray(0);
 }
-
-
 static MulleUIResourceStorageKeyDefine( test_image);
-
-
 - (void) drawOpenGLInContext:(CGContext *) context
 {
    float     timeValue;
@@ -140,8 +124,6 @@ static MulleUIResourceStorageKeyDefine( test_image);
    // render the triangle
    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
-
-
 - (void) finalize
 {
    if( _VAO)
@@ -154,8 +136,6 @@ static MulleUIResourceStorageKeyDefine( test_image);
 }
 
 @end
-
-
 static void   usage( void)
 {
    fprintf( stderr, "\n"
@@ -170,8 +150,6 @@ static void   usage( void)
 "\n");
    exit( 1);
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow          *window;
@@ -232,10 +210,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
-
-
 
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,

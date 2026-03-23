@@ -1,8 +1,8 @@
 #import "CGLayoutContext.h"
 #import "CGLayoutContext+CGFont.h"
 
-#import "CGColor.h"
-#include "nanowrap.h"
+#import "CGTypes.h"
+
 
 
 @class CGFont;
@@ -24,7 +24,10 @@ typedef NS_ENUM( NSUInteger, CGContextNanoVGBackend)
    CG_GL3_2,
    CG_GLES2,
    CG_GLES3,
-   CG_GLES3_2
+   CG_GLES3_2,
+   CG_D3D11,
+   CG_VULKAN,
+   CG_METAL
 };
 
 
@@ -259,8 +262,22 @@ static inline int
 // is this still used ? does it make sense ?
 - (CGFloat) fontScale;
 
+// Debug tracing — backend sets/returns a FILE* for draw call logging.
+// Returns the previous trace file (NULL if none). Pass NULL to disable.
+- (FILE *) setTraceFile:(FILE *) file;
 
 @end
+
+
+@interface CGContext( Forward)
+
+- (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options;
+- (void) _finalizeNanoVG;
+- (void) barrier;
+- (CGImage *) resolveMultiSampleImage:(CGImage *) image;
+
+@end
+
 
 typedef CGContext   *CGContextRef;
 
@@ -272,18 +289,24 @@ static inline BOOL   CGContextIsActiveInCurrentThread( CGContextRef self)
 
 
 MULLE_C_CONST_RETURN
-static inline struct NVGcontext   *CGContextGetNVGContext( CGContextRef self)
+static inline void   *CGContextGetBackendContext( CGContextRef self)
 {
    assert( CGContextIsActiveInCurrentThread( self));
 
-   return( ((struct{ @defs( CGContext); } *) self)->_vg);
+   return( ((struct{ @defs( CGContext); } *) self)->_cgBackend.context);
 }
 
 
 MULLE_C_CONST_RETURN
-static inline struct NVGcontext   *_CGContextGetNVGContext( CGContextRef self)
+static inline void   *_CGContextGetBackendContext( CGContextRef self)
 {
-   return( ((struct{ @defs( CGContext); } *) self)->_vg);
+   return( ((struct{ @defs( CGContext); } *) self)->_cgBackend.context);
+}
+
+MULLE_C_CONST_RETURN
+static inline struct CGFunctionTable *_CGContextGetFunctionTable( CGContextRef self)
+{
+   return( &((struct{ @defs( CGContext); } *) self)->_cgBackend.functions);
 }
 
 
@@ -319,25 +342,7 @@ static inline float  CGContextGetLinearAnimationFactor( CGContext *context, NSUI
 
 
 
-// defined in nanovg-specifics
 
 
-MULLE_CG_GLOBAL
-char   *CGNVGBackendErrorUTF8String( void);
-MULLE_CG_GLOBAL
-char   *_CGNVGBackendErrorShortUTF8String( void *error);
-MULLE_CG_GLOBAL
-char   *_CGNVGBackendErrorUTF8String( void *error);
 
-MULLE_CG_GLOBAL
-void  _CGContextCheckBackendError( CGContext *ctxt, char *str);
 
-static inline void   CGContextCheckBackendError( CGContext *ctxt, char *str)
-{
-#ifdef DEBUG
-   _CGContextCheckBackendError( ctxt, str);
-#endif
-}
-
-// cleans error state, returns YES if there were errors
-BOOL   CGContextResetBackendError( CGContext *ctxt);

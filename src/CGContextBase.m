@@ -128,9 +128,9 @@ static struct
 }
 
 
-- (struct NVGcontext *) nvgContext
+- (void *) backendContext
 {
-   return( _vg);
+   return( _cgBackend.context);
 }
 
 

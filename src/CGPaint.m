@@ -204,6 +204,7 @@
 
 - (CGPaint *) rotatedPaint:(CARotation) rotation
 {
+   MULLE_C_UNUSED( rotation);
    return( self);
 }
 

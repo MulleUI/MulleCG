@@ -1,10 +1,6 @@
 #import "import-private.h"
-
-
 static BOOL   drawStuff1( CGGraphicsLayer *layer, CGContext *context);
 static BOOL   drawStuff2( CGGraphicsLayer *layer, CGContext *context);
-
-
 static void    flipDraw( CGGraphicsLayer *layer, CGContext *context)
 {
    NSUInteger                      frames;
@@ -17,77 +13,51 @@ static void    flipDraw( CGGraphicsLayer *layer, CGContext *context)
       [layer setDrawCallback:callback];
    }
 }
-
-
 static BOOL   drawStuff1( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
    CGRect              canvas;
-
-   vg = CGContextGetNVGContext( context);
-
    canvas               = [layer canvas];
    canvas.size.height  /= 3.0;
 
    // red stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.0, 0.95, 0.0, 1.0));
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake( canvas.origin.x, canvas.origin.y, canvas.size.width, canvas.size.height));
+   CGContextFillColor( context, CGColorMakeWithRGBA( 0.0, 0.95, 0.0, 1.0));
+   CGContextFill( context);
 
    // white stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 1,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.0, 0.66, 0.0, 1.0));
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake( canvas.origin.x, canvas.origin.y + canvas.size.height * 1, canvas.size.width, canvas.size.height));
+   CGContextFillColor( context, CGColorMakeWithRGBA( 0.0, 0.66, 0.0, 1.0));
+   CGContextFill( context);
 
    // blue stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 2,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.0, 0.3, 0.0, 1.0));
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake( canvas.origin.x, canvas.origin.y + canvas.size.height * 2, canvas.size.width, canvas.size.height));
+   CGContextFillColor( context, CGColorMakeWithRGBA( 0.0, 0.3, 0.0, 1.0));
+   CGContextFill( context);
 
    flipDraw( layer, context);
    return( YES);
 }
-
-
 static BOOL   drawStuff2( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
    CGRect              canvas;
    NSUInteger          i;
-
-   vg = CGContextGetNVGContext( context);
-
    canvas               = [layer canvas];
    canvas.size.height  /= 5.0;
 
    for( i = 0; i < 5; i++)
    {
-      nvgBeginPath( vg);
-      nvgRect( vg, canvas.origin.x,
-                   canvas.origin.y + canvas.size.height * i,
-                   canvas.size.width,
-                   canvas.size.height);
-      nvgFillColor( vg, nvgRGBAf( 0.0, 1.0 - i / 5.0, 0.0, 1.0));
-      nvgFill( vg);
+      CGContextBeginPath( context);
+      CGContextRect( context, CGRectMake( canvas.origin.x, canvas.origin.y + canvas.size.height * i, canvas.size.width, canvas.size.height));
+      CGContextFillColor( context, CGColorMakeWithRGBA( 0.0, 1.0 - i / 5.0, 0.0, 1.0));
+      CGContextFill( context);
    }
 
    flipDraw( layer, context);
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff1,
