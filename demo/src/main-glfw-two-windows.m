@@ -1,8 +1,6 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 //
 // This is a step towards threaded drawing. This demo by itself just shows
 // how two single-threaded windows can run with different frameRates.
@@ -14,40 +12,27 @@ static void   drawStuff( CGRect canvas,
                          CGColor rightColor,
                          CGContext *context)
 {
-   struct NVGcontext   *vg;
    auto char           buf[ 64];
    CGFont              *font;
-
-   vg = CGContextGetNVGContext( context);
-
    canvas.size.width  /= 3.0;
 
    // red stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, leftColor);
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake( canvas.origin.x, canvas.origin.y, canvas.size.width, canvas.size.height));
+   CGContextFillColor( context, leftColor);
+   CGContextFill( context);
 
    // white stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x + canvas.size.width * 1,
-                canvas.origin.y,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, middleColor);
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake( canvas.origin.x + canvas.size.width * 1, canvas.origin.y, canvas.size.width, canvas.size.height));
+   CGContextFillColor( context, middleColor);
+   CGContextFill( context);
 
    // blue stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x + canvas.size.width * 2,
-                canvas.origin.y,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, rightColor);
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake( canvas.origin.x + canvas.size.width * 2, canvas.origin.y, canvas.size.width, canvas.size.height));
+   CGContextFillColor( context, rightColor);
+   CGContextFill( context);
 
    sprintf( buf, "%td", counter);
 
@@ -56,14 +41,12 @@ static void   drawStuff( CGRect canvas,
 
    canvas.size.width  *= 3.0;
 
-   nvgFontSize( vg, 32);
-   nvgTextAlign( vg, CGTextAlignCenter | CGTextAlignMiddle); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE
-   nvgTextColor( vg, CGColorMakeWithHexColor( 0x0000000FF));
-   nvgTextBackgroundColor( vg, middleColor);
-   nvgText( vg, CGRectGetMidX( canvas), CGRectGetMidY( canvas), buf, NULL);
+   CGContextFontSize( context, 32);
+   CGContextCombinedTextAlignment( context, CGTextAlignCenter | CGTextAlignMiddle); // Converted from CGTextAlignCenter | CGTextAlignMiddle
+   CGContextTextColor( context, CGColorMakeWithHexColor( 0x0000000FF));
+   CGContextTextBackgroundColor( context, middleColor);
+   CGContextText( context, CGPointMake( CGRectGetMidX( canvas), CGRectGetMidY( canvas)), buf, 0);
 }
-
-
 @interface MyWindow : GLFWOSWindow <UIOSWindow>
 
 @property( retain) CGContext    *context;
@@ -73,8 +56,6 @@ static void   drawStuff( CGRect canvas,
 @property( assign) CGColor      rightColor;
 
 @property( assign) NSUInteger   counter;
-
-
 // just for debugging
 @property( assign) CGFramebuffer      *previousLayer;
 
@@ -86,8 +67,6 @@ static void   drawStuff( CGRect canvas,
 {
    return( ++_counter);
 }
-
-
 - (void) finalize
 {
    [self os_activateGraphicsContext];
@@ -104,11 +83,7 @@ static void   drawStuff( CGRect canvas,
 {
    return( UIGraphicsBackendDefault);
 }
-
-
 @end
-
-
 //
 // window will already have activated the os_activateGraphicsContext
 //
@@ -138,8 +113,6 @@ static UIWindowDisplayBits   display( id <UIOSWindow> window_in)
 
    return( 0);
 }
-
-
 
 static MyWindow   *create_window( unsigned int i,
                                   double frameRate)
@@ -205,8 +178,6 @@ int   main( int argc, char *argv[])
    return( [app runApp]);
 }
 
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
@@ -242,6 +213,4 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-
 

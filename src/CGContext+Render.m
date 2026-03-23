@@ -5,14 +5,14 @@
 
 #import "import-private.h"
 
-#import "CGTypes.h"
+#import "CGContext+Drawing.h"
 #import "CGContext+CGFramebuffer.h"
 #import "CGContext+DebugPrivate.h"
 
 
 @interface CGContext( OpenGLPrivate)
 
-- (void) _changeRenderOpenGL:(struct CGFrameInfo *) info;
+- (void) _changeRenderGPU:(struct CGFrameInfo *) info;
 
 @end
 
@@ -70,7 +70,7 @@ static struct CGFrameInfo   emptyInfo;
 
    // doesn't stack
    if( (info->debuggingFlags | _debuggingFlags) & CGContextDebugTraceDrawCalls)
-      nvgTrace( CGContextGetNVGContext( self), stderr);
+      CGContextTrace( self, stderr);
 
    assert( info);
    assert( info->window.pixelRatio != 0.0);
@@ -97,15 +97,13 @@ static struct CGFrameInfo   emptyInfo;
    [self deleteGPUFramebuffers]; // after framebuffers
    [self deleteTextureIDs];
 
-   CGContextCheckBackendError( self, "delete textureIDs");
-
    // create or reuse existing offscreen framebuffer
    if( _rendersOffScreen)
    {
       // will acquire hopefully a preexisting framebuffer for reuse
       assert( ! _renderFramebuffer);
 
-      textureFlags  = (_nvgFlags & CGImageFlagMSAA) ? NVG_MSAA : 0;
+      textureFlags  = (_backendFlags & CGImageFlagMSAA) ? CGImageFlagMSAA : 0;
 #if defined( DEBUG) || defined( MULLE_TEST)
       {
          static uintptr_t   counter;
@@ -171,7 +169,6 @@ static struct CGFrameInfo   emptyInfo;
     * return to default, for unbinding YES or NO makes no difference
     */
    [self bindFramebuffer:CGContextFramebufferMakeDefault()];
-   CGContextCheckBackendError( self, "unbind buffer");
 
    // so if we rendered to the "window" framebuffer mark it as initialized
    if( _currentFramebuffer.type == CGContextDefaultFramebuffer ||
@@ -207,14 +204,18 @@ static struct CGFrameInfo   emptyInfo;
 
    // this doesn't stack
    if( (_currentFrameInfo.debuggingFlags | _debuggingFlags) & CGContextDebugTraceDrawCalls)
-      nvgTrace( CGContextGetNVGContext( self), NULL);
+      CGContextTrace( self, NULL);
 
    if( framebuffer)
    {
+#ifdef __has_include
+# if __has_include( "mulleui-debug.h")
       if( self->_debuggingFlags & CGContextDebugDumpFrameToFile)
       {
          MulleUIWriteImageToPNGFileSequenceAsync( framebuffer, "render-layer");
       }
+# endif
+#endif
 
       CGContextRenderLog( "End render into layer %#@", framebuffer);
       [self provideRenderedFramebuffer:framebuffer];

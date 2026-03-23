@@ -7,8 +7,6 @@
 
 #include <string.h>
 #include <time.h>
-
-
 #include "bitmap.inc"
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
@@ -29,7 +27,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    // is too early, and the texture is gone too soon
    image   = [[[CGImage alloc] initWithRGBABytes:bitmap
                                       bitmapSize:CGPixelSizeMake( 8, 8)
-                                    textureFlags:NVG_IMAGE_NEAREST  // CGImageFlagRepeatX
+                                    textureFlags:CGImageFlagNearest  // CGImageFlagRepeatX
                                          context:context] autorelease];
    assert( image);
 
@@ -50,7 +48,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       written = YES;
 
       cgLayer = [[[CGFramebuffer alloc] initWithImage:image
-                                         textureFlags:NVG_IMAGE_NEAREST
+                                         textureFlags:CGImageFlagNearest
                                        nameUTF8String:"image"
                                               context:context] autorelease];
       bitmapStruct = [cgLayer RGBABytesBitmap:NULL];
@@ -64,8 +62,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( YES);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -76,8 +72,6 @@ void   setupScene( UIWindow *window)
    [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow         *window;
@@ -97,10 +91,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

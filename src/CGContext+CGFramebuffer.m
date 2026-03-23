@@ -5,9 +5,8 @@
 
 #import "import-private.h"
 
+#import "CGContext+CGFramebuffer+Private.h"
 #import "CGContext+DebugPrivate.h"
-#import "CGContext+OpenGL.h"
-#import "CGContext+Render.h"
 #import "CGImage+DebugPrivate.h"
 
 
@@ -98,7 +97,7 @@
    case CGContextDefaultFramebuffer :
    case CGContextDefaultMultiSampleFramebuffer  :
       // this is GL on the "bottom" anyway
-      [self bindDefaultOpenGLFramebuffer];
+      [self bindDefaultGPUFramebuffer];
       break;
 
    case CGContextLayerFramebuffer :
@@ -108,7 +107,7 @@
 
    case CGContextOpenGLFramebuffer  :
    case CGContextOpenGLMultiSampleFramebuffer  :
-      [self bindOpenGLFramebuffer:fb.handle];
+      [self bindGPUFramebuffer:fb.handle];
       break;
 
    default :
@@ -474,46 +473,11 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
 //////
 
 
-static CGPixelSize
-   _CGContextBitmapSizeOfLayerFramebuffer( CGContext *self,
-                                           struct CGContextFramebuffer fb)
-{
-   assert( fb.type == CGContextLayerFramebuffer
-           || fb.type == CGContextLayerMultiSampleFramebuffer);
-   return( [(CGFramebuffer *) fb.handle bitmapSize]);
-}
-
-
-static CGPixelSize
-   _CGContextBitmapSizeOfDefaultFramebuffer( CGContext *self,
-                                             struct CGContextFramebuffer fb)
-{
-   struct CGFrameInfo   info;
-
-   assert( fb.type == CGContextDefaultFramebuffer
-           || fb.type == CGContextDefaultMultiSampleFramebuffer);
-   [self getCurrentFrameInfo:&info];
-   return( CGFrameInfoGetFramebufferSize( &info));
-}
-
-
 CGPixelSize
    CGContextBitmapSizeOfFramebuffer( CGContext *self,
                                      struct CGContextFramebuffer fb)
 {
-   switch( fb.type)
-   {
-   case CGContextDefaultFramebuffer :
-   case CGContextDefaultMultiSampleFramebuffer :
-      return( _CGContextBitmapSizeOfDefaultFramebuffer( self, fb));
-   case CGContextLayerFramebuffer :
-   case CGContextLayerMultiSampleFramebuffer :
-      return( _CGContextBitmapSizeOfLayerFramebuffer( self, fb));
-   case CGContextOpenGLFramebuffer :
-   case CGContextOpenGLMultiSampleFramebuffer :
-      return( _CGContextBitmapSizeOfOpenGLFramebuffer( self, fb));
-   }
-   abort();
+   return( [self bitmapSizeOfFramebuffer:fb]);
 }
 
 

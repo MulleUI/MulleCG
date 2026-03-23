@@ -565,6 +565,24 @@ static inline struct CGShadow
  * @note The metrics returned are for the currently selected font. Make sure
  *       to call this method after setting the desired font and font size.
  */
+#ifndef CGTextBoundsInfo_defined__
+#define CGTextBoundsInfo_defined__
+typedef struct CGTextBoundsInfo
+{
+   CGRect   bounds;
+   float    size;    // can be fontPixelSize or width depending on use
+} CGTextBoundsInfo;
+
+#define CGTextBoundsInfoNull \
+   (CGTextBoundsInfo) { .bounds = CGRectNull, .size = 0.0 }
+
+static inline CGTextBoundsInfo   CGTextBoundsInfoMake( CGRect rect, float size)
+{
+   return( (CGTextBoundsInfo) { .bounds = rect, .size = size });
+}
+#endif
+
+
 typedef struct CGTextMetrics
 {
    float   ascender;
@@ -591,5 +609,37 @@ static inline CGTextMetrics  CGTextMetricsMake( float ascender,
 
 // defined elsewhere
 //static inline char   *CGTextMetricsUTF8String( CGTextMetrics metrics)
+
+// Backend resource IDs (opaque integer handles)
+typedef NSInteger    CGTextureID;   // -1 == invalid
+typedef NSInteger    CGFontID;      // -1 == invalid
+typedef NSUInteger   CGShaderID;    // 0 is invalid
+
+#define CGTextureIDInvalid   0
+#define CGFontIDInvalid      -1
+
+// Backend-neutral texture flags (values match NVG_IMAGE_* in nanovg)
+enum
+{
+   CGTextureRepeatX = 1<<1,
+   CGTextureRepeatY = 1<<2,
+   CGTextureFlipY   = 1<<3,
+};
+
+
+// Font size rounding (nanovg is 1/10 resolution, FreeType is 1/64)
+#ifndef mvgRoundedFontSize_defined__
+# define mvgRoundedFontSize_defined__
+static inline CGFloat  mvgRoundedFontSize( CGFloat size)
+{
+   NSUInteger   tenth = (NSUInteger) (10 * size);
+
+   if( tenth < 10)
+      tenth = 10;
+   if( tenth >= 2044 * 10)
+      tenth = 2044 * 10;
+   return( tenth / 10.0f);
+}
+#endif
 
 #endif

@@ -1,13 +1,11 @@
 #import "import-private.h"
 
 #import "CGContext.h"
+#import "CGContext+Shader.h"
 
 #import "CGLayoutContext+CGFont.h"
 #import "CGContext+DebugPrivate.h"
-#import "CGContext+Drawing.h"
-#import "CGContext+Shader.h"
 #import "CGContext+Texture.h"
-#import "CGContext+CGFramebuffer.h"
 #import "CGImage.h"
 #import "CGImage+DebugPrivate.h"
 #import "CGFramebuffer.h"
@@ -23,6 +21,7 @@
 - (void) deleteGPUFramebuffers;
 - (void) deleteRenderedFramebuffers;
 - (void) queueScratchAndDrawnRenderedFramebuffersForDeletion;
+- (void) provideRenderedFramebuffer:(id) framebuffer;
 
 @end
 
@@ -41,6 +40,16 @@
 // there shall be no OpenGL calls or constants here. Just nanovg stuff
 //
 @implementation CGContext
+
+- (void) queueScratchAndDrawnRenderedFramebuffersForDeletion
+{
+}
+
+
+- (void) provideRenderedFramebuffer:(id) framebuffer
+{
+}
+
 
 - (BOOL) __isCGContext
 {
@@ -117,7 +126,7 @@ static struct
    {
       [self _initNanoVGWithGraphicsOptions:options];
 
-      if( ! _vg)
+      if( ! _cgBackend.context)
       {
          fprintf( stderr, "Could not create nanovg context\n");
          [self release];
@@ -164,7 +173,7 @@ static struct
 
    if( _backend != UIGraphicsBackendNone)
    { 
-      if( ! _vg)  // we died super early, so nothing to do
+      if( ! _cgBackend.context)  // we died super early, so nothing to do
          return;
 
       assert( ! _isRendering);
@@ -331,6 +340,12 @@ static struct
 - (void) setInitializedFramebuffer:(BOOL) flag
 {
    _mulle_atomic_pointer_write( &_atomicInitializedFramebuffer, (void *) (uintptr_t) flag);
+}
+
+
+- (FILE *) setTraceFile:(FILE *) file
+{
+   return( NULL);  // overridden by nanovg backend
 }
 
 

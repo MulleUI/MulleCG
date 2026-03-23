@@ -1,7 +1,6 @@
 //
 // Copyright (c) 2020 Nat!, Mulle kybernetiK
 //
-// prefer a local CGContext over one in import.h
 #ifdef __has_include
 # if __has_include( "CGLayoutContext.h")
 #  import "CGLayoutContext.h"

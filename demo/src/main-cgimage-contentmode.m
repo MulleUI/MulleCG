@@ -82,7 +82,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    // gray rectangle so we know something is drawn...
    CGContextBeginPath( context);
    {
-      CGContextRect( context, CGRectMake( tempRect.origin.x, tempRect.origin.y, tempRect.size.width, tempRect.size.height));
+      CGContextRect( context, tempRect);
       CGContextStrokeWidth( context, 8);
       CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }

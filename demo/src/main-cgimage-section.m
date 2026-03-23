@@ -4,11 +4,7 @@
 
 #include <string.h>
 #include <time.h>
-
-
 #include "bitmap2.inc"
-
-
 
 #define ROWS    3
 #define COLUMNS 4
@@ -26,12 +22,10 @@ static void   drawBitmap2( CALayer *layer, CGContext *context)
    canvas = [layer canvas];
 
    // Delete: Remove NVGcontext variable
-   // struct NVGcontext   *vg;
-   // vg = CGContextGetNVGContext( context);
 
    // Delete: Remove NVG calls
-   // nvgShapeAntiAlias( vg, 1);  // makes no visual difference
-//   nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
+   // CGContextShapeAntiAlias( context, 1);  // makes no visual difference
+//   CGContextGlobalCompositeOperation( context, CGCompositeOperationSourceOver);
 
    // gray rectangle so we know something is drawn...
    // Update: Use CGContext functions
@@ -42,25 +36,19 @@ static void   drawBitmap2( CALayer *layer, CGContext *context)
       CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
    CGContextStroke( context);
-
-
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon
    image = [[[CGImage alloc] initWithRGBABytes:bitmap2
                                     bitmapSize:CGPixelSizeMake( 32, 32)
-                                  textureFlags:NVG_IMAGE_NEAREST  // CGImageFlagRepeatX
+                                  textureFlags:CGImageFlagNearest  // CGImageFlagRepeatX
                                        context:context] autorelease];
    assert( image);
-
-
    canvas = CGRectInset( canvas, 4, 4);
 
    // acquire extra COLUMN, whose space will be used to extend the middle
    CGRectPartitionIntoRowsAndColumns( canvas, CGSizeMake( 4, 4), ROWS, COLUMNS, (CGRect *) rects);
 
    CGRectPartitionIntoRowsAndColumns( CGRectMake( 0, 0, 32, 32), CGSizeMake( 0, 0), 3, 3, (CGRect *) sections);
-
-
    options = CGDrawableOptionsMakeWithCornerRadius( 0.0,
                                                     1.0,
                                                     CGRotationNone,
@@ -84,8 +72,6 @@ static void   drawBitmap2( CALayer *layer, CGContext *context)
                  options:&options
                  context:context];
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -96,8 +82,6 @@ void   setupScene( UIWindow *window)
    [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawBitmap2];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow         *window;
@@ -117,10 +101,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
@@ -156,7 +136,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-
-
-

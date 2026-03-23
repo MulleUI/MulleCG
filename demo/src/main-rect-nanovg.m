@@ -1,23 +1,17 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 #define AntiAlias  1
 #define Thick      2
-
-
 static void   drawRect( CALayer *layer, CGContext *context, NSUInteger mode)
 {
-   struct NVGcontext    *vg;
    CGRect               canvas;
    CGRect               rect;
    char                 buf[ 64];
    CGFloat              strokeWidth;
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
-   nvgResetScissor( vg); // see if it makes a difference
+   CGContextResetScissor( context); // see if it makes a difference
 
    canvas = CGRectInset( canvas, 2.0, 2.0);
 
@@ -27,12 +21,12 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger mode)
 
    rect = CGRectMakeStrokeRect( canvas, strokeWidth, CGInside);
 
-   nvgBeginPath( vg);
-   nvgShapeAntiAlias( vg, (mode & AntiAlias) ? 1 : 0);
-   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-   nvgStrokeColor( vg, CGColorMakeRed());
-   nvgStrokeWidth( vg, strokeWidth);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextShapeAntiAlias( context, (mode & AntiAlias) ? 1 : 0);
+   CGContextRect( context, rect);
+   CGContextStrokeColor( context, CGColorMakeRed());
+   CGContextStrokeWidth( context, strokeWidth);
+   CGContextStroke( context);
 
    sprintf( buf, "%s%.0f",
                  (mode & AntiAlias) ? "AA " : "No AA ",
@@ -40,18 +34,13 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger mode)
 
    [context fontWithNameUTF8String:"sans"];
 
-   nvgFontFace( vg, "sans");
-   nvgTextAlign( vg, CGTextAlignCenter | CGTextAlignBaseline); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE
-   nvgTextColor( vg, CGColorMakeBlack());
-   nvgTextBackgroundColor( vg, CGColorMakeWhite());
-   nvgFontSize( vg, 13.0);
-   nvgText( vg, CGRectGetMidX( canvas),
-                CGRectGetMidY( canvas),
-                buf,
-                NULL);
+   CGContextFontFace( context, "sans");
+   CGContextCombinedTextAlignment( context, CGTextAlignCenter | CGTextAlignBaseline); // Converted from CGTextAlignCenter | CGTextAlignBaseline
+   CGContextTextColor( context, CGColorMakeBlack());
+   CGContextTextBackgroundColor( context, CGColorMakeWhite());
+   CGContextFontSize( context, 13.0);
+   CGContextText( context, CGPointMake( CGRectGetMidX( canvas), CGRectGetMidY( canvas)), buf, 0);
 }
-
-
 static void   drawStuff0( CALayer *layer, CGContext *context)
 {
    drawRect( layer, context, 0);
@@ -71,19 +60,15 @@ static void   drawStuff3( CALayer *layer, CGContext *context)
 {
    drawRect( layer, context, 0x3);
 }
-
-
 static void   fillRect( CALayer *layer, CGContext *context, NSUInteger mode)
 {
-   struct NVGcontext    *vg;
    CGRect               canvas;
    CGRect               rect;
    char                 buf[ 64];
    CGFloat              strokeWidth;
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [layer canvas];
-   nvgResetScissor( vg); // see if it makes a difference
+   CGContextResetScissor( context); // see if it makes a difference
 
    canvas = CGRectInset( canvas, 2.0, 2.0);
 
@@ -94,11 +79,11 @@ static void   fillRect( CALayer *layer, CGContext *context, NSUInteger mode)
    rect = CGRectMakeStrokeRect( canvas, strokeWidth, CGOverlap);
    rect = CGRectMakeFillRect( rect, strokeWidth, CGOverlap);
 
-   nvgBeginPath( vg);
-   nvgShapeAntiAlias( vg, (mode & AntiAlias) ? 1 : 0);
-   nvgRect( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-   nvgFillColor( vg, CGColorMakeRed());
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextShapeAntiAlias( context, (mode & AntiAlias) ? 1 : 0);
+   CGContextRect( context, rect);
+   CGContextFillColor( context, CGColorMakeRed());
+   CGContextFill( context);
 
    sprintf( buf, "%s%.0f",
                  (mode & AntiAlias) ? "AA " : "No AA ",
@@ -106,19 +91,14 @@ static void   fillRect( CALayer *layer, CGContext *context, NSUInteger mode)
 
    [context fontWithNameUTF8String:"sans"];
 
-   nvgFontFace( vg, "sans");
-   nvgTextAlign( vg, CGTextAlignCenter | CGTextAlignBaseline); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE
-   nvgTextColor( vg, CGColorMakeWhite());
-   nvgTextBackgroundColor( vg, CGColorMakeRed());
+   CGContextFontFace( context, "sans");
+   CGContextCombinedTextAlignment( context, CGTextAlignCenter | CGTextAlignBaseline); // Converted from CGTextAlignCenter | CGTextAlignBaseline
+   CGContextTextColor( context, CGColorMakeWhite());
+   CGContextTextBackgroundColor( context, CGColorMakeRed());
 
-   nvgFontSize( vg, 13.0);
-   nvgText( vg, CGRectGetMidX( canvas),
-                CGRectGetMidY( canvas),
-                buf,
-                NULL);
+   CGContextFontSize( context, 13.0);
+   CGContextText( context, CGPointMake( CGRectGetMidX( canvas), CGRectGetMidY( canvas)), buf, 0);
 }
-
-
 static void   fillStuff0( CALayer *layer, CGContext *context)
 {
    fillRect( layer, context, 0x0);
@@ -138,8 +118,6 @@ static void   fillStuff3( CALayer *layer, CGContext *context)
 {
    fillRect( layer, context, 0x3);
 }
-
-
 typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 8] =
@@ -154,8 +132,6 @@ static CALayerDrawCallbackPointer_t   drawStuff[ 8] =
    (CGGraphicsLayerDrawCallback_t *) fillStuff2,
    (CGGraphicsLayerDrawCallback_t *) fillStuff3
 };
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -174,8 +150,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

@@ -1,8 +1,6 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect              canvas;
@@ -27,7 +25,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                                       (CGRect *) rects);
 
    // NVGpaint nvgLinearGradient(NVGcontext* ctx, float sx, float sy, float ex, float ey,
-   //                  NVGcolor icol, NVGcolor ocol);
+   //                  CGColor icol, CGColor ocol);
    rect = rects[ 0][ 0];
    x       = (frameNr % 1000) / 999.0;
    feather = rect.size.height / 2.0 * (1.0 - _CACubicGetValue( CACubicEaseIn, x));
@@ -35,7 +33,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 //   feather = 20.0;
 
    gradientRect  = CGRectInset( rect, feather / 4.0, feather / 4.0);
-   paint         = [CGGradient boxGradientWithRoundedRect:gradientRect // Converted from nvgBoxGradient
+   paint         = [CGGradient boxGradientWithRoundedRect:gradientRect
                                              cornerRadius:0.0
                                                     color:CGColorMakeYellow()
                                                   feather:feather
@@ -55,7 +53,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
 
    rect  = rects[ 0][ 1];
-   paint = [CGGradient boxGradientWithRoundedRect:rect // Converted from nvgBoxGradient
+   paint = [CGGradient boxGradientWithRoundedRect:rect
                               cornerRadius:0.0
                                      color:CGColorMakeBlue()
                                    feather:feather
@@ -76,7 +74,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
 
    rect  = rects[ 1][ 0];
-   paint = [CGGradient linearGradientWithRect:rect // Converted from nvgLinearGradient
+   paint = [CGGradient linearGradientWithRect:rect
                                    startColor:CGColorMakeYellow()
                                      endColor:CGColorMakeBlue()
                                      rotation:0.0f];
@@ -91,7 +89,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    rect   = rects[ 1][ 1];
    radius = CGRectGetOuterRadius( rect);
    radius = radius * _CACubicGetValue( CACubicEaseOut, x);
-   paint  = [CGGradient radialGradientWithCircle:CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), radius) // Converted from nvgRadialGradient
+   paint  = [CGGradient radialGradientWithCircle:CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), radius)
                                            color:CGColorMakeBlue()
                                      innerRadius:0.0
                                       innerColor:CGColorMakeBlue()];
@@ -113,8 +111,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            60.0f));
 }
-
-
 
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,

@@ -4,8 +4,6 @@
 #import "import.h"
 
 #import <string.h>
-
-
 #define HAVE_TEXTURE
 
 #ifdef HAVE_TEXTURE
@@ -43,8 +41,6 @@ static void   drawTexture( CGContext *context, CGSize size)
    }
    CGContextStroke( context);
 }
-
-
 static CGFramebuffer  *createTexture( CGContext *context,
                                       CGFloat pixelRatio,
                                       NSUInteger textureFlags)
@@ -83,15 +79,12 @@ static CGFramebuffer  *createTexture( CGContext *context,
 }
 
 #endif
-
-
 static void  drawStuff( CALayer *layer, CGContext *context)
 {
    CGFloat      angle;
    CGRect       rect;
    CGRect       shape;
    CARotation   rotation;
-   NVGpaint     paint;
    NSUInteger   frameNumber;
 
    frameNumber = [context numberOfFrames];
@@ -119,8 +112,6 @@ static void  drawStuff( CALayer *layer, CGContext *context)
    }
    CGContextFill( context);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView      *view;
@@ -155,8 +146,6 @@ void   setupScene( UIWindow *window)
    [window deactivateGraphicsContext:context];
 #endif
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow        *window;
@@ -187,8 +176,6 @@ int   main( int argc, char *argv[])
 
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

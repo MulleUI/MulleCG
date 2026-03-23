@@ -5,8 +5,6 @@
 #include <string.h>
 #include <time.h>
 
-
-
 static char* cpToUTF8(int cp, char* str)
 {
    int n = 0;
@@ -27,20 +25,14 @@ static char* cpToUTF8(int cp, char* str)
    }
    return str;
 }
-
-
 static inline CGFloat   CGSizeGetMax( CGSize size)
 {
    return( size.width > size.height ? size.width : size.height);
 }
-
-
 static inline CGFloat   CGSizeGetMin( CGSize size)
 {
    return( size.width < size.height ? size.width : size.height);
 }
-
-
 static inline CGFloat   CGRectGetCornerRadiusValue( CGRect rect, CGFloat factor)
 {
    CGFloat   corner;
@@ -49,21 +41,17 @@ static inline CGFloat   CGRectGetCornerRadiusValue( CGRect rect, CGFloat factor)
    corner *= factor;
    return( corner);
 }
-
-
-static void   drawFancyStepperBackground( CGContext *context, // Changed from struct NVGcontext *vg
+static void   drawFancyStepperBackground( CGContext *context, // Changed from struct CGContext *context
                                           CGRect rect,
                                           CGColor color1,
                                           CGColor color2,
                                           CADirection direction)
 {
-   NVGpaint   paint;
    CGFloat    corner;
    CGFloat    cornerTR;
    CGFloat    cornerTL;
    CGFloat    cornerBR;
    CGFloat    cornerBL;
-   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
 
    /*
     * outer
@@ -81,41 +69,22 @@ static void   drawFancyStepperBackground( CGContext *context, // Changed from st
       cornerTL = cornerBL = 0.0f;
       cornerBR = cornerTR = corner;
    }
-   nvgBeginPath( vg);
-   nvgRoundedRectVarying( vg, rect.origin.x,
-                              rect.origin.y,
-                              rect.size.width,
-                              rect.size.height,
-                              cornerTL,
-                              cornerTR,
-                              cornerBR,
-                              cornerBL);
+   CGContextBeginPath( context);
+   CGContextRoundedRectVarying( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height), MulleCornerInsetsMake( cornerTL, cornerTR, cornerBR, cornerBL));
 
-   paint = nvgLinearGradient( vg,
-                              CGRectGetMinX( rect),
-                              CGRectGetMinY( rect),
-                              CGRectGetMinX( rect),   // sic!, we dont want change across x
-                              CGRectGetMaxY( rect),
-                              color1,
-                              color2);
-   nvgFillPaint( vg, paint);
-   nvgFill( vg);
+   CGContextSetFillLinearGradient( context, CGPointMake( CGRectGetMinX( rect), CGRectGetMinY( rect)), CGPointMake( CGRectGetMinX( rect), CGRectGetMaxY( rect)), color1, color2);
+   CGContextFill( context);
+   CGContextFill( context);
 }
-
-
-
-
-static void   drawFancyStepperHighlight( CGContext *context, // Changed from struct NVGcontext *vg
+static void   drawFancyStepperHighlight( CGContext *context, // Changed from struct CGContext *context
                                          CGRect rect,
                                          CGFloat thickness,
                                          CGFloat brightness,
                                          CADirection direction)
 {
-   NVGpaint   paint;
    CGFloat    corner;
    CGFloat    cornerTL;
    CGFloat    cornerTR;
-   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
 
    /*
     * highlight
@@ -126,69 +95,38 @@ static void   drawFancyStepperHighlight( CGContext *context, // Changed from str
    cornerTL = (direction == CADirectionLeft) ? corner : 0.0f;
    cornerTR = (direction == CADirectionRight) ? corner : 0.0f;
 
-   nvgBeginPath( vg);
-   nvgRoundedRectVarying( vg, rect.origin.x,
-                              rect.origin.y,
-                              rect.size.width,
-                              rect.size.height,
-                              cornerTL,
-                              cornerTR,
-                              0.0,
-                              0.0);
+   CGContextBeginPath( context);
+   CGContextRoundedRectVarying( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height), MulleCornerInsetsMake( cornerTL, cornerTR, 0.0, 0.0));
 
    // now subtract the next rect to get a highlight shape
-   nvgPathWinding(vg, NVG_HOLE); // sets nvgRoundedRect as a hole
+   CGContextPathWinding( context, CGPathFillStyleHole); // sets nvgRoundedRect as a hole
 
-   nvgRoundedRectVarying( vg, rect.origin.x,
-                              rect.origin.y + thickness,
-                              rect.size.width,
-                              rect.size.height - thickness,
-                              cornerTL,
-                              cornerTR,
-                              0.0,
-                              0.0);
+   CGContextRoundedRectVarying( context, CGRectMake( rect.origin.x, rect.origin.y + thickness, rect.size.width, rect.size.height - thickness), MulleCornerInsetsMake( cornerTL, cornerTR, 0.0, 0.0));
 
-   paint = nvgLinearGradient( vg,
-                              CGRectGetMinX( rect),
-                              CGRectGetMinY( rect),
-                              CGRectGetMinX( rect),
-                              CGRectGetMinY( rect) + corner,
-                              CGColorMakeWithRGBA( 1.0, 1.0, 1.0, brightness),
-                              CGColorMakeTransparent());
-//   nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
-   nvgFillPaint( vg, paint);
-   nvgFill( vg);
+   CGContextSetFillLinearGradient( context, CGPointMake( CGRectGetMinX( rect), CGRectGetMinY( rect)), CGPointMake( CGRectGetMinX( rect), CGRectGetMinY( rect) + corner), CGColorMakeWithRGBA( 1.0, 1.0, 1.0, brightness), CGColorMakeTransparent());
+//   CGContextGlobalCompositeOperation( context, CGCompositeOperationLighter);
+   CGContextFill( context);
+   CGContextFill( context);
 }
-
-
-static void   drawFancyStepperLine( CGContext *context, CGRect rect, CGFloat strokeWidth, CGColor color) // Changed from struct NVGcontext *vg
+static void   drawFancyStepperLine( CGContext *context, CGRect rect, CGFloat strokeWidth, CGColor color) // Changed from struct CGContext *context
 {
    CGFloat    corner;
-   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
 
    corner = CGRectGetCornerRadiusValue( rect, 0.5);
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
 
-   nvgRoundedRect( vg, rect.origin.x,
-                       rect.origin.y,
-                       rect.size.width,
-                       rect.size.height,
-                       corner);
+   CGContextRoundedRect( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height), corner);
 
-   nvgGlobalCompositeOperation( vg, NVG_SOURCE_OVER);
-   nvgStrokeColor( vg, color);
-   nvgStrokeWidth( vg, strokeWidth);
-   nvgStroke( vg);
+   CGContextGlobalCompositeOperation( context, CGCompositeOperationSourceOver);
+   CGContextStrokeColor( context, color);
+   CGContextStrokeWidth( context, strokeWidth);
+   CGContextStroke( context);
 }
-
-
 
 static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, BOOL highlight)
 {
    CGFont              *font;
-   struct NVGpaint     paint;
-   struct NVGcontext   *vg;
    char                icon[ 8];
    char                *iconText;
    CGFloat             radius;
@@ -199,48 +137,35 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
       return;
 
    font = [context fontWithNameUTF8String:"icons"];
-   vg   = CGContextGetNVGContext( context);
 
    if( highlight)
    {
-      nvgBeginPath( vg);
-      nvgCircle( vg, CGRectGetMidX( iconRect), CGRectGetMidY( iconRect), radius);
+      CGContextBeginPath( context);
+      CGContextCircle( context, CACircleMakeWithCenterAndRadius( CGPointMake( CGRectGetMidX( iconRect), CGRectGetMidY( iconRect)), radius));
 #if 0
-   paint = nvgLinearGradient( vg,
-                              CGRectGetMinX( iconRect),
-                              CGRectGetMinY( iconRect),
-                              CGRectGetMinX( iconRect),
-                              CGRectGetMaxY( iconRect),
-                              CGColorMakeWithRGBA( 0.6, 0.6, 0.6, 0.6),
-                              CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.2));
+   CGContextSetFillLinearGradient( context, CGPointMake( CGRectGetMinX( iconRect), CGRectGetMinY( iconRect)), CGPointMake( CGRectGetMinX( iconRect), CGRectGetMaxY( iconRect)), CGColorMakeWithRGBA( 0.6, 0.6, 0.6, 0.6), CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.2));
 #else
-      paint = nvgRadialGradient( vg,
-                                 CGRectGetMidX( iconRect) - radius / 8.0,
-                                 CGRectGetMidY( iconRect) - radius / 8.0,
-                                 radius / 8.0,
-                                 radius / 2.0,
-                                 CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.6),
-                                 CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.3));
+   CGContextSetFillRadialGradient( context, CACircleMakeWithCenterAndRadius( CGPointMake( CGRectGetMidX( iconRect) - radius / 8.0, CGRectGetMidY( iconRect) - radius / 8.0), radius / 2.0), CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.3), radius / 8.0, CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.6));
 #endif
-      nvgFillPaint( vg, paint);
-      nvgFill( vg);
+      CGContextFill( context);
+      CGContextFill( context);
    }
-//   nvgStrokeColor( vg, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 0.8));
-//   nvgStroke( vg);
+//   CGContextStrokeColor( context, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 0.8));
+//   CGContextStroke( context);
 
    iconRect.origin = CGPointMake( CGRectGetMidX( iconRect) - radius,
                                   CGRectGetMidY( iconRect) - radius);
    iconRect.size   = CGSizeMake( radius * 2.0, radius * 2.0f);
 
-   nvgFontSize( vg, iconRect.size.height);
-   nvgFontFace( vg, "icons");
+   CGContextFontSize( context, iconRect.size.height);
+   CGContextFontFace( context, "icons");
 
    iconText = cpToUTF8( unicodeIcon, icon);
 
-   nvgGlobalCompositeOperation( vg, NVG_LIGHTER);
-   nvgGlobalAlpha( vg, 0.8);
-   nvgTextColor( vg, CGColorMakeWhite());
-   nvgTextBackgroundColor( vg, CGColorMakeBlack());
+   CGContextGlobalCompositeOperation( context, CGCompositeOperationLighter);
+   CGContextGlobalAlpha( context, 0.8);
+   CGContextTextColor( context, CGColorMakeWhite());
+   CGContextTextBackgroundColor( context, CGColorMakeBlack());
    CGContextTextInRect( context, iconText, // Converted from mvgTextInRect
                       (size_t) -1,
                       iconRect,
@@ -248,11 +173,8 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
                       CGTextOptionAlignVisually);
 }
 
-
-
 static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[ 6])
 {
-   NVGpaint   paint; // This variable seems unused here
    CGFloat    corner; // This variable seems unused here
    CGRect     innerRect;
    CGRect     iconRect;
@@ -266,11 +188,7 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
    CGFloat    thickness;
    CGFloat    horw;
 
-   struct NVGcontext *vg = CGContextGetNVGContext( context); // vg is retrieved once
-
-   // Delete: vg = CGContextGetNVGContext( context); // Redundant
-
-   nvgSave( vg);
+   CGContextSave( context);
    {
       /*
        * outer
@@ -318,10 +236,8 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
        * line
        */
    }
-   nvgRestore( vg);
+   CGContextRestore( context);
 }
-
-
 
 static void   drawStepper( CALayer *layer, CGContext *context)
 {
@@ -330,7 +246,6 @@ static void   drawStepper( CALayer *layer, CGContext *context)
    CGRect              rect;
    NSUInteger          x, y;
    CGColor             colors[ 6];
-   // Delete: NVGcontext          *vg; // No longer needed
    CGFloat             leftHue;
    CGFloat             rightHue;
 
@@ -356,8 +271,6 @@ static void   drawStepper( CALayer *layer, CGContext *context)
          drawFancyStepper( context, rect, colors);
       }
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -368,8 +281,6 @@ void   setupScene( UIWindow *window)
    [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStepper];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow         *window;
@@ -389,10 +300,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

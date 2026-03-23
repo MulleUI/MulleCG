@@ -1,13 +1,9 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 #define AntiAlias  1
 #define Thick      2
 #define Offset     4
-
-
 
 static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias)
 {
@@ -22,14 +18,13 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
    char         *strokeMode;
    char         buf[ 1024];
    NSUInteger   i, j;
-   // struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context, though not strictly needed if all calls are CGContext...
 
    canvas      = CGRectInset( [layer canvas], 10.0, 10.0);
 
    strokeWidth = 6.0;
-   CGContextShapeAntiAlias( context, antiAlias); // Converted from nvgShapeAntiAlias
+   CGContextShapeAntiAlias( context, antiAlias);
 
-   CGContextResetScissor( context); // Converted from nvgResetScissor // see if it makes a difference
+   CGContextResetScissor( context); // see if it makes a difference
    CGRectPartitionVertically( canvas, 20.0, 3, rows);
    for( i = 0; i < 3; i++)
    {
@@ -83,14 +78,14 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
          CGContextStrokeWidth( context, strokeWidth);
          CGContextStroke( context);
 
-         CGContextGlobalCompositeOperation( context, NVG_LIGHTER);
+         CGContextGlobalCompositeOperation( context, CGCompositeOperationLighter);
          {
             CGContextBeginPath( context);
             CGContextRect( context, fillRect);
             CGContextFillColor( context, CGColorMake( 0.0, 1.0, 0.0, 0.75));
             CGContextFill( context);
          }
-         CGContextGlobalCompositeOperation( context, NVG_SOURCE_OVER);
+         CGContextGlobalCompositeOperation( context, CGCompositeOperationSourceOver);
          mulle_snprintf( buf, sizeof( buf),
                            "%s %s %s\nf:%s\ns:%s",
                            antiAlias ? "AA " : "No AA ",
@@ -100,7 +95,7 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
                            CGRectUTF8String( strokeRect));
 
          CGContextFontFace( context, "sans");
-         CGContextCombinedTextAlignment( context, CGTextAlignCenter | CGTextAlignTop); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_TOP
+         CGContextCombinedTextAlignment( context, CGTextAlignCenter | CGTextAlignTop); // Converted from CGTextAlignCenter | CGTextAlignTop
          CGContextTextColor( context, CGColorMakeBlack());
          CGContextTextBackgroundColor( context, CGColorMake( 0.0, 1.0, 0.0, 0.75));
          CGContextFontSize( context, 12.0);
@@ -113,7 +108,7 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
    }
 
    strokeWidth = 1.0;
-   CGContextShapeAntiAlias( context, 1); // Converted from nvgShapeAntiAlias
+   CGContextShapeAntiAlias( context, 1);
 
    CGRectPartitionVertically( canvas, 20.0, 3, rows);
    for( i = 2; i < 3; i++)
@@ -153,8 +148,6 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
       }
    }
 }
-
-
 static void   drawStuff0( CALayer *layer, CGContext *context)
 {
    drawRect( layer, context, 0x0);
@@ -165,8 +158,6 @@ static void   drawStuff1( CALayer *layer, CGContext *context)
    drawRect( layer, context, 0x1);
 }
 
-
-
 typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 2] =
@@ -174,8 +165,6 @@ static CALayerDrawCallbackPointer_t   drawStuff[ 2] =
    (CGGraphicsLayerDrawCallback_t *) drawStuff0,
    (CGGraphicsLayerDrawCallback_t *) drawStuff1
 };
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -195,8 +184,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

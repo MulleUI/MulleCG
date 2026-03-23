@@ -1,13 +1,9 @@
 #import "import-private.h"
-
-
 enum
 {
    even,
    odd
 };
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect              canvas;
@@ -45,8 +41,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    }
    return( YES);
 }
-
-
 static void   usage( void)
 {
    fprintf( stderr, "\n"
@@ -60,8 +54,6 @@ static void   usage( void)
 "\n");
    exit( 1);
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow       *window;

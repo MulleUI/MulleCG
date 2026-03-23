@@ -1,7 +1,5 @@
 #import "import-private.h"
 
-
-
 static void   usage( void)
 {
    fprintf( stderr, "\n"
@@ -16,49 +14,32 @@ static void   usage( void)
    exit( 1);
 }
 
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   struct NVGcontext   *vg;
    CGRect              canvas;
-
-   vg = CGContextGetNVGContext( context);
-
    canvas               = [layer canvas];
    canvas.size.height  /= 3.0;
 
    // yellow stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.95, 0.95, 0.0, 1.0));
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake( canvas.origin.x, canvas.origin.y, canvas.size.width, canvas.size.height));
+   CGContextFillColor( context, CGColorMakeWithRGBA( 0.95, 0.95, 0.0, 1.0));
+   CGContextFill( context);
 
    // green stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 1,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.0, 0.95, 0.0, 1.0));
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake( canvas.origin.x, canvas.origin.y + canvas.size.height * 1, canvas.size.width, canvas.size.height));
+   CGContextFillColor( context, CGColorMakeWithRGBA( 0.0, 0.95, 0.0, 1.0));
+   CGContextFill( context);
 
    // blue stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 2,
-                canvas.size.width,
-                canvas.size.height);
-   nvgFillColor( vg, nvgRGBAf( 0.5, 0.5, 0.95, 1.0));
-   nvgFill( vg);
+   CGContextBeginPath( context);
+   CGContextRect( context, CGRectMake( canvas.origin.x, canvas.origin.y + canvas.size.height * 2, canvas.size.width, canvas.size.height));
+   CGContextFillColor( context, CGColorMakeWithRGBA( 0.5, 0.5, 0.95, 1.0));
+   CGContextFill( context);
 
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    CGGraphicsLayer    *layer;

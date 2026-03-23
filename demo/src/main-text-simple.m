@@ -4,8 +4,6 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect               canvas;
@@ -15,7 +13,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    [context useFontWithNameUTF8String:"sans"];
 
    CGContextClearType( context, 1);
-   CGContextCombinedTextAlignment( context, CGTextAlignCenter | CGTextAlignMiddle); // Converted from NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE
+   CGContextCombinedTextAlignment( context, CGTextAlignCenter | CGTextAlignMiddle); // Converted from CGTextAlignCenter | CGTextAlignMiddle
    CGContextTextColor( context, CGColorMakeOrange());
    CGContextTextBackgroundColor( context, CGColorMakeBlack());
 
@@ -30,15 +28,13 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGContextFormat( context, CGRectGetCenter( canvas), "O");
 
    CGContextClearType( context, 0);
-   CGContextCombinedTextAlignment( context, CGTextAlignLeft| CGTextAlignBottom); // Converted from NVG_ALIGN_LEFT| NVG_ALIGN_BOTTOM
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft| CGTextAlignBottom); // Converted from CGTextAlignLeft| CGTextAlignBottom
    CGContextTextColor( context, CGColorMakeWhite());
    CGContextFontSize( context, 14.0f);
    CGContextFormat( context, CGPointOffset( CGRectGetBottomLeft( canvas), 20, -20),
                   "fontSize: %g", fontSize);
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -46,8 +42,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            60.0f));
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

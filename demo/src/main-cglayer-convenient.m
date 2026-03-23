@@ -1,11 +1,7 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 #include "draw-flag.inc"
-
-
 //
 // A somewhat more conveniently coded version of main-cglayer.m
 // using: -beginFBRenderWithBackgroundColor: / -endFBRender:
@@ -24,7 +20,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGRect                        rect;
    CGRect                        rects[ 2][ 2];
    NSUInteger                    i, j;
-   NVGpaint                      paint;
    struct CGFramebufferRenderInfo      memo;
 
    @autoreleasepool
@@ -34,10 +29,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       // draw a little square "conventionally"
       rect = CGRectCenterInRect( CGRectMake( 0, 0, 40, 40), originalCanvas);
 
-      CGContextBeginPath( context); // Converted from nvgBeginPath
-      CGContextRect( context, rect); // Converted from nvgRect
-      CGContextFillColor( context, CGColorMakeWithRGBA( 0.7, 0.5, 0.7, 1.0)); // Converted from nvgFillColor
-      CGContextFill( context); // Converted from nvgFill
+      CGContextBeginPath( context);
+      CGContextRect( context, rect);
+      CGContextFillColor( context, CGColorMakeWithRGBA( 0.7, 0.5, 0.7, 1.0));
+      CGContextFill( context);
 
       // we want to draw the flag four times. We render it once into a CGFramebuffer
       // and then draw the CGFramebuffer. This may or may not be better than drawing
@@ -67,11 +62,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
                       context:context];
 
             rect = CGRectExtrude( rects[ j][ i], 1, 1);
-            CGContextBeginPath( context); // Converted from nvgBeginPath
-            CGContextRect( context, rect); // Converted from nvgRect
-            CGContextStrokeColor( context, CGColorMakeGreen()); // Converted from nvgStrokeColor
-            CGContextStrokeWidth( context, 2.0); // Converted from nvgStrokeWidth
-            CGContextStroke( context); // Converted from nvgStroke
+            CGContextBeginPath( context);
+            CGContextRect( context, rect);
+            CGContextStrokeColor( context, CGColorMakeGreen());
+            CGContextStrokeWidth( context, 2.0);
+            CGContextStroke( context);
          }
 
       // CGFramebuffer must remain until actual render end or flush
@@ -79,15 +74,13 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    }
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    NSUInteger      styleMask;
    UIApplication   *app;
    UIWindow        *window;
 
-   fprintf( stderr, "%s\n", [CGContext nanoVGBackendUTF8String]);
+   fprintf( stderr, "%s\n", [CGContext backendUTF8String]);
 
    app = [UIApplication sharedInstance];
 
@@ -106,10 +99,6 @@ int   main( int argc, char *argv[])
 
    return( [app runWindow:window]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

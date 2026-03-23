@@ -33,22 +33,7 @@
 //  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 //  POSSIBILITY OF SUCH DAMAGE.
 //
-#define MULLE_CG_INCLUDE_BARE
-
-// prefer a local CGColor over one in import.h
-#ifdef __has_include
-# if __has_include( "CGColor.h")
-#  import "CGColor.h"
-# endif
-#endif
-
-// we want "import.h" always anyway
 #import "import.h"
-
-// Ensure MULLE_CG_GLOBAL is defined
-#ifndef MULLE_CG_GLOBAL
-# include "include.h"
-#endif
 
 MULLE_CG_GLOBAL
 char  *CGColorUTF8String( CGColor color);

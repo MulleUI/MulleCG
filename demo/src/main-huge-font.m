@@ -3,8 +3,6 @@
 #import "import-private.h"
 
 #include <string.h>
-
-
 // this is a "reenactment" of MulleGraphics/main-catextlayer.m just with
 // plain nanovg to check if it looks the same
 
@@ -38,8 +36,6 @@
 //    view  = [UIView viewWithLayer:layer];
 //    [contentPlane addSubview:view];
 // }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGFont             *font;
@@ -52,13 +48,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGContextFontSize( context, canvas.size.height);
    CGContextTextColor( context, CGColorMakeWhite());
    CGContextTextBackgroundColor( context, CGColorMakeWithRGBA( 0.5, 0.5, 0.5, 1.0));
-   CGContextCombinedTextAlignment( context, CGTextAlignCenter|CGTextAlignBottom); // Converted from NVG_ALIGN_CENTER|NVG_ALIGN_BOTTOM
+   CGContextCombinedTextAlignment( context, CGTextAlignCenter|CGTextAlignBottom); // Converted from CGTextAlignCenter|CGTextAlignBottom
    CGContextText( context, CGPointMake( CGRectGetMidX( canvas), CGRectGetMaxY( canvas)), "|y|", (size_t) -1);
 
    return( YES);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -73,8 +67,6 @@ void   setupScene( UIWindow *window)
    [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -101,8 +93,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
@@ -138,6 +128,4 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-
 // EOF

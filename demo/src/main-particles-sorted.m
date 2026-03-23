@@ -3,16 +3,12 @@
 #import "import-private.h"
 
 #import <string.h>
-
-
 // THIS DEMOS IS DIFFERENT BECAUSE WE TRY TO KEEP SAME COLORED PARTICLES
 // TOGETHER. WILL IT MAKE A DIFFERENCE ?
 // 2.9.2022: on this lame wayland emulated 3d, its actually slower
 
 #define PARTICLE_COUNT  1000
 #define PARTICLE_SIZE   10
-
-
 #define STROKE          0
 #define FILL            1
 
@@ -36,8 +32,6 @@
 #define EDGE_ANTIALIAS  1
 #define SHAPE_ANTIALIAS 1
 #define DRAW_METHOD     FILL
-
-
 
 // Debug Values
 //
@@ -105,8 +99,6 @@ static CGColor    colors[ 32] =
    CGColorDataViolet,
    CGColorDataYellowGreen
 };
-
-
 static inline void   ParticleInit( struct Particle *p, CGSize canvasSize)
 {
    CGFloat    r, g, b;
@@ -118,11 +110,9 @@ static inline void   ParticleInit( struct Particle *p, CGSize canvasSize)
 
    p->color       = colors[ rand() % 32];
 }
-
-
 static inline void   ParticleDrawRange( struct Particle *particles,
                                         NSRange range,
-                                        NVGcontext *vg)
+                                        CGContext *context)
 {
    CGFloat          size;
    struct Particle  *start;
@@ -141,21 +131,19 @@ static inline void   ParticleDrawRange( struct Particle *particles,
    if( start == sentinel)
       return;
 
-   nvgBeginPath( vg);
+   CGContextBeginPath( context);
 #if DRAW_METHOD == STROKE
-   nvgStrokeColor( vg, start->color);
+   CGContextStrokeColor( context, start->color);
 #else
-   nvgFillColor( vg, start->color);
+   CGContextFillColor( context, start->color);
 #endif
 
    for( p = start; p < sentinel; p++)
    {
 #if CIRCLE
-   nvgCircle( vg, p->location.x,
-                  p->location.y,
-                  size);
+   CGContextCircle( context, CACircleMakeWithCenterAndRadius( CGPointMake( p->location.x, p->location.y), size));
 #else
-   nvgRect( vg, p->location.x,
+   CGContextRect( context, p->location.x,
                 p->location.y,
                 size,
                 size);
@@ -163,14 +151,12 @@ static inline void   ParticleDrawRange( struct Particle *particles,
    }
 
 #if DRAW_METHOD == STROKE
-   nvgStroke( vg);
+   CGContextStroke( context);
 #else
-   nvgFill( vg);
+   CGContextFill( context);
 #endif
 
 }
-
-
 static inline void   ParticleUpdate( struct Particle *p, CGSize canvasSize)
 {
    p->location.x += p->velocity.dx;
@@ -181,14 +167,10 @@ static inline void   ParticleUpdate( struct Particle *p, CGSize canvasSize)
   if (p->location.y < 0 || p->location.y > canvasSize.height)
      p->velocity.dy = -p->velocity.dy;
 }
-
-
 static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
 {
    return( CGColorCompare( p->color, q->color));
 }
-
-
 @interface ParticlesLayer : CGGraphicsLayer
 {
    struct Particle   *_particles;
@@ -199,8 +181,6 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
 - (void) setupParticles:(NSUInteger) n;
 
 @end
-
-
 @implementation ParticlesLayer
 
 - (void) dealloc
@@ -211,8 +191,6 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
    mulle_allocator_free( allocator, _particles);
    [super dealloc];
 }
-
-
 - (void) setupParticles:(NSUInteger) n
 {
    CGRect                  canvas;
@@ -233,11 +211,8 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
           (int (*)(const void *, const void *))
           ParticleCompareByColor);
 }
-
-
 - (BOOL) drawInContext:(CGContext *) context
 {
-   NVGcontext   *vg;
    CGRect       canvas;
    NSUInteger   i;
    NSRange      range;
@@ -248,29 +223,26 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
    if( ! [super drawInContext:context])
       return( NO);
 
-   vg     = CGContextGetNVGContext( context);
    canvas = [self canvas];
 
-   nvgShapeAntiAlias( vg, SHAPE_ANTIALIAS);
-
-
+   CGContextShapeAntiAlias( context, SHAPE_ANTIALIAS);
 //enum NVGcompositeOperation {
-//	NVG_SOURCE_OVER,
-//	NVG_SOURCE_IN,          // saturate to black ?
-//	NVG_SOURCE_OUT,         // flitter
-//	NVG_ATOP,               // normaaahl
-//	NVG_DESTINATION_OVER,   // schwarz
-//	NVG_DESTINATION_IN,     // schwarz
-//	NVG_DESTINATION_OUT,    // schwarz vom hintergrund
-//	NVG_DESTINATION_ATOP,   // kleiner flitter
-//	NVG_LIGHTER,   // brightness --> saturate to white
-//	NVG_COPY,   // rahmen effect
-//	NVG_XOR,    // flitter effect
+//	CGCompositeOperationSourceOver,
+//	CGCompositeOperationSourceIn,          // saturate to black ?
+//	CGCompositeOperationSourceOut,         // flitter
+//	CGCompositeOperationAtop,               // normaaahl
+//	CGCompositeOperationDestinationOver,   // schwarz
+//	CGCompositeOperationDestinationIn,     // schwarz
+//	CGCompositeOperationDestinationOut,    // schwarz vom hintergrund
+//	CGCompositeOperationDestinationAtop,   // kleiner flitter
+//	CGCompositeOperationLighter,   // brightness --> saturate to white
+//	CGCompositeOperationCopy,   // rahmen effect
+//	CGCompositeOperationXOR,    // flitter effect
 //};
 
-//   nvgGlobalCompositeOperation( vg, NVG_ATOP);
+//   CGContextGlobalCompositeOperation( context, CGCompositeOperationAtop);
 
-   nvgStrokeWidth( vg, PARTICLE_SIZE / 4);
+   CGContextStrokeWidth( context, PARTICLE_SIZE / 4);
 
    for( i = 0; i < _numberOfParticles; i++)
    {
@@ -285,7 +257,7 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
       if( ! CGColorEqualToColor( color, _particles[ i].color))
       {
          range.length    = i - range.location;
-         ParticleDrawRange( _particles, range, vg);
+         ParticleDrawRange( _particles, range, context);
 
          range.location += range.length;
          color           = _particles[ i].color;
@@ -294,15 +266,13 @@ static int   ParticleCompareByColor( struct Particle *p, struct Particle *q)
 
    range.length = _numberOfParticles - range.location;
 
-   ParticleDrawRange( _particles, range, vg);
+   ParticleDrawRange( _particles, range, context);
    range.location += range.length;
 
    return( YES);
 }
 
 @end
-
-
 void   setupSceneInView( UIWindowPlane *contentPlane)
 {
    ParticlesLayer   *layer;
@@ -311,8 +281,6 @@ void   setupSceneInView( UIWindowPlane *contentPlane)
    [contentPlane addLayer:layer];
    [layer setupParticles:PARTICLE_COUNT];
 }
-
-
 int   main()
 {
    UIWindow         *window;
@@ -340,8 +308,6 @@ int   main()
 
    return( [app runApp]);
 }
-
-
 
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,

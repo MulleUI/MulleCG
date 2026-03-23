@@ -1,10 +1,7 @@
 #import "CGFramebuffer.h"
 
 #import "CGContext.h"
-#import "CGContext+Drawing.h"
 #import "CGContext+DebugPrivate.h"
-#import "CGContext+Render.h"
-#import "CGContext+CGFramebuffer.h"
 #import "CGImage+DebugPrivate.h"
 
 #import "import-private.h"
@@ -48,43 +45,12 @@
                 nameUTF8String:(char *) nameUTF8String
                        context:(CGContext *) context
 {
-   CGPixelSize                   bitmapSize;
-   struct CGContextFramebuffer   old;
-   struct CGFrameInfo            frameInfo;
-   struct CGFrameInfo            oldFrameInfo;
-   CGRect                        rect;
-
-   assert( [image context] == context);
-   assert( [context conformsToProtocol:@protocol(UIGraphicsDrawing)]);
-
-   bitmapSize = [image bitmapSize];
-   self = [self initWithBitmapSize:bitmapSize
-                      textureFlags:textureFlags
-                    nameUTF8String:nameUTF8String
-                           context:context];
-   if( ! self)
-      return( self);
-
-   //
-   // use nanovg to draw the bitmap, using OpenGL portably is just pain
-   //
-   frameInfo    = CGFrameInfoFBMake( bitmapSize, 1.0, 1.0);
-   old          = [context bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( self)];
-   oldFrameInfo = [context bindRender:&frameInfo];
-   {
-      rect = CGRectMake( 0.0f, 0.0f, bitmapSize.width, bitmapSize.height);
-      [(id <UIGraphicsDrawing>) context drawRect:rect
-                                          image:image
-                                           scale:1.0];
-   }
-   [context bindRender:&oldFrameInfo];
-   [context bindFramebuffer:old];
-
-   CGImageLog( "create framebuffer %p with textureID %td (GPU: %p)",
-                     _gpuFramebuffer,
-                     [self textureID],
-                     [context gpuTextureForImageID:[self textureID]]);
-   return( self);
+   MULLE_C_UNUSED( image);
+   MULLE_C_UNUSED( textureFlags);
+   MULLE_C_UNUSED( nameUTF8String);
+   MULLE_C_UNUSED( context);
+   // implemented by nanovg backend
+   return( nil);
 }
 
 
@@ -93,6 +59,10 @@
                                 nameUTF8String:(char *) nameUTF8String
                                        context:(CGContext *) context
 {
+   MULLE_C_UNUSED( filename);
+   MULLE_C_UNUSED( textureFlags);
+   MULLE_C_UNUSED( nameUTF8String);
+   MULLE_C_UNUSED( context);
    abort();
    return( nil);
 }
@@ -103,6 +73,10 @@
                     nameUTF8String:(char *) nameUTF8String
                            context:(CGContext *) context
 {
+   MULLE_C_UNUSED( fileCData);
+   MULLE_C_UNUSED( textureFlags);
+   MULLE_C_UNUSED( nameUTF8String);
+   MULLE_C_UNUSED( context);
    abort();
    return( nil);
 }
@@ -114,6 +88,11 @@
                     nameUTF8String:(char *) nameUTF8String
                            context:(CGContext *) context
 {
+   MULLE_C_UNUSED( bytes);
+   MULLE_C_UNUSED( bitmapSize);
+   MULLE_C_UNUSED( textureFlags);
+   MULLE_C_UNUSED( nameUTF8String);
+   MULLE_C_UNUSED( context);
    abort();
    return( nil);
 }
@@ -175,8 +154,8 @@
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
 {
-   return( [_context RGBABytesBitmapOfImage:self
-                                  allocator:allocator]);
+   MULLE_C_UNUSED( allocator);
+   return( (struct CGBitmap){ 0 });  // implemented by nanovg backend
 }
 
 
@@ -302,30 +281,21 @@
 
 - (void) _beginFBRender:(struct CGFramebufferRenderInfo *) memo
 {
-   assert( memo);
-
-   [_resolvedImage autorelease];
-   _resolvedImage = nil;
-
-   [_context flushRender];
-   [_context getCurrentFrameInfo:&memo->frameInfo];
-   memo->framebuffer = [_context bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( self)];
+   // implemented by nanovg backend
 }
 
 
 - (void) _endFBRender:(struct CGFramebufferRenderInfo *) memo
 {
-   assert( memo);
-
-   [_context flushRender];
-   [_context bindFramebuffer:memo->framebuffer];
-   [_context changeRender:&memo->frameInfo];
+   // implemented by nanovg backend
 }
 
 
 - (void) _didBeginFBRenderWithBitmapSize:(CGPixelSize) bitmapSize
                         devicePixelRatio:(CGFloat) ratio
 {
+   MULLE_C_UNUSED( bitmapSize);
+   MULLE_C_UNUSED( ratio);
    // hack for nanovg category
 }
 

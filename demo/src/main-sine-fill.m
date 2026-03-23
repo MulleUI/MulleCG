@@ -2,8 +2,6 @@
 
 #import <MulleUI/MulleUI.h>
 
-
-
 // just a stupid demo for me to figure out what nanovg does for open
 // and selfintersecting fills
 
@@ -45,8 +43,6 @@ static CGPath   *createSineWavePath( CGRect bounds, BOOL close, BOOL hole)
 
    return( path);
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
   CGRect              canvas;
@@ -74,11 +70,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
   CGAffineTransform   transformation;
   CARotation          rotation;
   NSUInteger          frameNr;
-  NVGcontext          *nvg;
+  
 
   mulle_fprintf( stderr, "\n\n\n\n>>>>=== DRAWSTUFF %td ===<<<\n", [context numberOfFrames]);
-  nvg           = CGContextGetNVGContext( context);
-  nvgTrace( nvg, stderr);
+  
 
   canvas        = [layer canvas];
 
@@ -92,8 +87,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          rect  = rects[ i][ j];
          rect  = CGRectInset( rect, 10, 10);
          path  = createSineWavePath( rect, solid, clockwise);
-
-
          frameNr        = [context numberOfFrames] % 240;
          rotation       = (frameNr % 120) / 120.0f ;
          transformation = CGAffineTransformMakeRotationAroundPoint( CGRectGetCenter( rect), rotation);
@@ -125,8 +118,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
   return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
      UIApplication   *app;
@@ -150,8 +141,6 @@ int   main( int argc, char *argv[])
 
      return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

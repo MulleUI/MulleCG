@@ -30,21 +30,17 @@ struct Info
    CGFloat                fontSize;
    NSUInteger             verticalAlignment;
 };
-
-
-static char  *NVG_ALIGN_UTF8String( NSUInteger valign)
+static char  *CG_ALIGN_UTF8String( NSUInteger valign)
 {
    switch( valign)
    {
-   case CGTextAlignBaseline : return( "CGTextAlignBaseline"); // Converted from NVG_ALIGN_BASELINE
-   case CGTextAlignTop      : return( "CGTextAlignTop"); // Converted from NVG_ALIGN_TOP
-   case CGTextAlignMiddle   : return( "CGTextAlignMiddle"); // Converted from NVG_ALIGN_MIDDLE
-   case CGTextAlignBottom   : return( "CGTextAlignBottom"); // Converted from NVG_ALIGN_BOTTOM
+   case CGTextAlignBaseline : return( "CGTextAlignBaseline"); // Converted from CGTextAlignBaseline
+   case CGTextAlignTop      : return( "CGTextAlignTop"); // Converted from CGTextAlignTop
+   case CGTextAlignMiddle   : return( "CGTextAlignMiddle"); // Converted from CGTextAlignMiddle
+   case CGTextAlignBottom   : return( "CGTextAlignBottom"); // Converted from CGTextAlignBottom
    }
    return( "???");
 }
-
-
 static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *context)
 {
    CGTextMetrics   metrics;
@@ -76,7 +72,7 @@ static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *contex
          mulle_buffer_sprintf( buf, "clearType = %bd, fontSize = %g, valign = %s",
                                     info->isClearType,
                                     info->fontSize,
-                                    NVG_ALIGN_UTF8String( info->verticalAlignment));
+                                    CG_ALIGN_UTF8String( info->verticalAlignment));
          CGContextTextInRect( context,
                  mulle_buffer_get_string( buf), (size_t) -1,
                  CGRectMake( canvas.origin.x + 2,
@@ -132,10 +128,6 @@ static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *contex
    }
    CGContextRestore( context);
 }
-
-
-
-
 static void   dump_row_glyphs_to_file( FILE *fp,
                                        struct UITextRow *rows,
                                        NSUInteger i,
@@ -157,7 +149,7 @@ static void   dump_row_glyphs_to_file( FILE *fp,
 
    mulle_fprintf( fp, "fontSize = %g, valign = %s, lineHeight: %g visualLineHeight: %g\n",
                        info->fontSize,
-                       NVG_ALIGN_UTF8String( info->verticalAlignment),
+                       CG_ALIGN_UTF8String( info->verticalAlignment),
                        info->metrics.lineHeight,
                        info->visualMetrics.lineHeight);
    for( j = 0; j < m; j++)
@@ -166,8 +158,6 @@ static void   dump_row_glyphs_to_file( FILE *fp,
       mulle_fprintf( fp, "\t%td,%td: %s\n", j, i, CGRectUTF8String( rect));
    }
 }
-
-
 // nanovg uses a texture atlas, where each character has a 1 pixel clear
 // border around it, because:
 //
@@ -218,17 +208,17 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    bits = [context numberOfFrames] & 0x1F;
 
-   // NVG_ALIGN_TOP      = 1<<3,  // Align text vertically to top.
-   // NVG_ALIGN_MIDDLE   = 1<<4,  // Align text vertically to middle.
-   // NVG_ALIGN_BOTTOM   = 1<<5,  // Align text vertically to bottom.
-   // NVG_ALIGN_BASELINE = 1<<6, // Default, align text vertically to baseline.
+   // CGTextAlignTop      = 1<<3,  // Align text vertically to top.
+   // CGTextAlignMiddle   = 1<<4,  // Align text vertically to middle.
+   // CGTextAlignBottom   = 1<<5,  // Align text vertically to bottom.
+   // CGTextAlignBaseline = 1<<6, // Default, align text vertically to baseline.
 
    switch( bits & 0x3)
    {
-   case 0x00 : info->verticalAlignment = CGTextAlignBaseline; break; // Converted from NVG_ALIGN_BASELINE
-   case 0x01 : info->verticalAlignment = CGTextAlignTop;      break; // Converted from NVG_ALIGN_TOP
-   case 0x02 : info->verticalAlignment = CGTextAlignMiddle;   break; // Converted from NVG_ALIGN_MIDDLE
-   case 0x03 : info->verticalAlignment = CGTextAlignBottom;   break; // Converted from NVG_ALIGN_BOTTOM
+   case 0x00 : info->verticalAlignment = CGTextAlignBaseline; break; // Converted from CGTextAlignBaseline
+   case 0x01 : info->verticalAlignment = CGTextAlignTop;      break; // Converted from CGTextAlignTop
+   case 0x02 : info->verticalAlignment = CGTextAlignMiddle;   break; // Converted from CGTextAlignMiddle
+   case 0x03 : info->verticalAlignment = CGTextAlignBottom;   break; // Converted from CGTextAlignBottom
    }
    bits >>= 0x2;
 
@@ -242,7 +232,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    //CGContextShapeAntiAlias( context, 0);
    CGContextClearType( context, info->isClearType);
-   CGContextCombinedTextAlignment( context, CGTextAlignLeft | info->verticalAlignment); // Converted from NVG_ALIGN_LEFT | info->verticalAlignment
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | info->verticalAlignment); // Converted from CGTextAlignLeft | info->verticalAlignment
    CGContextFontSize( context, info->fontSize);
 
    info->metrics       = [context textMetrics];
@@ -289,10 +279,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    y += info->compensation;
    switch( info->verticalAlignment)
    {
-   case CGTextAlignBaseline : y += info->metrics.ascender; // info->metrics.descender; break; // Converted from NVG_ALIGN_BASELINE
-   case CGTextAlignTop      : y += 0; break; // Converted from NVG_ALIGN_TOP
-   case CGTextAlignMiddle   : y += info->metrics.lineHeight / 2.0; break; // Converted from NVG_ALIGN_MIDDLE
-   case CGTextAlignBottom   : y += info->metrics.lineHeight; break; // Converted from NVG_ALIGN_BOTTOM
+   case CGTextAlignBaseline : y += info->metrics.ascender; // info->metrics.descender; break; // Converted from CGTextAlignBaseline
+   case CGTextAlignTop      : y += 0; break; // Converted from CGTextAlignTop
+   case CGTextAlignMiddle   : y += info->metrics.lineHeight / 2.0; break; // Converted from CGTextAlignMiddle
+   case CGTextAlignBottom   : y += info->metrics.lineHeight; break; // Converted from CGTextAlignBottom
    }
 
    CGContextTextColor( context, CGColorMakeWhite());
@@ -319,8 +309,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( NO);
 }
-
-
 int   main( int argc, char *argv[])
 {
    int    i;
@@ -363,8 +351,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            0.125f));
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

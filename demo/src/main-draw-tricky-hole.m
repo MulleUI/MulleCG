@@ -2,8 +2,6 @@
 
 #import "import-private.h"
 
-
-
 // this demo shows how to draw "holes". Notice how the first nvgPathWinding
 // is completely ignored. It doesn't really (seem) to matter, if you do
 // hole / solid or solid / hole, the result is the same.
@@ -36,9 +34,7 @@ static void   drawCheckboard( CGRect  rect, CGContext *context)
            options:NULL
            context:context];
 }
-
-
-static CGRect   drawRect( CGContext *context, CGRect rect) // Converted from struct NVGcontext *vg
+static CGRect   drawRect( CGContext *context, CGRect rect) // Converted from struct CGContext *context
 {
    CGRect   drawRect;
 
@@ -50,9 +46,7 @@ static CGRect   drawRect( CGContext *context, CGRect rect) // Converted from str
 
    return( drawRect);
 }
-
-
-static void   drawArcHole( CGContext *context, CGRect rect) // Converted from struct NVGcontext *vg
+static void   drawArcHole( CGContext *context, CGRect rect) // Converted from struct CGContext *context
 {
    CGPoint          center;
    CGFloat          radius;
@@ -82,13 +76,11 @@ static void   drawArcHole( CGContext *context, CGRect rect) // Converted from st
    fprintf( stderr, "3: %s\n", CGPointUTF8String( intersectionPoint[ 3]));
 
    CGContextMoveTo( context, intersectionPoint[ 1]); // Converted from mvgMoveTo
-   CGContextArcRadians( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 1], angle[ 0], CARotationDirectionClockWise); // Converted from mvgArc
+   CGContextArc( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 1], angle[ 0] - angle[ 1]);
    CGContextLineTo( context, intersectionPoint[ 2]); // Converted from mvgLineTo
-   CGContextArcRadians( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 2], angle[ 3], CARotationDirectionClockWise); // Converted from mvgArc
+   CGContextArc( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 2], angle[ 3] - angle[ 2]);
    CGContextLineTo( context, intersectionPoint[ 1]); // Converted from mvgLineTo
 }
-
-
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
@@ -113,14 +105,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    CGContextBeginPath( context); // Converted from mvgBeginPath
    aRect = drawRect( context, rect); // Updated function call
-   CGContextPathWinding( context, NVG_SOLID); // Converted from mvgPathWinding
+   CGContextPathWinding( context, CGPathFillStyleSolid); // Converted from mvgPathWinding
 
    if( animShape)
    {
       bRect = CACircleGetOuterRect( CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), 50.0));
       bRect = CGRectOffset( bRect, animation * rect.size.width / 2.0 / 20.0, 0.0);
       CGContextRect( context, bRect); // Converted from mvgRect
-      CGContextPathWinding( context, NVG_HOLE); // Converted from mvgPathWinding
+      CGContextPathWinding( context, CGPathFillStyleHole); // Converted from mvgPathWinding
    }
    else
    {
@@ -128,7 +120,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       bRect  = CACircleGetOuterRect( CACircleMakeWithCenterAndRadius( CGRectGetCenter( rect), radius));
       bRect  = CGRectOffset( bRect, animation * rect.size.width / 2.0 / 20.0, 0.0);
       CGContextCircle( context, CACircleMakeWithCenterAndRadius( CGRectGetCenter( bRect), radius - 1.0)); // Converted from mvgCircle
-      CGContextPathWinding( context, NVG_HOLE); // Converted from mvgPathWinding
+      CGContextPathWinding( context, CGPathFillStyleHole); // Converted from mvgPathWinding
    }
 
    paint = [CGPaint paintWithStartColor:CGColorMakeGray()
@@ -137,8 +129,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                  context:context];
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -146,10 +136,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            60.0f));
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

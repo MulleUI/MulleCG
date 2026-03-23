@@ -7,11 +7,7 @@
 
 #include <string.h>
 #include <time.h>
-
-
 #include "bitmap2.inc"
-
-
 
 static void   draw_triangle_with_centroid( CGContext *context,
                                            CGPoint center,
@@ -68,8 +64,6 @@ static void   draw_triangle_with_centroid( CGContext *context,
       rect = CGRectMakeWithCenterAndSize( CGPointZero, CGSizeMake( 1.0, 1.0));
       [paint fillWithBounds:rect
                     context:context];
-
-
       xform      = CGContextCurrentTransform( context);
       translated = CGPointApplyAffineTransform( massCenter, xform);
    }
@@ -79,15 +73,12 @@ static void   draw_triangle_with_centroid( CGContext *context,
    CGContextFillCircleWithPaintable( context, circle, centroidPaint);
 }
 
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    NSUInteger   frameNr;
    CARotation   rotation;
    CGRect       canvas;
    CGRect       rect;
-   // Delete: NVGcontext   *vg;
    CGRect       rects[ 2][ 2];
    NSUInteger   i, j;
    CGPaint      *paint;
@@ -103,7 +94,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    rotation = (frameNr % 120) / 120.0f + 0.25;
 
    canvas   = [layer canvas];
-   // Delete: vg       = CGContextGetNVGContext( context);
 
    CGRectPartition2x2( CGRectInset( canvas, 10, 10),
                        CGSizeMake( 10, 10),

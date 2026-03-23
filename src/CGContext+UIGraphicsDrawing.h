@@ -1,7 +1,6 @@
 //
 // Copyright (c) <|YEAR|> Nat!, Mulle kybernetiK
 //
-// prefer a local CGContext over one in import.h
 #ifdef __has_include
 # if __has_include( "CGContext.h")
 #  import "CGContext.h"

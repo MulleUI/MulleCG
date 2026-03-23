@@ -7,8 +7,6 @@
 
 #import "CGContext+Drawing.h"
 #import "CGContext+CGImage.h"
-#import "CGContext+OpenGL.h"
-#import "CGContext+nanovg.h"
 #import "CGImage.h"
 
 
@@ -53,17 +51,7 @@
             image:(id) image
             scale:(BOOL) scale
 {
-   CGDrawableOptions             *options;
-   struct CGContextFramebuffer   dst;
-
-   if( [image isMultiSample])
-   {
-      //  a hack for UIWindow+Thread refresh code
-      dst = CGContextCurrentOpenGLFramebuffer( self);
-      _CGContextBlitFramebufferImage( self, dst, rect, image, NO);
-      CGContextSetCurrentOpenGLFramebuffer( self, dst);
-      return;
-   }
+   CGDrawableOptions   *options;
 
    // this code will be used if MSAA is not available, as
    // _CGContextBlitFramebufferImage will be just an empty shell
@@ -71,7 +59,7 @@
 
    CGContextSave( self);
    {
-      CGContextGlobalCompositeOperation( self, NVG_COPY);
+      CGContextGlobalCompositeOperation( self, CGCompositeOperationCopy);
 
       options = scale ? &CGDrawableOptionsScaleToFit :
                         &CGDrawableOptionsDefault;
@@ -167,9 +155,8 @@
             hexColor:(NSUInteger) color
 {
    CGContextFontFace( self, fontNameUTF8String);
-//   nvgFontFace( vg, fontNameUTF8String ? fontNameUTF8String : "sans");
    CGContextFontSize( self, fontSize != 0.0 ? fontSize : 10.0);
-   CGContextCombinedTextAlignment( self, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+   CGContextCombinedTextAlignment( self, CGTextAlignLeft | CGTextAlignTop);
    CGContextFillColor( self, CGColorMakeWithHexColor( color));
 
    CGContextTextBox( self, position, INFINITY, s, (size_t) -1);
@@ -185,7 +172,7 @@
    char   icon_utf8[ 8];
    char   *end;
 
-   CGContextCombinedTextAlignment( self, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+   CGContextCombinedTextAlignment( self, CGTextAlignCenter | CGTextAlignMiddle);
    end = (char *) mulle_utf32_as_utf8( icon, icon_utf8);
    CGContextText( self, point, icon_utf8, end - icon_utf8);
 }
@@ -285,4 +272,3 @@
 }
 
 @end
-

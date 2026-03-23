@@ -2,22 +2,16 @@
 
 #import "import-private.h"
 
-
-
 #include "bitmap2.inc"
-
-
 #define COLS  4
 #define ROWS  2
-
-
 
 static void   drawRectBehindText( CGContext *context, CGRect canvas, char *label)
 {
    struct CGTextBoundsInfo   info;
 
    // BUG: The visually is needed to "remove" the descender space. What is not
-   //      super clear here is, that NVG_ALIGN_TOP | NVG_ALIGN_LEFT will be
+   //      super clear here is, that CGTextAlignTop | CGTextAlignLeft will be
    //      working on descender and ascender lineHeight, which is spitting
    //      in the soup again.
    CGContextFontFace( context, "sans");
@@ -36,11 +30,9 @@ static void   drawRectBehindText( CGContext *context, CGRect canvas, char *label
    CGContextTextColor( context, CGColorMakeWhite());
    CGContextTextBackgroundColor( context, CGColorMakeGray());
 
-   CGContextCombinedTextAlignment( context, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignTop);
    CGContextText( context, info.bounds.origin, label, (size_t) -1);
 }
-
-
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
@@ -136,8 +128,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    return( YES);
 }
 
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -153,8 +143,6 @@ int   main( int argc, char *argv[])
 
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

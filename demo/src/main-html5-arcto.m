@@ -1,8 +1,6 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 //
 // Copyright (c) 2023 Nat!, Mulle kybernetiK
 //
@@ -40,7 +38,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 
    r  = 50;
 
-   CGContextTranslate( context, CGPointMake( 100, 50)); // Converted from nvgTranslate
+   CGContextTranslate( context, CGPointMake( 100, 50));
 
    CGContextBeginPath( context); // Converted from mvgBeginPath
    CGContextStrokeColor( context, CGColorMakeGray()); // Converted from mvgStrokeColor
@@ -74,8 +72,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
@@ -83,8 +79,6 @@ int   main( int argc, char *argv[])
                                            NULL,
                                            60.0f));
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

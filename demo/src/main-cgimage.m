@@ -7,8 +7,6 @@
 
 #include "bitmap.inc"
 
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGDrawableOptions   options;
@@ -18,13 +16,13 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    rect = [layer canvas];
 
    // magenta rectangle so we know something is drawn...
-   CGContextBeginPath( context); // Converted from nvgBeginPath
+   CGContextBeginPath( context);
    {
-      CGContextRect( context, rect); // Converted from nvgRect
-      CGContextStrokeWidth( context, 8); // Converted from nvgStrokeWidth
-      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF)); // Converted from nvgStrokeColor
+      CGContextRect( context, rect);
+      CGContextStrokeWidth( context, 8);
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
-   CGContextStroke( context); // Converted from nvgStroke
+   CGContextStroke( context);
 
    options = CGDrawableOptionsMakeScaleToFit();
 
@@ -50,8 +48,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( YES);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -62,8 +58,6 @@ void   setupScene( UIWindow *window)
    [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIWindow         *window;
@@ -83,10 +77,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

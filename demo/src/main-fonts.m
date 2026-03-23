@@ -7,23 +7,17 @@
 
 // https://fontello.github.io/entypo/demo.html
 #define ICONS_TEXT   "➕➖"
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect               rect;
-   // Delete: struct NVGcontext    *vg; // No longer needed
    CGFont               *font;
 
    font = [context fontWithNameUTF8String:"sans"];
    font = [context fontWithNameUTF8String:"sans-bold"];
    font = [context fontWithNameUTF8String:"icons"];
    rect = [layer canvas];
-
-   // Delete: vg = CGContextGetNVGContext( context); // No longer needed
-
    CGContextFontFace( context, "sans");
-   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE
+   CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from CGTextAlignLeft | CGTextAlignBaseline
    CGContextTextColor( context, CGColorMakeWithRGBABytes( 0, 0, 0, 0xFF));
    CGContextTextBackgroundColor( context, CGColorMakeWithRGBABytes( 0xFF, 0xFF, 0xFF, 0xFF));
  // TODO: use textColor
@@ -32,27 +26,27 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGContextText( context, CGPointMake( rect.origin.x,
                 rect.origin.y + 20.0),
                 TEXT,
-                (size_t) -1); // Converted from nvgText
+                (size_t) -1);
 
    CGContextFontFace( context, "sans-bold");
    CGContextText( context, CGPointMake( rect.origin.x,
                 rect.origin.y + 50.0),
                 TEXT,
-                (size_t) -1); // Converted from nvgText
+                (size_t) -1);
 
    // TODO: emojis aren't colorized
    CGContextFontFace( context, "sans");
    CGContextText( context, CGPointMake( rect.origin.x,
                 rect.origin.y + 80.0),
                 EMOJI_TEXT,
-                (size_t) -1); // Converted from nvgText
+                (size_t) -1);
 
    // TODO: emojis aren't bold
    CGContextFontFace( context, "sans-bold");
    CGContextText( context, CGPointMake( rect.origin.x,
                 rect.origin.y + 120.0),
                 EMOJI_TEXT,
-                (size_t) -1); // Converted from nvgText
+                (size_t) -1);
 
    // TODO: why so small ?
    CGContextFontFace( context, "icons");
@@ -60,11 +54,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGContextText( context, CGPointMake( rect.origin.x,
                 rect.origin.y + 150.0),
                 ICONS_TEXT,
-                (size_t) -1); // Converted from nvgText
+                (size_t) -1);
    return( YES);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView        *view;
@@ -82,8 +74,6 @@ void   setupScene( UIWindow *window)
    [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -110,8 +100,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

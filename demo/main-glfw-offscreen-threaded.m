@@ -1,8 +1,6 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 //
 // This demo shows how CGContext draws into a offscreen buffer first and
 // this buffer is shared with another window[ 0]s. For "fun", both window[ 0]s
@@ -15,40 +13,36 @@ static void   drawStuff( CGRect canvas,
                          CGColor rightColor,
                          CGContext *context)
 {
-   struct NVGcontext   *vg;
    auto char           buf[ 64];
    CGFont              *font;
-
-   vg = CGContextGetNVGContext( context);
-
    canvas.size.width  /= 3.0;
 
    // red stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x,
+   CGContextBeginPath( context);
+   CGContextRect( context, canvas.origin.x,
                 canvas.origin.y,
                 canvas.size.width,
                 canvas.size.height);
-   nvgFillColor( vg, leftColor);
-   nvgFill( vg);
+   CGContextFillColor( context, leftColor);
+   CGContextFill( context);
 
    // white stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x + canvas.size.width * 1,
+   CGContextBeginPath( context);
+   CGContextRect( context, canvas.origin.x + canvas.size.width * 1,
                 canvas.origin.y,
                 canvas.size.width,
                 canvas.size.height);
-   nvgFillColor( vg, middleColor);
-   nvgFill( vg);
+   CGContextFillColor( context, middleColor);
+   CGContextFill( context);
 
    // blue stripe
-   nvgBeginPath( vg);
-   nvgRect( vg, canvas.origin.x + canvas.size.width * 2,
+   CGContextBeginPath( context);
+   CGContextRect( context, canvas.origin.x + canvas.size.width * 2,
                 canvas.origin.y,
                 canvas.size.width,
                 canvas.size.height);
-   nvgFillColor( vg, rightColor);
-   nvgFill( vg);
+   CGContextFillColor( context, rightColor);
+   CGContextFill( context);
 
    sprintf( buf, "%td", counter);
 
@@ -57,14 +51,12 @@ static void   drawStuff( CGRect canvas,
 
    canvas.size.width  *= 3.0;
 
-   nvgFontSize( vg, 32);
-   nvgTextAlign( vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-   nvgTextColor( vg, CGColorMakeWithHexColor( 0x0000000FF));
-   nvgTextBackgroundColor( vg, middleColor);
-   nvgText( vg, CGRectGetMidX( canvas), CGRectGetMidY( canvas), buf, NULL);
+   CGContextFontSize( context, 32);
+   CGContextCombinedTextAlignment( context, CGTextAlignCenter | CGTextAlignMiddle);
+   CGContextTextColor( context, CGColorMakeWithHexColor( 0x0000000FF));
+   CGContextTextBackgroundColor( context, middleColor);
+   CGContextText( context, CGRectGetMidX( canvas), CGRectGetMidY( canvas), buf, NULL);
 }
-
-
 @interface MyWindow : GLFWOSWindow <UIOSWindow>
 
 @property( retain) CGContext    *context;
@@ -90,8 +82,6 @@ static void   drawStuff( CGRect canvas,
 }
 
 @end
-
-
 static UIWindowDisplayBits   display_0( id <UIOSWindow> *window_in)
 {
    MyWindow         *window = MULLE_OBJC_CLASS_CAST( MyWindow, window_in);
@@ -156,8 +146,6 @@ static UIWindowDisplayBits   display_0( id <UIOSWindow> *window_in)
    [window os_deactivateGraphicsContext];
    return( 1);
 }
-
-
 static UIWindowDisplayBits  display_1( id <UIOSWindow> *window_in)
 {
    MyWindow         *window = MULLE_OBJC_CLASS_CAST( MyWindow, window_in);
@@ -223,8 +211,6 @@ static UIWindowDisplayBits  display_1( id <UIOSWindow> *window_in)
 
    retuzrn( 1);
 }
-
-
 static MyWindow   *create_window( unsigned int i,
                                   MyWindow *sharingWindow,
                                   void  (*display_f)( GLFWOSWindow *),
@@ -233,8 +219,6 @@ static MyWindow   *create_window( unsigned int i,
    MyWindow      *window;
    NSUInteger    hints;
    CGContext     *context;
-
-
    hints = GLFW_DEFAULT_CONTEXT;
    switch( [MyWindow defaultBackend])
    {
@@ -269,8 +253,6 @@ static MyWindow   *create_window( unsigned int i,
 
    return( window);
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication            *app;
@@ -287,8 +269,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
 
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,

@@ -10,8 +10,6 @@
 #define DRAW_LINES
 //#define ARTIFICIAL_LAG
 
-
-
 #define LAG_FRAMES    2
 
 static void   lag( long refreshRate)
@@ -32,96 +30,71 @@ static void   lag( long refreshRate)
 //  * run renderloop (with event handling)
 //  * shows differences for pixel alignment and antialiasing
 //
-static void   _drawAlpha( CGContext *context, // Changed from NVGcontext *vg
+static void   _drawAlpha( CGContext *context, // Changed from CGContext *context
                           CGRect rect,
                           int antialias)
 {
-   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
 
    rect.size.width  -= 50;
    rect.size.height -= 50;
 
-   nvgShapeAntiAlias( vg, antialias);
-   nvgStrokeWidth( vg, 10.0);
+   CGContextShapeAntiAlias( context, antialias);
+   CGContextStrokeWidth( context, 10.0);
 
-   nvgBeginPath( vg);
-   nvgRoundedRect( vg, rect.origin.x,
-                       rect.origin.y,
-                       rect.size.width,
-                       rect.size.height,
-                       20);
-   nvgStrokeColor(vg, CGColorMakeWithHexColor( 0x8080007F));
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextRoundedRect( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height), 20);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8080007F));
+   CGContextStroke( context);
 
-   nvgBeginPath( vg);
-   nvgRoundedRect( vg, rect.origin.x + 50,
-                       rect.origin.y,
-                       rect.size.width,
-                       rect.size.height,
-                       20);
-   nvgStrokeColor(vg, CGColorMakeWithHexColor( 0x0080807F));
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextRoundedRect( context, CGRectMake( rect.origin.x + 50, rect.origin.y, rect.size.width, rect.size.height), 20);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x0080807F));
+   CGContextStroke( context);
 
-   nvgBeginPath( vg);
-   nvgRoundedRect( vg, rect.origin.x + 50,
-                       rect.origin.y + 50,
-                       rect.size.width,
-                       rect.size.height,
-                       20);
-   nvgStrokeColor(vg, CGColorMakeWithHexColor( 0x8000807F));
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextRoundedRect( context, CGRectMake( rect.origin.x + 50, rect.origin.y + 50, rect.size.width, rect.size.height), 20);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8000807F));
+   CGContextStroke( context);
 
-   nvgBeginPath( vg);
-   nvgRoundedRect( vg, rect.origin.x,
-                       rect.origin.y + 50,
-                       rect.size.width,
-                       rect.size.height,
-                       20);
-   nvgStrokeColor(vg, CGColorMakeWithHexColor( 0x8080807F));
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextRoundedRect( context, CGRectMake( rect.origin.x, rect.origin.y + 50, rect.size.width, rect.size.height), 20);
+   CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8080807F));
+   CGContextStroke( context);
 
-   nvgShapeAntiAlias( vg, 1);
+   CGContextShapeAntiAlias( context, 1);
 }
 
-
-
-static void   _drawRects( CGContext *context, // Changed from NVGcontext *vg
+static void   _drawRects( CGContext *context, // Changed from CGContext *context
                           CGRect rect,
                           CGColor color,
                           int antialias,
                           CGFloat thickness)
 {
-   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
 
-   nvgShapeAntiAlias( vg, antialias);
-   nvgStrokeWidth( vg, thickness);
+   CGContextShapeAntiAlias( context, antialias);
+   CGContextStrokeWidth( context, thickness);
 
-   nvgBeginPath( vg);
-   nvgRoundedRect( vg, rect.origin.x,
-                       rect.origin.y,
-                       rect.size.width,
-                       rect.size.height,
-                       20);
-   nvgStrokeColor(vg, color);
-   nvgStroke( vg);
+   CGContextBeginPath( context);
+   CGContextRoundedRect( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height), 20);
+   CGContextStrokeColor( context, color);
+   CGContextStroke( context);
 
-   nvgShapeAntiAlias( vg, 1);
+   CGContextShapeAntiAlias( context, 1);
 }
 
 static NSInteger   lines;
 
-static void   _drawColoredLinesH( CGContext *context, // Changed from NVGcontext *vg
+static void   _drawColoredLinesH( CGContext *context, // Changed from CGContext *context
                                   CGRect rect,
                                   int antialias,
                                   CGFloat thickness)
 {
-   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
    CGPoint      point;
    NSUInteger   i;
    CGFloat      h;
 
-   nvgShapeAntiAlias( vg, antialias);
-   nvgStrokeWidth( vg, thickness);
+   CGContextShapeAntiAlias( context, antialias);
+   CGContextStrokeWidth( context, thickness);
 
    h = rect.size.height / 8;
 
@@ -130,44 +103,41 @@ static void   _drawColoredLinesH( CGContext *context, // Changed from NVGcontext
       point.y = rect.origin.y;
       for( i = 0; i < 8; i++)
       {
-         nvgBeginPath( vg);
+         CGContextBeginPath( context);
 
-         nvgMoveTo(vg, point.x, point.y);
+         CGContextMoveTo( context, CGPointMake(point.x, point.y));
          point.y += h;
-         nvgLineTo(vg, point.x, point.y);
+         CGContextLineTo( context, CGPointMake(point.x, point.y));
          switch( i)
          {
-         case 0 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
-         case 1 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF0000FF)); break;
-         case 2 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FF00FF)); break;
-         case 3 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x0000FFFF)); break;
-         case 4 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFF00FF)); break;
-         case 5 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF00FFFF)); break;
-         case 6 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FFFFFF)); break;
-         case 7 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
+         case 0 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
+         case 1 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFF0000FF)); break;
+         case 2 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x00FF00FF)); break;
+         case 3 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x0000FFFF)); break;
+         case 4 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFFFF00FF)); break;
+         case 5 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFF00FFFF)); break;
+         case 6 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x00FFFFFF)); break;
+         case 7 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
          }
-         nvgStroke( vg);
+         CGContextStroke( context);
          if( lines >= 0)
             ++lines;
       }
    }
 
-   nvgShapeAntiAlias( vg, 1);
+   CGContextShapeAntiAlias( context, 1);
 }
-
-
-static void   _drawColoredLinesV( CGContext *context, // Changed from NVGcontext *vg
+static void   _drawColoredLinesV( CGContext *context, // Changed from CGContext *context
                                   CGRect rect,
                                   int antialias,
                                   CGFloat thickness)
 {
-   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
    CGPoint      point;
    NSUInteger   i;
    CGFloat      w;
 
-   nvgShapeAntiAlias( vg, antialias);
-   nvgStrokeWidth( vg, thickness);
+   CGContextShapeAntiAlias( context, antialias);
+   CGContextStrokeWidth( context, thickness);
 
    w = rect.size.width / 8;
 
@@ -176,49 +146,46 @@ static void   _drawColoredLinesV( CGContext *context, // Changed from NVGcontext
       point.x = rect.origin.x;
       for( i = 0; i < 8; i++)
       {
-         nvgBeginPath( vg);
+         CGContextBeginPath( context);
 
-         nvgMoveTo(vg, point.x, point.y);
+         CGContextMoveTo( context, CGPointMake(point.x, point.y));
          point.x += w;
-         nvgLineTo(vg, point.x, point.y);
+         CGContextLineTo( context, CGPointMake(point.x, point.y));
          switch( i)
          {
-         case 0 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
-         case 1 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF0000FF)); break;
-         case 2 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FF00FF)); break;
-         case 3 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x0000FFFF)); break;
-         case 4 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFF00FF)); break;
-         case 5 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF00FFFF)); break;
-         case 6 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FFFFFF)); break;
-         case 7 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
+         case 0 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
+         case 1 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFF0000FF)); break;
+         case 2 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x00FF00FF)); break;
+         case 3 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x0000FFFF)); break;
+         case 4 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFFFF00FF)); break;
+         case 5 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFF00FFFF)); break;
+         case 6 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x00FFFFFF)); break;
+         case 7 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
          }
-         nvgStroke( vg);
+         CGContextStroke( context);
          if( lines >= 0)
             ++lines;
       }
    }
 
-   nvgShapeAntiAlias( vg, 1);
+   CGContextShapeAntiAlias( context, 1);
 }
-
-
-static void   _drawColoredLinesHV( CGContext *context, // Changed from NVGcontext *vg
+static void   _drawColoredLinesHV( CGContext *context, // Changed from CGContext *context
                                    CGRect rect,
                                    int antialias,
                                    CGFloat thickness)
 {
-   struct NVGcontext *vg = CGContextGetNVGContext( context); // Get vg from context
    CGPoint      point;
    NSUInteger   i;
    CGFloat      w;
 
-   nvgShapeAntiAlias( vg, antialias);
-   nvgStrokeWidth( vg, thickness);
-   nvgSave( vg);
-   nvgScissor( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
-   nvgTranslate(vg, rect.origin.x + rect.size.width / 2.0, rect.origin.y + rect.size.height / 2.0);
-   nvgRotate(vg, 0.9 * NVG_PI*2);
-   nvgTranslate(vg, -rect.origin.x - rect.size.width / 2.0, -rect.origin.y - rect.size.height / 2.0);
+   CGContextShapeAntiAlias( context, antialias);
+   CGContextStrokeWidth( context, thickness);
+   CGContextSave( context);
+   CGContextScissor( context, rect);
+   CGContextTranslate( context, CGPointMake(rect.origin.x + rect.size.width / 2.0, rect.origin.y + rect.size.height / 2.0));
+   CGContextRotate( context, 0.9 * M_PI*2);
+   CGContextTranslate( context, CGPointMake(-rect.origin.x - rect.size.width / 2.0, -rect.origin.y - rect.size.height / 2.0));
 
    w = rect.size.width / 8;
 
@@ -227,34 +194,32 @@ static void   _drawColoredLinesHV( CGContext *context, // Changed from NVGcontex
       point.x = rect.origin.x;
       for( i = 0; i < 8; i++)
       {
-         nvgBeginPath( vg);
+         CGContextBeginPath( context);
 
-         nvgMoveTo(vg, point.x, point.y);
+         CGContextMoveTo( context, CGPointMake(point.x, point.y));
          point.x += w;
-         nvgLineTo(vg, point.x, point.y);
+         CGContextLineTo( context, CGPointMake(point.x, point.y));
          switch( i)
          {
-         case 0 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
-         case 1 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF0000FF)); break;
-         case 2 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FF00FF)); break;
-         case 3 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x0000FFFF)); break;
-         case 4 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFF00FF)); break;
-         case 5 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFF00FFFF)); break;
-         case 6 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x00FFFFFF)); break;
-         case 7 : nvgStrokeColor( vg, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
+         case 0 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
+         case 1 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFF0000FF)); break;
+         case 2 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x00FF00FF)); break;
+         case 3 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x0000FFFF)); break;
+         case 4 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFFFF00FF)); break;
+         case 5 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFF00FFFF)); break;
+         case 6 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x00FFFFFF)); break;
+         case 7 : CGContextStrokeColor( context, CGColorMakeWithHexColor( 0xFFFFFFFF)); break;
          }
-         nvgStroke( vg);
+         CGContextStroke( context);
          if( lines >= 0)
             ++lines;
       }
    }
-   nvgRestore( vg);
+   CGContextRestore( context);
 
-   nvgShapeAntiAlias( vg, 1);
+   CGContextShapeAntiAlias( context, 1);
 }
-
-
-static void   _drawColoredLines( CGContext *context, // Changed from NVGcontext *vg
+static void   _drawColoredLines( CGContext *context, // Changed from CGContext *context
                                  CGRect rect,
                                  int antialias,
                                  CGFloat thickness)
@@ -273,8 +238,6 @@ static void   _drawColoredLines( CGContext *context, // Changed from NVGcontext 
 
    _drawColoredLinesHV( context, columns[ 0], antialias, thickness); // Pass context
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect              rows[ 3];
@@ -284,13 +247,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    UIEdgeInsets        insets;
    NSUInteger          i;
    NSUInteger          j;
-   struct NVGcontext   *vg;
    CGColor             fore;
    CGColor             back;
    CGRect              canvas;
-
-   vg = CGContextGetNVGContext( context);
-
    canvas = [layer canvas];
    CGRectPartitionVertically( canvas, 8, 3, rows);
 
@@ -299,15 +258,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    for( i = 0; i < 4; i++)
    {
-      nvgStrokeWidth( vg, 1.0);
-      nvgBeginPath( vg);
-      nvgStrokeColor( vg, CGColorMakeWithHexColor( 0x808080FF));
-      nvgRoundedRect( vg, columns[ i].origin.x,
-                          columns[ i].origin.y,
-                          columns[ i].size.width,
-                          columns[ i].size.height,
-                          3);
-      nvgStroke( vg);
+      CGContextStrokeWidth( context, 1.0);
+      CGContextBeginPath( context);
+      CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x808080FF));
+      CGContextRoundedRect( context, CGRectMake( columns[ i].origin.x, columns[ i].origin.y, columns[ i].size.width, columns[ i].size.height), 3);
+      CGContextStroke( context);
 
       rect = CGSizeCenterInRect( CGSizeMake( 150, 150), columns[ i]);
       rect = CGRectIntegral( rect);
@@ -341,17 +296,13 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             fore = CGColorMakeWithHexColor( 0x000000FF);
          }
 
-         nvgStrokeWidth( vg, 1.0);
-         nvgBeginPath( vg);
-         nvgStrokeColor( vg, fore);
-         nvgFillColor( vg, back);
-         nvgRoundedRect( vg, subrows[ j].origin.x,
-                             subrows[ j].origin.y,
-                             subrows[ j].size.width,
-                             subrows[ j].size.height,
-                             3);
-         nvgStroke( vg);
-         nvgFill( vg);
+         CGContextStrokeWidth( context, 1.0);
+         CGContextBeginPath( context);
+         CGContextStrokeColor( context, fore);
+         CGContextFillColor( context, back);
+         CGContextRoundedRect( context, CGRectMake( subrows[ j].origin.x, subrows[ j].origin.y, subrows[ j].size.width, subrows[ j].size.height), 3);
+         CGContextStroke( context);
+         CGContextFill( context);
 
          insets = UIEdgeInsetsMake( 10, 10, 10, 10);
          rect   = UIEdgeInsetsInsetRect( subrows[ j], insets);
@@ -389,17 +340,13 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             fore = CGColorMakeWithHexColor( 0x000000FF);
          }
 
-         nvgStrokeWidth( vg, 1.0);
-         nvgBeginPath( vg);
-         nvgStrokeColor( vg, fore);
-         nvgFillColor( vg, back);
-         nvgRoundedRect( vg, subrows[ j].origin.x,
-                             subrows[ j].origin.y,
-                             subrows[ j].size.width,
-                             subrows[ j].size.height,
-                             3);
-         nvgStroke( vg);
-         nvgFill( vg);
+         CGContextStrokeWidth( context, 1.0);
+         CGContextBeginPath( context);
+         CGContextStrokeColor( context, fore);
+         CGContextFillColor( context, back);
+         CGContextRoundedRect( context, CGRectMake( subrows[ j].origin.x, subrows[ j].origin.y, subrows[ j].size.width, subrows[ j].size.height), 3);
+         CGContextStroke( context);
+         CGContextFill( context);
 
          insets = UIEdgeInsetsMake( 10, 10, 10, 10);
          rect   = UIEdgeInsetsInsetRect( subrows[ j], insets);
@@ -426,8 +373,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( YES);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView        *view;
@@ -445,8 +390,6 @@ void   setupScene( UIWindow *window)
    [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
-
-
 static void   usage( void)
 {
    fprintf( stderr, "\n"
@@ -560,14 +503,8 @@ int   main( int argc, char *argv[])
 
       [app addWindow:window];
    }
-
-
    return( [app runApp]);
 }
-
-
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
@@ -603,7 +540,3 @@ int   main( int argc, char *argv[])
 //                 "▀╦,       M ╙▌  ▀       `█W▐▌       wæQ▄▀╙
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
-
-
-
-

@@ -1,49 +1,44 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 BOOL  scissor;
 
-void   drawSplitRectWithHole(NVGcontext* vg, CGRect rect, CGFloat x, CGFloat radius)
+void   drawSplitRectWithHole(CGContext *context, CGRect rect, CGFloat x, CGFloat radius)
 {
     CGFloat y = CGRectGetMidY( rect);
     CGFloat angle = asinf( rect.size.height / (2 * radius));
 
-    nvgSave( vg);
+    CGContextSave( context);
 
     if( scissor)
-      nvgIntersectScissor( vg, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+      CGContextIntersectScissor( context, rect);
 
     // Draw the left part of the rect
-    nvgBeginPath(vg);
-    nvgMoveTo(vg, CGRectGetMinX( rect), CGRectGetMinY( rect));
-    nvgLineTo(vg, x - radius * cosf(angle), CGRectGetMinY( rect));
-    nvgArc(vg, x, y, radius, M_PI_f + angle, M_PI_f - angle, NVG_CCW);
-    nvgLineTo(vg, CGRectGetMinX( rect), CGRectGetMaxY( rect));
-    nvgClosePath(vg);
-    nvgFillColor( vg, CGColorMakeIndigo());
-    nvgFill(vg);
+    CGContextBeginPath( context);
+    CGContextMoveTo( context, CGPointMake(CGRectGetMinX( rect), CGRectGetMinY( rect)));
+    CGContextLineTo( context, CGPointMake(x - radius * cosf(angle), CGRectGetMinY( rect)));
+    CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( x, y), radius), CARadiansToAngle( M_PI_f + angle), -2 * angle);
+    CGContextLineTo( context, CGPointMake(CGRectGetMinX( rect), CGRectGetMaxY( rect)));
+    CGContextClosePath( context);
+    CGContextFillColor( context, CGColorMakeIndigo());
+    CGContextFill( context);
 
     // Draw the right part of the rect
-    nvgBeginPath(vg);
-    nvgMoveTo(vg, x + radius * cosf(angle), CGRectGetMinY( rect));
-    nvgLineTo(vg, CGRectGetMaxX( rect), CGRectGetMinY( rect));
-    nvgLineTo(vg, CGRectGetMaxX( rect), CGRectGetMaxY( rect));
-    nvgLineTo(vg, x + radius * cosf(angle), CGRectGetMaxY( rect));
-    nvgArc(vg, x, y, radius, angle, -angle, NVG_CCW);
-    nvgClosePath(vg);
-    nvgFillColor( vg, CGColorMakeOrange());
-    nvgFill(vg);
+    CGContextBeginPath( context);
+    CGContextMoveTo( context, CGPointMake(x + radius * cosf(angle), CGRectGetMinY( rect)));
+    CGContextLineTo( context, CGPointMake(CGRectGetMaxX( rect), CGRectGetMinY( rect)));
+    CGContextLineTo( context, CGPointMake(CGRectGetMaxX( rect), CGRectGetMaxY( rect)));
+    CGContextLineTo( context, CGPointMake(x + radius * cosf(angle), CGRectGetMaxY( rect)));
+    CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( x, y), radius), CARadiansToAngle( angle), -2 * angle);
+    CGContextClosePath( context);
+    CGContextFillColor( context, CGColorMakeOrange());
+    CGContextFill( context);
 
-    nvgRestore( vg);
+    CGContextRestore( context);
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   struct NVGcontext   *vg;
    CGRect              rect;
    CGFloat             factor;
    NSUInteger          frameNr;
@@ -55,15 +50,12 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       factor = frameNr / 119.0;
    factor = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
-   vg   = CGContextGetNVGContext( context);
    rect = CGRectInset( [layer canvas], 25, 25);
    rect = CGSizePlaceInRect( CGSizeMake( rect.size.width, 200), rect, CGContentModeCenterPoint);
 
-   drawSplitRectWithHole( vg, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
+   drawSplitRectWithHole( context, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
    return( YES);
 }
-
-
 static void   usage( void)
 {
    fprintf( stderr, "\n"
@@ -78,8 +70,6 @@ static void   usage( void)
 "\n");
    exit( 1);
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -133,8 +123,6 @@ int   main( int argc, char *argv[])
 
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

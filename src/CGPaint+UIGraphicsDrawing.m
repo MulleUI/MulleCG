@@ -6,8 +6,8 @@
 #import "import-private.h"
 
 #import "CGContext+Drawing.h"
-#import "CGPaint+Drawing.h"
 #import "CGGradient.h"
+#import "CGPaintable.h"
 #import "CGPaint+Private.h"
 
 
@@ -78,13 +78,14 @@
 @end
 
 
-@implementation _CGMonoColor( nanovg)
+@implementation _CGMonoColor( Drawing)
 
 - (void) strokeWithBounds:(CGRect) rect
               strokeWidth:(CGFloat) strokeWidth
                     alpha:(CGFloat) alpha
                   context:(CGContext *) context
 {
+   MULLE_C_UNUSED( rect);
    CGColor   color;
 
    if( strokeWidth <= 0.0f || alpha <= 0.0)
@@ -103,6 +104,7 @@
                   alpha:(CGFloat) alpha
                 context:(CGContext *) context
 {
+   MULLE_C_UNUSED( rect);
    CGColor   color;
 
    if( alpha <= 0.0)

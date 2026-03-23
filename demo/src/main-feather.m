@@ -1,8 +1,6 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-
-
 #define COLS 2
 #define ROWS 2
 #define WEIGH( x)   ((double) (x) / (COLS * ROWS - 1))
@@ -40,9 +38,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    frameNr = [context numberOfFrames];
 
    [context useDefaultFont];  // default
-   CGContextTextColor( context, CGColorMakeWhite()); // Converted from nvgTextColor
-   CGContextTextBackgroundColor( context, CGColorMakeGray()); // Converted from nvgTextBackgroundColor
-   CGContextFontSize( context, 14.0); // Converted from nvgFontSize
+   CGContextTextColor( context, CGColorMakeWhite());
+   CGContextTextBackgroundColor( context, CGColorMakeGray());
+   CGContextFontSize( context, 14.0);
    sprintf( buf, "frame: %ld", frameNr);
    CGContextExtendedAlignedText( context, // Converted from mvgExtendedAlignedText
                            buf,
@@ -50,16 +48,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                            canvas.origin,
                            CGContentModeLeft|CGContentModeTop,
                            CGTextOptionAlignVisually);
-
-
    i = 0;
    for( y = 0; y < ROWS; y++)
       for( x = 0; x < COLS; x++)
       {
-         CGContextSave( context); // Converted from nvgSave
+         CGContextSave( context);
          rect         = CGRectIntegral( rects[ i]);
 
-         CGContextTranslate( context, CGPointMake( rect.origin.x, rect.origin.y)); // Converted from nvgTranslate
+         CGContextTranslate( context, CGPointMake( rect.origin.x, rect.origin.y));
          rect.origin  = CGPointZero;
 
          cornerRadius = rect.size.width / 16.0;
@@ -91,22 +87,22 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 //                       : rect.size.height / 2.0);
 //        offset = offset * 2.0 * ((frameNr >> 2) % 8 / 7.0) - offset;
 
-         paint        = [CGGradient boxGradientWithRoundedRect:gradientRect // Converted from nvgBoxGradient
+         paint        = [CGGradient boxGradientWithRoundedRect:gradientRect
                                              cornerRadius:cornerRadius
                                                     color:CGColorMakeGreen()
                                                   feather:feather
                                              featherColor:CGColorMakeTransparent()];
-         CGContextBeginPath( context); // Converted from nvgBeginPath
+         CGContextBeginPath( context);
 
 //         drawRect = CGRectExtrude( rect, offset, offset);
 
          drawRect = rect;
-         CGContextRoundedRect( context, drawRect, cornerRadius); // Converted from nvgRoundedRect
-         CGContextFillPaintable( context, paint); // Converted from nvgFillPaint
-         CGContextFill( context); // Converted from nvgFill
+         CGContextRoundedRect( context, drawRect, cornerRadius);
+         CGContextFillPaintable( context, paint);
+         CGContextFill( context);
 #if 0
-         nvgBeginPath(vg);
-         nvgRoundedRect(vg, rect.origin.x,
+         CGContextBeginPath( context);
+         CGContextRoundedRect( context, rect.origin.x,
                             rect.origin.y,
                             rect.size.width,
                             rect.size.height,
@@ -122,8 +118,8 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          case 3 : color = CGColorMakeMagenta();
                   break;
          }
-         nvgFillColor(vg, color);
-         nvgFill(vg);
+         CGContextFillColor( context, color);
+         CGContextFill( context);
 #endif
 
 #if 1
@@ -137,21 +133,19 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             case 2 : outlineRect = CGRectInset( rect, feather, feather); break;
             }
 
-            CGContextBeginPath( context); // Converted from nvgBeginPath
-            CGContextRoundedRect( context, outlineRect, cornerRadius); // Converted from nvgRoundedRect
-            CGContextStrokeColor( context, color); // Converted from nvgStrokeColor
-            CGContextStrokeWidth( context, 0.5); // Converted from nvgStrokeWidth
-            CGContextStroke( context); // Converted from nvgStroke
+            CGContextBeginPath( context);
+            CGContextRoundedRect( context, outlineRect, cornerRadius);
+            CGContextStrokeColor( context, color);
+            CGContextStrokeWidth( context, 0.5);
+            CGContextStroke( context);
          }
 #endif
-
-
 #if 1
          [context useDefaultFont];  // default
          textRect = CGRectInset( rect, 10, 10);
-         CGContextFontSize( context, 14.0); // Converted from nvgFontSize
-         CGContextTextColor( context, CGColorMakeBlack()); // Converted from nvgTextColor
-         CGContextTextBackgroundColor( context, CGColorMakeGreen()); // Converted from nvgTextBackgroundColor
+         CGContextFontSize( context, 14.0);
+         CGContextTextColor( context, CGColorMakeBlack());
+         CGContextTextBackgroundColor( context, CGColorMakeGreen());
 
          sprintf( buf, "feather: %g", feather);
          CGContextTextInRect( context, buf, // Converted from mvgTextInRect
@@ -173,14 +167,12 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                         CGTextOptionAlignVisually);
 #endif
 
-         CGContextRestore( context); // Converted from nvgRestore
+         CGContextRestore( context);
          ++i;
       }
 
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -194,8 +186,6 @@ int   main( int argc, char *argv[])
    [window setFrameRateHz:0.5];
    return( [app runWindow:window]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

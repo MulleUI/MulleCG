@@ -6,8 +6,6 @@
 #import "import-private.h"
 
 #include <string.h>
-
-
 static void   drawTextOverRect( CGContext *context, CGRect canvas)
 {
    CGRect   rect;
@@ -21,8 +19,6 @@ static void   drawTextOverRect( CGContext *context, CGRect canvas)
    CGContextTextBackgroundColor( context, CGColorMakeGray());
    CGContextTextInRect( context, "VfL Bochum 1848", (size_t) -1, textRect, CGContentModeScaleAspectFit, 0); // CGTextOptionNoClip);
 }
-
-
 static void   drawRectBehindText( CGContext *context, CGRect canvas)
 {
    CGRect                    rect;
@@ -35,7 +31,7 @@ static void   drawRectBehindText( CGContext *context, CGRect canvas)
    struct CGTextBoundsInfo   info;
 
    // BUG: The visually is needed to "remove" the descender space. What is not
-   //      super clear here is, that NVG_ALIGN_TOP | NVG_ALIGN_LEFT will be
+   //      super clear here is, that CGTextAlignTop | CGTextAlignLeft will be
    //      working on descender and ascender lineHeight, which is spitting
    //      in the soup again.
    pad       = 6.0f;
@@ -61,11 +57,9 @@ static void   drawRectBehindText( CGContext *context, CGRect canvas)
    // only BASELINE, LEFT does not do anything
    metrics            = CGContextTextMetrics( context);
    textRect.origin.y += metrics.ascender;
-   CGContextCombinedTextAlignment( context, NVG_ALIGN_BASELINE | NVG_ALIGN_LEFT);
+   CGContextCombinedTextAlignment( context, CGTextAlignBaseline | CGTextAlignLeft);
    CGContextText( context, textRect.origin, "VfL Bochum 1848", (size_t) -1);
 }
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect   canvas;
@@ -83,8 +77,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( YES);
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -109,8 +101,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w

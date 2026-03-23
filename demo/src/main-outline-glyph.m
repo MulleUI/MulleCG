@@ -8,8 +8,8 @@
 #include <freetype/ftoutln.h>
 #include <freetype/ftglyph.h>
 
-#define NVG_MAX_FONTIMAGES   4
-#define NVG_MAX_STATES       32
+#define CG_MAX_FONTIMAGES   4
+#define CG_MAX_STATES       32
 
 //#define FONT_NAME     "sans"
 //#define GLYPH_0  '%'
@@ -70,23 +70,19 @@ struct MulleGlyphPathCallbacks
    void  (*close)( void *userinfo);
    void  (*winding)( void *userinfo, CGPathFillStyle style);
 };
-
-
-static inline void   MulleGlyphPathCallbacksInitNVG( struct MulleGlyphPathCallbacks *callbacks)
+static inline void   MulleGlyphPathCallbacksInitCG( struct MulleGlyphPathCallbacks *callbacks)
 {
    if( ! callbacks)
       return;
 
    MULLE_C_ASSERT( sizeof( void *) == sizeof( CGContext *)); // Updated comment
-   callbacks->move    = (void (*)(void *, CGPoint)) CGContextMoveTo; // Converted from nvgMoveTo
-   callbacks->line    = (void (*)(void *, CGPoint)) CGContextLineTo; // Converted from nvgLineTo
-   callbacks->quad    = (void (*)(void *, CGPoint, CGPoint)) CGContextQuadTo; // Converted from nvgQuadTo
-   callbacks->bezier  = (void (*)(void *, CGPoint, CGPoint, CGPoint)) CGContextBezierTo; // Converted from nvgBezierTo
-   callbacks->close   = (void (*)(void *)) CGContextClosePath; // Converted from nvgClosePath
-   callbacks->winding = (void (*)(void *, CGPathFillStyle)) CGContextPathWinding; // Converted from nvgPathWinding
+   callbacks->move    = (void (*)(void *, CGPoint)) CGContextMoveTo;
+   callbacks->line    = (void (*)(void *, CGPoint)) CGContextLineTo;
+   callbacks->quad    = (void (*)(void *, CGPoint, CGPoint)) CGContextQuadTo;
+   callbacks->bezier  = (void (*)(void *, CGPoint, CGPoint, CGPoint)) CGContextBezierTo;
+   callbacks->close   = (void (*)(void *)) CGContextClosePath;
+   callbacks->winding = (void (*)(void *, CGPathFillStyle)) CGContextPathWinding;
 }
-
-
 static inline void   MulleGlyphPathCallbacksInitPath( struct MulleGlyphPathCallbacks *callbacks)
 {
    if( ! callbacks)
@@ -100,8 +96,6 @@ static inline void   MulleGlyphPathCallbacksInitPath( struct MulleGlyphPathCallb
    callbacks->close   = (void (*)(void *)) CGPathCloseSubpath;
    callbacks->winding = (void (*)(void *, CGPathFillStyle )) CGPathSetSubpathFillStyle;
 }
-
-
 static void   mulleFreetypeOutlineGlyphPath( FT_Outline *outline,
                                              int winding,
                                              struct MulleGlyphPathCallbacks *callbacks,
@@ -174,8 +168,6 @@ static void   mulleFreetypeOutlineGlyphPath( FT_Outline *outline,
          point--;
          tags--;
       }
-
-
       (*callbacks->move)( userinfo, CGPointMake( (float) v_start.x / 64.0f,
                                                  (float) v_start.y / 64.0f));
       isOpen = 1;
@@ -315,8 +307,6 @@ static void   mulleFreetypeOutlineGlyphPath( FT_Outline *outline,
    }
 }
 
-
-
 enum MulleFreetypeGlyphPathOptions
 {
    MVG_COMPUTE_WINDINGS     = 0x1,
@@ -324,8 +314,6 @@ enum MulleFreetypeGlyphPathOptions
    MVG_TRANSLATE_X_TO_ZERO  = 0x4+0x2,  // always implies bounding box
    MVG_TRANSLATE_Y_TO_ZERO  = 0x8+0x2  // always implies bounding box
 };
-
-
 static CGRect  mulleFreetypeFaceGlyphPath( FT_Face face,
                                            int codepoint,
                                            float size,
@@ -402,10 +390,8 @@ static CGRect  mulleFreetypeFaceGlyphPath( FT_Face face,
 
    return( rect);
 }
-
-
 static void   _mvgPathAddGlyph( CGPath *path,
-                                CGContext *context, // Converted from NVGcontext *vg
+                                CGContext *context, // Converted from CGContext *context
                                 int codepoint,
                                 CGFloat size,
                                 int options)
@@ -414,7 +400,7 @@ static void   _mvgPathAddGlyph( CGPath *path,
    FT_Face                       face;
    struct MulleGlyphPathCallbacks   callbacks;
 
-   face = (FT_Face) (intptr_t) CGContextGetFontHandle( context, -1); // Converted from nvgGetFontHandle
+   face = (FT_Face) (intptr_t) CGContextGetFontHandle( context, -1);
    if( ! face)
    {
       fprintf( stderr, "No current font set\n");
@@ -432,9 +418,7 @@ static void   _mvgPathAddGlyph( CGPath *path,
    _CGPathSetBounds( path, rect);
 }
 
-
-
-static CGPath  *mvgCreateGlyphPath( CGContext *context, // Converted from NVGcontext *vg
+static CGPath  *mvgCreateGlyphPath( CGContext *context, // Converted from CGContext *context
                                     int codepoint,
                                     CGFloat size,
                                     int options,
@@ -446,8 +430,6 @@ static CGPath  *mvgCreateGlyphPath( CGContext *context, // Converted from NVGcon
    _mvgPathAddGlyph( path, context, codepoint, size, options); // Updated function call
    return( path);
 }
-
-
 static CGFloat   fontSizes[ 3]    = { 32 * 5, 64 * 5, 48 * 5 };
 static int       codePoints[ 3]   = { GLYPH_0, GLYPH_1, GLYPH_2 };
 static CGFloat   strokeWidths[ 3] = {  1.0, 3.0, 2.0 };
@@ -460,8 +442,6 @@ static CGColor   colors[ 3]       = {
 #define X_OFFSET       10
 #define Y_OFFSET       200
 #define DRAW_HELPERS   YES
-
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect             bbox;
@@ -477,7 +457,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       _mvgPathAddGlyph( &paths[ i], context, codePoints[ i], fontSizes[ i], MVG_COMPUTE_WINDINGS | MVG_TRANSLATE_X_TO_ZERO); // Updated function call
    }
 
-   CGContextTranslate( context, CGPointMake( X_OFFSET, Y_OFFSET)); // Converted from nvgTranslate
+   CGContextTranslate( context, CGPointMake( X_OFFSET, Y_OFFSET));
 
 // just a little marker to see placement of baseline left
    if( drawHelpers)
@@ -516,7 +496,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       }
 
       // move to next char
-      CGContextTranslate( context, CGPointMake( CGRectGetMaxX( bbox) + SPACING, 0)); // Converted from nvgTranslate
+      CGContextTranslate( context, CGPointMake( CGRectGetMaxX( bbox) + SPACING, 0));
 
       // draw vertical helper line
       if( drawHelpers)
@@ -525,7 +505,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       }
    }
 
-   CGContextTranslate( context, CGPointMake( X_OFFSET * 2.0, 0)); // Converted from nvgTranslate
+   CGContextTranslate( context, CGPointMake( X_OFFSET * 2.0, 0));
 
    if( drawHelpers)
    {
@@ -548,7 +528,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          CGContextStrokeRectWithColor( context, bbox,  0.5f, CGColorMakeWhite()); // Converted from mvgStrokeRectWithColor
       }
 
-      CGContextTranslate( context, CGPointMake( CGRectGetMaxX( bbox) + SPACING, 0)); // Converted from nvgTranslate
+      CGContextTranslate( context, CGPointMake( CGRectGetMaxX( bbox) + SPACING, 0));
 
       if( drawHelpers)
       {
@@ -561,8 +541,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( YES);
 }
-
-
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -575,8 +553,6 @@ void   setupScene( UIWindow *window)
    [view setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
-
-
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -602,8 +578,6 @@ int   main( int argc, char *argv[])
    }
    return( [app runApp]);
 }
-
-
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,
 //                      ╓▄ª╙└╧▓        █           ⁿ▓▓ª╦w
@@ -640,5 +614,3 @@ int   main( int argc, char *argv[])
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"
-
-
