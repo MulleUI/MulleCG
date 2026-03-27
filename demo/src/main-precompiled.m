@@ -41,7 +41,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    {
       MulleUICLog( "Cache path");
 
-      pathContext = [CGContext createPathContext];
+      pathContext = [[CGContext createPathContext] retain];
       assert( pathContext);
 
       drawSplitRectWithHole( pathContext, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
@@ -60,7 +60,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    {
       CGContextTranslate( context, CGPointMake(steps, 0.0f));
       if( cache)
-         { /* TODO: CGContextCopyPath( context, pathContext); */ }
+         CGContextCopyPath( context, pathContext);
       else
          drawSplitRectWithHole( context, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
       CGContextStrokeColor( context, CGColorMakeWithHSL( fmodf( hue + i / 100.0, 1.0), 1.0, 0.5));

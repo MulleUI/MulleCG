@@ -88,6 +88,7 @@ typedef struct CGFunctionTable
    void        (*fill)( void *vg);
    void        (*stroke)( void *vg);
    void        (*addCGPath)( void *vg, struct CGPath *path);
+   void        (*copyPath)( void *vg, void *src_vg);
 
    // Paint style (set before fill/stroke)
    void        (*setFillLinearGradient)( void *vg, CGPoint start, CGPoint end, CGColor startColor, CGColor endColor);
