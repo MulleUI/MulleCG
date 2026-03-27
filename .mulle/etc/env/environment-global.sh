@@ -61,7 +61,7 @@ export MULLE_MATCH_TO_C_IGNORE_HEADERS="fontstash.h:nanovg_gl.h:nanovg_gl_utils.
 #
 #
 #
-export MULLE_CRAFT_PLATFORMS="${MULLE_UNAME}:windows"
+export MULLE_CRAFT_PLATFORMS="${MULLE_UNAME}"
 
 
 #

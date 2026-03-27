@@ -38,6 +38,7 @@
 #import "CGLayoutContext+CGFont.h"
 #import "CGLayoutContext.h"
 #import "CGPaint+DrawingConveniences.h"
+#import "CGPaint+Drawing.h"
 #import "CGPaint+UIGraphicsDrawing.h"
 #import "CGPaintable.h"
 #import "CGPaint.h"

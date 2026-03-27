@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 
-#import <MulleUI/MulleUI.h>
+#import "import-private.h"
+
 
 // just a stupid demo for me to figure out what nanovg does for open
 // and selfintersecting fills

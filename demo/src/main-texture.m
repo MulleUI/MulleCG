@@ -41,7 +41,7 @@ static void   drawTexture( CGContext *context, CGSize size)
    }
    CGContextStroke( context);
 }
-static CGFramebuffer  *createTexture( CGContext *context,
+static CGFramebuffer  *createTexture( id context,
                                       CGFloat pixelRatio,
                                       NSUInteger textureFlags)
 {
@@ -117,7 +117,7 @@ void   setupScene( UIWindow *window)
    UIView      *view;
    UIView      *contentPlane;
    CGRect      rect;
-   CGContext   *context;
+   id <UIGraphicsContext>   graphicsContext;
 
    contentPlane = [window contentView];
    rect         = [contentPlane contentRect];
@@ -135,15 +135,15 @@ void   setupScene( UIWindow *window)
    // We want to do drawing outside of the render, so we
    // need to get an activated context from the window.
    //
-   context = (CGContext *) [window activateWindowGraphicsContext];
+   graphicsContext = [window activateWindowGraphicsContext];
    @autoreleasepool
    {
-      texture = createTexture( context,
+      texture = createTexture( graphicsContext,
                                [window pixelRatio],
                                CGImageFlagRepeatX|CGImageFlagRepeatY);
       [[texture bitmapImage] writeToPNGUTF8String:"debug.png"];
    }
-   [window deactivateGraphicsContext:context];
+   [window deactivateGraphicsContext:graphicsContext];
 #endif
 }
 int   main( int argc, char *argv[])

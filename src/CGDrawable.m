@@ -2,6 +2,7 @@
 
 #import "CGContext.h"
 #import "CGContext.h"
+#import "CGPaint+Drawing.h"
 
 
 // #define DRAWABLE_DEBUG
@@ -266,15 +267,6 @@ CGSize   CGBitmapDrawableGetBitmapExtent( id <CGBitmapDrawable> self,
 
 
 
-- (void) drawRect:(CGRect) rect
-          options:(CGDrawableOptions *) options
-          context:(CGContext *) context
-{
-   MULLE_C_UNUSED( rect);
-   MULLE_C_UNUSED( options);
-   MULLE_C_UNUSED( context);
-   // implemented by nanovg backend
-}
 
 
 CGRect   CGDrawablePatternRect( id <CGDrawable> self,
@@ -365,11 +357,13 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self,
           options:(CGDrawableOptions *) options
           context:(CGContext *) context
 {
-   MULLE_C_UNUSED( rect);
-   MULLE_C_UNUSED( fromRect);
-   MULLE_C_UNUSED( options);
-   MULLE_C_UNUSED( context);
-   // implemented by nanovg backend
+   CGRect   r;
+
+   if( ! options)
+      options = &CGDrawableOptionsScaleToFit;
+
+   r = CGDrawablePatternRect( self, rect, fromRect, options);
+   CGContextDrawBitmapDrawableInRect( context, self, rect, r, options);
 }
 
 

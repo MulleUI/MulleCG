@@ -53,6 +53,7 @@
 
 @end
 
+MULLE_CG_GLOBAL
 CGPixelSize
    CGContextBitmapSizeOfFramebuffer( CGContext *self,
                                      struct CGContextFramebuffer fb);

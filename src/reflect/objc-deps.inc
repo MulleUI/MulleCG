@@ -1,3 +1,4 @@
+      { @selector( MulleObjCDeps), @selector( MulleUIBase) },      // 3c20656f;MulleObjCDeps;3ebba954;MulleUIBase
       { @selector( CGBitmapDrawable), MULLE_OBJC_NO_CATEGORYID },      // ac0569ab;CGBitmapDrawable;;
       { @selector( CGBlendedPaint), @selector( CGPaintable) },      // f164885b;CGBlendedPaint;faf2d5d6;CGPaintable
       { @selector( CGBlendedPaint), @selector( Drawing) },      // f164885b;CGBlendedPaint;53946657;Drawing

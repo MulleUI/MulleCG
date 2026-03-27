@@ -11,10 +11,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    // pixels...
    // red stripe
    CGContextBeginPath( context);
-   CGContextRect( context, canvas.origin.x,
-                canvas.origin.y,
-                canvas.size.width,
-                canvas.size.height);
+   CGContextRect( context, canvas);
    CGContextFillColor( context, CGColorMakeWithRGBA( 0.95, 0.0, 0.0, 1.0));
    CGContextFill( context);
 
@@ -28,10 +25,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    // white stripe
    CGContextBeginPath( context);
-   CGContextRect( context, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 1,
-                canvas.size.width,
-                canvas.size.height);
+   CGContextRect( context, CGRectMake( canvas.origin.x,
+                                       canvas.origin.y + canvas.size.height * 1,
+                                       canvas.size.width,
+                                       canvas.size.height));
    CGContextFillColor( context, CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 1.0));
    CGContextFill( context);
 
@@ -41,10 +38,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    
    // blue stripe
    CGContextBeginPath( context);
-   CGContextRect( context, canvas.origin.x,
-                canvas.origin.y + canvas.size.height * 2,
-                canvas.size.width,
-                canvas.size.height);
+   CGContextRect( context, CGRectMake( canvas.origin.x,
+                                       canvas.origin.y + canvas.size.height * 2,
+                                       canvas.size.width,
+                                       canvas.size.height));
    CGContextFillColor( context, CGColorMakeWithRGBA( 0.0, 0.0, 1.0, 1.0));
    CGContextFill( context);
    return( YES);

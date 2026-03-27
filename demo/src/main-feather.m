@@ -46,7 +46,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
                            buf,
                            (size_t) -1,
                            canvas.origin,
-                           CGContentModeLeft|CGContentModeTop,
+                           CGTextAlignLeft|CGTextAlignTop,
                            CGTextOptionAlignVisually);
    i = 0;
    for( y = 0; y < ROWS; y++)
@@ -151,19 +151,19 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          CGContextTextInRect( context, buf, // Converted from mvgTextInRect
                         (size_t) -1,
                         CGRectMake( textRect.origin.x, textRect.origin.y + 20, textRect.size.width, 20),
-                        CGContentModeLeft,
+                        CGTextAlignLeft,
                         CGTextOptionAlignVisually);
          sprintf( buf, "gradientRect: %s", CGRectUTF8String( gradientRect));
          CGContextTextInRect( context, buf, // Converted from mvgTextInRect
                         (size_t) -1,
                         CGRectMake( textRect.origin.x, textRect.origin.y + 40, textRect.size.width, 20),
-                        CGContentModeLeft,
+                        CGTextAlignLeft,
                         CGTextOptionAlignVisually);
          sprintf( buf, "drawRect: %s", CGRectUTF8String( drawRect));
          CGContextTextInRect( context, buf, // Converted from mvgTextInRect
                         (size_t) -1,
                         CGRectMake( textRect.origin.x, textRect.origin.y + 60, textRect.size.width, 20),
-                        CGContentModeLeft,
+                        CGTextAlignLeft,
                         CGTextOptionAlignVisually);
 #endif
 

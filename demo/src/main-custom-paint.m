@@ -51,12 +51,17 @@
 
 }
 - (void) fillWithBounds:(CGRect) bounds
-              CGContext:(CGContext *) context
+                options:(struct CGFillOptions *) options
+                context:(CGContext *) context
 {
+   CGStrokeOptions   strokeOptions = CGStrokeOptionsDefault;
+
    [_paint fillWithBounds:bounds
+                  options:options
                   context:context];
    [_rotatedPaint strokeWithBounds:bounds
                        strokeWidth:_strokeWidth
+                           options:&strokeOptions
                            context:context];
 }
 

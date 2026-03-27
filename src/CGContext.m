@@ -194,7 +194,7 @@ static struct
    [super finalize];
    if( _backend != UIGraphicsBackendNone)
    {
-      [self _finalizeNanoVG];
+      [self _doneBackend];
    }
 }
 
@@ -290,6 +290,12 @@ static struct
 - (mulle_relativetime_t) secondsSinceFirstRender
 {
    return( _currentFrameInfo.now - _firstRenderTimeStamp);
+}
+
+
++ (char *) backendUTF8String
+{
+   return( "unknown");
 }
 
 

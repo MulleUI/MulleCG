@@ -202,7 +202,6 @@
 - (id) mutableCopy;
 
 
-- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
 
 // multisample images can not be used as paint, use resolvedImage
 - (BOOL) isMultiSample        MULLE_OBJC_THREADSAFE_METHOD;
@@ -214,5 +213,12 @@
 - (instancetype) shareWithContext:(CGContext *) context
                      textureFlags:(NSUInteger) textureFlags  MULLE_OBJC_THREADSAFE_METHOD;
 
+
+@end
+
+
+@interface CGImage( Future)
+
+- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
 
 @end

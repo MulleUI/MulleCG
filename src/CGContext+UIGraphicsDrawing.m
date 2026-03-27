@@ -7,7 +7,66 @@
 
 #import "CGContext+Drawing.h"
 #import "CGContext+CGImage.h"
+#import "CGDrawable.h"
 #import "CGImage.h"
+#import "CGPaint+Drawing.h"
+#import "CGTypes.h"
+
+
+void  CGContextDrawBitmapDrawableInRect( CGContext *context,
+                                         id <CGBitmapDrawable> drawable,
+                                         CGRect rect,
+                                         CGRect patternRect,
+                                         CGDrawableOptions *options)
+{
+   CGImage       *image;
+   CGTextureID   textureID;
+   NSUInteger    textureFlags;
+
+   if( ! options)
+      options = &CGDrawableOptionsDefault;
+
+   textureFlags = [drawable textureFlags];
+   if( options->flags.repeat != CGRepeatAsIs)
+   {
+      textureFlags &= ~(CGTextureRepeatX|CGTextureRepeatY);
+      if( options->flags.repeat & CGRepeatHorizontally)
+         textureFlags |= CGTextureRepeatX;
+      if( options->flags.repeat & CGRepeatVertically)
+         textureFlags |= CGTextureRepeatY;
+   }
+
+   image = [drawable cgImageWithContext:context
+                           textureFlags:textureFlags];
+   if( ! image)
+      return;
+
+   textureID = [image textureID];
+   if( textureID == CGTextureIDInvalid)
+      return;
+
+   if( options->flags.flip & CGFlipHorizontally)
+   {
+      patternRect.origin.x   += rect.size.width;
+      rect.origin.x          += rect.size.width;
+      rect.size.width        *= -1.0;
+      patternRect.size.width *= -1.0;
+   }
+   if( options->flags.flip & CGFlipVertically)
+   {
+      patternRect.origin.y    += rect.size.height;
+      rect.origin.y           += rect.size.height;
+      rect.size.height        *= -1.0;
+      patternRect.size.height *= -1.0;
+   }
+
+   CGContextBeginPath( context);
+   CGContextRoundedRectVarying( context, rect, options->cornerInsets);
+   CGContextSetFillImagePattern( context, textureID, patternRect,
+                                 options->rotation, options->alpha);
+   CGContextFill( context);
+}
+
 
 
 @implementation CGContext ( UIGraphicsDrawing)

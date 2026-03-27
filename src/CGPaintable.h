@@ -31,11 +31,13 @@ PROTOCOLCLASS_END()
 @end
 
 
+MULLE_CG_GLOBAL
 void   CGContextFillPaintableOptions( CGContext *context,
                                       id <CGPaintable> paint,
                                       CGRect  bounds,
                                       CGFillOptions *options);
 
+MULLE_CG_GLOBAL
 void   CGContextStrokePaintableOptions( CGContext *context,
                                         id <CGPaintable> paint,
                                         CGRect  bounds,

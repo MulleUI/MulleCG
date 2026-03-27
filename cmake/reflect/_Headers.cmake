@@ -90,6 +90,7 @@ src/CGImage.h
 src/CGLayoutContext+CGFont.h
 src/CGLayoutContext.h
 src/CGPaint+DrawingConveniences.h
+src/CGPaint+Drawing.h
 src/CGPaint+UIGraphicsDrawing.h
 src/CGPaintable.h
 src/CGPaint.h

@@ -13,7 +13,7 @@
 
 struct CGBackend
 {
-   void                          *context;            // opaque backend context (e.g. NVGcontext *)
+   void                           *context;           // opaque backend context (e.g. NVGcontext *)
    struct CGFunctionTable         functions;          // drawing vtable — embedded, no pointer indirection
    struct CGBackendFunctionTable  backendFunctions;   // framebuffer vtable — embedded
 };
