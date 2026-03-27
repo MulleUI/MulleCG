@@ -5,6 +5,7 @@
 #import "CGTypes.h"
 #import "CGContext.h"
 #import "CGContext+Texture.h"
+#import "CGContext+Render.h"
 #import "CGContext+DebugPrivate.h"
 #import "CGImage+DebugPrivate.h"
 #import "CGFramebuffer.h"
@@ -869,8 +870,8 @@ static struct
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
 {
-   MULLE_C_UNUSED( allocator);
-   return( (struct CGBitmap){ 0 });  // implemented by nanovg backend
+   return( [[self context] RGBABytesBitmapOfImage:self
+                                        allocator:allocator]);
 }
 
 @end

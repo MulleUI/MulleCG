@@ -223,3 +223,48 @@ static struct CGFrameInfo   emptyInfo;
 }
 
 @end
+
+
+// No-op stubs — overridden by CGContext(Errors) in MulleCGNanovgGL
+@implementation CGContext( BackendErrors)
+
+- (void) _checkBackendError:(char *) str
+{
+}
+
+- (BOOL) resetBackendError
+{
+   return( NO);
+}
+
+@end
+
+
+@implementation CGContext( RenderFuture)
+
+- (CGImage *) resolveMultiSampleImage:(CGImage *) image
+{
+   NSUInteger                    textureFlags;
+   CGFramebuffer                 *layer;
+   struct CGContextFramebuffer   previous;
+
+   CGContextRenderLog( "");
+
+   assert( [image isMultiSample]);
+
+   textureFlags  = [image textureFlags] & ~CGImageFlagMSAA;
+   layer         = [CGFramebuffer framebufferWithBitmapSize:[image bitmapSize]
+                                               textureFlags:textureFlags
+                                             nameUTF8String:[image nameUTF8String]
+                                                    context:self];
+
+   previous = [self bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( layer)];
+   [self blitRect:CGRectMakeWithOriginAndSize( CGPointZero, [layer size])
+            image:image
+            scale:NO];
+   [self bindFramebuffer:previous];
+
+   return( layer);
+}
+
+@end
