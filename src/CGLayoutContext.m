@@ -60,6 +60,7 @@ MULLE_CG_GLOBAL_VAR mulle_thread_mutex_t   CGLayoutContextFreeTypeLock;
 #endif
 
    [self _initFontCache];
+   _defaultFontName = "sans";
    return( self);
 }
 
@@ -376,6 +377,6 @@ CGFont  *CGLayoutContextUseFontWithNameUTF8String( CGLayoutContext *self, char *
    if( font)
       [self useFont:font];
    else
-      _CGContextRenderLog( self, "Font %s is unknown\n", name);
+      fprintf( stderr, "Font \"%s\" is unknown\n", name);
    return( font);
 }
