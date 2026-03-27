@@ -7,6 +7,7 @@
 
 #import "CGContext+Drawing.h"
 #import "CGContext+CGFramebuffer.h"
+#import "CGContext+UIGraphicsDrawing.h"
 #import "CGContext+DebugPrivate.h"
 
 

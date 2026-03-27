@@ -1,4 +1,3 @@
-      { @selector( MulleObjCDeps), @selector( MulleUIBase) },      // 3c20656f;MulleObjCDeps;3ebba954;MulleUIBase
       { @selector( CGBitmapDrawable), MULLE_OBJC_NO_CATEGORYID },      // ac0569ab;CGBitmapDrawable;;
       { @selector( CGBlendedPaint), @selector( CGPaintable) },      // f164885b;CGBlendedPaint;faf2d5d6;CGPaintable
       { @selector( CGBlendedPaint), @selector( Drawing) },      // f164885b;CGBlendedPaint;53946657;Drawing
@@ -6,10 +5,12 @@
       { @selector( CGBoxGradient), @selector( CGPaintable) },      // 0966d40c;CGBoxGradient;faf2d5d6;CGPaintable
       { @selector( CGBoxGradient), MULLE_OBJC_NO_CATEGORYID },      // 0966d40c;CGBoxGradient;;
       { @selector( CGColorLoader), MULLE_OBJC_NO_CATEGORYID },      // dd5a2891;CGColorLoader;;
+      { @selector( CGContext), @selector( BackendErrors) },      // 80b7b568;CGContext;bf206249;BackendErrors
       { @selector( CGContext), @selector( CGFramebuffer) },      // 80b7b568;CGContext;ef762cef;CGFramebuffer
       { @selector( CGContext), @selector( CGImage) },      // 80b7b568;CGContext;6ec55940;CGImage
       { @selector( CGContext), @selector( CGImageGPUTexture) },      // 80b7b568;CGContext;86f29fd6;CGImageGPUTexture
       { @selector( CGContext), @selector( Render) },      // 80b7b568;CGContext;50cf42d3;Render
+      { @selector( CGContext), @selector( RenderFuture) },      // 80b7b568;CGContext;03df5de7;RenderFuture
       { @selector( CGContext), @selector( Shader) },      // 80b7b568;CGContext;deb38887;Shader
       { @selector( CGContext), @selector( UIGraphicsDrawing) },      // 80b7b568;CGContext;00f5260e;UIGraphicsDrawing
       { @selector( CGContext), MULLE_OBJC_NO_CATEGORYID },      // 80b7b568;CGContext;;
@@ -21,6 +22,7 @@
       { @selector( CGGradient), @selector( CGPaintable) },      // 37670335;CGGradient;faf2d5d6;CGPaintable
       { @selector( CGGradient), MULLE_OBJC_NO_CATEGORYID },      // 37670335;CGGradient;;
       { @selector( CGImage), @selector( CGPaintable) },      // 6ec55940;CGImage;faf2d5d6;CGPaintable
+      { @selector( CGImage), @selector( Future) },      // 6ec55940;CGImage;b69b0b69;Future
       { @selector( CGImage), MULLE_OBJC_NO_CATEGORYID },      // 6ec55940;CGImage;;
       { @selector( CGImagePaint), @selector( CGPaintable) },      // 3e23b783;CGImagePaint;faf2d5d6;CGPaintable
       { @selector( CGImagePaint), MULLE_OBJC_NO_CATEGORYID },      // 3e23b783;CGImagePaint;;

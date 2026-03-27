@@ -1,6 +1,7 @@
 #import "CGFramebuffer.h"
 
 #import "CGContext.h"
+#import "CGContext+CGFramebuffer.h"
 #import "CGContext+DebugPrivate.h"
 #import "CGImage+DebugPrivate.h"
 
