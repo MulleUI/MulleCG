@@ -613,6 +613,12 @@ static inline void   CGContextAddCGPath( CGContext *context, CGPathRef path)
       CGContextFN(context)->addCGPath( CGContextVG(context), path);
 }
 
+static inline void   CGContextCopyPath( CGContext *context, CGContext *src)
+{
+   if( context && src && CGContextFN(context)->copyPath)
+      CGContextFN(context)->copyPath( CGContextVG(context), CGContextVG(src));
+}
+
 
 // Paint style setters (call before fill/stroke)
 
