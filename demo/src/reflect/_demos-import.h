@@ -12,19 +12,19 @@
  */
 
 // To remove the following dependency (headers and library) completely:
-//   `mulle-sde dependency remove MulleUI`
-// (Use E006D74A-0A52-40DD-BA3F-40427AA218C8 instead of MulleUI, if there are duplicate entries)
+//   `mulle-sde dependency remove MulleUIOS`
+// (Use E9B3433A-62EB-405A-BB5B-8DFFB3DF6D1B instead of MulleUIOS, if there are duplicate entries)
 //
 // You can tweak the following #import with these commands:
-//    remove #import      : `mulle-sde dependency mark MulleUI no-header`
-//    rename              : `mulle-sde dependency|library set MulleUI include whatever.h`
-//    reorder             : `mulle-sde dependency move MulleUI <up|down>`
-//    toggle #import      : `mulle-sde dependency mark MulleUI [no-]import`
-//    toggle public       : `mulle-sde dependency mark MulleUI [no-]public`
-//    toggle optional     : `mulle-sde dependency mark MulleUI [no-]require`
-//    remove for platform : `mulle-sde dependency mark MulleUI no-platform-<uname>`
+//    remove #import      : `mulle-sde dependency mark MulleUIOS no-header`
+//    rename              : `mulle-sde dependency|library set MulleUIOS include whatever.h`
+//    reorder             : `mulle-sde dependency move MulleUIOS <up|down>`
+//    toggle objc         : `mulle-sde dependency mark MulleUIOS [no-]import`
+//    toggle public       : `mulle-sde dependency mark MulleUIOS [no-]public`
+//    toggle optional     : `mulle-sde dependency mark MulleUIOS [no-]require`
+//    remove for platform : `mulle-sde dependency mark MulleUIOS no-platform-<uname>`
 //        (use `mulle-sourcetree-to-c --unames` to list known values)
-#import <MulleUI/MulleUI.h>   // MulleUI
+#import <MulleUIOS/MulleUIOS.h>   // MulleUIOS
 
 // To remove the following dependency (headers and library) completely:
 //   `mulle-sde dependency remove MulleGraphicsImage`
@@ -34,7 +34,7 @@
 //    remove #import      : `mulle-sde dependency mark MulleGraphicsImage no-header`
 //    rename              : `mulle-sde dependency|library set MulleGraphicsImage include whatever.h`
 //    reorder             : `mulle-sde dependency move MulleGraphicsImage <up|down>`
-//    toggle #import      : `mulle-sde dependency mark MulleGraphicsImage [no-]import`
+//    toggle objc         : `mulle-sde dependency mark MulleGraphicsImage [no-]import`
 //    toggle public       : `mulle-sde dependency mark MulleGraphicsImage [no-]public`
 //    toggle optional     : `mulle-sde dependency mark MulleGraphicsImage [no-]require`
 //    remove for platform : `mulle-sde dependency mark MulleGraphicsImage no-platform-<uname>`
@@ -49,27 +49,12 @@
 //    remove #import      : `mulle-sde dependency mark MulleUIPerf no-header`
 //    rename              : `mulle-sde dependency|library set MulleUIPerf include whatever.h`
 //    reorder             : `mulle-sde dependency move MulleUIPerf <up|down>`
-//    toggle #import      : `mulle-sde dependency mark MulleUIPerf [no-]import`
+//    toggle objc         : `mulle-sde dependency mark MulleUIPerf [no-]import`
 //    toggle public       : `mulle-sde dependency mark MulleUIPerf [no-]public`
 //    toggle optional     : `mulle-sde dependency mark MulleUIPerf [no-]require`
 //    remove for platform : `mulle-sde dependency mark MulleUIPerf no-platform-<uname>`
 //        (use `mulle-sourcetree-to-c --unames` to list known values)
 #import <MulleUIPerf/MulleUIPerf.h>   // MulleUIPerf
-
-// To remove the following dependency (headers and library) completely:
-//   `mulle-sde dependency remove MulleCG`
-// (Use 8D6691CB-F735-42C1-A1B6-1A88B2C39CF6 instead of MulleCG, if there are duplicate entries)
-//
-// You can tweak the following #import with these commands:
-//    remove #import      : `mulle-sde dependency mark MulleCG no-header`
-//    rename              : `mulle-sde dependency|library set MulleCG include whatever.h`
-//    reorder             : `mulle-sde dependency move MulleCG <up|down>`
-//    toggle #import      : `mulle-sde dependency mark MulleCG [no-]import`
-//    toggle public       : `mulle-sde dependency mark MulleCG [no-]public`
-//    toggle optional     : `mulle-sde dependency mark MulleCG [no-]require`
-//    remove for platform : `mulle-sde dependency mark MulleCG no-platform-<uname>`
-//        (use `mulle-sourcetree-to-c --unames` to list known values)
-#import <MulleCG/MulleCG.h>   // MulleCG
 
 #ifdef __has_include
 # if __has_include( "_demos-include.h")

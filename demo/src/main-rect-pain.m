@@ -19,7 +19,7 @@
 #define drawRectColorOrderedFill     1  // 171-174 fps
 
 // ca. 48-50fps
-static void   strokeRect1( struct CGContext *context,
+static void   strokeRect1( CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
@@ -34,7 +34,7 @@ static void   strokeRect1( struct CGContext *context,
    CGContextStroke( context);
 }
 // ca. 66 fps
-static void   strokeRect2( struct CGContext *context,
+static void   strokeRect2( CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
@@ -52,7 +52,7 @@ static void   strokeRect2( struct CGContext *context,
    CGContextFill( context);
 }
 // ca. 39-40 fps
-static void   strokeRect3( struct CGContext *context,
+static void   strokeRect3( CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
@@ -67,7 +67,7 @@ static void   strokeRect3( struct CGContext *context,
    CGContextFill( context);
 }
 // ca. 47-49 fps
-static void   strokeRect4( struct CGContext *context,
+static void   strokeRect4( CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
@@ -87,7 +87,7 @@ static void   strokeRect4( struct CGContext *context,
 }
 // here we just fill a rect for reference
 // ca. 125-127 fps
-static void   fillRect( struct CGContext *context,
+static void   fillRect( CGContext *context,
                         CGRect rect,
                         CGColor color,
                         CGColor backgroundColor,

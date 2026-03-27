@@ -42,7 +42,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    float                glyphBounds[ 4];
    float                bounds[ 4];
    CGPoint              origin;
-   CGGlyphPosition     positions[ 32];
+   struct UIGlyphPosition     positions[ 32];
    int                  i;
    int                  nGlyphs;
    CGPoint              adjust;

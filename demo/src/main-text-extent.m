@@ -7,7 +7,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
    CGRect              canvas;
-   float               bounds[ 4];
+   CGTextBoundsInfo    info;
    CGFont              *font;
    font = [context fontWithNameUTF8String:"sans"];
    assert( font);
@@ -15,24 +15,18 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGContextFontFace( context, "sans");
    CGContextFontSize( context, 12.0);
 
-   CGContextTextBoundsInfo( context, 0, 0, "abc", NULL, bounds);
-   fprintf( stderr, "abc: %.1f %.1f %.1f %1f\n",
-                    bounds[ 0],
-                    bounds[ 1],
-                    bounds[ 2],
-                    bounds[ 3]);
+   info = CGContextTextBoundsInfo( context, CGPointZero, "abc", -1);
+   mulle_fprintf( stderr, "abc: %s\n", CGRectUTF8String( info.bounds));
 
    // has space in back
-   CGContextTextBoundsInfo( context, 0, 0, "abc ", NULL, bounds);
-   fprintf( stderr, "abc : %.1f %.1f %.1f %1f\n",
-                    bounds[ 0],
-                    bounds[ 1],
-                    bounds[ 2],
-                    bounds[ 3]);
+   info = CGContextTextBoundsInfo( context, CGPointZero, "abc ", -1);
+   mulle_fprintf( stderr, "abc : %s\n", CGRectUTF8String( info.bounds));
    fprintf( stderr, "App exits intentionally now\n");
    exit( 0);
    return( NO);
 }
+
+
 int   main( int argc, char *argv[])
 {
    UIWindow        *window;

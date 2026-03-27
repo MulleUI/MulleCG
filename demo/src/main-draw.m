@@ -14,13 +14,7 @@
 
 static void   lag( long refreshRate)
 {
-   struct timespec   sleep;
-   long              nsperframe;
-
-   nsperframe    = (1000000000L + (refreshRate - 1)) / refreshRate;
-   sleep.tv_sec  = 0.0;
-   sleep.tv_nsec = (long) round( nsperframe * LAG_FRAMES);
-   nanosleep( &sleep, NULL);
+   mulle_relativetime_sleep( 1.0 / refreshRate * LAG_FRAMES);
 }
 
 // Topics:

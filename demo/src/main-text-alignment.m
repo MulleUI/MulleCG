@@ -48,7 +48,7 @@ static char  *cgVAlignmentUTF8String( int alignment)
    }
 }
 
-static void   cgStrokeGlyphPosition( CGContext *context, CGGlyphPosition *position, CGColor color) // Converted from CGContext *context
+static void   cgStrokeGlyphPosition( CGContext *context, struct UIGlyphPosition *position, CGColor color) // Converted from CGContext *context
 {
    CGContextBeginPath( context);
    CGContextRect( context, CGRectMake( position->minx,

@@ -241,6 +241,7 @@ static inline int
 
 
 // default is NULL until MulleUIOS comes into play
++ (char *) backendUTF8String;
 - (char *) backendUTF8String;
 
 - (void) getCurrentFrameInfo:(struct CGFrameInfo *) info;
@@ -272,7 +273,7 @@ static inline int
 @interface CGContext( Forward)
 
 - (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options;
-- (void) _finalizeNanoVG;
+- (void) _doneBackend;
 - (void) barrier;
 - (CGImage *) resolveMultiSampleImage:(CGImage *) image;
 

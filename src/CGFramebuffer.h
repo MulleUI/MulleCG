@@ -53,9 +53,6 @@ struct CGFrameInfo;
                 nameUTF8String:(char *) nameUTF8String
                        context:(CGContext *) context;
 
-
-- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
-
 @end
 
 

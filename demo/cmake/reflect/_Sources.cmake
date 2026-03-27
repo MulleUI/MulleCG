@@ -26,7 +26,6 @@ src/main-alpha.m
 src/main-alpha-white.m
 src/main-arc-cw.m
 src/main-arc.m
-src/main-arc-nanovg.m
 src/main-arcto.m
 src/main-bezier.m
 src/main-blend.m
@@ -60,10 +59,6 @@ src/main-feather.m
 src/main-font-bug.m
 src/main-fonts.m
 src/main-framebuffer-simple.m
-src/main-glfw-cglayer.m
-src/main-glfw-draw-offscreen.m
-src/main-glfw-draw-simple.m
-src/main-glfw-two-windows.m
 src/main-gradient-interpolate.m
 src/main-gradient.m
 src/main-gradient-rotate.m
@@ -72,8 +67,6 @@ src/main-html5-arc.m
 src/main-html5-arcto.m
 src/main-huge-font.m
 src/main-line-context.m
-src/main-line-nanovg.m
-src/main-opengl.m
 src/main-outline-glyph.m
 src/main-paint-image.m
 src/main-paint.m
@@ -84,7 +77,6 @@ src/main-particles.m
 src/main-particles-sorted.m
 src/main-precompiled.m
 src/main-rect.m
-src/main-rect-nanovg.m
 src/main-rect-pain.m
 src/main-relation.m
 src/main-rotate-rect.m
@@ -109,7 +101,6 @@ src/main-text-fps.m
 src/main-text-in-rect.m
 src/main-text.m
 src/main-text-multiline.m
-src/main-text-nanovg.m
 src/main-text-origin.m
 src/main-text-simple.m
 src/main-texture.m

@@ -107,7 +107,7 @@ static void   mulleFreetypeOutlineGlyphPath( FT_Outline *outline,
 
    FT_Vector   *point;
    FT_Vector   *limit;
-   char        *tags;
+   unsigned char  *tags;
 
    FT_Error    error;
 

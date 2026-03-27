@@ -794,11 +794,6 @@ static struct
 }
 
 
-- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
-{
-   MULLE_C_UNUSED( allocator);
-   return( (struct CGBitmap){ 0 });  // implemented by nanovg backend
-}
 
 // this is a hack, until we properly turn multisample layers into standard
 // cgimages for paints
@@ -865,6 +860,17 @@ static struct
 - (CGImage *) image
 {
    return( self);
+}
+
+@end
+
+
+@implementation CGImage( Future)
+
+- (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
+{
+   MULLE_C_UNUSED( allocator);
+   return( (struct CGBitmap){ 0 });  // implemented by nanovg backend
 }
 
 @end

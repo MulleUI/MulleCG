@@ -63,6 +63,8 @@ static struct
    // MEMO: the layout context will have NULL _OSWindow (!)
    _OSWindow = os_context; // sic, not retained
 
+   [self _initBackend];
+
    MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, name);
 
    return( self);
@@ -86,6 +88,8 @@ static struct
 - (void) dealloc
 {
    [self _doneResourceStorage:&_resourceStorage];
+   [self _doneBackend];
+
    MulleObjCInstanceDeallocateMemory( self, _nameUTF8String);
 
    [super dealloc];

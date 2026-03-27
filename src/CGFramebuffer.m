@@ -166,7 +166,7 @@
    uintptr_t   hash;
    int         color;
 
-   s = _nameUTF8String;
+   s = _nameUTF8String; // is readonly !
    if( s)
       hash = _mulle_string_hash( s);
    else
