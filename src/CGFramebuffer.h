@@ -113,6 +113,7 @@ typedef CGFramebuffer   CGLayer;
 - (void) _didBeginFBRenderWithBitmapSize:(CGPixelSize) bitmapSize
                         devicePixelRatio:(CGFloat) ratio;
 - (void) _willEndFBRender:(struct CGFramebufferRenderInfo *) memo;
+- (void) willeEndFBRender:(struct CGFramebufferRenderInfo *) memo;
 
 - (void) beginFBRenderWithBackgroundColor:(CGColor) color
                          devicePixelRatio:(CGFloat) ratio

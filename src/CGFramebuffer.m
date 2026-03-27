@@ -154,8 +154,13 @@
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
 {
-   MULLE_C_UNUSED( allocator);
-   return( (struct CGBitmap){ 0 });  // implemented by nanovg backend
+   return( [_context RGBABytesBitmapOfImage:self
+                                  allocator:allocator]);
+}
+
+
+- (void) willeEndFBRender:(struct CGFramebufferRenderInfo *) memo
+{
 }
 
 
