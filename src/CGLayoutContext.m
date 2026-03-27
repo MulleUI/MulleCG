@@ -7,6 +7,7 @@
 
 #import "CGLayoutContext+CGFont.h"
 #import "CGContext+Drawing.h"
+#import "CGContext+DebugPrivate.h"
 
 
 @implementation CGLayoutContext
@@ -365,3 +366,16 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
 }
 
 @end
+
+
+CGFont  *CGLayoutContextUseFontWithNameUTF8String( CGLayoutContext *self, char *name)
+{
+   CGFont   *font;
+
+   font = [self fontWithNameUTF8String:name];
+   if( font)
+      [self useFont:font];
+   else
+      _CGContextRenderLog( self, "Font %s is unknown\n", name);
+   return( font);
+}
