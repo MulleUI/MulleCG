@@ -97,7 +97,7 @@ static inline void mvgRoundedSector(CGContext *context, // Changed parameter typ
    CGContextArcTo( context, outerStart, compensatedOuterStart, outerCornerRadius); // Converted from mvgArcTo
 
    CGContextArc( context, outerCircle, increasedOuterStartAngle,
-                 CAAngleGetRotationTowardsAngle( increasedOuterStartAngle, reducedOuterEndAngle, CARotationDirectionClockWise));
+                 (CAAngleToRadians( reducedOuterEndAngle) - CAAngleToRadians( increasedOuterStartAngle)) / (2.0f * M_PI_f));
 
    CGContextArcTo( context, outerEnd, middleEnd, outerCornerRadius); // Converted from mvgArcTo
    if( outerCornerRadius < halfDistance)
@@ -105,7 +105,7 @@ static inline void mvgRoundedSector(CGContext *context, // Changed parameter typ
    CGContextArcTo( context, innerEnd, compensatedInnerEnd, innerCornerRadius); // Converted from mvgArcTo
 
    CGContextArc( context, innerCircle, reducedInnerEndAngle,
-                 CAAngleGetRotationTowardsAngle( reducedInnerEndAngle, increasedInnerStartAngle, CARotationDirectionCounterClockWise));
+                 (CAAngleToRadians( increasedInnerStartAngle) - CAAngleToRadians( reducedInnerEndAngle)) / (2.0f * M_PI_f));
 
 #if 0
    CGContextClosePath( context); // Converted from mvgClosePath
@@ -160,10 +160,6 @@ static void   drawDial( CGContext *context, // Changed parameter type
       CGContextFillColor( context, dimColor);
    }
    CGContextFill( context);
-
-   // skip fill when near zero to avoid full-circle artifact
-   if( radians < 0.01f)
-      return;
 
 #if 1
    mvgRoundedSector( context, innerCircle, outerCircle, startAngle, endAngle, 10.0);
