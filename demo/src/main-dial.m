@@ -96,14 +96,16 @@ static inline void mvgRoundedSector(CGContext *context, // Changed parameter typ
        CGContextLineTo( context, middleStart); // Converted from mvgLineTo
    CGContextArcTo( context, outerStart, compensatedOuterStart, outerCornerRadius); // Converted from mvgArcTo
 
-   CGContextArc( context, outerCircle, increasedOuterStartAngle, reducedOuterEndAngle - increasedOuterStartAngle);
+   CGContextArc( context, outerCircle, increasedOuterStartAngle,
+                 (CAAngleToRadians( reducedOuterEndAngle) - CAAngleToRadians( increasedOuterStartAngle)) / (2.0f * M_PI_f));
 
    CGContextArcTo( context, outerEnd, middleEnd, outerCornerRadius); // Converted from mvgArcTo
    if( outerCornerRadius < halfDistance)
        CGContextLineTo( context, middleEnd); // Converted from mvgLineTo
    CGContextArcTo( context, innerEnd, compensatedInnerEnd, innerCornerRadius); // Converted from mvgArcTo
 
-   CGContextArc( context, innerCircle, reducedInnerEndAngle, increasedInnerStartAngle - reducedInnerEndAngle);
+   CGContextArc( context, innerCircle, reducedInnerEndAngle,
+                 (CAAngleToRadians( increasedInnerStartAngle) - CAAngleToRadians( reducedInnerEndAngle)) / (2.0f * M_PI_f));
 
 #if 0
    CGContextClosePath( context); // Converted from mvgClosePath
