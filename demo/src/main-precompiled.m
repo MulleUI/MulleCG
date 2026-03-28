@@ -23,6 +23,8 @@ void   drawSplitRectWithHole( CGContext *context, CGRect rect, CGFloat x, CGFloa
     CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( x, y), radius), CARadiansToAngle( angle), -2 * angle);
     CGContextClosePath( context);
 }
+
+
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext                  *context = _context;
@@ -78,6 +80,7 @@ static void   usage( void)
 "Options:\n"
 "   -a      : disable default antialias (nvg/glfw)\n"
 "   -f      : force edge antialias (nvg)\n"
+"   -h <hz> : framerate\n"
 "   -r      : retained\n"
 "   -p      : dont precompile path\n"
 "   -c      : dont cache path\n"
@@ -86,12 +89,14 @@ static void   usage( void)
 }
 int   main( int argc, char *argv[])
 {
-   UIApplication   *app;
-   UIWindow        *window;
-   NSUInteger      styleMask;
-   int             i;
+   UIApplication          *app;
+   UIWindow               *window;
+   NSUInteger             styleMask;
+   int                    i;
+   mulle_relativetime_t   frameRate;
 
    styleMask = UIWindowStyleMaskDefault;
+   frameRate = 1.0;
 
    /*
     * window and app
@@ -102,24 +107,29 @@ int   main( int argc, char *argv[])
          break;
       switch( argv[ i][ 1])
       {
-      case 'r' :
-         styleMask ^= ~UIWindowStyleRetained;
+      case 'a' :
+         styleMask ^= UIWindowStyleAntiAlias;
+         break;
+
+      case 'c' :
+         cache = NO;
          break;
 
       case 'f' :
          styleMask ^= UIWindowStyleForceEdgeAntiAlias;
          break;
 
-      case 'a' :
-         styleMask ^= UIWindowStyleAntiAlias;
+      case 'h' :
+         if( ++i < argc)
+            frameRate = 1 / atof( argv[ i]);
          break;
 
       case 'p' :
          precompile = NO;
          break;
 
-      case 'c' :
-         cache = NO;
+      case 'r' :
+         styleMask ^= ~UIWindowStyleRetained;
          break;
 
       default :
@@ -136,7 +146,7 @@ int   main( int argc, char *argv[])
                       titleUTF8String:"Demo"
                             styleMask:styleMask];
    [[window contentView] setDrawCallback:drawStuff];
-   [window setFrameRateHz:60.0f];
+   [window setFrameRate:frameRate];
    [window setFrameDelegate:[MulleUIPerf instance]];
    [app addWindow:window];
    return( [app runApp]);

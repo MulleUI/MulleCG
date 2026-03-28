@@ -102,6 +102,10 @@ static struct
    abort();
 }
 
+- (instancetype) _initAsPathContext
+{
+   return( self);
+}
 
 //
 // due to freetype being singlethreaded (mostly ?) the nvgCreate routines
