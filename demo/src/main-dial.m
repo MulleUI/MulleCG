@@ -145,21 +145,30 @@ static void   drawDial( CGContext *context, // Changed parameter type
    outerCircle = CACircleExtrude( outerCircle, space / 2.0);
 
    radians     = CAAngleToRadians( CAAngleSubtract( endAngle, startAngle));
+   CAAngle  fullEndAngle = endAngle;  // full arc end before fill scaling
+
    radians    *= CGFloatClampToUnity( fill);
    endAngle    = CAAngleAddRadians( startAngle, radians);
 
+   // draw background track (full arc, dim)
+   mvgRoundedSector( context, innerCircle, outerCircle, startAngle, fullEndAngle, 10.0);
+   {
+      CGColor   dimColor = color;
+      dimColor.a = 0.2f;
+      CGContextFillColor( context, dimColor);
+   }
+   CGContextFill( context);
+
 #if 1
-   mvgRoundedSector( context, innerCircle, outerCircle, startAngle, endAngle, 10.0); // Changed function call
+   mvgRoundedSector( context, innerCircle, outerCircle, startAngle, endAngle, 10.0);
 #else
-   CGContextBeginPath( context); // Converted from mvgBeginPath
+   CGContextBeginPath( context);
    CGContextArc( context, innerCircle, startAngle, endAngle - startAngle);
    CGContextArc( context, outerCircle, endAngle, startAngle - endAngle);
-   CGContextClosePath( context); // Converted from mvgClosePath
+   CGContextClosePath( context);
 #endif
-//   CGContextFillWithColor( context, CGColorMakeLightGray()); // Converted from mvgFillWithColor
-   CGContextStrokeWidth( context, 1.0f);
-   CGContextStrokeColor( context, CGColorMakeGray()); // Converted from mvgStrokeWithColor
-   CGContextStroke( context);
+   CGContextFillColor( context, color);
+   CGContextFill( context);
 }
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
