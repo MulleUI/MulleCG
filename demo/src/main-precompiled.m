@@ -45,7 +45,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 
       pathContext = [[CGContext createPathContext] retain];
       assert( pathContext);
-
       drawSplitRectWithHole( pathContext, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
       if( precompile)
       {
