@@ -58,6 +58,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 
    hue   = CGContextGetBackAndForthAnimationFactor( context, 240);
    steps = (contentRect.size.width - CGRectGetMidX( rect) * 2.0) / (CGFloat) STEPS;
+   CGContextSave( context);
    for( i = 0; i < STEPS; i++)
    {
       CGContextTranslate( context, CGPointMake(steps, 0.0f));
@@ -69,6 +70,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       CGContextStrokeWidth( context, 3.0);
       CGContextStroke( context);
    }
+   CGContextRestore( context);
    return( YES);
 }
 static void   usage( void)
