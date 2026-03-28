@@ -1,10 +1,6 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-#import <MulleCGNanovg/CGContext+nanovg.h>  // for CGContextGetNVGContext
-// nvgPrecompilePath is in nanovg.h but including it directly causes redefinition
-// of NVGcolor — access via CGContextGetNVGContext and declare extern instead
-extern void nvgPrecompilePath( struct NVGcontext *ctx);
 static BOOL   precompile = YES;
 static BOOL   cache = YES;
 
@@ -53,11 +49,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       [pathContext setTraceFile:stderr];
       drawSplitRectWithHole( pathContext, rect, CGRectGetMidX( rect), rect.size.height / 2.0);
       [pathContext setTraceFile:NULL];
-      // precompile the path (tessellate) so nvgCopyPath can use cached points
-      nvgPrecompilePath( CGContextVG( pathContext));
       if( precompile)
       {
-         // TODO: CGContextPrecompilePath( pathContext);
+         CGContextPrecompilePath( pathContext);
          MulleUICLog( "Precompile path");
       }
    }
