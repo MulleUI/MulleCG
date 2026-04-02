@@ -2,6 +2,39 @@
 
 #import <string.h>
 #define FONT_SIZE   10
+
+//
+// Text placement and CGTextOptionAlignVisually
+// =============================================
+//
+// CGContextTextInRect / CGContextFormatInRect place text inside a rect
+// using a content mode (TopLeft, BottomRight, Center, ScaleAspectFit, etc.)
+// and clip to that rect with a scissor.
+//
+// Without CGTextOptionAlignVisually, text bounds come from font metrics
+// (ascender, descender, line height). These are consistent across strings
+// but don't reflect the actual ink. With NVG_ALIGN_TOP, the draw point is
+// at the top of the line — but the actual glyph ink can start a few pixels
+// below that. The font metrics bounds report origin.y ≈ 0, so the text is
+// placed right at the rect edge.
+//
+// Problem: CGContextTextInRect sets a scissor to the text rect. If the
+// glyph ink extends above the draw point (anti-aliasing fringe, or glyphs
+// like "0" whose ink starts at the very top of the em square), the scissor
+// clips those top pixels. At small font sizes this is very visible — the
+// tops of zeros and other tall glyphs get cut off.
+//
+// With CGTextOptionAlignVisually, text bounds come from the actual rendered
+// glyph outlines (CGContextTextVisualBounds). The origin reflects where
+// the ink really starts, and CGContextTextInRect compensates by shifting
+// the draw point so the ink fits inside the rect. This avoids the clipping.
+//
+// Rule of thumb: when placing text at edges (TopLeft, BottomRight, etc.)
+// and you care about pixel-perfect rendering, use CGTextOptionAlignVisually.
+// Without it, you get consistent metric-based placement (good for multi-line
+// layout) but risk clipping at rect boundaries.
+//
+
 static BOOL   drawStuff( CGGraphicsLayer *self, CGContext *context)
 {
    CGRect              rect;
@@ -24,9 +57,9 @@ static BOOL   drawStuff( CGGraphicsLayer *self, CGContext *context)
       CGContextTextBackgroundColor( context,  CGColorMakeBlack()); // Converted from mvgTextBackgroundColor
 
       textRect = CGRectInset( rect, 4.0, 4.0);
-      CGContextFontSize( context, FONT_SIZE); // Converted from mvgFontSize
-      CGContextFormatInRect( context, textRect, CGContentModeLeft|CGContentModeTop, 0, "%s", CGPointUTF8String( rect.origin)); // Converted from mvgFormatInRect
-      CGContextFormatInRect( context, textRect, CGContentModeRight|CGContentModeBottom, 0, "%s", CGSizeUTF8String( rect.size)); // Converted from mvgFormatInRect
+      CGContextFontSize( context, FONT_SIZE);
+      CGContextFormatInRect( context, textRect, CGContentModeLeft|CGContentModeTop, CGTextOptionAlignVisually, "%s", CGPointUTF8String( rect.origin));
+      CGContextFormatInRect( context, textRect, CGContentModeRight|CGContentModeBottom, CGTextOptionAlignVisually, "%s", CGSizeUTF8String( rect.size));
    }
    CGContextRestore( context); // Converted from mvgRestore
    return( YES);

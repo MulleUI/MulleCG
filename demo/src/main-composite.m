@@ -81,6 +81,8 @@ static void   drawGridInRect( CGContext  *context, CGRect rect)
            options:NULL
            context:context];
 }
+
+
 static void   drawCirclesInRect( CGContext *context,
                                  NSUInteger step,
                                  CGRect rect,
@@ -135,6 +137,8 @@ static void   drawCirclesInRect( CGContext *context,
    }
    CGContextRestore( context);
 }
+
+
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
@@ -184,6 +188,9 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 
    return( YES);
 }
+
+
+
 int   main( int argc, char *argv[])
 {
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,

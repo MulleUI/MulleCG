@@ -34,6 +34,8 @@ static void   drawCheckboard( CGRect  rect, CGContext *context)
            options:NULL
            context:context];
 }
+
+
 static void   drawRect( CGContext *context, CGRect rect, int slim)
 {
    CGRect   drawRect;
@@ -52,12 +54,16 @@ static void   drawRect( CGContext *context, CGRect rect, int slim)
    CGContextRoundedRect( context, drawRect, 3.0);
 #endif
 }
+
+
 static void   drawCircle( CGContext *context, CGRect rect, CGFloat animation)
 {
    rect = CGRectInset( rect, 20, 20);
    rect = CGRectInset( rect, animation, animation);
    CGContextCircle( context, CGRectGetInnerCircle( rect));
 }
+
+
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect              rects[ 2][ 4];

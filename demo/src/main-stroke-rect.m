@@ -180,6 +180,7 @@ int   main( int argc, char *argv[])
                                    styleMask:UIWindowStyleMaskDefault];
       [window[ i] setDrawCallback:drawStuff[ i]];
       [window[ i] setBackgroundColor:CGColorMakeBlack()];
+      [window[ i] setFrameRate:UIWindowFrameRateSynced];
       [app addWindow:window[ i]];
    }
    return( [app runApp]);

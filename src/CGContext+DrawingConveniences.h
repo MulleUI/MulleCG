@@ -47,8 +47,6 @@ CGPoint   CGContextTLAdjustmentForVisualBounds( CGLayoutContext *context, char *
 MULLE_CG_GLOBAL
 void   CGContextFillRoundedShadow( CGContext *context, CGRect rect, CGFloat cornerRadius, struct CGShadow *shadow);
 MULLE_CG_GLOBAL
-MULLE_CG_GLOBAL
-MULLE_CG_GLOBAL
 void   CGContextTextInRect( CGContext *context, char *s, size_t length, CGRect rect, CGContentMode contentMode, CGTextOptions options);
 MULLE_CG_GLOBAL
 struct CGTextBoundsInfo   CGContextTextBoundsOptions( CGContext *context, char *s, size_t length, CGRect rect, CGContentMode contentMode, CGTextOptions options);

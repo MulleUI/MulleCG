@@ -70,15 +70,20 @@ static void   drawArcHole( CGContext *context, CGRect rect) // Converted from st
    intersectionPoint[ 2] = CGPointMake( center.x + x * radius, center.y - h_2);
    intersectionPoint[ 3] = CGPointMake( center.x + x * radius, center.y + h_2);
 
+   angle[ 0] = CARadiansToAngle( atan2( intersectionPoint[ 0].y - center.y, intersectionPoint[ 0].x - center.x));
+   angle[ 1] = CARadiansToAngle( atan2( intersectionPoint[ 1].y - center.y, intersectionPoint[ 1].x - center.x));
+   angle[ 2] = CARadiansToAngle( atan2( intersectionPoint[ 2].y - center.y, intersectionPoint[ 2].x - center.x));
+   angle[ 3] = CARadiansToAngle( atan2( intersectionPoint[ 3].y - center.y, intersectionPoint[ 3].x - center.x));
+
    fprintf( stderr, "0: %s\n", CGPointUTF8String( intersectionPoint[ 0]));
    fprintf( stderr, "1: %s\n", CGPointUTF8String( intersectionPoint[ 1]));
    fprintf( stderr, "2: %s\n", CGPointUTF8String( intersectionPoint[ 2]));
    fprintf( stderr, "3: %s\n", CGPointUTF8String( intersectionPoint[ 3]));
 
    CGContextMoveTo( context, intersectionPoint[ 1]); // Converted from mvgMoveTo
-   CGContextArc( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 1], angle[ 0] - angle[ 1]);
+   CGContextArcFromAngleToAngle( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 1], angle[ 0], CARotationDirectionClockWise);
    CGContextLineTo( context, intersectionPoint[ 2]); // Converted from mvgLineTo
-   CGContextArc( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 2], angle[ 3] - angle[ 2]);
+   CGContextArcFromAngleToAngle( context, CACircleMakeWithCenterAndRadius( center, radius), angle[ 2], angle[ 3], CARotationDirectionClockWise);
    CGContextLineTo( context, intersectionPoint[ 1]); // Converted from mvgLineTo
 }
 

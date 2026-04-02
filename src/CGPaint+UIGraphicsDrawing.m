@@ -11,7 +11,7 @@
 #import "CGPaint+Private.h"
 
 
-@implementation CGPaint ( Drawing)
+@implementation CGPaint ( UIGraphicsDrawing)
 
 - (void) strokeWithBounds:(CGRect) rect
               strokeWidth:(CGFloat) strokeWidth

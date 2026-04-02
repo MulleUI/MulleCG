@@ -104,7 +104,7 @@ static struct CGFrameInfo   emptyInfo;
       // will acquire hopefully a preexisting framebuffer for reuse
       assert( ! _renderFramebuffer);
 
-      textureFlags  = (_backendFlags & CGImageFlagMSAA) ? CGImageFlagMSAA : 0;
+      textureFlags  = (_cgBackend.flags & CGImageFlagMSAA) ? CGImageFlagMSAA : 0;
 #if defined( DEBUG) || defined( MULLE_TEST)
       {
          static uintptr_t   counter;
@@ -209,14 +209,10 @@ static struct CGFrameInfo   emptyInfo;
 
    if( framebuffer)
    {
-#ifdef __has_include
-# if __has_include( "mulleui-debug.h")
       if( self->_debuggingFlags & CGContextDebugDumpFrameToFile)
       {
          MulleUIWriteImageToPNGFileSequenceAsync( framebuffer, "render-layer");
       }
-# endif
-#endif
 
       CGContextRenderLog( "End render into layer %#@", framebuffer);
       [self provideRenderedFramebuffer:framebuffer];
@@ -241,7 +237,7 @@ static struct CGFrameInfo   emptyInfo;
 @end
 
 
-@implementation CGContext( RenderFuture)
+@implementation CGContext( RenderMultiSample)
 
 - (CGImage *) resolveMultiSampleImage:(CGImage *) image
 {

@@ -56,7 +56,7 @@ MULLE_CG_GLOBAL_VAR mulle_thread_mutex_t   CGLayoutContextFreeTypeLock;
    // TODO: this is surely the wrong place, move it to MulleCGNanovgD311
 #ifdef MULLE_CG_BACKEND_D3D11
    if( [context respondsToSelector:@selector( backendDevicePointer)])
-      _backendDevicePointer = [(id) context backendDevicePointer];
+      _cgBackend.devicePointer = [(id) context backendDevicePointer];
 #endif
 
    [self _initFontCache];

@@ -14,6 +14,8 @@
 struct CGBackend
 {
    void                           *context;           // opaque backend context (e.g. NVGcontext *)
+   void                           *devicePointer;     // D3D11/Vulkan/Metal device (nil for OpenGL)
+   NSUInteger                     flags;             // backend-specific flags (e.g. nvgCreate flags)
    struct CGFunctionTable         functions;          // drawing vtable — embedded, no pointer indirection
    struct CGBackendFunctionTable  backendFunctions;   // framebuffer vtable — embedded
 };

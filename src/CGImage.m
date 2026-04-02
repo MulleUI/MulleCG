@@ -870,6 +870,8 @@ static struct
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator
 {
+   if( [self isMultiSample])
+      return( [[self resolvedImage] RGBABytesBitmap:allocator]);
    return( [[self context] RGBABytesBitmapOfImage:self
                                         allocator:allocator]);
 }

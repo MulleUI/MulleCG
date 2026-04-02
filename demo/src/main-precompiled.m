@@ -12,7 +12,7 @@ void   drawSplitRectWithHole( CGContext *context, CGRect rect, CGFloat x, CGFloa
     CGContextBeginPath( context);
     CGContextMoveTo( context, CGPointMake(CGRectGetMinX( rect), CGRectGetMinY( rect)));
     CGContextLineTo( context, CGPointMake(x - radius * cosf(angle), CGRectGetMinY( rect)));
-    CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( x, y), radius), CARadiansToAngle( M_PI_f + angle), -2 * angle);
+    CGContextArcFromAngleToAngle( context, CACircleMakeWithCenterAndRadius( CGPointMake( x, y), radius), CARadiansToAngle( M_PI_f + angle), CARadiansToAngle( M_PI_f - angle), CARotationDirectionCounterClockWise);
     CGContextLineTo( context, CGPointMake(CGRectGetMinX( rect), CGRectGetMaxY( rect)));
     CGContextLineTo( context, CGPointMake(CGRectGetMinX( rect), CGRectGetMinY( rect)));
 
@@ -20,7 +20,7 @@ void   drawSplitRectWithHole( CGContext *context, CGRect rect, CGFloat x, CGFloa
     CGContextLineTo( context, CGPointMake(CGRectGetMaxX( rect), CGRectGetMinY( rect)));
     CGContextLineTo( context, CGPointMake(CGRectGetMaxX( rect), CGRectGetMaxY( rect)));
     CGContextLineTo( context, CGPointMake(x + radius * cosf(angle), CGRectGetMaxY( rect)));
-    CGContextArc( context, CACircleMakeWithCenterAndRadius( CGPointMake( x, y), radius), CARadiansToAngle( angle), -2 * angle);
+    CGContextArcFromAngleToAngle( context, CACircleMakeWithCenterAndRadius( CGPointMake( x, y), radius), CARadiansToAngle( angle), CARadiansToAngle( -angle), CARotationDirectionCounterClockWise);
     CGContextClosePath( context);
 }
 

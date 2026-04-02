@@ -41,6 +41,12 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    [context useDefaultFont];
 
    for( j = 0; j < 2; j++)
+   {
+      if( j & 0x1)
+         initial = 1.5;
+      else
+         initial = 0.5;
+
       for( i = 0; i < 4; i++)
       {
          if( i & 0x2)
@@ -112,10 +118,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
             }
 
             // TODO: kick out lowlevel fix
-            CGContextArc( context,
+            CGContextArcFromAngleToAngle( context,
                     CACircleMakeWithCenterAndRadius( centerPoint, radius),
                     CARadiansToAngle( start * M_PI_f),
-                    fabsf( end - start) * ((dir == CARotationDirectionCounterClockWise) ? -1 : +1));
+                    CARadiansToAngle( end * M_PI_f),
+                    dir);
             color = CGColorMakeWithHSL( 0.2 + ((i + (j * 4)) / 7.0) * 0.6,
                                         1.0,
                                         0.6);
@@ -125,6 +132,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          }
          CGContextRestore( context);
       }
+   }
    return( YES);
 }
 void   setupScene( UIWindow *window)

@@ -316,6 +316,22 @@ static inline void   CGContextArc( CGContext *context,
    }
 }
 
+// Draw arc from startAngle to endAngle in the given direction.
+// This is the natural two-angle form: no manual rotation calculation needed.
+// Uses arcRadians directly to avoid precision loss from rotation round-trip.
+static inline void   CGContextArcFromAngleToAngle( CGContext *context,
+                                                   CACircle circle,
+                                                   CAAngle startAngle,
+                                                   CAAngle endAngle,
+                                                   CARotationDirection dir)
+{
+   if( context)
+      CGContextFN(context)->arcRadians( CGContextVG(context), circle,
+                                        CAAngleToRadians( startAngle),
+                                        CAAngleToRadians( endAngle),
+                                        dir);
+}
+
 // hackish for old demos that pass raw radians
 static inline void   CGContextArcRadians( CGContext *context,
                                           CACircle circle,
@@ -664,12 +680,14 @@ static inline void   CGContextSetStrokeRadialGradient( CGContext *context, CACir
       CGContextFN(context)->setStrokeRadialGradient( CGContextVG(context), circle, outerColor, innerRadius, innerColor);
 }
 
+// TODO: use CGImage instead of CGTextureID
 static inline void   CGContextSetFillImagePattern( CGContext *context, CGTextureID textureID, CGRect rect, CARotation rotation, CGFloat alpha)
 {
    if( context)
       CGContextFN(context)->setFillImagePattern( CGContextVG(context), textureID, rect, rotation, alpha);
 }
 
+// TODO: use CGImage instead of CGTextureID
 static inline void   CGContextSetStrokeImagePattern( CGContext *context, CGTextureID textureID, CGRect rect, CARotation rotation, CGFloat alpha)
 {
    if( context)

@@ -3,6 +3,8 @@
 #import "CGContext.h"
 #import "CGContext+CGFramebuffer.h"
 #import "CGContext+DebugPrivate.h"
+#import "CGContext+Drawing.h"
+#import "CGContext+Render.h"
 #import "CGImage+DebugPrivate.h"
 
 #import "import-private.h"
@@ -11,9 +13,9 @@
 @implementation CGFramebuffer
 
 + (instancetype) framebufferWithBitmapSize:(CGPixelSize) bitmapSize
-                             textureFlags:(NSUInteger) textureFlags
-                           nameUTF8String:(char *) nameUTF8String
-                                  context:(CGContext *) context {
+                              textureFlags:(NSUInteger) textureFlags
+                            nameUTF8String:(char *) nameUTF8String
+                                   context:(CGContext *) context {
     CGFramebuffer *obj;
 
     obj = [self alloc];
@@ -117,13 +119,15 @@
 - (id) copy  
 {
    CGFramebuffer   *framebuffer;
+   Class           cls;
 
-   framebuffer = [[self class] alloc];
+   cls         = [self class];
+   framebuffer = [cls alloc];
    framebuffer = [framebuffer initWithImage:self
                                textureFlags:self->_textureFlags
                              nameUTF8String:NULL
                                     context:self->_context];
-   framebuffer = [framebuffer autorelease];
+   // framebuffer = [framebuffer autorelease]; ???
    return( framebuffer);
 }
 
@@ -135,7 +139,7 @@
       CGImageLog( "delete framebuffer %p", _gpuFramebuffer);
       // assert( [self state] & UIGraphicsContextActive);
       [context deleteGPUFramebuffer:_gpuFramebuffer];
-      _gpuFramebuffer          = NULL;
+      _gpuFramebuffer         = NULL;
       _initializedFramebuffer = NO;
    }
 
@@ -160,7 +164,7 @@
 }
 
 
-- (void) willeEndFBRender:(struct CGFramebufferRenderInfo *) memo
+- (void) _willEndFBRender:(struct CGFramebufferRenderInfo *) memo
 {
 }
 
@@ -221,7 +225,7 @@
 @end
 
 
-@implementation CGFramebuffer( CGContentRendering)
+@implementation CGFramebuffer( CGLayerRender)
 
 // TODO: render with MSAA then resolve to regular texture ?
 //
@@ -287,13 +291,24 @@
 
 - (void) _beginFBRender:(struct CGFramebufferRenderInfo *) memo
 {
-   // implemented by nanovg backend
+   assert( memo);
+
+   [_resolvedImage autorelease];
+   _resolvedImage = nil;
+
+   [_context flushRender];
+   [_context getCurrentFrameInfo:&memo->frameInfo];
+   memo->framebuffer = [_context bindFramebuffer:CGContextFramebufferMakeWithFramebuffer( self)];
 }
 
 
 - (void) _endFBRender:(struct CGFramebufferRenderInfo *) memo
 {
-   // implemented by nanovg backend
+   assert( memo);
+
+   [_context flushRender];
+   [_context bindFramebuffer:memo->framebuffer];
+   [_context changeRender:&memo->frameInfo];
 }
 
 
@@ -305,11 +320,6 @@
    // hack for nanovg category
 }
 
-
-- (void) _willEndFBRender:(struct CGFramebufferRenderInfo *) memo
-{
-   // hack for nanovg category
-}
 
 @end
 

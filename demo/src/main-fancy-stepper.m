@@ -5,6 +5,25 @@
 #include <string.h>
 #include <time.h>
 
+static UIWindowDisplayBits   dumpAndExit( UIPureWindow *window,
+                                          id <UIGraphicsContext> context,
+                                          struct CGFrameInfo *info,
+                                          UIWindowDisplayBits displayBits)
+{
+   static int           frameCount;
+   struct CGBitmap      bm;
+   UIBitmapImage        *img;
+
+   if( ++frameCount < 2)
+      return( displayBits);
+
+   bm  = [window screenshotBitmap];
+   img = [UIBitmapImage imageWithBitmap:bm freeWhenDone:YES];
+   [img writeToPNGUTF8String:"fancy-stepper-dump.png"];
+   exit( 0);
+   return( displayBits);
+}
+
 static char* cpToUTF8(int cp, char* str)
 {
    int n = 0;
@@ -74,7 +93,6 @@ static void   drawFancyStepperBackground( CGContext *context, // Changed from st
 
    CGContextSetFillLinearGradient( context, CGPointMake( CGRectGetMinX( rect), CGRectGetMinY( rect)), CGPointMake( CGRectGetMinX( rect), CGRectGetMaxY( rect)), color1, color2);
    CGContextFill( context);
-   CGContextFill( context);
 }
 static void   drawFancyStepperHighlight( CGContext *context, // Changed from struct CGContext *context
                                          CGRect rect,
@@ -105,7 +123,6 @@ static void   drawFancyStepperHighlight( CGContext *context, // Changed from str
 
    CGContextSetFillLinearGradient( context, CGPointMake( CGRectGetMinX( rect), CGRectGetMinY( rect)), CGPointMake( CGRectGetMinX( rect), CGRectGetMinY( rect) + corner), CGColorMakeWithRGBA( 1.0, 1.0, 1.0, brightness), CGColorMakeTransparent());
 //   CGContextGlobalCompositeOperation( context, CGCompositeOperationLighter);
-   CGContextFill( context);
    CGContextFill( context);
 }
 static void   drawFancyStepperLine( CGContext *context, CGRect rect, CGFloat strokeWidth, CGColor color) // Changed from struct CGContext *context
@@ -147,7 +164,6 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
 #else
    CGContextSetFillRadialGradient( context, CACircleMakeWithCenterAndRadius( CGPointMake( CGRectGetMidX( iconRect) - radius / 8.0, CGRectGetMidY( iconRect) - radius / 8.0), radius / 2.0), CGColorMakeWithRGBA( 0.2, 0.2, 0.2, 0.3), radius / 8.0, CGColorMakeWithRGBA( 1.0, 1.0, 1.0, 0.6));
 #endif
-      CGContextFill( context);
       CGContextFill( context);
    }
 //   CGContextStrokeColor( context, CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 0.8));
@@ -227,7 +243,7 @@ static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[
          drawFancyStepperLine( context, lineRect, 1.5, colors[ 5]); // Pass context
       }
 
-      iconRect = CGRectInset( contentRect, 2, 2);
+      iconRect = CGRectInset( contentRect, 14, 14);
 
       CGRectDivide( iconRect, &leftRect, &rightRect, iconRect.size.width / 2.0, CADirectionLeft);
       drawEmote( context, leftRect, 0x2796, NO);  // -
@@ -285,6 +301,7 @@ int   main( int argc, char *argv[])
 {
    UIWindow         *window;
    UIApplication    *app;
+   int              i;
 
    app = [UIApplication sharedInstance];
    @autoreleasepool
@@ -296,6 +313,11 @@ int   main( int argc, char *argv[])
       assert( window);
       [window setBackgroundColor:CGColorMakeWithRGBA( 0.8, 0.8, 0.8, 1.0)];
       setupScene( window);
+
+      for( i = 1; i < argc; i++)
+         if( ! strcmp( argv[ i], "-dump"))
+            [window setDidRenderFrameCallback:dumpAndExit];
+
       [app addWindow:window];
    }
    return( [app runApp]);

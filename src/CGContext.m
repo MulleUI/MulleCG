@@ -128,7 +128,8 @@ static struct
 
    if( _backend != UIGraphicsBackendNone)
    {
-      [self _initNanoVGWithGraphicsOptions:options];
+      [self _initNanoVGWithGraphicsOptions:options
+                           nameUTF8String:nameUTF8String];
 
       if( ! _cgBackend.context)
       {

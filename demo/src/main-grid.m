@@ -2,7 +2,7 @@
 
 #import "import-private.h"
 
-#define DEBUG_TEXTURE 0
+#define DEBUG_TEXTURE 1
 
 #define drawFill 0
 
@@ -62,8 +62,8 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
       return;
    }
    [cgLayer beginFBRenderWithBackgroundColor:CGColorMakeClear()
-                               devicePixelRatio:1.0
-                                layerRenderInfo:&memo];
+                            devicePixelRatio:1.0
+                             layerRenderInfo:&memo];
    draw_texture( cgLayer, context);
    [cgLayer endFBRender:&memo];
 
@@ -80,10 +80,16 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
    }
 #endif
 
-   CGContextSetFillImagePattern( context, [cgLayer textureID], CGRectMake( 0, 0, wh.width, wh.height), 0, 1.0);
-   CGContextFillPaintableOptions( context, cgLayer, CGRectMakeWithSize( wh), NULL);
-   CGContextCheckBackendError( context, "after CGContextFillPaintable");
+   // set fill paint once — loop reuses it
+   [context setTraceFile:stderr];
 
+   CGContextFillImageOptions( context, cgLayer, CGRectMake( 0, 0, wh.width, wh.height), NULL);
+
+   CGContextBeginPath( context);
+   CGContextRect( context, canvas);
+   CGContextFill( context);
+   CGContextCheckBackendError( context, "after CGContextFill");
+#if 0
    for( j = 0; j < 70; j++)
    {
       rect = CGRectMake( CGRectGetMinX( canvas), j * wh.height, canvas.size.width, wh.height);
@@ -109,9 +115,11 @@ static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger 
       rect.size.height += 1.0;
       CGContextBeginPath( context);
       CGContextRect( context, rect);
+      CGContextFillColor( context, CGColorMakeRed());
       CGContextFill( context);
       CGContextCheckBackendError( context, "after CGContextFill");
    }
+#endif
 }
 
 #if 0
@@ -164,12 +172,16 @@ static void   drawStuff0( CALayer *layer, CGContext *context)
 {
    drawGridWithLayer( layer, context, 0);
 }
+
 typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
+
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 1] =
 {
    (CGGraphicsLayerDrawCallback_t *) drawStuff0
 };
+
+
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -193,10 +205,10 @@ int   main( int argc, char *argv[])
       [app addWindow:window[ i]];
 
 //      [window[ i] setSwapInterval:1];
-      [window[ i] setFrameRate:UIWindowFrameRateUnsynced];
+      [window[ i] setFrameRate:UIWindowFrameRateAsync];
 
-      perf = [MulleUIPerf instance];
-      [window[ i] setFrameDelegate:perf];
+      //perf = [MulleUIPerf instance];
+      //[window[ i] setFrameDelegate:perf];
    }
    return( [app runApp]);
 }
