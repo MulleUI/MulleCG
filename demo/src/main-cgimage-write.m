@@ -62,6 +62,8 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    return( YES);
 }
+
+
 void   setupScene( UIWindow *window)
 {
    UIView   *view;
@@ -72,6 +74,8 @@ void   setupScene( UIWindow *window)
    [[window contentView] setDrawCallback:(CGGraphicsLayerDrawCallback_t *) drawStuff];
    [[window contentView] addSubview:view];
 }
+
+
 int   main( int argc, char *argv[])
 {
    UIWindow         *window;

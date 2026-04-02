@@ -25,9 +25,6 @@
 @interface CGContextBase : MulleObject < MulleUIResourceMap, MulleUINamedObject>
 {
    struct CGBackend                _cgBackend;   // context at offset 0; functions follow (backend-defined)
-   NSUInteger                      _backendFlags;           // backend-specific flags (e.g. nvgCreate flags)
-   void                            *_backendDevicePointer;  // D3D11/Vulkan/Metal device (nil for OpenGL)
-
    struct MulleUIResourceStorage   _resourceStorage;
    mulle_atomic_pointer_t          _atomicState;
 }
@@ -90,12 +87,14 @@ static inline void   *_CGContextBaseGetBackendContext( CGContextBase *self)
    return( ((struct{ @defs( CGContextBase); } *) self)->_cgBackend.context);
 }
 
+
 MULLE_C_CONST_RETURN
 static inline struct CGFunctionTable *_CGContextBaseGetFunctionTable( CGContextBase *self)
 {
    assert( self);
    return( &((struct{ @defs( CGContextBase); } *) self)->_cgBackend.functions);
 }
+
 
 MULLE_C_CONST_RETURN
 static inline struct CGBackendFunctionTable *_CGContextBaseGetBackendFunctionTable( CGContextBase *self)

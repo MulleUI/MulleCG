@@ -7,7 +7,7 @@
 
 
 // MEMO: this demo used to work at some time, currently in bad state
-//
+//       also not sure what it was supposed to show really
 
 #define R   0xFF, 0x00, 0x00, 0xFF
 #define G   0x00, 0xFF, 0x00, 0xFF
@@ -212,10 +212,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    area.size = CGSizeAspectFillToSize( CGSizeMake( 1, 1), canvas.size);
    area      = CGSizePlaceInRect( area.size, canvas, CGContentModeCenterPoint);
 
-   // subdivide into 1010
+   // subdivide into 10x10
    CGRectPartitionIntoRowsAndColumns( area, CGSizeMake( SPACING, SPACING), ROWS, COLUMNS, (CGRect *) rects);
 
-   // draw some kind of grif
+   // draw some kind of grid
    for( y = 0; y < ROWS; y++)
       for( x = 0; x < COLUMNS; x++)
          CGContextFillRectWithColor( context, rects[ y][ x], CGColorMakeWhite());

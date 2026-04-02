@@ -35,7 +35,6 @@ struct CGFrameInfo;
 
 // as long as noone has drawn to it, this will be NO
 @property( assign, getter=isInitializedFramebuffer) BOOL   initializedFramebuffer;
-@property( assign) CGFloat                                 alpha;
 
 + (instancetype) framebufferWithBitmapSize:(CGPixelSize) size
                               textureFlags:(NSUInteger) textureFlags

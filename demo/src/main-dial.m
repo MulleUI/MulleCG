@@ -39,11 +39,79 @@ static inline void mvgRoundedSector(CGContext *context, // Changed parameter typ
    halfDistance      = (outerCircle.radius - innerCircle.radius) / 2.0f;
    midCircle         = CACircleExtrude( innerCircle, halfDistance);
 
+   //
+   // Corner radius clamping for rounded sectors
+   // ============================================
+   //
+   // A rounded sector has four corners connected by two arcs (inner, outer)
+   // and two straight-ish end caps. Each corner is drawn with arcTo() using
+   // a corner radius. Two constraints limit the corner radius:
+   //
+   // 1. Radial constraint: cornerRadius <= halfDistance
+   //    The corner can't be larger than half the track width (outer - inner
+   //    radius). Same idea as nvgRoundedRectVarying clamping to halfh.
+   //
+   // 2. Tangential constraint: cornerRadius <= R * sin(arcSpan/2)
+   //    The corner's tangent point on the arc can't exceed half the arc's
+   //    chord length. At small arc spans this is the binding constraint.
+   //    Example: outerRadius=115, arcSpan=5.4° (0.094 rad)
+   //      maxOuter = 115 * sin(0.047) = 115 * 0.047 ≈ 5.4
+   //    So a 10px corner radius gets clamped to ~5.4px.
+   //    Same idea as nvgRoundedRectVarying clamping to halfw.
+   //
+   // After computing corner radii, we derive deltaAngle — the angular span
+   // consumed by each corner: deltaAngle = asin(cornerRadius / arcRadius).
+   // The two corners at each end (start, end) each consume deltaAngle from
+   // the outer/inner arc. A third constraint ensures they don't overlap:
+   //
+   // 3. Delta angle constraint: deltaAngle <= arcSpan/2
+   //    Both corners must fit within the arc. Without this clamp, at small
+   //    fills the start and end corners overlap, collapsing the arc between
+   //    them to zero and producing a degenerate line instead of a filled
+   //    wedge. Example: arcSpan=0.094 rad, deltaAngle=0.047 rad
+   //      2 * deltaAngle = 0.094 ≈ arcSpan → outer arc span ≈ 0
+   //    Clamping deltaAngle to arcSpan/2 = 0.047 ensures the outer arc
+   //    always has non-negative span, and the sector smoothly shrinks to
+   //    a pill shape at very small fills — same visual behavior as
+   //    nvgRoundedRectVarying producing a capsule when width < 2*radius.
+   //
+   // TL;DR: Think of it like a rounded rectangle that gets very narrow.
+   // The corners shrink to fit, and eventually the shape becomes a pill.
+   // Same thing happens here, but on a curved track instead of a straight
+   // box. Without the clamping, the corners overlap and the shape
+   // collapses into an invisible line. Since on OpenGL the line draw ordering
+   // is important an inconsistency in the lines may lead to the "fill" going
+   // astray (filling the outer), which would be real ugly.
+   //
    outerCornerRadius = fminf( cornerRadius, halfDistance);
    innerCornerRadius = fminf( cornerRadius, halfDistance);
 
+   {
+      CGFloat   arcSpan = fabsf( CAAngleToRadians( CAAngleSubtract( endAngle, startAngle)));
+      if( arcSpan > 0.0f)
+      {
+         CGFloat   halfArc = arcSpan / 2.0f;
+         CGFloat   maxOuter = outerCircle.radius * sinf( fminf( halfArc, (CGFloat) M_PI_2));
+         CGFloat   maxInner = innerCircle.radius * sinf( fminf( halfArc, (CGFloat) M_PI_2));
+         outerCornerRadius = fminf( outerCornerRadius, maxOuter);
+         innerCornerRadius = fminf( innerCornerRadius, maxInner);
+      }
+   }
+
    deltaAngleOuter   = asinf( outerCornerRadius / outerCircle.radius);
-   deltaAngleInner   = asinf( innerCornerRadius / innerCircle.radius); // sic
+   deltaAngleInner   = asinf( innerCornerRadius / innerCircle.radius);
+
+   {
+      CGFloat   arcSpan  = fabsf( CAAngleToRadians( CAAngleSubtract( endAngle, startAngle)));
+      CGFloat   halfSpan = arcSpan / 2.0f;
+      deltaAngleOuter = fminf( deltaAngleOuter, halfSpan);
+      deltaAngleInner = fminf( deltaAngleInner, halfSpan);
+   }
+
+   mulle_fprintf( stderr, "  arcSpan=%.6f outerCR=%.4f innerCR=%.4f dOuter=%.6f dInner=%.6f\n",
+                  CAAngleToRadians( CAAngleSubtract( endAngle, startAngle)),
+                  outerCornerRadius, innerCornerRadius,
+                  deltaAngleOuter, deltaAngleInner);
 
 //   reducedStartAngle = CAAngleSubtractRadians( startAngle, deltaAngleInner);
 //   compensatedInnerStart = CACirclePointAtAngle( innerCircle, increasedEndAngle);
@@ -96,20 +164,20 @@ static inline void mvgRoundedSector(CGContext *context, // Changed parameter typ
        CGContextLineTo( context, middleStart); // Converted from mvgLineTo
    CGContextArcTo( context, outerStart, compensatedOuterStart, outerCornerRadius); // Converted from mvgArcTo
 
-   CGContextArc( context, outerCircle, increasedOuterStartAngle,
-                 (CAAngleToRadians( reducedOuterEndAngle) - CAAngleToRadians( increasedOuterStartAngle)) / (2.0f * M_PI_f));
+   CGContextArcFromAngleToAngle( context, outerCircle, increasedOuterStartAngle, reducedOuterEndAngle, CARotationDirectionClockWise);
+
+   mulle_fprintf( stderr, "  outerArc: from=%.6f to=%.6f rot=%.6f\n",
+                  increasedOuterStartAngle, reducedOuterEndAngle,
+                  CAAngleGetRotationTowardsAngle( increasedOuterStartAngle, reducedOuterEndAngle, CARotationDirectionClockWise));
 
    CGContextArcTo( context, outerEnd, middleEnd, outerCornerRadius); // Converted from mvgArcTo
    if( outerCornerRadius < halfDistance)
        CGContextLineTo( context, middleEnd); // Converted from mvgLineTo
    CGContextArcTo( context, innerEnd, compensatedInnerEnd, innerCornerRadius); // Converted from mvgArcTo
 
-   CGContextArc( context, innerCircle, reducedInnerEndAngle,
-                 (CAAngleToRadians( increasedInnerStartAngle) - CAAngleToRadians( reducedInnerEndAngle)) / (2.0f * M_PI_f));
+   CGContextArcFromAngleToAngle( context, innerCircle, reducedInnerEndAngle, increasedInnerStartAngle, CARotationDirectionCounterClockWise);
 
-#if 0
-   CGContextClosePath( context); // Converted from mvgClosePath
-#endif
+   CGContextClosePath( context);
 }
 
 static void   drawDial( CGContext *context, // Changed parameter type
@@ -165,13 +233,15 @@ static void   drawDial( CGContext *context, // Changed parameter type
    mvgRoundedSector( context, innerCircle, outerCircle, startAngle, endAngle, 10.0);
 #else
    CGContextBeginPath( context);
-   CGContextArc( context, innerCircle, startAngle, endAngle - startAngle);
-   CGContextArc( context, outerCircle, endAngle, startAngle - endAngle);
+   CGContextArcFromAngleToAngle( context, innerCircle, startAngle, endAngle, CARotationDirectionClockWise);
+   CGContextArcFromAngleToAngle( context, outerCircle, endAngle, startAngle, CARotationDirectionCounterClockWise);
    CGContextClosePath( context);
 #endif
    CGContextFillColor( context, color);
    CGContextFill( context);
 }
+
+static CGFloat   g_fill = -1.0f;  // -1 = animate
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
@@ -183,20 +253,49 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    canvas = CGSizePlaceInRect( CGSizeMake( 400, 200), [layer canvas], CGContentModeCenterPoint);
    rect   = CGRectIntegral( canvas);
 
-   percentage = CGContextGetBackAndForthAnimationFactor( context, 120.f * 10.0);
+   percentage = (g_fill >= 0.0f) ? g_fill
+                                  : CGContextGetBackAndForthAnimationFactor( context, 120.f * 10.0);
 
-   CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeBlack()); // Converted from mvgStrokeRectWithColor
-   drawDial( context, rect, 50.0f, CAAngleSouthWest, CAAngleSouthEast, percentage, CGColorMakeDodgerBlue()); // Changed function call
+   mulle_fprintf( stderr, "fill=%.6f\n", percentage);
+   CGContextStrokeRectWithColor( context, rect, 0.5, CGColorMakeBlack());
+   drawDial( context, rect, 50.0f, CAAngleSouthWest, CAAngleSouthEast, percentage, CGColorMakeDodgerBlue());
 
    return( YES);
 }
 
 int   main( int argc, char *argv[])
 {
+   CGFloat   fps = 60.0f;
+   int       i;
+
+   for( i = 1; i < argc; i++)
+   {
+      if( ! strcmp( argv[ i], "-f") && i + 1 < argc)
+         fps = atof( argv[ ++i]);
+      else if( ! strcmp( argv[ i], "-p") && i + 1 < argc)
+         g_fill = atof( argv[ ++i]);
+      else if( ! strcmp( argv[ i], "-h") || ! strcmp( argv[ i], "--help") || ! strcmp( argv[ i], "help"))
+      {
+         mulle_fprintf( stderr,
+            "Usage: dial [options]\n"
+            "\n"
+            "Options:\n"
+            "  -f <fps>   framerate (default: 60)\n"
+            "  -p <fill>  freeze at fixed fill value 0.0..1.0 (default: animate)\n"
+            "  -h         this help\n"
+            "\n"
+            "Logging (stderr):\n"
+            "  fill=       current fill percentage\n"
+            "  arcSpan=    arc span in radians\n"
+            "  outerArc:   from/to angles and rotation of outer arc\n");
+         return( 0);
+      }
+   }
+
    return( UIApplicationRunDrawCallbackHz( (CGGraphicsLayerDrawCallback_t *) drawStuff,
                                            CGSizeMake( 600, 400),
                                            NULL,
-                                           60.0f));
+                                           fps));
 }
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,

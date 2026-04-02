@@ -55,16 +55,12 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
          CGContextBeginPath( context);
          CGContextRect( context, rect);
 
-         // TODO: still a little weird
-         // the "unrotated" gradient will be 0.0 rotation, which is North
-         // but we want it so show up in East, so rotate it.
-         angle    = CAAngleRotate( angle, CARotation90);
-         gradient = [CGGradient linearGradientWithRect:rect
-                                            startColor:CGColorMakeGoldenrod()
+         // rotate 180° so the gradient points FROM the cell's direction TOWARD center
+         angle    = CAAngleRotate( angle, CARotation180);
+         gradient = [CGGradient gradientWithStartColor:CGColorMakeGoldenrod()
                                               endColor:CGColorMakeMagenta()
                                               rotation:CAAngleToRotation( angle)];
-         CGContextFillPaintable( context, gradient);
-         CGContextFill( context);
+         CGContextFillPaintableOptions( context, gradient, rect, NULL);
 
          [context useFontWithNameUTF8String:"sans"];
          CGContextFontSize( context, 12);

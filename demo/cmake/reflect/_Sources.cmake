@@ -56,6 +56,7 @@ src/main-dropshadow.m
 src/main-fancy-button.m
 src/main-fancy-stepper.m
 src/main-feather.m
+src/main-fill-vs-image.m
 src/main-font-bug.m
 src/main-fonts.m
 src/main-framebuffer-simple.m
@@ -83,6 +84,7 @@ src/main-rotate-rect.m
 src/main-rotate-stroke.m
 src/main-rotate-triangle2.m
 src/main-rotate-triangle.m
+src/main-rounded-rect-anim.m
 src/main-rounded-rect.m
 src/main-rounded-stroke.m
 src/main-scissor.m
@@ -104,5 +106,6 @@ src/main-text-multiline.m
 src/main-text-origin.m
 src/main-text-simple.m
 src/main-texture.m
+src/main-window-config.m
 src/parse_uniform.c
 )

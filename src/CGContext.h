@@ -272,7 +272,8 @@ static inline int
 
 @interface CGContext( Forward)
 
-- (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options;
+- (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options
+                         nameUTF8String:(char *) nameUTF8String;
 - (void) _doneBackend;
 - (void) barrier;
 - (CGImage *) resolveMultiSampleImage:(CGImage *) image;

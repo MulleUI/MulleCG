@@ -46,7 +46,7 @@
 @end
 
 
-// will be provided by +nanovg
+// provided by +nanovg / +nanovg-gl
 @interface CGContext( RenderFuture)
 
 + (BOOL) supportsAntiAliasing;
@@ -63,7 +63,6 @@
 
 
 - (void *) gpuTextureForImageID:(NSInteger) textureID;
-- (CGImage *) resolveMultiSampleImage:(CGImage *) image;
 
 //
 // framebuffer needs to be bound here, and context must be active
@@ -76,6 +75,13 @@
 //
 - (struct CGBitmap) RGBABytesBitmapOfImage:(CGImage *) image
                                  allocator:(struct mulle_allocator *) allocator;
+
+@end
+
+
+@interface CGContext( RenderMultiSample)
+
+- (CGImage *) resolveMultiSampleImage:(CGImage *) image;
 
 @end
 

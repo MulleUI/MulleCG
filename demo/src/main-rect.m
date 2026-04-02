@@ -1,14 +1,18 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
+
 #define AntiAlias  1
 #define Thick      2
+
+
+
 static void   drawRect( CALayer *layer, CGContext *context, NSUInteger mode)
 {
-   CGRect               canvas;
-   CGRect               rect;
-   char                 buf[ 64];
-   CGFloat              strokeWidth;
+   CGRect    canvas;
+   CGRect    rect;
+   char      buf[ 64];
+   CGFloat   strokeWidth;
 
    canvas = [layer canvas];
    CGContextResetScissor( context); // see if it makes a difference
@@ -41,25 +45,32 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger mode)
    CGContextFontSize( context, 13.0);
    CGContextText( context, CGPointMake( CGRectGetMidX( canvas), CGRectGetMidY( canvas)), buf, 0);
 }
+
+
 static void   drawStuff0( CALayer *layer, CGContext *context)
 {
    drawRect( layer, context, 0);
 }
+
 
 static void   drawStuff1( CALayer *layer, CGContext *context)
 {
    drawRect( layer, context, 0x1);
 }
 
+
 static void   drawStuff2( CALayer *layer, CGContext *context)
 {
    drawRect( layer, context, 0x2);
 }
 
+
 static void   drawStuff3( CALayer *layer, CGContext *context)
 {
    drawRect( layer, context, 0x3);
 }
+
+
 static void   fillRect( CALayer *layer, CGContext *context, NSUInteger mode)
 {
    CGRect               canvas;
@@ -99,25 +110,31 @@ static void   fillRect( CALayer *layer, CGContext *context, NSUInteger mode)
    CGContextFontSize( context, 13.0);
    CGContextText( context, CGPointMake( CGRectGetMidX( canvas), CGRectGetMidY( canvas)), buf, 0);
 }
+
+
 static void   fillStuff0( CALayer *layer, CGContext *context)
 {
    fillRect( layer, context, 0x0);
 }
+
 
 static void   fillStuff1( CALayer *layer, CGContext *context)
 {
    fillRect( layer, context, 0x1);
 }
 
+
 static void   fillStuff2( CALayer *layer, CGContext *context)
 {
    fillRect( layer, context, 0x2);
 }
 
+
 static void   fillStuff3( CALayer *layer, CGContext *context)
 {
    fillRect( layer, context, 0x3);
 }
+
 typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 8] =
@@ -132,6 +149,8 @@ static CALayerDrawCallbackPointer_t   drawStuff[ 8] =
    (CGGraphicsLayerDrawCallback_t *) fillStuff2,
    (CGGraphicsLayerDrawCallback_t *) fillStuff3
 };
+
+
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
@@ -146,6 +165,8 @@ int   main( int argc, char *argv[])
       [window[ i] setDrawCallback:drawStuff[ i]];
       [window[ i] setBackgroundColor:CGColorMakeWhite()];
       [app addWindow:window[ i]];
+      MulleUICLog( "Window %td added");
+      [app runLoopIteration]; // allow window to run (once)
    }
    return( [app runApp]);
 }

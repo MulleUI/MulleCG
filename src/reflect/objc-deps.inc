@@ -1,3 +1,4 @@
+      { @selector( MulleObjCDeps), @selector( MulleUIBase) },      // 3c20656f;MulleObjCDeps;3ebba954;MulleUIBase
       { @selector( CGBitmapDrawable), MULLE_OBJC_NO_CATEGORYID },      // ac0569ab;CGBitmapDrawable;;
       { @selector( CGBlendedPaint), @selector( CGPaintable) },      // f164885b;CGBlendedPaint;faf2d5d6;CGPaintable
       { @selector( CGBlendedPaint), @selector( Drawing) },      // f164885b;CGBlendedPaint;53946657;Drawing
@@ -10,13 +11,13 @@
       { @selector( CGContext), @selector( CGImage) },      // 80b7b568;CGContext;6ec55940;CGImage
       { @selector( CGContext), @selector( CGImageGPUTexture) },      // 80b7b568;CGContext;86f29fd6;CGImageGPUTexture
       { @selector( CGContext), @selector( Render) },      // 80b7b568;CGContext;50cf42d3;Render
-      { @selector( CGContext), @selector( RenderFuture) },      // 80b7b568;CGContext;03df5de7;RenderFuture
+      { @selector( CGContext), @selector( RenderMultiSample) },      // 80b7b568;CGContext;0b9b450c;RenderMultiSample
       { @selector( CGContext), @selector( Shader) },      // 80b7b568;CGContext;deb38887;Shader
       { @selector( CGContext), @selector( UIGraphicsDrawing) },      // 80b7b568;CGContext;00f5260e;UIGraphicsDrawing
       { @selector( CGContext), MULLE_OBJC_NO_CATEGORYID },      // 80b7b568;CGContext;;
       { @selector( CGContextBase), MULLE_OBJC_NO_CATEGORYID },      // 750419bb;CGContextBase;;
       { @selector( CGFont), MULLE_OBJC_NO_CATEGORYID },      // 1881416f;CGFont;;
-      { @selector( CGFramebuffer), @selector( CGContentRendering) },      // ef762cef;CGFramebuffer;84d6dd0c;CGContentRendering
+      { @selector( CGFramebuffer), @selector( CGLayerRender) },      // ef762cef;CGFramebuffer;a48ff70b;CGLayerRender
       { @selector( CGFramebuffer), MULLE_OBJC_NO_CATEGORYID },      // ef762cef;CGFramebuffer;;
       { @selector( CGGradient), @selector( CGGradientSubclasses) },      // 37670335;CGGradient;15b75a5c;CGGradientSubclasses
       { @selector( CGGradient), @selector( CGPaintable) },      // 37670335;CGGradient;faf2d5d6;CGPaintable
@@ -33,7 +34,7 @@
       { @selector( CGPaint), @selector( CGBlendedPaint) },      // df22fbd2;CGPaint;f164885b;CGBlendedPaint
       { @selector( CGPaint), @selector( CGImagePaint) },      // df22fbd2;CGPaint;3e23b783;CGImagePaint
       { @selector( CGPaint), @selector( CGPaintable) },      // df22fbd2;CGPaint;faf2d5d6;CGPaintable
-      { @selector( CGPaint), @selector( Drawing) },      // df22fbd2;CGPaint;53946657;Drawing
+      { @selector( CGPaint), @selector( UIGraphicsDrawing) },      // df22fbd2;CGPaint;00f5260e;UIGraphicsDrawing
       { @selector( CGPaint), MULLE_OBJC_NO_CATEGORYID },      // df22fbd2;CGPaint;;
       { @selector( CGPaintable), MULLE_OBJC_NO_CATEGORYID },      // faf2d5d6;CGPaintable;;
       { @selector( CGRadialGradient), @selector( CGPaintable) },      // 74b8ddc9;CGRadialGradient;faf2d5d6;CGPaintable

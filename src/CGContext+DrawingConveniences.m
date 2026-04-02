@@ -258,7 +258,6 @@ static CGTextBoundsInfo   _computeTextRect( CGContext *context,
    CGFloat            vfactor;
    CGRect             coverage;
    CGRect             vbounds;
-   CGRect             placement;
    CGTextBoundsInfo   result;
    CGTextMetrics      metrics;
    float              fontSize;
@@ -353,7 +352,7 @@ static CGTextBoundsInfo   _computeTextRect( CGContext *context,
 
       if( factor != 1.0f)
       {
-         fontSize = 100.0f * maxFactor;
+         fontSize = 100.0f * factor;
          // TODO: binary search for font size fitting width if binSearch
          CGContextFontSize( context, fontSize);
 
@@ -362,7 +361,6 @@ static CGTextBoundsInfo   _computeTextRect( CGContext *context,
          {
             vbounds            = CGContextTextVisualBounds( context, CGPointZero, s, length);
             coverage           = vbounds;
-            coverage.origin.y += metrics.ascender;
          }
          else
          {
@@ -370,8 +368,7 @@ static CGTextBoundsInfo   _computeTextRect( CGContext *context,
          }
       }
 
-      placement = CGSizePlaceInRect( coverage.size, rect, contentMode);
-      result    = CGTextBoundsInfoMake( placement, fontSize);
+      result    = CGTextBoundsInfoMake( coverage, fontSize);
    }
    while( 0);
    CGContextRestore( context);
@@ -403,7 +400,9 @@ void   CGContextTextInRect( CGContext *context,
 
    CGContextSave( context);
    {
-      origin = info.bounds.origin;
+      origin    = CGSizePlaceInRect( info.bounds.size, rect, contentMode).origin;
+      origin.x -= info.bounds.origin.x;
+      origin.y -= info.bounds.origin.y;
 
       CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignTop);
       if( ! isnan( info.size))

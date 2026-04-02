@@ -34,6 +34,12 @@ CGPoint  CGRectGetOriginToTexturePointForRotationAndExtent( CGRect rect,
       options = &CGDrawableOptionsDefault;
 
    // CGImage IS the texture — no need to call cgImageWithContext:textureFlags:
+   // but if multisampled, resolve first so it can be used as a pattern
+   if( [self isMultiSample])
+   {
+      [[self resolvedImage] drawRect:rect options:options context:context];
+      return;
+   }
    textureID = [self textureID];
    if( textureID == CGTextureIDInvalid)
       return;

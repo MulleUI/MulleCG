@@ -70,31 +70,46 @@ struct MulleGlyphPathCallbacks
    void  (*close)( void *userinfo);
    void  (*winding)( void *userinfo, CGPathFillStyle style);
 };
+
+static void   _CGContextMoveTo_cb( void *ctx, CGPoint p)                          { CGContextMoveTo( ctx, p); }
+static void   _CGContextLineTo_cb( void *ctx, CGPoint p)                          { CGContextLineTo( ctx, p); }
+static void   _CGContextQuadTo_cb( void *ctx, CGPoint c, CGPoint p)               { CGContextQuadTo( ctx, c, p); }
+static void   _CGContextBezierTo_cb( void *ctx, CGPoint c1, CGPoint c2, CGPoint p){ CGContextBezierTo( ctx, c1, c2, p); }
+static void   _CGContextClosePath_cb( void *ctx)                                  { CGContextClosePath( ctx); }
+static void   _CGContextPathWinding_cb( void *ctx, CGPathFillStyle s)             { CGContextPathWinding( ctx, s); }
+
 static inline void   MulleGlyphPathCallbacksInitCG( struct MulleGlyphPathCallbacks *callbacks)
 {
    if( ! callbacks)
       return;
 
-   MULLE_C_ASSERT( sizeof( void *) == sizeof( CGContext *)); // Updated comment
-   callbacks->move    = (void (*)(void *, CGPoint)) CGContextMoveTo;
-   callbacks->line    = (void (*)(void *, CGPoint)) CGContextLineTo;
-   callbacks->quad    = (void (*)(void *, CGPoint, CGPoint)) CGContextQuadTo;
-   callbacks->bezier  = (void (*)(void *, CGPoint, CGPoint, CGPoint)) CGContextBezierTo;
-   callbacks->close   = (void (*)(void *)) CGContextClosePath;
-   callbacks->winding = (void (*)(void *, CGPathFillStyle)) CGContextPathWinding;
+   MULLE_C_ASSERT( sizeof( void *) == sizeof( CGContext *));
+   callbacks->move    = _CGContextMoveTo_cb;
+   callbacks->line    = _CGContextLineTo_cb;
+   callbacks->quad    = _CGContextQuadTo_cb;
+   callbacks->bezier  = _CGContextBezierTo_cb;
+   callbacks->close   = _CGContextClosePath_cb;
+   callbacks->winding = _CGContextPathWinding_cb;
 }
+static void   _CGPathMoveTo_cb( void *p, CGPoint pt)                               { CGPathMoveTo( p, NULL, pt.x, pt.y); }
+static void   _CGPathLineTo_cb( void *p, CGPoint pt)                               { CGPathAddLineTo( p, NULL, pt.x, pt.y); }
+static void   _CGPathQuadTo_cb( void *p, CGPoint c, CGPoint pt)                    { CGPathAddQuadTo( p, NULL, c.x, c.y, pt.x, pt.y); }
+static void   _CGPathBezierTo_cb( void *p, CGPoint c1, CGPoint c2, CGPoint pt)     { CGPathAddCurveTo( p, NULL, c1.x, c1.y, c2.x, c2.y, pt.x, pt.y); }
+static void   _CGPathClosePath_cb( void *p)                                        { CGPathCloseSubpath( p); }
+static void   _CGPathWinding_cb( void *p, CGPathFillStyle s)                       { CGPathSetSubpathFillStyle( p, s); }
+
 static inline void   MulleGlyphPathCallbacksInitPath( struct MulleGlyphPathCallbacks *callbacks)
 {
    if( ! callbacks)
       return;
 
-   MULLE_C_ASSERT( sizeof( void *) == sizeof( CGPath *)); // Updated comment
-   callbacks->move    = (void (*)(void *, CGPoint)) CGPathMoveTo;
-   callbacks->line    = (void (*)(void *, CGPoint)) CGPathAddLineTo;
-   callbacks->quad    = (void (*)(void *, CGPoint, CGPoint)) CGPathAddQuadTo;
-   callbacks->bezier  = (void (*)(void *, CGPoint, CGPoint, CGPoint)) CGPathAddCurveTo;
-   callbacks->close   = (void (*)(void *)) CGPathCloseSubpath;
-   callbacks->winding = (void (*)(void *, CGPathFillStyle )) CGPathSetSubpathFillStyle;
+   MULLE_C_ASSERT( sizeof( void *) == sizeof( CGPath *));
+   callbacks->move    = _CGPathMoveTo_cb;
+   callbacks->line    = _CGPathLineTo_cb;
+   callbacks->quad    = _CGPathQuadTo_cb;
+   callbacks->bezier  = _CGPathBezierTo_cb;
+   callbacks->close   = _CGPathClosePath_cb;
+   callbacks->winding = _CGPathWinding_cb;
 }
 static void   mulleFreetypeOutlineGlyphPath( FT_Outline *outline,
                                              int winding,

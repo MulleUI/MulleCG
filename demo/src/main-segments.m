@@ -103,10 +103,10 @@ static void   fillRectWithLinearGradient( CGContext *context, // Converted from 
    CGContextBeginPath( context);
    CGContextRoundedRectVarying( context, rect, MulleCornerInsetsMake( info->cornerInfo.cornerTL, info->cornerInfo.cornerTR, info->cornerInfo.cornerBR, info->cornerInfo.cornerBL));
 
-   CGContextFillLinearGradient( context,
-                                info->gradientStartPoint, // Converted from x, y
+   CGContextSetFillLinearGradient( context,
+                                info->gradientStartPoint,
+                                info->gradientEndPoint,
                                 color1,
-                                info->gradientEndPoint,   // Converted from x, y
                                 color2);
    CGContextFill( context);
 }
@@ -132,10 +132,10 @@ static void   fillRectWithHighlight( CGContext *context, // Converted from struc
                               MulleCornerInsetsMake( info->cornerInfo.cornerTL, info->cornerInfo.cornerTR, info->cornerInfo.cornerBR, info->cornerInfo.cornerBL));
 
 //   CGContextGlobalCompositeOperation( context, CGCompositeOperationLighter);
-   CGContextFillLinearGradient( context,
-                                info->gradientStartPoint, // Converted from x, y
+   CGContextSetFillLinearGradient( context,
+                                info->gradientStartPoint,
+                                CGPointMake( info->gradientStartPoint.x, info->gradientStartPoint.y + info->cornerInfo.corner),
                                 CGColorMakeWithRGBA( 1.0, 1.0, 1.0, brightness),
-                                CGPointMake( info->gradientStartPoint.x, info->gradientStartPoint.y + info->cornerInfo.corner), // Converted from x, y
                                 CGColorMakeTransparent());
    CGContextFill( context);
 }
