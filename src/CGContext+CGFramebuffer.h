@@ -59,9 +59,7 @@ CGPixelSize
                                      struct CGContextFramebuffer fb);
 
 
-@interface CGContext( CGFramebufferFuture)
-
-- (CGPixelSize) bitmapSizeOfFramebuffer:(struct CGContextFramebuffer) fb;
+@interface CGContext( CGFramebufferFuture) < MulleObjCFuture>
 
 //
 // framebuffer needs to be bound here, and context must be active
@@ -79,12 +77,14 @@ CGPixelSize
 
 
 // provided by GPU backend (e.g. MulleCGNanoVG)
-@interface CGContext( CGFramebufferGPU)
+@interface CGContext( CGFramebufferGPUFuture) <MulleObjCFuture>
+
 
 - (void) bindGPUFramebuffer:(void *) framebuffer;
 - (void) bindDefaultGPUFramebuffer;
 - (void) clearFramebufferBits:(NSUInteger) bits
                         color:(CGColor) color;
 - (NSUInteger) framebufferBitsWithColorBit:(BOOL) flag;
+- (CGPixelSize) bitmapSizeOfFramebuffer:(struct CGContextFramebuffer) fb;
 
 @end

@@ -47,12 +47,12 @@
 static struct
 {
    struct CGHexColorNamePair   _table[ CGHexColorCommonNameTableSize];
-} Self;
+} ClassStatic;
 
 
 + (void) load
 {
-   CGHexColorNamePairInitColorSortedTable( Self._table, CGHexColorCommonNameTableSize);
+   CGHexColorNamePairInitColorSortedTable( ClassStatic._table, CGHexColorCommonNameTableSize);
 }
 
 @end
@@ -64,7 +64,7 @@ char   *CGColorUTF8String( CGColor color)
    char         *s;
 
    hexColor = CGColorGetHexColor( color);
-   s        = CGHexColorNamePairSearchNameForHexColor( Self._table,
+   s        = CGHexColorNamePairSearchNameForHexColor( ClassStatic._table,
                                                        CGHexColorCommonNameTableSize,
                                                        hexColor);
    return( s ? s : MulleObjC_asprintf( "#%08tx", hexColor));

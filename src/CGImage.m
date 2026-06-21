@@ -169,7 +169,7 @@
 static struct
 {
    NSUInteger   _debuggingFlags;
-} Self;
+} ClassStatic;
 
 
 + (void) initialize
@@ -184,7 +184,7 @@ static struct
    if( ! s)
       s = getenv( "UIDebuggingFlags");
    if( s)
-      Self._debuggingFlags = strtol( s, NULL, 0);
+      ClassStatic._debuggingFlags = strtol( s, NULL, 0);
 }
 
 
@@ -195,7 +195,7 @@ static struct
 
 + (void) setDebuggingFlags:(NSUInteger) flag    MULLE_OBJC_THREADSAFE_METHOD
 {
-   Self._debuggingFlags = flag;
+   ClassStatic._debuggingFlags = flag;
 }
 
 
@@ -217,7 +217,7 @@ static struct
    _textureID      = textureID;
    _textureFlags   = textureFlags;
    _bitmapSize     = bitmapSize;
-   _debuggingFlags = Self._debuggingFlags;
+   _debuggingFlags = ClassStatic._debuggingFlags;
 
    MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, nameUTF8String);
 
@@ -258,7 +258,7 @@ static struct
    _textureID      = textureID;
    _textureFlags   = textureFlags;
    _bitmapSize     = bitmapSize;
-   _debuggingFlags = Self._debuggingFlags;
+   _debuggingFlags = ClassStatic._debuggingFlags;
 
    MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, nameUTF8String);
 
@@ -299,7 +299,7 @@ static struct
    _textureID        = textureID;
    _textureFlags     = textureFlags;
    _bitmapSize       = bitmapSize;
-   _debuggingFlags   = Self._debuggingFlags;
+   _debuggingFlags   = ClassStatic._debuggingFlags;
    _sharedGPUTexture = [sharedGPUTexture retain];
 
    MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, nameUTF8String);

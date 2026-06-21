@@ -12,7 +12,7 @@
 static struct
 {
    NSUInteger    _debuggingFlags;
-} Self;
+} ClassStatic;
 
 
 + (void) initialize
@@ -28,19 +28,19 @@ static struct
    if( ! s)
       s = getenv( "UIDebuggingFlags");
    if( s)
-      Self._debuggingFlags = strtol( s, NULL, 0);
+      ClassStatic._debuggingFlags = strtol( s, NULL, 0);
 }
 
 
 + (NSUInteger) debuggingFlags
 {
-   return( Self._debuggingFlags);
+   return( ClassStatic._debuggingFlags);
 }
 
 
 + (void) setDebuggingFlags:(NSUInteger) flag
 {
-    Self._debuggingFlags = flag;
+    ClassStatic._debuggingFlags = flag;
 }
 
 
@@ -62,8 +62,6 @@ static struct
             callbackSelectors:selectors];
    // MEMO: the layout context will have NULL _OSWindow (!)
    _OSWindow = os_context; // sic, not retained
-
-   [self _initBackend];
 
    MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, name);
 
@@ -88,12 +86,20 @@ static struct
 - (void) dealloc
 {
    [self _doneResourceStorage:&_resourceStorage];
-   [self _doneBackend];
 
    MulleObjCInstanceDeallocateMemory( self, _nameUTF8String);
 
    [super dealloc];
 }
+
+
+// no-op stubs — overridden by backends
+- (void) _initBackend        {}
+- (void) _doneBackend        {}
+- (void) _initGraphicsBackend {}
+- (void) _doneGraphicsBackend {}
+- (void) _initFontBackend    {}
+- (void) _doneFontBackend    {}
 
 
 
@@ -134,7 +140,7 @@ static struct
 
 - (void *) backendContext
 {
-   return( _cgBackend.context);
+   return( NULL);
 }
 
 

@@ -18,7 +18,7 @@ static struct
    mulle_thread_mutex_t                      _shaderSourceLock;
    struct mulle_container_keyvaluecallback   _shaderSourcesCallback;
    struct mulle_map                          _registeredSources;
-} Self;
+} ClassStatic;
 
 
 // can't use +initialize in a category
@@ -29,13 +29,13 @@ static struct
    if( MulleObjCClassGetID( self) != @selector( CGContext))
       return;
 
-   mulle_thread_mutex_init( &Self._shaderSourceLock);
+   mulle_thread_mutex_init( &ClassStatic._shaderSourceLock);
 
-   Self._shaderSourcesCallback.keycallback   = mulle_container_keycallback_copied_cstring;
-   Self._shaderSourcesCallback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
+   ClassStatic._shaderSourcesCallback.keycallback   = mulle_container_keycallback_copied_cstring;
+   ClassStatic._shaderSourcesCallback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
 
    allocator = MulleObjCClassGetAllocator( self);
-   mulle_map_init( &Self._registeredSources, 0, &Self._shaderSourcesCallback, allocator);
+   mulle_map_init( &ClassStatic._registeredSources, 0, &ClassStatic._shaderSourcesCallback, allocator);
 }
 
 
@@ -44,8 +44,8 @@ static struct
    if( MulleObjCClassGetID( self) != @selector( CGContext))
       return;
 
-   mulle_map_done( &Self._registeredSources);
-   mulle_thread_mutex_done( &Self._shaderSourceLock);
+   mulle_map_done( &ClassStatic._registeredSources);
+   mulle_thread_mutex_done( &ClassStatic._shaderSourceLock);
 }
 
 
@@ -195,9 +195,9 @@ static UIGraphicsBackend   defaultBackends[] =
 
          mulle_buffer_sprintf( buffer, "%s__%s", prefix, nameUTF8String);
          key = mulle_buffer_get_string( buffer);
-         mulle_thread_mutex_do( Self._shaderSourceLock)
+         mulle_thread_mutex_do( ClassStatic._shaderSourceLock)
          {
-            mulle_map_insert( &Self._registeredSources, key, sources);
+            mulle_map_insert( &ClassStatic._registeredSources, key, sources);
          }
          ++backends;
       }
@@ -233,9 +233,9 @@ static UIGraphicsBackend   defaultBackends[] =
          prefix = UIGraphicsBackendUTF8String( *backends);
          mulle_buffer_sprintf( buffer, "%s__%s", prefix, nameUTF8String);
 
-         mulle_thread_mutex_do( Self._shaderSourceLock)
+         mulle_thread_mutex_do( ClassStatic._shaderSourceLock)
          {
-            sources = mulle_map_get( &Self._registeredSources, nameUTF8String);
+            sources = mulle_map_get( &ClassStatic._registeredSources, nameUTF8String);
          }
       }
       while( ! sources && *++backends != UIGraphicsBackendNone);

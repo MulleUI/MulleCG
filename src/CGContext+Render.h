@@ -47,9 +47,15 @@
 
 
 // provided by +nanovg / +nanovg-gl
-@interface CGContext( RenderFuture)
+@interface CGContext( RenderFuture) < MulleObjCFuture>
 
 + (BOOL) supportsAntiAliasing;
+
+// Viewport for rendering. Default is { 0, 0, -1, -1 } meaning "auto"
+// (uses full framebuffer size). Set to a specific CGPixelRect to pin
+// rendering to a sub-region of the framebuffer.
+- (void) setViewport:(CGPixelRect) rect;
+- (CGPixelRect) viewport;
 
 //
 // used to intermix OpenGL or other commands, this flushes commands

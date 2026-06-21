@@ -24,7 +24,6 @@
 //
 @interface CGContextBase : MulleObject < MulleUIResourceMap, MulleUINamedObject>
 {
-   struct CGBackend                _cgBackend;   // context at offset 0; functions follow (backend-defined)
    struct MulleUIResourceStorage   _resourceStorage;
    mulle_atomic_pointer_t          _atomicState;
 }
@@ -60,46 +59,51 @@
 @end
 
 
-@interface CGContextBase( Future)
+@interface CGContextBase( Future) < MulleObjCFuture>
 
-- (void) _initBackend;
-- (void) _doneBackend;
+- (void) _initBackend;      // deprecated: use _initGraphicsBackend
+- (void) _doneBackend;      // deprecated: use _doneGraphicsBackend
+
+- (void) _initGraphicsBackend;
+- (void) _doneGraphicsBackend;
+- (void) _initFontBackend;
+- (void) _doneFontBackend;
 
 @end
 
 
 //
-// use these functions during rendering where we assume _cgBackend.context is not
-// suddenly changed by someone
+// These return NULL/empty for CGContextBase/CGLayoutContext.
+// CGContext overrides backendContext to return _cgBackend.context.
+// CGContext+Drawing.h provides the real inline accessors using @defs(CGContext).
 //
 MULLE_C_CONST_RETURN
 static inline void   *CGContextBaseGetBackendContext( CGContextBase *self)
 {
    if( ! self)
       return( NULL);
-   return( ((struct{ @defs( CGContextBase); } *) self)->_cgBackend.context);
+   return( [self backendContext]);
 }
 
 MULLE_C_CONST_RETURN
 static inline void   *_CGContextBaseGetBackendContext( CGContextBase *self)
 {
-   assert( self);
-   return( ((struct{ @defs( CGContextBase); } *) self)->_cgBackend.context);
+   return( [self backendContext]);
 }
 
 
 MULLE_C_CONST_RETURN
 static inline struct CGFunctionTable *_CGContextBaseGetFunctionTable( CGContextBase *self)
 {
-   assert( self);
-   return( &((struct{ @defs( CGContextBase); } *) self)->_cgBackend.functions);
+   // overridden in CGContext+Drawing.h with @defs(CGContext)
+   return( NULL);
 }
 
 
 MULLE_C_CONST_RETURN
 static inline struct CGBackendFunctionTable *_CGContextBaseGetBackendFunctionTable( CGContextBase *self)
 {
-   assert( self);
-   return( &((struct{ @defs( CGContextBase); } *) self)->_cgBackend.backendFunctions);
+   // overridden in CGContext+Drawing.h with @defs(CGContext)
+   return( NULL);
 }
 

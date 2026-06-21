@@ -4,7 +4,7 @@
 #import "CGImage.h"
 
 
-PROTOCOLCLASS_IMPLEMENTATION( CGDrawable)
+@implementation  CGDrawable
 
 - (CGRect) canvas
 {
@@ -17,11 +17,11 @@ PROTOCOLCLASS_IMPLEMENTATION( CGDrawable)
    return( [self canvas]);
 }
 
-PROTOCOLCLASS_END()
+@end
 
 
 
-PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
+@implementation  CGBitmapDrawable
 
 - (struct CGBitmapSize) bitmapSize
 {
@@ -428,4 +428,4 @@ static CGPoint  CGRectGetPointForAngleAndImageSize( CGRect rect,
    return( NULL);
 }
 
-PROTOCOLCLASS_END()
+@end

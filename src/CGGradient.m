@@ -713,18 +713,10 @@ static Class  CGRadialGradientClass;
 
 @implementation CGGradient( CGGradientSubclasses)
 
-// paranoia: but could be warranted
-+ (mulle_objc_dependency_t *) dependencies
-{
-   static mulle_objc_dependency_t   dependencies[] =
-   {
-      MULLE_OBJC_CLASS_DEPENDENCY( CGBoxGradient),
-      MULLE_OBJC_CLASS_DEPENDENCY( CGRadialGradient),
-      MULLE_OBJC_CLASS_DEPENDENCY( CGLinearGradient),
-      MULLE_OBJC_NO_DEPENDENCY
-   };
-   return( dependencies);
-}
+// super paranoia....
+@dependency CGBoxGradient;
+@dependency CGRadialGradient;
+@dependency CGLinearGradient;
 
 
 + (instancetype) linearGradientWithStartPoint:(CGPoint) startPoint

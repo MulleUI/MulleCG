@@ -76,3 +76,9 @@ export MULLE_EMULATOR__WINDOWS="WINEDEBUG=fixme-all,err-all wine"
 export MULLE_CRAFT_CROSS_COMPILER_ROOT__WINDOWS="/opt/mulle-clang-project-windows/latest"
 
 
+#
+#
+#
+export MULLE_SOURCETREE_CONFIG_NAME_MULLE_UIOS="glfw"
+
+

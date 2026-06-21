@@ -32,7 +32,7 @@ CGDrawableOptions   CGDrawableOptionsScaleToFit =
 };
 
 
-PROTOCOLCLASS_IMPLEMENTATION( CGBitmapDrawable)
+@implementation  CGBitmapDrawable
 
 - (CGPixelSize) bitmapSize
 {
@@ -265,10 +265,6 @@ CGSize   CGBitmapDrawableGetBitmapExtent( id <CGBitmapDrawable> self,
 }
 
 
-
-
-
-
 CGRect   CGDrawablePatternRect( id <CGDrawable> self,
                                 CGRect rect,
                                 CGRect fromRect,
@@ -353,6 +349,22 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self,
 
 
 - (void) drawRect:(CGRect) rect
+          options:(CGDrawableOptions *) options
+          context:(CGContext *) context
+{
+   CGPixelSize   size;
+   CGRect        fromRect;
+
+   size     = [self bitmapSize];
+   fromRect = CGRectMake( 0, 0, size.width, size.height);
+   [self drawRect:rect
+         fromRect:fromRect
+          options:options
+          context:context];
+}
+
+
+- (void) drawRect:(CGRect) rect
          fromRect:(CGRect) fromRect
           options:(CGDrawableOptions *) options
           context:(CGContext *) context
@@ -385,10 +397,10 @@ CGRect   CGDrawablePatternRect( id <CGDrawable> self,
 }
 
 
-PROTOCOLCLASS_END()
+@end
 
 
-PROTOCOLCLASS_IMPLEMENTATION( CGVectorDrawable)
+@implementation CGVectorDrawable
 
 - (CGRect) canvas
 {
@@ -406,4 +418,4 @@ PROTOCOLCLASS_IMPLEMENTATION( CGVectorDrawable)
    return( NO);
 }
 
-PROTOCOLCLASS_END()
+@end

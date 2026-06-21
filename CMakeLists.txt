@@ -15,7 +15,6 @@ include( Environment)
 add_compile_definitions(
 FONS_USE_FREETYPE
 FT_CONFIG_OPTION_SUBPIXEL_RENDERING
-NVG_NO_STB_IMAGE_IMPLEMENTATION
 NANOVG_EXTENSION_SOURCE="nanovg-extensions.inc"
 )
 

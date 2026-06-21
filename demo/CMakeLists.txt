@@ -36,33 +36,35 @@ find_program(MULLE_C_STRING_ESCAPE mulle-c-string-escape
 # Create a custom command to generate the *.inc files
 foreach( SHADER ${SHADERS})
    set( INC_FILE "${SHADER}.inc")
+   set( INC_FILE_ABSOLUTE "${PROJECT_SOURCE_DIR}/${INC_FILE}")
+   set( SHADER_ABSOLUTE "${PROJECT_SOURCE_DIR}/${SHADER}")
    if( GLSLANG_VALIDATOR)
       add_custom_command(
-         OUTPUT "${INC_FILE}"
-         COMMAND "${GLSLANG_VALIDATOR}" "${SHADER}" &&
-                 "${MULLE_C_STRING_ESCAPE}" -0 -q "${SHADER}" > "${INC_FILE}"
+         OUTPUT "${INC_FILE_ABSOLUTE}"
+         COMMAND "${GLSLANG_VALIDATOR}" "${SHADER_ABSOLUTE}" &&
+                 "${MULLE_C_STRING_ESCAPE}" -0 -q "${SHADER_ABSOLUTE}" > "${INC_FILE_ABSOLUTE}"
          WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-         DEPENDS "${SHADER}"
+         DEPENDS "${SHADER_ABSOLUTE}"
          COMMENT "Generating ${INC_FILE} from ${SHADER}"
       )
    else()
       if( MULLE_C_STRING_ESCAPE)
-         add_custom_command(
-            OUTPUT "${INC_FILE}"
-            COMMAND "${MULLE_C_STRING_ESCAPE}" -0 -q "${SHADER}" > "${INC_FILE}"
+          add_custom_command(
+            OUTPUT "${INC_FILE_ABSOLUTE}"
+            COMMAND "${MULLE_C_STRING_ESCAPE}" -0 -q "${SHADER_ABSOLUTE}" > "${INC_FILE_ABSOLUTE}"
             WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-            DEPENDS "${SHADER}"
+            DEPENDS "${SHADER_ABSOLUTE}"
             COMMENT "Generating ${INC_FILE} from ${SHADER}"
          )
       else()
-         if( EXISTS "${INC_FILE}")
+         if( EXISTS "${INC_FILE_ABSOLUTE}")
             message( STATUS "Keeping old ${INC_FILE} as mulle-c-string-escape is not installed")
          else()
             message( FATAL "Install mulle-c-string-escape or glslangValidator")
          endif()
       endif()
    endif()
-   list( APPEND INC_FILES ${INC_FILE})
+   list( APPEND INC_FILES "${INC_FILE_ABSOLUTE}")
 endforeach()
 
 

@@ -104,7 +104,12 @@ static struct CGFrameInfo   emptyInfo;
       // will acquire hopefully a preexisting framebuffer for reuse
       assert( ! _renderFramebuffer);
 
-      textureFlags  = (_cgBackend.flags & CGImageFlagMSAA) ? CGImageFlagMSAA : 0;
+      // Use the texture flags configured at context creation time.
+      // When MSAA is enabled (_renderLayerTextureFlags has CGImageFlagMSAA),
+      // we render into a multisampled FBO and resolve it in endRender before
+      // handing the result to the display context. The resolve happens within
+      // this context so no cross-context MSAA issues arise.
+      textureFlags  = _renderLayerTextureFlags;
 #if defined( DEBUG) || defined( MULLE_TEST)
       {
          static uintptr_t   counter;
@@ -209,6 +214,13 @@ static struct CGFrameInfo   emptyInfo;
 
    if( framebuffer)
    {
+      // Resolve MSAA framebuffer into a plain single-sample framebuffer before
+      // handing it off. The blit happens within this context so no cross-context
+      // MSAA restrictions apply. The original MSAA framebuffer is autoreleased
+      // and cleaned up normally after this scope.
+      if( [framebuffer isMultiSample])
+         framebuffer = (CGFramebuffer *) [self resolveMultiSampleImage:framebuffer];
+
       if( self->_debuggingFlags & CGContextDebugDumpFrameToFile)
       {
          MulleUIWriteImageToPNGFileSequenceAsync( framebuffer, "render-layer");

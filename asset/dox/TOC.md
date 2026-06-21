@@ -1,5 +1,5 @@
 # MulleCG Library Documentation for AI
-<!-- Keywords: graphics, rendering, nanovg, CoreGraphics, textures, fonts, OpenGL -->
+<!-- Keywords: graphics, rendering, nanovg, CoreGraphics, textures, fonts, text, OpenGL -->
 
 ## 1. Introduction & Purpose
 

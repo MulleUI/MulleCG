@@ -39,7 +39,7 @@
 //
 // implemented by nanovg-specifics
 //
-@interface CGLayoutContext( CGFontFuture)
+@interface CGLayoutContext( CGFontFuture) < MulleObjCFuture>
 
 /*
  * Fill fontCache with fonts, preferably don't use during draws as it does I/O
