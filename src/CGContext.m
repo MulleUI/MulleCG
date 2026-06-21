@@ -1,6 +1,7 @@
 #import "import-private.h"
 
 #import "CGContext.h"
+#import "CGContext+Drawing.h"
 #import "CGContext+Shader.h"
 
 #import "CGLayoutContext+CGFont.h"
@@ -63,7 +64,7 @@ static struct
    struct mulle_container_keyvaluecallback   _shaderMapCallback;
    NSUInteger                                _contextID; // unsafe but just for debugging
    NSUInteger                                _debuggingFlags;
-} Self;
+} ClassStatic;
 
 
 + (void) initialize
@@ -72,11 +73,11 @@ static struct
    if( MulleObjCClassGetID( self) != @selector( CGContext))
       return;
 
-   Self._gpuTextureMapCallback.keycallback   = mulle_container_keycallback_nonowned_pointer;
-   Self._gpuTextureMapCallback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
+   ClassStatic._gpuTextureMapCallback.keycallback   = mulle_container_keycallback_nonowned_pointer;
+   ClassStatic._gpuTextureMapCallback.valuecallback = mulle_container_valuecallback_nonowned_pointer;
 
-   Self._shaderMapCallback.keycallback       = mulle_container_keycallback_copied_cstring;
-   Self._shaderMapCallback.valuecallback     = mulle_container_valuecallback_intptr;
+   ClassStatic._shaderMapCallback.keycallback       = mulle_container_keycallback_copied_cstring;
+   ClassStatic._shaderMapCallback.valuecallback     = mulle_container_valuecallback_intptr;
 }
 
 
@@ -102,6 +103,13 @@ static struct
    abort();
 }
 
+
+- (void *) backendContext
+{
+   return( _cgBackend.context);
+}
+
+
 - (instancetype) _initAsPathContext
 {
    return( self);
@@ -119,24 +127,29 @@ static struct
 {
    struct mulle_allocator   *allocator;
 
-   _backend = [osContext backend];
-   _shareID = shareID;
+   _backend  = [osContext backend];
+   _shareID  = shareID;
+   _viewport = CGPixelRectMake( 0, 0, -1, -1);
 
    // do this early
    _debuggingFlags = [[self class] debuggingFlags];
-   _contextID      = ++Self._contextID;
+   _contextID      = ++ClassStatic._contextID;
 
    if( _backend != UIGraphicsBackendNone)
    {
       [self _initNanoVGWithGraphicsOptions:options
-                           nameUTF8String:nameUTF8String];
+                            nameUTF8String:nameUTF8String];
 
       if( ! _cgBackend.context)
       {
-         fprintf( stderr, "Could not create nanovg context\n");
+         fprintf( stderr, "Could not create graphics backend context\n");
          [self release];
          return( nil);
       }
+
+      // pre-set font context so CGLayoutContext._initFontBackend just shares it
+      _fontContext   = _cgBackend.context;
+      // _fontFunctions is set by _initFontBackend via CGNanoVGFontFunctionTable
    }
 
    // do this now to get CGContextLayout
@@ -152,10 +165,10 @@ static struct
       _mulle__pointerarray_init( &_deletedGPUFramebuffers, 0, allocator);
       _mulle__pointerarray_init( &_deletedFramebuffers, 0, allocator);
       // this is merely there to provide a mapping, it doesn't own the CGImage
-      _mulle_map_init( &_gpuTextureMap, 0, &Self._gpuTextureMapCallback, allocator);
+      _mulle_map_init( &_gpuTextureMap, 0, &ClassStatic._gpuTextureMapCallback, allocator);
 
       // this is a way to rendezvous to exisiting shaders by name
-      _mulle_map_init( &_shaderMap, 0, &Self._shaderMapCallback, allocator);
+      _mulle_map_init( &_shaderMap, 0, &ClassStatic._shaderMapCallback, allocator);
    }
 
    return( self);
@@ -199,7 +212,7 @@ static struct
    [super finalize];
    if( _backend != UIGraphicsBackendNone)
    {
-      [self _doneBackend];
+      [self _doneGraphicsBackend];
    }
 }
 
@@ -317,7 +330,7 @@ static struct
 
 
 // support for some demos
-// UIWindow needs styleMask | UIWindowStyleMousePolling set to fill this
+// UIWindow needs styleMask | UIWindowStyleInputPolling set to fill this
 // property
 - (struct UIInputState) inputState
 {
@@ -342,6 +355,13 @@ static struct
 }
 
 
+- (struct UIKeyStates) keyStates
+{
+   return( _inputState.keyStates);
+}
+
+
+
 - (BOOL) isInitializedFramebuffer
 {
    return( (BOOL) (uintptr_t) _mulle_atomic_pointer_read( &_atomicInitializedFramebuffer));
@@ -357,6 +377,20 @@ static struct
 - (FILE *) setTraceFile:(FILE *) file
 {
    return( NULL);  // overridden by nanovg backend
+}
+
+
+- (void *) pushGraphicsState
+{
+   CGContextSave( self);
+   return( NULL);
+}
+
+
+- (void) popGraphicsState:(void *) state
+{
+   assert( state == NULL);
+   CGContextRestore( self);
 }
 
 

@@ -9,7 +9,7 @@
 @class CGImage;
 
 
-PROTOCOLCLASS_INTERFACE0( CGPaintable)
+@mixin CGPaintable
 
 @optional
 - (void) fillWithBounds:(CGRect) rect
@@ -24,7 +24,7 @@ PROTOCOLCLASS_INTERFACE0( CGPaintable)
 - (CGImage *) image;
 - (CGImage *) otherImage;
 
-PROTOCOLCLASS_END()
+@end
 
 
 @interface CGPaint( CGPaintable)  < CGPaintable>

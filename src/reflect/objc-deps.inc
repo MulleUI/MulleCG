@@ -1,5 +1,4 @@
       { @selector( MulleObjCDeps), @selector( MulleUIBase) },      // 3c20656f;MulleObjCDeps;3ebba954;MulleUIBase
-      { @selector( CGBitmapDrawable), MULLE_OBJC_NO_CATEGORYID },      // ac0569ab;CGBitmapDrawable;;
       { @selector( CGBlendedPaint), @selector( CGPaintable) },      // f164885b;CGBlendedPaint;faf2d5d6;CGPaintable
       { @selector( CGBlendedPaint), @selector( Drawing) },      // f164885b;CGBlendedPaint;53946657;Drawing
       { @selector( CGBlendedPaint), MULLE_OBJC_NO_CATEGORYID },      // f164885b;CGBlendedPaint;;
@@ -41,7 +40,6 @@
       { @selector( CGRadialGradient), MULLE_OBJC_NO_CATEGORYID },      // 74b8ddc9;CGRadialGradient;;
       { @selector( CGSharedGPUTexture), MULLE_OBJC_NO_CATEGORYID },      // e7d245f1;CGSharedGPUTexture;;
       { @selector( CGTwoColorGradient), MULLE_OBJC_NO_CATEGORYID },      // f0f08c2d;CGTwoColorGradient;;
-      { @selector( CGVectorDrawable), MULLE_OBJC_NO_CATEGORYID },      // e5ec3a2e;CGVectorDrawable;;
       { @selector( NSObject), @selector( CGContext) },      // b3a66256;NSObject;80b7b568;CGContext
       { @selector( NSObject), @selector( CGGradient) },      // b3a66256;NSObject;37670335;CGGradient
       { @selector( NSObject), @selector( CGImage) },      // b3a66256;NSObject;6ec55940;CGImage

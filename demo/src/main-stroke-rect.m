@@ -1,9 +1,7 @@
 #define _GNU_SOURCE
 
 #import "import-private.h"
-#define AntiAlias  1
-#define Thick      2
-#define Offset     4
+
 
 static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias)
 {
@@ -22,8 +20,8 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
    canvas      = CGRectInset( [layer canvas], 10.0, 10.0);
 
    strokeWidth = 6.0;
+#if 0
    CGContextShapeAntiAlias( context, antiAlias);
-
    CGContextResetScissor( context); // see if it makes a difference
    CGRectPartitionVertically( canvas, 20.0, 3, rows);
    for( i = 0; i < 3; i++)
@@ -109,7 +107,7 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
 
    strokeWidth = 1.0;
    CGContextShapeAntiAlias( context, 1);
-
+#endif
    CGRectPartitionVertically( canvas, 20.0, 3, rows);
    for( i = 2; i < 3; i++)
    {
@@ -148,37 +146,49 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
       }
    }
 }
+
+
 static void   drawStuff0( CALayer *layer, CGContext *context)
 {
    drawRect( layer, context, 0x0);
 }
+
 
 static void   drawStuff1( CALayer *layer, CGContext *context)
 {
    drawRect( layer, context, 0x1);
 }
 
+
 typedef CGGraphicsLayerDrawCallback_t  *CALayerDrawCallbackPointer_t;
+
 
 static CALayerDrawCallbackPointer_t   drawStuff[ 2] =
 {
    (CGGraphicsLayerDrawCallback_t *) drawStuff0,
    (CGGraphicsLayerDrawCallback_t *) drawStuff1
 };
+
+
 int   main( int argc, char *argv[])
 {
    UIApplication   *app;
    UIWindow        *window[ 2];
    NSUInteger      i;
+   NSUInteger      styleMask;
 
    app = [UIApplication sharedInstance];
+
+   styleMask  = UIWindowStyleMaskDefault;
+//   styleMask |= UIWindowStyleRetainedOnMainThread;
+   styleMask &= ~UIWindowStyleAntiAlias;
 
    for( i = 0; i < 2; i++)
    {
       window[ i] = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 600, 300)
                              titleUTF8String:i == 0 ? "No AntiAlias" : "AntiAlias"
-                                   styleMask:UIWindowStyleMaskDefault];
-      [window[ i] setDrawCallback:drawStuff[ i]];
+                                   styleMask:styleMask];
+      [window[ i] setDrawCallback:drawStuff[ i == 1 ? 0 : 1]];
       [window[ i] setBackgroundColor:CGColorMakeBlack()];
       [window[ i] setFrameRate:UIWindowFrameRateSynced];
       [app addWindow:window[ i]];

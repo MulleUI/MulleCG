@@ -221,8 +221,9 @@ static inline CGDrawableOptions   CGDrawableOptionsMakeScaleToFit( void)
 // by textures that resides on the GPU so not in our addresspace.
 //
 //
-PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
+@mixin CGBitmapDrawable < CGDrawable>
 
+@required
 // this is called by drawRect to get a texture from the desired options.
 // The textureFlags in CGImage are not necessarily identical to
 // the passed in value, but reflect the actual image settings.Mostly this
@@ -257,11 +258,11 @@ PROTOCOLCLASS_INTERFACE( CGBitmapDrawable, CGDrawable)
 
 - (NSUInteger) textureFlags;
 
-PROTOCOLCLASS_END()
+@end
 
 
 
-PROTOCOLCLASS_INTERFACE( CGVectorDrawable, CGDrawable)
+@mixin CGVectorDrawable < CGDrawable>
 
 @optional
 
@@ -269,7 +270,7 @@ PROTOCOLCLASS_INTERFACE( CGVectorDrawable, CGDrawable)
 - (CGRect) bounds;      // usually same as canvas for bitmaps
 - (BOOL) isRepeating;   // ususually NO, used by repeating bitmaps
 
-PROTOCOLCLASS_END()
+@end
 
 
 MULLE_CG_GLOBAL

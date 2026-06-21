@@ -49,7 +49,7 @@
 @end
 
 
-@interface CGContext( Future)
+@interface CGContext( Future) < MulleObjCFuture>
 
 - (char *) shaderHeaderUTF8String;
 

@@ -81,6 +81,7 @@ src/CGContext+Texture.h
 src/CGContext+UIGraphicsDrawing.h
 src/CGContext.h
 src/CGDrawable.h
+src/CGFontFunctionTable.h
 src/CGFont.h
 src/CGFramebuffer.h
 src/CGFunctionTable.h

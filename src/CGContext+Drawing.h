@@ -3,16 +3,22 @@
 //
 #include "CGTypes.h"
 #include "CGFunctionTable.h"
+#include "CGFontFunctionTable.h"
 #include "CGBackendFunctionTable.h"
 #import "CGContextBase.h"
 #import "CGContext.h"
 #import "CGLayoutContext.h"
 
 // Dispatch a drawing call through the function table.
-// Works for CGContext *, CGLayoutContext *, CGContextBase * — all cast to base.
-#define CGContextVG( ctx)        (_CGContextBaseGetBackendContext( (CGContextBase *)(ctx)))
-#define CGContextFN( ctx)        (_CGContextBaseGetFunctionTable( (CGContextBase *)(ctx)))
-#define CGContextBFN( ctx)       (_CGContextBaseGetBackendFunctionTable( (CGContextBase *)(ctx)))
+// Works for CGContext *, CGLayoutContext *, CGContextBase * — all cast to CGContext.
+// _cgBackend lives in CGContext, so we use @defs(CGContext) for direct struct access.
+#define CGContextVG( ctx)        (((struct{ @defs( CGContext); } *)(ctx))->_cgBackend.context)
+#define CGContextFN( ctx)        (&((struct{ @defs( CGContext); } *)(ctx))->_cgBackend.functions)
+#define CGContextBFN( ctx)       (&((struct{ @defs( CGContext); } *)(ctx))->_cgBackend.backendFunctions)
+// Font context and function table for CGLayoutContext font/measurement operations
+// These use @defs(CGLayoutContext) and are safe for both CGLayoutContext and CGContext objects.
+#define CGContextFontVG( ctx)    (((struct{ @defs( CGLayoutContext); } *)(ctx))->_fontContext)
+#define CGContextFontFN( ctx)    (&((struct{ @defs( CGLayoutContext); } *)(ctx))->_fontFunctions)
 
 
 // ###
@@ -51,6 +57,7 @@ static inline void   CGContextGlobalCompositeBlendFunc( CGContext *context,
       CGContextFN(context)->globalCompositeBlendFunc( CGContextVG(context), sfactor, dfactor);
 }
 
+
 static inline void   CGContextGlobalCompositeBlendFuncSeparate( CGContext *context,
                                                                 NSUInteger srcRGB,
                                                                 NSUInteger dstRGB,
@@ -62,23 +69,92 @@ static inline void   CGContextGlobalCompositeBlendFuncSeparate( CGContext *conte
                                            srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
 
-static inline void   CGContextSave( CGLayoutContext *context)
+
+static inline void   CGLayoutContextSave( CGLayoutContext *context)
 {
-   if( context)
-      CGContextFN(context)->save( CGContextVG(context));
+   void   *fontVG;
+
+   if( ! context)
+      return;
+   fontVG = CGContextFontVG( context);
+   if( fontVG)
+      CGContextFontFN( context)->save( fontVG);
 }
 
-static inline void   CGContextRestore( CGLayoutContext *context)
+
+static inline void   CGLayoutContextRestore( CGLayoutContext *context)
 {
-   if( context)
-      CGContextFN(context)->restore( CGContextVG(context));
+   void   *fontVG;
+
+   if( ! context)
+      return;
+   fontVG = CGContextFontVG( context);
+   if( fontVG)
+      CGContextFontFN( context)->restore( fontVG);
 }
 
-static inline void   CGContextReset( CGContextBase *context)
+
+static inline void   CGLayoutContextReset( CGLayoutContext *context)
 {
-   if( context)
-      CGContextFN(context)->reset( CGContextVG(context));
+   void   *fontVG;
+
+   if( ! context)
+      return;
+   fontVG = CGContextFontVG( context);
+   if( fontVG && CGContextFontFN( context)->reset)
+      CGContextFontFN( context)->reset( fontVG);
 }
+
+
+static inline void   CGContextSave( CGContext *context)
+{
+   void   *fontVG;
+   void   *drawVG;
+
+   if( ! context)
+      return;
+   fontVG = CGContextFontVG( context);
+   if( fontVG)
+      CGContextFontFN( context)->save( fontVG);
+   // Draw save only when there is a separate draw backend (CGContext with distinct vg)
+   drawVG = CGContextVG( context);
+   if( drawVG != fontVG && drawVG)
+      CGContextFN( context)->save( drawVG);
+}
+
+
+static inline void   CGContextRestore( CGContext *context)
+{
+   void   *fontVG;
+   void   *drawVG;
+
+   if( ! context)
+      return;
+
+   fontVG = CGContextFontVG( context);
+   if( fontVG)
+      CGContextFontFN( context)->restore( fontVG);
+   drawVG = CGContextVG( context);
+   if( drawVG != fontVG && drawVG)
+      CGContextFN( context)->restore( drawVG);
+}
+
+
+static inline void   CGContextReset( CGContext *context)
+{
+   void   *fontVG;
+   void   *drawVG;
+
+   if( ! context)
+      return;
+   fontVG = CGContextFontVG( context);
+   if( fontVG && CGContextFontFN( context)->reset)
+      CGContextFontFN( context)->reset( fontVG);
+   drawVG = CGContextVG( context);
+   if( drawVG && drawVG != fontVG && CGContextFN( context)->reset)
+      CGContextFN( context)->reset( drawVG);
+}
+
 
 static inline void   CGContextShapeAntiAlias( CGContext *context, BOOL enable)
 {
@@ -399,81 +475,81 @@ static inline void   CGContextStroke( CGContext *context)
 static inline CGFontID CGContextCreateFont( CGLayoutContext *context, char *name, char *filename)
 {
    if( context)
-      return CGContextFN(context)->createFont( CGContextVG(context), name, filename);
+      return CGContextFontFN(context)->createFont( CGContextFontVG(context), name, filename);
    return( CGFontIDInvalid);
 }
 
 static inline CGFontID CGContextCreateFontMem( CGLayoutContext *context, char *name, void *data, size_t length, BOOL freeData)
 {
    if( context)
-      return CGContextFN(context)->createFontMem( CGContextVG(context), name, data, length, freeData);
+      return CGContextFontFN(context)->createFontMem( CGContextFontVG(context), name, data, length, freeData);
    return( CGFontIDInvalid);
 }
 
 static inline CGFontID CGContextFindFont( CGLayoutContext *context, char *name)
 {
    if( context)
-      return CGContextFN(context)->findFont( CGContextVG(context), name);
+      return CGContextFontFN(context)->findFont( CGContextFontVG(context), name);
    return( CGFontIDInvalid);
 }
 
 static inline CGFontID CGContextAddFallbackFontId( CGLayoutContext *context, CGFontID baseFont, CGFontID fallbackFont)
 {
    if( context)
-      return CGContextFN(context)->addFallbackFontId( CGContextVG(context), baseFont, fallbackFont);
+      return CGContextFontFN(context)->addFallbackFontId( CGContextFontVG(context), baseFont, fallbackFont);
    return( CGFontIDInvalid);
 }
 
 static inline CGFontID CGContextAddFallbackFont( CGLayoutContext *context, char *baseFont, char *fallbackFont)
 {
    if( context)
-      return CGContextFN(context)->addFallbackFont( CGContextVG(context), baseFont, fallbackFont);
+      return CGContextFontFN(context)->addFallbackFont( CGContextFontVG(context), baseFont, fallbackFont);
    return( CGFontIDInvalid);
 }
 
 static inline void   CGContextResetFallbackFontsId( CGLayoutContext *context, NSInteger baseFont)
 {
    if( context)
-      CGContextFN(context)->resetFallbackFontsId( CGContextVG(context), baseFont);
+      CGContextFontFN(context)->resetFallbackFontsId( CGContextFontVG(context), baseFont);
 }
 
 static inline void   CGContextResetFallbackFonts( CGLayoutContext *context, char *baseFont)
 {
    if( context)
-      CGContextFN(context)->resetFallbackFonts( CGContextVG(context), baseFont);
+      CGContextFontFN(context)->resetFallbackFonts( CGContextFontVG(context), baseFont);
 }
 
 static inline void   CGContextFontSize( CGLayoutContext *context, CGFloat size)
 {
    if( context)
-      CGContextFN(context)->fontSize( CGContextVG(context), size);
+      CGContextFontFN(context)->fontSize( CGContextFontVG(context), size);
 }
 
 static inline void   CGContextFontBlur( CGLayoutContext *context, CGFloat blur)
 {
    if( context)
-      CGContextFN(context)->fontBlur( CGContextVG(context), blur);
+      CGContextFontFN(context)->fontBlur( CGContextFontVG(context), blur);
 }
 
 static inline void   CGContextTextLetterSpacing( CGLayoutContext *context,
                                                  CGFloat spacing)
 {
    if( context)
-      CGContextFN(context)->textLetterSpacing( CGContextVG(context), spacing);
+      CGContextFontFN(context)->textLetterSpacing( CGContextFontVG(context), spacing);
 }
 
 static inline void   CGContextTextLineHeight( CGLayoutContext *context,
                                               CGFloat lineHeight)
 {
    if( context)
-      CGContextFN(context)->textLineHeight( CGContextVG(context), lineHeight);
+      CGContextFontFN(context)->textLineHeight( CGContextFontVG(context), lineHeight);
 }
 
 static inline void   CGContextCombinedTextAlignment( CGLayoutContext *context,
                                                 CGCombinedTextAlign align)
 {
    if( context)
-      CGContextFN(context)->textAlign( CGContextVG(context), align);
+      CGContextFontFN(context)->textAlign( CGContextFontVG(context), align);
 }
 
 static inline void   CGContextTextAlignment( CGLayoutContext *context,
@@ -490,31 +566,31 @@ static inline void   CGContextTextAlignment( CGLayoutContext *context,
    case UITextAlignmentRight  : align = CGTextAlignRight  | CGTextAlignBaseline; break;
    case UITextAlignmentCenter : align = CGTextAlignCenter | CGTextAlignBaseline; break;
    }
-   CGContextFN(context)->textAlign( CGContextVG(context), align);
+   CGContextFontFN(context)->textAlign( CGContextFontVG(context), align);
 }
 
 static inline void   CGContextFontFaceId( CGLayoutContext *context, CGFontID fontID)
 {
    if( context)
-      CGContextFN(context)->fontFaceId( CGContextVG(context), fontID);
+      CGContextFontFN(context)->fontFaceId( CGContextFontVG(context), fontID);
 }
 
 static inline void   CGContextClearType( CGLayoutContext *context, BOOL enable)
 {
    if( context)
-      CGContextFN(context)->clearType( CGContextVG(context), enable);
+      CGContextFontFN(context)->clearType( CGContextFontVG(context), enable);
 }
 
 static inline void   CGContextTextColor( CGLayoutContext *context, CGColor color)
 {
    if( context)
-      CGContextFN(context)->textColor( CGContextVG(context), color);
+      CGContextFontFN(context)->textColor( CGContextFontVG(context), color);
 }
 
 static inline void   CGContextTextBackgroundColor( CGLayoutContext *context, CGColor color)
 {
    if( context)
-      CGContextFN(context)->textBackgroundColor( CGContextVG(context), color);
+      CGContextFontFN(context)->textBackgroundColor( CGContextFontVG(context), color);
 }
 
 static inline CGTextBoundsInfo   CGContextTextBoundsInfo( CGLayoutContext *context,
@@ -522,7 +598,7 @@ static inline CGTextBoundsInfo   CGContextTextBoundsInfo( CGLayoutContext *conte
                                                           char *s,
                                                           size_t length)
 {
-   return( CGContextFN(context)->textBounds( CGContextVG(context), point, s, length));
+   return( CGContextFontFN(context)->textBounds( CGContextFontVG(context), point, s, length));
 }
 
 static inline CGRect   CGContextTextVisualBounds( CGLayoutContext *context,
@@ -533,7 +609,7 @@ static inline CGRect   CGContextTextVisualBounds( CGLayoutContext *context,
    CGRect   vbounds = CGRectNull;
 
    if( context)
-      vbounds = CGContextFN(context)->textVisualBounds( CGContextVG(context), point, s, length);
+      vbounds = CGContextFontFN(context)->textVisualBounds( CGContextFontVG(context), point, s, length);
    return( vbounds);
 }
 
@@ -546,7 +622,7 @@ static inline CGRect   CGContextTextBoxBounds( CGLayoutContext *context,
    CGRect   bbox = CGRectNull;
 
    if( context)
-      CGContextFN(context)->textBoxBounds( CGContextVG(context), point, s, length, breakRowWidth, &bbox);
+      CGContextFontFN(context)->textBoxBounds( CGContextFontVG(context), point, s, length, breakRowWidth, &bbox);
    return( bbox);
 }
 
@@ -560,7 +636,7 @@ static inline NSUInteger   CGContextTextGlyphPositions( CGLayoutContext *context
    if( ! context)
       return 0;
 
-   return( CGContextFN(context)->textGlyphPositions( CGContextVG(context),
+   return( CGContextFontFN(context)->textGlyphPositions( CGContextFontVG(context),
                                   point,
                                   s,
                                   length,
@@ -579,7 +655,7 @@ static inline NSUInteger   CGContextTextBreakLines( CGLayoutContext *context,
    if( ! context)
       return( 0);
 
-   return( CGContextFN(context)->textBreakLines( CGContextVG(context), s, length, breakRowWidth, rows, maxRows, UITextRowSize));
+   return( CGContextFontFN(context)->textBreakLines( CGContextFontVG(context), s, length, breakRowWidth, rows, maxRows, UITextRowSize));
 }
 
 static inline CGTextMetrics   CGContextTextMetrics( CGLayoutContext *context)
@@ -587,14 +663,14 @@ static inline CGTextMetrics   CGContextTextMetrics( CGLayoutContext *context)
    CGTextMetrics   metrics = { 0 };
 
    if( context)
-      metrics = CGContextFN(context)->textMetrics( CGContextVG(context));
+      metrics = CGContextFontFN(context)->textMetrics( CGContextFontVG(context));
    return( metrics);
 }
 
 static inline void   *CGContextGetFontHandle( CGLayoutContext* context, int font)
 {
    if( context)
-      return( CGContextFN(context)->getFontHandle( CGContextVG(context), font));
+      return( CGContextFontFN(context)->getFontHandle( CGContextFontVG(context), font));
    return( NULL);
 }
 
@@ -609,7 +685,7 @@ static inline CGFloat   CGContextText( CGContext *context,
                                        size_t length)
 {
    if( context && s)
-      return( CGContextFN(context)->text( CGContextVG(context), point, s, length));
+      return( CGContextFontFN(context)->text( CGContextFontVG(context), point, s, length));
    return( 0.0);
 }
 
@@ -620,7 +696,19 @@ static inline void   CGContextTextBox( CGContext *context,
                                        size_t length)
 {
    if( context && s)
-      CGContextFN(context)->textBox( CGContextVG(context), point, breakRowWidth, s, length);
+      CGContextFontFN(context)->textBox( CGContextFontVG(context), point, breakRowWidth, s, length);
+}
+
+static inline CGFloat   CGContextAttributedText( CGContext *context,
+                                                 CGPoint point,
+                                                 char *s,
+                                                 size_t length,
+                                                 struct CGTextAttribute *attributes,
+                                                 int nAttributes)
+{
+   if( context && s && CGContextFontFN(context)->attributedText)
+      return( CGContextFontFN(context)->attributedText( CGContextFontVG(context), point, s, length, attributes, nAttributes));
+   return( 0.0);
 }
 
 static inline void   CGContextAddCGPath( CGContext *context, CGPathRef path)
@@ -699,3 +787,18 @@ static inline void   CGContextTrace( CGContext *context, FILE *fp)
    if( context && CGContextFN(context)->trace)
       CGContextFN(context)->trace( CGContextVG(context), fp);
 }
+
+
+
+#define _CGContextDo( context, name)                    \
+   for( int name ## __j = (CGContextSave( context), 0); \
+        ! name ## __j;                                  \
+        name ## __j  = (CGContextRestore( context), 1)) \
+      MULLE_C_CONFINED_LOOP                             \
+      for( int  name ## __i = 0;                        \
+           ! name ## __i;                               \
+           name ## __i = 1)
+
+#define _CGContextDo_PASTE(context, line)  _CGContextDo( context, cgcontext__ ## line)
+#define _CGContextDo_LINE(context, line)   _CGContextDo_PASTE( context, line)
+#define CGContextDo( context)              _CGContextDo_LINE( context, __LINE__)

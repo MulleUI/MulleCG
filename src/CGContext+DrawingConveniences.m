@@ -352,6 +352,11 @@ static CGTextBoundsInfo   _computeTextRect( CGContext *context,
 
       if( factor != 1.0f)
       {
+         // MEMO: seems this was lost, but is it still true ? delete at will
+         //       if it gives problems
+         if( factor > maxFactor)
+            factor = maxFactor;
+
          fontSize = 100.0f * factor;
          // TODO: binary search for font size fitting width if binSearch
          CGContextFontSize( context, fontSize);
@@ -493,7 +498,7 @@ static CGPoint   _tlAdjustmentForVisualBounds( CGContext *context,
       switch( valign)
       {
       case CGTextAlignTop      : break;
-      case CGTextAlignMiddle   : adjust.y -= lineh / 2.0; break;
+      case CGTextAlignMiddle   : adjust.y -= metrics.ascender / 2.0; break;
       case CGTextAlignBottom   : adjust.y -= lineh; break;
       case CGTextAlignBaseline : adjust.y -= metrics.ascender; break;
       }

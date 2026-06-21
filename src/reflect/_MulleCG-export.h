@@ -29,6 +29,7 @@
 #import "CGContext+UIGraphicsDrawing.h"
 #import "CGContext.h"
 #import "CGDrawable.h"
+#import "CGFontFunctionTable.h"
 #import "CGFont.h"
 #import "CGFramebuffer.h"
 #import "CGFunctionTable.h"

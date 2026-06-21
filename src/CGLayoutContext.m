@@ -41,8 +41,8 @@ MULLE_CG_GLOBAL_VAR mulle_thread_mutex_t   CGLayoutContextFreeTypeLock;
 
    // do this as a layoutContext wont get a beginFrame and then we could
    // not save graphicsState
-   CGContextSave( context);
-   CGContextReset( context);
+   CGLayoutContextSave( context);
+   CGLayoutContextReset( context);
    return( context);
 }
 
@@ -53,12 +53,7 @@ MULLE_CG_GLOBAL_VAR mulle_thread_mutex_t   CGLayoutContextFreeTypeLock;
    self = [super initWithOSGraphicsContext:os_context
                             nameUTF8String:name];
 
-   // TODO: this is surely the wrong place, move it to MulleCGNanovgD311
-#ifdef MULLE_CG_BACKEND_D3D11
-   if( [context respondsToSelector:@selector( backendDevicePointer)])
-      _cgBackend.devicePointer = [(id) context backendDevicePointer];
-#endif
-
+   [self _initFontBackend];
    [self _initFontCache];
    _defaultFontName = "sans";
    return( self);
@@ -67,8 +62,8 @@ MULLE_CG_GLOBAL_VAR mulle_thread_mutex_t   CGLayoutContextFreeTypeLock;
 
 - (void) dealloc
 {
-   [self _doneBackend];
-
+   if( _ownsFontContext)
+      [self _doneFontBackend];
    [self _doneFontCache];
    [super dealloc];
 }
@@ -220,7 +215,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
       return( metrics);
 
    bounds = CGRectZero;
-   CGContextSave( self);
+   CGLayoutContextSave( self);
    {
       // we can not do scaled conversion
       // nvgResetTransform( _vg);
@@ -242,7 +237,7 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
          }
       }
    }
-   CGContextRestore( self);
+   CGLayoutContextRestore( self);
 
    metrics.lineHeight = bounds.size.height;
    metrics.ascender   = fabsf( -bounds.origin.y);
@@ -356,14 +351,14 @@ static char   extreme_chars[] = { '|', '_', 'y', ';', 'X', '`' };
 
 - (void *) pushGraphicsState
 {
-   CGContextSave( self);
+   CGLayoutContextSave( self);
    return( NULL);
 }
 
 - (void) popGraphicsState:(void *) state
 {
    assert( state == NULL); // i mean come on...
-   CGContextRestore( self);
+   CGLayoutContextRestore( self);
 }
 
 @end

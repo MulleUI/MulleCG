@@ -46,7 +46,9 @@ struct CGFrameInfo;
                                    context:(CGContext *) context;
 
 // more or less for completeness... probably makes no sense
-// (but used in a demo cgimage-write, so... )
+// (but used in a demo cgimage-write, so... ) the default implementation does
+// nothing, but nanovg will augment
+@optional
 - (instancetype) initWithImage:(CGImage *) image
                   textureFlags:(NSUInteger) textureFlags
                 nameUTF8String:(char *) nameUTF8String
@@ -97,7 +99,7 @@ typedef CGFramebuffer   CGLayer;
 //
 // implemented by CGFramebuffer+nanovg (or whatever we be using)
 //
-@interface CGFramebuffer( FutureCategory)
+@interface CGFramebuffer( FutureCategory) < MulleObjCFuture>
 
 - (instancetype) initWithBitmapSize:(CGPixelSize) size
                        textureFlags:(NSUInteger) textureFlags

@@ -29,7 +29,7 @@ typedef void    CGGPUFramebuffer;
 //
 // function will be implemented by +nanovg so this is a "future" @interface
 //
-@interface CGContext( TextureFuture)
+@interface CGContext( TextureFuture) < MulleObjCFuture>
 
 - (CGTextureID) textureIDWithRGBABytes:(void *) bytes
                         bitmapSize:(CGPixelSize) size

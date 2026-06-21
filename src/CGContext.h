@@ -166,8 +166,11 @@ static inline int
 //
 @interface CGContext : CGLayoutContext
 {
+   struct CGBackend                 _cgBackend;   // graphics backend: context at offset 0, functions follow
+
    struct CGFrameInfo               _currentFrameInfo;
    struct CGContextFramebuffer      _currentFramebuffer;
+   CGPixelRect                      _viewport;  // { 0,0,-1,-1 } = auto (full framebuffer)
 
    struct mulle_map                 _gpuTextureMap;
    struct mulle_map                 _shaderMap;
@@ -255,10 +258,12 @@ static inline int
 - (CGShaderID) activeShader;
 
 // support for some demos
-// UIWindow needs to be set with UIWindowStyleMousePolling to get values
+// UIWindow needs to be set with UIWindowStyleInputPolling to get values
 - (CGPoint) mouseLocation;
 - (NSUInteger) keyModifiers;
 - (NSUInteger) buttonStates;
+- (struct UIKeyStates) keyStates;
+
 
 // is this still used ? does it make sense ?
 - (CGFloat) fontScale;
@@ -267,11 +272,8 @@ static inline int
 // Returns the previous trace file (NULL if none). Pass NULL to disable.
 - (FILE *) setTraceFile:(FILE *) file;
 
-@end
-
-
-@interface CGContext( Forward)
-
+// implemented by subclasses
+@optional
 - (void) _initNanoVGWithGraphicsOptions:(UIGraphicsOptions) options
                          nameUTF8String:(char *) nameUTF8String;
 - (void) _doneBackend;

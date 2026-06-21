@@ -588,6 +588,7 @@ typedef struct CGTextMetrics
    float   ascender;
    float   descender;
    float   lineHeight;
+   float   lineGap;      // -1 means unknown/unavailable
 } CGTextMetrics;
 
 
@@ -603,12 +604,14 @@ static inline CGTextMetrics  CGTextMetricsMake( float ascender,
            {
               .ascender   = ascender,
               .descender  = descender,
-              .lineHeight = lineHeight
+              .lineHeight = lineHeight,
+              .lineGap    = -1
            });
 }
 
 // defined elsewhere
 //static inline char   *CGTextMetricsUTF8String( CGTextMetrics metrics)
+
 
 // Backend resource IDs (opaque integer handles)
 typedef NSInteger    CGTextureID;   // -1 == invalid
@@ -617,6 +620,22 @@ typedef NSUInteger   CGShaderID;    // 0 is invalid
 
 #define CGTextureIDInvalid   0
 #define CGFontIDInvalid      -1
+
+
+// Attributed text: per-run styling for CGContextAttributedText.
+// Runs tile the string contiguously. Each run's `offset` is the byte offset
+// past the last byte of that run. So run 0 covers bytes [0, attributes[0].offset),
+// run 1 covers [attributes[0].offset, attributes[1].offset), etc.
+typedef struct CGTextAttribute
+{
+   NSUInteger  offset;           // byte offset past end of this run
+   CGColor     textColor;
+   CGColor     backgroundColor;  // ClearType background hint
+   CGFontID    fontId;           // -1 = inherit from current state
+   CGFloat     fontSize;         // <=0 = inherit from current state
+   CGFloat     yOffset;          //  0 = baseline, <0 = up (superscript)
+} CGTextAttribute;
+
 
 // Backend-neutral texture flags (values match NVG_IMAGE_* in nanovg)
 enum

@@ -217,7 +217,7 @@
 @end
 
 
-@interface CGImage( Future)
+@interface CGImage( Future) < MulleObjCFuture>
 
 - (struct CGBitmap) RGBABytesBitmap:(struct mulle_allocator *) allocator;
 

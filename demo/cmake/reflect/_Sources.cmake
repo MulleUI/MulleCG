@@ -29,6 +29,7 @@ src/main-arc.m
 src/main-arcto.m
 src/main-bezier.m
 src/main-blend.m
+src/main-border-compare.m
 src/main-canvas.m
 src/main-cgimage-contentmode.m
 src/main-cgimage-flip.m
@@ -95,6 +96,7 @@ src/main-stroke-fill.m
 src/main-stroke-rect.m
 src/main-suspend-resume.m
 src/main-text-alignment.m
+src/main-text-attributed.m
 src/main-text-bounds.m
 src/main-text-contentmode.m
 src/main-text-draw.m

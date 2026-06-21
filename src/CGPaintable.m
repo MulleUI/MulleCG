@@ -12,7 +12,7 @@
 #import "import-private.h"
 
 
-PROTOCOLCLASS_IMPLEMENTATION( CGPaintable)
+@implementation  CGPaintable
 
 
 - (void) fillWithBounds:(CGRect) bounds
@@ -53,7 +53,7 @@ PROTOCOLCLASS_IMPLEMENTATION( CGPaintable)
 }
 
 
-PROTOCOLCLASS_END()
+@end
 
 
 @implementation CGPaint( CGPaintable)
