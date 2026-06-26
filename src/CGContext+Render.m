@@ -88,6 +88,8 @@ static struct CGFrameInfo   emptyInfo;
    if( _firstRenderTimeStamp == 0.0)
       _firstRenderTimeStamp = _currentFrameInfo.now;
 
+   CGContextTraceComment( self, "\n// *** frame %tu\n", [self numberOfFrames]);
+
    // sets opengl viewport and a beginFrame for nanovg
    [self resumeRender];
 

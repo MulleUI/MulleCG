@@ -101,6 +101,7 @@ typedef struct CGFunctionTable
 
    // Debugging
    void        (*trace)( void *vg, FILE *fp);
+   void        (*traceComment)( void *vg, char *comment);
 
 } CGFunctionTable;
 
