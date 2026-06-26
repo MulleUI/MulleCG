@@ -782,12 +782,37 @@ static inline void   CGContextSetStrokeImagePattern( CGContext *context, CGTextu
       CGContextFN(context)->setStrokeImagePattern( CGContextVG(context), textureID, rect, rotation, alpha);
 }
 
-static inline void   CGContextTrace( CGContext *context, FILE *fp)
+static inline void   _CGContextTrace( CGContext *context, FILE *fp)
 {
    if( context && CGContextFN(context)->trace)
       CGContextFN(context)->trace( CGContextVG(context), fp);
 }
 
+
+// Append 'comment' (UTF-8) to the active trace stream; no-op when no trace is
+// set or the backend does not implement traceComment. Mirrors nvgTraceComment.
+static inline void   _CGContextTraceComment( CGContext *context, char *format, ...)
+{
+   if( context && CGContextFN(context)->trace)
+   {
+      va_list   args;
+
+      va_start( args, format);
+      mulle_vsprintf_do( buf, format, args)
+      {
+         CGContextFN( context)->traceComment( CGContextVG(context), buf);
+      }
+      va_end( args);
+   }
+}
+
+#if defined( DEBUG) || defined( CG_CONTEXT_TRACE_ENABLED)
+#define CGContextTrace( context, fp)                   _CGContextTrace( context, fp)
+#define CGContextTraceComment( context, format, ...)   _CGContextTraceComment( context, format __VA_OPT__(,) __VA_ARGS__)
+#else
+#define CGContextTrace( context, fp)
+#define CGContextTraceComment( context, format, ...)
+#endif
 
 
 #define _CGContextDo( context, name)                    \
