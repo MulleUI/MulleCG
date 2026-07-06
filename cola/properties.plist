@@ -14,20 +14,6 @@
    dependencies =
    (
       {
-         domain="github";
-         name="freetype";
-         repo="freetype";
-         url="https://github.com/MulleUI/freetype";
-         user="MulleUI";
-      },
-      {
-         domain="github";
-         name="mulle-gfx";
-         repo="mulle-gfx";
-         url="https://github.com/mulle-gfx/mulle-gfx";
-         user="mulle-gfx";
-      },
-      {
          description="💺 MulleUIBase adds Objective-C to mulle-geometry and friends";
          domain="github";
          name="MulleUIBase";
@@ -42,26 +28,6 @@
          repo="mulle-objc-list";
          url="https://github.com/mulle-objc/mulle-objc-list";
          user="mulle-objc";
-      }
-   );
-   embedded =
-   (
-      {
-         description="===================
-   ===================";
-         domain="github";
-         name="nanovg";
-         repo="nanovg";
-         url="https://github.com/mulle-kybernetik-tv/nanovg";
-         user="mulle-kybernetik-tv";
-      },
-      {
-         description="🌈 mulle-color converts between color models";
-         domain="clib";
-         name="src/mulle-color";
-         repo="mulle-color";
-         url="https://github.com/mulle-gfx/mulle-color";
-         user="mulle-gfx";
       }
    );
 }

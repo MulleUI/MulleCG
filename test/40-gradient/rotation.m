@@ -24,10 +24,10 @@ void  test_gradient( CGGradient *gradient, char *name)
 
    print_gradient( gradient, "gradient");
 
-   rotated = [gradient rotatedGradient:0.0];
+   rotated = MULLE_OBJC_CLASS_CAST( CGGradient, [gradient rotatedPaint:0.0]);
    print_gradient( rotated, "rotated (0)");
 
-   rotated = [gradient rotatedGradient:CAHourToRotation( 3.0)];
+   rotated = MULLE_OBJC_CLASS_CAST( CGGradient, [gradient rotatedPaint:CAHourToRotation( 3.0)]);
    print_gradient( rotated, "rotated (3h)");
 }
 

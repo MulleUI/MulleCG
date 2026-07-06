@@ -221,7 +221,7 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
    // acquire -> gain  (you can't read)
    framebuffer = _MulleObjCAcquireObjectAtomically( &_drawnRenderedFramebuffer);  // this calls -autorelease
 
-   _CGImageLog( framebuffer, "%#@ acquires framebuffer", self);
+   _CGImageLogVerbose( framebuffer, "%#@ acquires framebuffer", self);
 
    return( framebuffer);
 }
@@ -235,7 +235,7 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
    if( ! framebuffer)
       return;
 
-   _CGImageLog( framebuffer, "%#@ recycles framebuffer", self);
+   _CGImageLogVerbose( framebuffer, "%#@ recycles framebuffer", self);
 
    if( ! _MulleObjCRecycleObjectAtomically( &_scratchRenderedFramebuffer, framebuffer))
    {
@@ -274,7 +274,7 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
    old = _MulleObjCAcquireObjectAtomically( &_drawnRenderedFramebuffer);
    if( old)
    {
-      CGContextRenderLog( "Recycle scratch %#@ for %#@", _scratchRenderedFramebuffer, old);
+      CGContextRenderLogVerbose( "Recycle scratch %#@ for %#@", _scratchRenderedFramebuffer, old);
       assert( [old context] == self || [old context] == nil);
       if( ! _MulleObjCRecycleObjectAtomically( &_scratchRenderedFramebuffer, old))
       {
@@ -309,7 +309,7 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
    // no longer a resource!
    [self _removeResourceForKey:(MulleUIResourceStorageKey_t) framebuffer];
 
-   _CGImageLog( framebuffer, "%#@ provides framebuffer", self);
+   _CGImageLogVerbose( framebuffer, "%#@ provides framebuffer", self);
 
    if( ! _MulleObjCRecycleObjectAtomically( &_drawnRenderedFramebuffer, framebuffer))
    {
@@ -338,7 +338,7 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
    if( ! framebuffer)
       return;
 
-   _CGImageLog( framebuffer, "%#@ recycles framebuffer", self);
+   CGImageLogVerbose( framebuffer, "%#@ recycles framebuffer", self);
 
    [self _removeResourceForKey:(MulleUIResourceStorageKey_t) framebuffer];
    if( ! _MulleObjCRecycleObjectAtomically( &_scratchRenderedFramebuffer, framebuffer))
@@ -377,7 +377,7 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
 
    assert( ! framebuffer || [framebuffer context] == self);
 
-   _CGImageLog( framebuffer, "%#@ repossesses framebuffer", self);
+   _CGImageLogVerbose( framebuffer, "%#@ repossesses framebuffer", self);
    return( framebuffer);
 }
 
@@ -398,7 +398,7 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
          // we don't want a duplicate didAddToContect: callback though
          [self _assignResource:framebuffer
                         forKey:(MulleUIResourceStorageKey_t) framebuffer];
-         _CGImageLog( framebuffer, "%#@ finalizes framebuffer", self);
+         _CGImageLogVerbose( framebuffer, "%#@ finalizes framebuffer", self);
          [framebuffer mullePerformFinalize];
       }
 
@@ -417,7 +417,7 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
    if( ! framebuffer)
       return;
 
-   _CGImageLog( framebuffer, "%#@ queues framebuffer for finalization/release", self);
+   _CGImageLogVerbose( framebuffer, "%#@ queues framebuffer for finalization/release", self);
 
    mulle_thread_mutex_do( _deletedFramebuffersLock)
    {
@@ -450,7 +450,7 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
 
       if( framebuffer)
       {
-         _CGImageLog( framebuffer, "queue drawnLayer for deletion");
+         _CGImageLogVerbose( framebuffer, "queue drawnLayer for deletion");
          _mulle__pointerarray_add( &_deletedFramebuffers,
                                    framebuffer,
                                    MulleObjCInstanceGetAllocator( self));
@@ -460,7 +460,7 @@ static BOOL   isAccessFromOtherThread( CGContext *self, BOOL defaultFlag)
       framebuffer = __mulle_atomic_pointer_cas( &_scratchRenderedFramebuffer, NULL, framebuffer);
       if( framebuffer)
       {
-         _CGImageLog( framebuffer, "queue _scratchRenderedFramebuffer for deletion");
+         _CGImageLogVerbose( framebuffer, "queue _scratchRenderedFramebuffer for deletion");
          _mulle__pointerarray_add( &_deletedFramebuffers,
                                    framebuffer,
                                    MulleObjCInstanceGetAllocator( self));

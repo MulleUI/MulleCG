@@ -81,7 +81,7 @@
 }
 
 
-- (CGGradient *) rotatedGradient:(CARotation) rotation
+- (CGPaint *) rotatedPaint:(CARotation) rotation
 {
    return( [[CGTwoColorGradient newWithStartColor:_startColor
                                          endColor:_endColor
@@ -375,7 +375,7 @@ static id   CGGradientNewWithColors( CGColor *colors,
 }  // default: NO (mono color gradient says also NO)
 
 
-- (char *) UTF8String
+- (char *) nonLockingUTF8String
 {
    char         *name;
    char         *s;
@@ -411,7 +411,7 @@ static id   CGGradientNewWithColors( CGColor *colors,
 
 
 
-- (CGGradient *) rotatedGradient:(CAAngle) rotation
+- (CGPaint *) rotatedPaint:(CAAngle) rotation
 {
    NSUInteger   count;
    CGGradient   *gradient;
@@ -432,17 +432,6 @@ static id   CGGradientNewWithColors( CGColor *colors,
    return( gradient);
 }
 
-
-- (CGPaint *) rotatedPaint:(CARotation) rotation
-{
-   return( [self rotatedGradient:rotation]);
-}
-
-
-- (CGGradient *) reversedGradient // rotated 180 degrees
-{
-   return( [self rotatedGradient:0.5f]);
-}
 
 
 - (CGGradient *) gradientByChangingColorsWithFunction:(CGColor (*)( CGColor, void *)) f
@@ -496,7 +485,8 @@ static CGColor   desaturator( CGColor color, void *factor_p)
 }
 
 
-- (CGGradient *) brightenedGradient:(CGFloat) brighten
+
+- (CGPaint *) brightenedPaint:(CGFloat) brighten
 {
    brighten = -brighten;
    return( [self gradientByChangingColorsWithFunction:dimmer
@@ -504,21 +494,21 @@ static CGColor   desaturator( CGColor color, void *factor_p)
 }
 
 
-- (CGGradient *) dimmedGradient:(CGFloat) dim
+- (CGPaint *) dimmedPaint:(CGFloat) dim
 {
    return( [self gradientByChangingColorsWithFunction:dimmer
                                              userInfo:&dim]);
 }
 
 
-- (CGGradient *) saturatedGradient:(CGFloat) factor
+- (CGPaint *) saturatedPaint:(CGFloat) factor
 {
    return( [self gradientByChangingColorsWithFunction:saturator
                                              userInfo:&factor]);
 }
 
 
-- (CGGradient *) desaturatedGradient:(CGFloat) factor
+- (CGPaint *) desaturatedPaint:(CGFloat) factor
 {
    return( [self gradientByChangingColorsWithFunction:desaturator
                                              userInfo:&factor]);
@@ -534,12 +524,11 @@ static CGColor   alphizer( CGColor color, void *alpha_p)
 }
 
 
-- (CGGradient *) transparentGradient:(CGFloat) alpha
+- (CGPaint *) transparentPaint:(CGFloat) alpha
 {
    return( [self gradientByChangingColorsWithFunction:alphizer
                                              userInfo:&alpha]);
 }
-
 
 @end
 
@@ -582,7 +571,7 @@ static Class  CGLinearGradientClass;
 //
 // need to keep rotationInfo alive for animation
 //
-- (CGGradient *) rotatedGradient:(CARotation) rotation
+- (CGPaint *) rotatedPaint:(CARotation) rotation
 {
    CGLinearGradient   *obj;
 
@@ -647,7 +636,7 @@ static Class  CGBoxGradientClass;
 }
 
 
-- (CGGradient *) rotatedGradient:(CARotation) rotation
+- (CGPaint *) rotatedPaint:(CARotation) rotation
 {
    MULLE_C_UNUSED( rotation);
    return( self);
@@ -702,7 +691,7 @@ static Class  CGRadialGradientClass;
 }
 
 
-- (CGGradient *) rotatedGradient:(CARotation) rotation
+- (CGPaint *) rotatedPaint:(CARotation) rotation
 {
    MULLE_C_UNUSED( rotation);
    return( self);

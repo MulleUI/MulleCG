@@ -146,6 +146,15 @@ typedef NS_ENUM( NSUInteger, CGRelation)
 };
 
 
+// Backend-neutral texture flags (values match NVG_IMAGE_* in nanovg)
+typedef NS_OPTIONS( NSUInteger, CGTextureFlags)
+{
+   CGTextureRepeatX = 1<<1,
+   CGTextureRepeatY = 1<<2,
+   CGTextureFlipY   = 1<<3,
+};
+
+
 // CGContextType string conversion functions
 static inline char   *_CGContextTypeUTF8String( NSUInteger value)
 {
@@ -635,15 +644,6 @@ typedef struct CGTextAttribute
    CGFloat     fontSize;         // <=0 = inherit from current state
    CGFloat     yOffset;          //  0 = baseline, <0 = up (superscript)
 } CGTextAttribute;
-
-
-// Backend-neutral texture flags (values match NVG_IMAGE_* in nanovg)
-enum
-{
-   CGTextureRepeatX = 1<<1,
-   CGTextureRepeatY = 1<<2,
-   CGTextureFlipY   = 1<<3,
-};
 
 
 // Font size rounding (nanovg is 1/10 resolution, FreeType is 1/64)

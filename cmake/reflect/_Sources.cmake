@@ -30,6 +30,7 @@ src/CGGradient+CGPaintable.m
 src/CGGradient.m
 src/CGImage+CGPaintable.m
 src/CGImagePaint+CGPaintable.m
+src/CGImage+PaintTransform.m
 src/CGImagePaint.m
 src/CGImage.m
 src/CGLayoutContext+CGFont.m

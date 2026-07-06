@@ -219,13 +219,13 @@ static MyWindow   *create_window( unsigned int i,
    MyWindow      *window;
    NSUInteger    hints;
    CGContext     *context;
-   hints = GLFW_DEFAULT_CONTEXT;
+   hints = GLFWGraphicsHintsDefault;
    switch( [MyWindow defaultBackend])
    {
-   case UIGraphicsBackendGL3   : hints = GLFW_GL3_CONTEXT; break;
-   case UIGraphicsBackendGL3_2 : hints = GLFW_GL3_2_CONTEXT; break;
-   case UIGraphicsBackendGLES2 : hints = GLFW_GLES2_CONTEXT; break;
-   case UIGraphicsBackendGLES3 : hints = GLFW_GLES3_CONTEXT; break;
+   case UIGraphicsBackendGL3   : hints = GLFWGraphicsHintsGL3; break;
+   case UIGraphicsBackendGL3_2 : hints = GLFWGraphicsHintsGL3_2; break;
+   case UIGraphicsBackendGLES2 : hints = GLFWGraphicsHintsGLES2; break;
+   case UIGraphicsBackendGLES3 : hints = GLFWGraphicsHintsGLES3; break;
    }
 
    window = [[[MyWindow alloc] initWithFrame:CGRectMake( 200 + 200 * i, 200, 200, 200)

@@ -30,6 +30,32 @@
 //
 
 
+static inline char  *CGTextureUTF8String( NSUInteger textureFlags)
+{
+   char   *s;
+
+   mulle_buffer_do_autoreleased_string( buffer, NULL, s)
+   {
+      if( textureFlags & CGTextureRepeatX)
+      {
+         mulle_buffer_add_string( buffer, "RepeatX");
+      }
+      if( textureFlags & CGTextureRepeatY)
+      {
+         mulle_buffer_add_string_if_not_empty( buffer, ",");
+         mulle_buffer_add_string( buffer, "RepeatY");
+      }
+      if( textureFlags & CGTextureFlipY)
+      {
+         mulle_buffer_add_string_if_not_empty( buffer, ",");
+         mulle_buffer_add_string( buffer, "FlipY");
+      }
+   }
+   return( s);
+}
+
+
+
 //
 // Container for the OpenGL textureID, it's used for sharing textures across
 // multiple contexts and threads.
