@@ -53,19 +53,7 @@
                       locations:(CGFloat *) locations
                           count:(NSUInteger) count;
 
-// or reversed ?
-- (CGGradient *) reversedGradient; // rotated 180 degrees
-- (CGGradient *) rotatedGradient:(CARotation) rotation;
-- (CGGradient *) brightenedGradient:(CGFloat) brighten;
-- (CGGradient *) dimmedGradient:(CGFloat) dim;
-- (CGGradient *) transparentGradient:(CGFloat) alpha;
 
-// fator from 0.0 to 1.0: 0.0 no desaturation/saturation
-- (CGGradient *) desaturatedGradient:(CGFloat) factor;
-- (CGGradient *) saturatedGradient:(CGFloat) factor;
-
-
-- (CGGradient *) desaturatedGradient:(CGFloat) factor;
 - (CGGradient *) gradientByChangingColorsWithFunction:(CGColor (*)( CGColor, void *)) f
                                              userInfo:(void *) userInfo;
 

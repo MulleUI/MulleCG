@@ -28,11 +28,23 @@ TODO: dFdx not supported by OpenGLES2 (steal from shader compiler or
 wherever)
 ```
 
+> #### Memo
+>
+> It's still too big. Need to split this into:
+>
+>  * MulleCG (abstract)  or live somewhere else
+>  * MulleCG+nanovg
+>  * MulleCG+OpenGL
+>
 
 
-| Release Version                                       | Release Notes
-|-------------------------------------------------------|--------------
-| ![Mulle kybernetiK tag](https://img.shields.io/github/tag/MulleUI/MulleCG.svg) [![Build Status](https://github.com/MulleUI/MulleCG/workflows/CI/badge.svg)](//github.com/MulleUI/MulleCG/actions) | [RELEASENOTES](RELEASENOTES.md) |
+
+
+
+
+| Release Version                                       | Release Notes  | AI Documentation
+|-------------------------------------------------------|----------------|---------------
+| ![Mulle kybernetiK tag](https://img.shields.io/github/tag/MulleUI/MulleCG.svg) [![Build Status](https://github.com/MulleUI/MulleCG/workflows/CI/badge.svg)](//github.com/MulleUI/MulleCG/actions) | [RELEASENOTES](RELEASENOTES.md) | [DeepWiki for MulleCG](https://deepwiki.com/MulleUI/MulleCG)
 
 
 
@@ -105,7 +117,7 @@ inside this rectangle, calculate the appropriate stroke rectangle:
 > #### Note
 >
 > Instead of `CGInside`, you can also use `CGOutside` to draw a border around
-> the rectangle or `CGCover` which is basically a nop operation and will make
+> the rectangle or `CGOverlap` which is basically a nop operation and will make
 > the half the border drawn on the inside and half the border on the inside.
 
 Now to compute the rectangle to fill this stroked rectangle use
@@ -113,7 +125,7 @@ Now to compute the rectangle to fill this stroked rectangle use
 
 > ### Note
 >
-> Instead of `CGInside` you can also use `CGCover` to cover the same space.
+> Instead of `CGInside` you can also use `CGOverlap` to cover the same space.
 > `CGOutside` is not really useful here.
 
 
@@ -159,8 +171,6 @@ Install the requirements:
 
 | Requirements                                 | Description
 |----------------------------------------------|-----------------------
-| [freetype](https://github.com/MulleUI/freetype)             | 
-| [mulle-gfx](https://github.com/mulle-gfx/mulle-gfx)             | 
 | [MulleUIBase](https://github.com/MulleUI/MulleUIBase)             | 💺 MulleUIBase adds Objective-C to mulle-geometry and friends
 | [mulle-objc-list](https://github.com/mulle-objc/mulle-objc-list)             | 📒 Lists mulle-objc runtime information contained in executables.
 
@@ -169,9 +179,11 @@ Download the latest [tar](https://github.com/MulleUI/MulleCG/archive/refs/tags/l
 Install **MulleCG** into `/usr/local` with [cmake](https://cmake.org):
 
 ``` sh
-cmake -B build \
-      -DCMAKE_INSTALL_PREFIX=/usr/local \
-      -DCMAKE_PREFIX_PATH=/usr/local \
+PREFIX_DIR="/usr/local"
+cmake -B build                               \
+      -DMULLE_SDK_PATH="${PREFIX_DIR}"       \
+      -DCMAKE_INSTALL_PREFIX="${PREFIX_DIR}" \
+      -DCMAKE_PREFIX_PATH="${PREFIX_DIR}"    \
       -DCMAKE_BUILD_TYPE=Release &&
 cmake --build build --config Release &&
 cmake --install build --config Release

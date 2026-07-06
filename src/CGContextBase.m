@@ -144,7 +144,7 @@ static struct
 }
 
 
-- (char *) UTF8String
+- (char *) nonLockingUTF8String
 {
    char   *s;
 

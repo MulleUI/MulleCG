@@ -24,10 +24,10 @@ void  test_gradient( CGGradient *gradient, char *name)
 
    print_gradient( gradient, "gradient");
 
-   brightened = [gradient brightenedGradient:0.0];
+   brightened = MULLE_OBJC_CLASS_CAST( CGGradient, [gradient brightenedPaint:0.0]);
    print_gradient( brightened, "brightened (0)");
 
-   brightened = [gradient brightenedGradient:0.5];
+   brightened = MULLE_OBJC_CLASS_CAST( CGGradient, [gradient brightenedPaint:0.5]);
    print_gradient( brightened, "brightened (0.5)");
 }
 

@@ -266,7 +266,7 @@ static inline CGTextureID CGContextCreateImage( CGContext *context,
 {
    if( context)
       return CGContextFN(context)->createImage( CGContextVG(context), filename, textureFlags);
-   return CGTextureIDInvalid;
+   return( CGTextureIDInvalid);
 }
 
 static inline CGTextureID   CGContextCreateImageMem( CGContext *context,
@@ -276,7 +276,7 @@ static inline CGTextureID   CGContextCreateImageMem( CGContext *context,
 {
    if( context)
       return CGContextFN(context)->createImageMem( CGContextVG(context), textureFlags, data, ndata);
-   return CGTextureIDInvalid;
+   return( CGTextureIDInvalid);
 }
 
 static inline CGTextureID CGContextCreateImageRGBA( CGContext *context,
@@ -376,9 +376,7 @@ static inline void   CGContextPathWinding( CGContext *context,
                                            CGPathFillStyle style)
 {
    if( context)
-   {
       CGContextFN(context)->pathWinding( CGContextVG(context), style);
-   }
 }
 
 static inline void   CGContextArc( CGContext *context,
@@ -387,9 +385,7 @@ static inline void   CGContextArc( CGContext *context,
                                    CARotation rotation)
 {
    if( context)
-   {
       CGContextFN(context)->arc( CGContextVG(context), circle, angle, rotation);
-   }
 }
 
 // Draw arc from startAngle to endAngle in the given direction.
@@ -810,8 +806,8 @@ static inline void   _CGContextTraceComment( CGContext *context, char *format, .
 #define CGContextTrace( context, fp)                   _CGContextTrace( context, fp)
 #define CGContextTraceComment( context, format, ...)   _CGContextTraceComment( context, format __VA_OPT__(,) __VA_ARGS__)
 #else
-#define CGContextTrace( context, fp)
-#define CGContextTraceComment( context, format, ...)
+#define CGContextTrace( context, fp)                   do {} while( 0)
+#define CGContextTraceComment( context, format, ...)   do {} while( 0)
 #endif
 
 

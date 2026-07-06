@@ -23,6 +23,7 @@
       { @selector( CGGradient), MULLE_OBJC_NO_CATEGORYID },      // 37670335;CGGradient;;
       { @selector( CGImage), @selector( CGPaintable) },      // 6ec55940;CGImage;faf2d5d6;CGPaintable
       { @selector( CGImage), @selector( Future) },      // 6ec55940;CGImage;b69b0b69;Future
+      { @selector( CGImage), @selector( PaintTransform) },      // 6ec55940;CGImage;ab569252;PaintTransform
       { @selector( CGImage), MULLE_OBJC_NO_CATEGORYID },      // 6ec55940;CGImage;;
       { @selector( CGImagePaint), @selector( CGPaintable) },      // 3e23b783;CGImagePaint;faf2d5d6;CGPaintable
       { @selector( CGImagePaint), MULLE_OBJC_NO_CATEGORYID },      // 3e23b783;CGImagePaint;;

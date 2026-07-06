@@ -32,7 +32,7 @@
 #endif
 
 
-- (char *) UTF8String
+- (char *) nonLockingUTF8String
 {
    char   *s;
 
@@ -89,7 +89,7 @@
 
    if( image)
    {
-      CGContextLog( "remember %#@ for gpuTexture %p", image, gpuTexture);
+      CGContextLogVerbose( "remember %#@ for gpuTexture %p", image, gpuTexture);
       mulle_map_insert( &_gpuTextureMap, gpuTexture, image);
    }
    return( image);
@@ -111,7 +111,7 @@
    image      = mulle_map_get( &_gpuTextureMap, gpuTexture);
    if( image)
    {
-      CGContextLog( "reuse %#@ for gpuTexture %p", image, gpuTexture);
+      CGContextLogVerbose( "reuse %#@ for gpuTexture %p", image, gpuTexture);
 
       assert( ! sharedGPUTexture || [image sharedGPUTexture] == sharedGPUTexture);
       return( [image textureFlags] == textureFlags ? image : nil);
@@ -125,7 +125,7 @@
 
    if( image)
    {
-      CGContextLog( "remember %#@ for gpuTexture %p", image, gpuTexture);
+      CGContextLogVerbose( "remember %#@ for gpuTexture %p", image, gpuTexture);
       mulle_map_insert( &_gpuTextureMap, gpuTexture, image);
    }
    return( image);
@@ -137,7 +137,7 @@
    CGGPUTextureID   gpuTexture;
 
    gpuTexture = [[image sharedGPUTexture] gpuTexture];
-   CGContextLog( "forget %#@ for gpuTexture %p", image, gpuTexture);
+   CGContextLogVerbose( "forget %#@ for gpuTexture %p", image, gpuTexture);
    // if key is NULL its no problem
    mulle_map_remove( &_gpuTextureMap, gpuTexture);
 }
@@ -227,7 +227,7 @@ static struct
       _sharedGPUTexture = [[CGSharedGPUTexture alloc] initWithGPUTexture:gpuTexture];
    }
 
-   CGImageLog( "");
+   CGImageLogVerbose( "");
 
    [_context assignResource:self
                      forKey:(MulleUIResourceStorageKey_t) self];
@@ -265,7 +265,7 @@ static struct
    if( [context shareID])
       _sharedGPUTexture = [[CGSharedGPUTexture alloc] initWithGPUTexture:gpuTexture];
 
-   CGImageLog( "");
+   CGImageLogVerbose( "");
 
    [_context assignResource:self
                      forKey:(MulleUIResourceStorageKey_t) self];
@@ -304,7 +304,7 @@ static struct
 
    MulleObjCObjectSetDuplicatedUTF8String( self, &_nameUTF8String, nameUTF8String);
 
-   CGImageLog( "");
+   CGImageLogVerbose( "");
 
    [_context assignResource:self];
 
@@ -374,7 +374,7 @@ static struct
 //
 - (void) finalize
 {
-   CGImageLog( "finalizing");
+   CGImageLogVerbose( "finalizing");
 
    [_context removeFromSharedGPUTextureMap:self];
 
@@ -432,7 +432,7 @@ static struct
    if( textureFlags != _textureFlags)
    {
       CGImageLog( "Non standard textureFlags 0x%tx (0x%x) requested. "
-                  "Use UIBitmapImage instead (for now)", textureFlags, _textureFlags);
+                        "Use UIBitmapImage instead (for now)", textureFlags, _textureFlags);
       // would need to construct a new CGImage, but CGImage is too low level
       // use UIBitmapImage instead
       assert( 0);
@@ -822,7 +822,7 @@ static struct
 }
 
 
-- (char *) UTF8String
+- (char *) nonLockingUTF8String
 {
    char   *s;
 
@@ -835,6 +835,7 @@ static struct
       mulle_buffer_sprintf( buffer, " ID=%td", self->_textureID);
       if( self->_sharedGPUTexture)
          mulle_buffer_sprintf( buffer, " GPUID=%td", (intptr_t) [self->_sharedGPUTexture gpuTexture]);
+      mulle_buffer_sprintf( buffer, " FLAGS=%s", CGTextureUTF8String( self->_textureFlags));
       mulle_buffer_add_string( buffer, ">");
    }
    return( s);

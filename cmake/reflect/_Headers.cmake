@@ -75,6 +75,7 @@ src/CGContext+CGFramebuffer.h
 src/CGContext+CGImage.h
 src/CGContext+DrawingConveniences.h
 src/CGContext+Drawing.h
+src/CGContext+ImageEffect.h
 src/CGContext+Render.h
 src/CGContext+Shader.h
 src/CGContext+Texture.h

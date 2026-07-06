@@ -7,6 +7,12 @@
 
 #import "CGPaint.h"
 
+#include <mulle-objc-runtime/mulle-metaabi-call.h>
+
+#ifndef mulle_metaabi_call
+# define mulle_metaabi_call   mulle_metaabi_object_call
+#endif
+
 
 @implementation CGPaint( CGBlendedPaint)
 
@@ -65,6 +71,44 @@
 }
 
 
+
+// guess
+- (BOOL) isTexture
+{
+   return( [_paint isTexture] || [_otherPaint isTexture]);
+}
+
+
+
+- (CGPaint *) colorChangedPaint:(CGFloat) value
+                       selector:(SEL) sel
+{
+   CGPaint   *first;
+   CGPaint   *second;
+
+   mulle_metaabi_call( &first, _paint, sel, value);
+   mulle_metaabi_call( &second, _otherPaint, sel, value);
+   if( first == _paint && second == _otherPaint)
+      return( self);
+
+   return( [CGBlendedPaint paintWithPaint:first
+                               otherPaint:second
+                                    blend:_blend
+                                 rotation:_rotation]);
+}
+
+- (CGPaint *) brightenedPaint:(CGFloat) brighten
+{
+   return( [self colorChangedPaint:brighten
+                          selector:_cmd]);
+}
+
+@method_implementation -desaturatedPaint: = -brightenedPaint:;
+@method_implementation -dimmedPaint:      = -brightenedPaint:;
+@method_implementation -saturatedPaint:   = -brightenedPaint:;
+@method_implementation -transparentPaint: = -brightenedPaint:;
+
+
 - (CGPaint *) rotatedPaint:(CARotation) rotation
 {
    if( rotation == 0.0)
@@ -76,10 +120,5 @@
                                  rotation:rotation + _rotation]);
 }
 
-// guess
-- (BOOL) isTexture
-{
-   return( [_paint isTexture] || [_otherPaint isTexture]);
-}
 
 @end

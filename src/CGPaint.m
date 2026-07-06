@@ -93,7 +93,7 @@
    *locations = 0.0;  // or what ?
 }
 
-- (char *) UTF8String
+- (char *) nonLockingUTF8String
 {
    return( CGColorUTF8String( _color));
 }
@@ -166,22 +166,14 @@
 }
 
 
-- (BOOL) isTexture
+- (BOOL) isNo
 {
    return( NO);
 }
 
-
-- (BOOL) isGradient
-{
-   return( NO);
-}  // default: NO (mono color gradient says also NO)
-
-
-- (BOOL) isMonochrome
-{
-   return( NO);
-}
+@method_implementation -isMonochrome = -isNo;
+@method_implementation -isGradient = -isNo;
+@method_implementation -isTexture = -isNo;
 
 
 - (BOOL) isOpaque
@@ -202,11 +194,25 @@
 }
 
 
-- (CGPaint *) rotatedPaint:(CARotation) rotation
+- (CGPaint *) samePaint:(CGFloat) factor
 {
-   MULLE_C_UNUSED( rotation);
+   MULLE_C_UNUSED( factor);
    return( self);
 }
+
+
+@method_implementation -brightenedPaint: = -samePaint:;
+@method_implementation -desaturatedPaint: = -samePaint:;
+@method_implementation -rotatedPaint: = -samePaint:;
+@method_implementation -dimmedPaint: = -samePaint:;
+@method_implementation -saturatedPaint: = -samePaint:;
+@method_implementation -transparentPaint: = -samePaint:;
+
+- (CGPaint *) reversedPaint // rotated 180 degrees
+{
+   return( [self rotatedPaint:0.5]);
+}
+
 
 - (CGFloat) overdraw
 {
@@ -220,10 +226,7 @@
 }
 
 
-- (CGImage *) otherImage
-{
-   return( nil);
-}
+@method_implementation -otherImage = -image;
 
 
 - (CGColor) suggestedTextColor

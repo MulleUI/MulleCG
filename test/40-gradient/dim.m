@@ -8,7 +8,7 @@ void  print_gradient( CGGradient *gradient, char *name)
    CGFloat      location;
 
    n = [gradient numberOfColors];
-   printf( "%s (%tu) %g:\n", name, n, [gradient rotation]);
+   printf( "%s (%tu):\n", name, n);
    for( i = 0; i < n; i++)
    {
       location = [gradient locationAtIndex:i];
@@ -24,10 +24,10 @@ void  test_gradient( CGGradient *gradient, char *name)
 
    print_gradient( gradient, "gradient");
 
-   dimmed = [gradient dimmedGradient:0.0];
+   dimmed = MULLE_OBJC_CLASS_CAST( CGGradient, [gradient dimmedPaint:0.0]);
    print_gradient( dimmed, "dimmed (0)");
 
-   dimmed = [gradient dimmedGradient:0.5];
+   dimmed = MULLE_OBJC_CLASS_CAST( CGGradient, [gradient dimmedPaint:0.5]);
    print_gradient( dimmed, "dimmed (0.5)");
 }
 

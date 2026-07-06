@@ -58,7 +58,13 @@
 - (BOOL) needsBounds;  // mono color, does not need it others do
 
 // for mono colors, this will return just self (guaranteed)
+- (CGPaint *) brightenedPaint:(CGFloat) brighten;
+- (CGPaint *) desaturatedPaint:(CGFloat) factor;
+- (CGPaint *) dimmedPaint:(CGFloat) dim;
+- (CGPaint *) reversedPaint; // rotated 180 degrees
 - (CGPaint *) rotatedPaint:(CARotation) rotation;
+- (CGPaint *) saturatedPaint:(CGFloat) factor;
+- (CGPaint *) transparentPaint:(CGFloat) alpha;
 
 // when a paint incorporates a stroke, this is strokeWidth / 2, that will
 // overdraw on a fill! (default 0)

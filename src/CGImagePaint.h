@@ -18,19 +18,39 @@
 // for easier rotation) then use a CGImagePaint.
 //
 @interface CGImagePaint : CGPaint
+{
+   CGImage      *_image;
+   CGFloat      _alpha;
+   CARotation   _rotation;
+   CGFloat      _saturation;
+   CGFloat      _brightness;
+   CGImage      *_processedImage;
+}
 
 @property( readonly, retain) CGImage   *image;
 @property( readonly) CGFloat           alpha;
 @property( readonly) CARotation        rotation;
+@property( readonly) CGFloat           saturation;
+@property( readonly) CGFloat           brightness;
 
 - (instancetype) initWithImage:(CGImage *) image
                       rotation:(CARotation) rotation
                          alpha:(CGFloat) alpha;
 
+- (instancetype) initWithImage:(CGImage *) image
+                      rotation:(CARotation) rotation
+                         alpha:(CGFloat) alpha
+                    saturation:(CGFloat) saturation
+                    brightness:(CGFloat) brightness;
+
 @end
 
 
-@interface CGPaint( CGImagePaint)
+@interface CGImagePaint( CGPaintable)
+
+- (CGImage *) processedImage;
+
+@end@interface CGPaint( CGImagePaint)
 
 + (instancetype) paintWithImage:(CGImage *) image
                        rotation:(CARotation) rotation

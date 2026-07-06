@@ -23,6 +23,7 @@
 #import "CGContext+CGImage.h"
 #import "CGContext+DrawingConveniences.h"
 #import "CGContext+Drawing.h"
+#import "CGContext+ImageEffect.h"
 #import "CGContext+Render.h"
 #import "CGContext+Shader.h"
 #import "CGContext+Texture.h"

@@ -116,7 +116,7 @@ static struct CGFrameInfo   emptyInfo;
       {
          static uintptr_t   counter;
 
-         nameUTF8String = MulleObjC_asprintf( "RenderFrame #%td", counter++);
+         nameUTF8String = MulleObjC_asprintf( "%s frame #%td", _nameUTF8String ? _nameUTF8String : MulleObjCObjectGetClassNameUTF8String( self), counter++);
       }
 #else
       nameUTF8String = NULL;
@@ -225,7 +225,16 @@ static struct CGFrameInfo   emptyInfo;
 
       if( self->_debuggingFlags & CGContextDebugDumpFrameToFile)
       {
-         MulleUIWriteImageToPNGFileSequenceAsync( framebuffer, "render-layer");
+         mulle_buffer_do( buffer)
+         {
+            mulle_buffer_add_string( buffer, "render-layer");
+            if( _nameUTF8String && *_nameUTF8String)
+            {
+               mulle_buffer_add_char( buffer, '-');
+               mulle_buffer_slugify_utf8data( buffer, mulle_utf8data_make( _nameUTF8String, -1));
+            }
+            MulleUIWriteImageToPNGFileSequenceAsync( framebuffer, mulle_buffer_get_string( buffer));
+         }
       }
 
       CGContextRenderLog( "End render into layer %#@", framebuffer);
