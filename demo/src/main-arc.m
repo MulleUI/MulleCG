@@ -3,13 +3,16 @@
 #import "import-private.h"
 
 
+// this demo looks peculiar, but it's just the same as the HTML5 demo...
+// see arc-demo.html
+
 static void   drawArc( CGContext *context,
                        CGRect rect,
                        CGColor color)
 {
    // insets are flipped, because rect is flipped!
    CGPoint             p0, p1, p2;
-   CAPolarPoint        x0, x1, x2;
+   CAPolarPoint        x1, x2;
    CGFloat             r;
    CGFloat             factor;
    NSUInteger          frameNr;

@@ -18,15 +18,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    BOOL                 useClearType;
    CGFloat              height;
    CGFont               *font;
-   CGPoint              point;
    CGRect               canvas;
    CGRect               rect;
    float                factor;
-   int                  atlas_h;
-   int                  atlas_w;
-   int                  i;
    struct MulleLayout   layout;
-   void                 *fonsContext;
    char                 *fontName;
 
    if( fontFilename)

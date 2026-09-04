@@ -45,9 +45,6 @@ static CGFramebuffer  *createTexture( id context,
                                       CGFloat pixelRatio,
                                       NSUInteger textureFlags)
 {
-   CGFrameInfo                   *info;
-   CGFloat                       radius;
-   struct CGBitmapInfo           bitmapInfo;
    struct CGFrameInfo            frameInfo;
    struct CGFrameInfo            oldFrameInfo;
    struct CGContextFramebuffer   oldFramebuffer;
@@ -81,7 +78,6 @@ static CGFramebuffer  *createTexture( id context,
 #endif
 static void  drawStuff( CALayer *layer, CGContext *context)
 {
-   CGFloat      angle;
    CGRect       rect;
    CGRect       shape;
    CARotation   rotation;

@@ -44,10 +44,6 @@ static char* cpToUTF8(int cp, char* str)
    }
    return str;
 }
-static inline CGFloat   CGSizeGetMax( CGSize size)
-{
-   return( size.width > size.height ? size.width : size.height);
-}
 static inline CGFloat   CGSizeGetMin( CGSize size)
 {
    return( size.width < size.height ? size.width : size.height);
@@ -143,7 +139,6 @@ static void   drawFancyStepperLine( CGContext *context, CGRect rect, CGFloat str
 
 static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, BOOL highlight)
 {
-   CGFont              *font;
    char                icon[ 8];
    char                *iconText;
    CGFloat             radius;
@@ -153,7 +148,7 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
    if( radius < 5.0 / 2.0)
       return;
 
-   font = [context fontWithNameUTF8String:"icons"];
+   [context useFontWithNameUTF8String:"icons"];
 
    if( highlight)
    {
@@ -191,16 +186,13 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
 
 static void   drawFancyStepper( CGContext *context, CGRect rect, CGColor colors[ 6])
 {
-   CGFloat    corner; // This variable seems unused here
    CGRect     innerRect;
    CGRect     iconRect;
    CGRect     lineRect;
    CGRect     contentRect;
    CGRect     outerRect;
-   CGRect     middleRect; // This variable seems unused here
    CGRect     leftRect;
    CGRect     rightRect;
-   CGFont     *font; // This variable seems unused here
    CGFloat    thickness;
    CGFloat    horw;
 

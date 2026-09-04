@@ -17,7 +17,7 @@ across many render frames via `CGContextCopyPath`.
 Create one with:
 
 ```objc
-CGContext *pathContext = [[CGContext createPathContext] retain];
+CGContext *pathContext = [[CGContext pathContext] retain];
 ```
 
 ## What works on a path context
@@ -89,7 +89,7 @@ CGContextPrecompilePath( pathContext);
 
 ```objc
 // --- Setup (once) ---
-CGContext *pathContext = [[CGContext createPathContext] retain];
+CGContext *pathContext = [[CGContext pathContext] retain];
 
 CGContextBeginPath( pathContext);
 CGContextMoveTo( pathContext, CGPointMake( 25, 150));

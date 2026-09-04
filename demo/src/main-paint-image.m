@@ -13,7 +13,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect            canvas;
    CACircle          circle;
    CGFloat           strokeWidth;
-   CGFloat           strokeRadius;
    NSInteger         index;
    CGStrokeOptions   options;
    CGImage           *image;

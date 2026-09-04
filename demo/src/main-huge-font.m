@@ -38,10 +38,9 @@
 // }
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CGFont             *font;
    CGRect             canvas;
 
-   font   = [context fontWithNameUTF8String:"sans"];
+   [context useFontWithNameUTF8String:"sans"];
    canvas = [layer canvas];
 
    CGContextStrokeRectWithColor( context, canvas, 1.0, CGColorMakeOrange()); // Converted from mvgStrokeRectWithColor

@@ -26,12 +26,8 @@ static void   draw_texture( CGFramebuffer *self, CGContext *context)
 static void   drawGridWithLayer( CALayer *layer, CGContext *context, NSUInteger mode)
 {
    CGRect                        canvas;
-   CGRect                        rect;
    CGFloat                       strokeWidth;
    CGSize                        wh;
-   unsigned int                  i, j, k;
-   CGColor                       color;
-   CGColor                       colors[ 4];
    CGFramebuffer                       *cgLayer;
    CGPixelSize       bitmapSize;
    struct CGFramebufferRenderInfo      memo;
@@ -187,7 +183,6 @@ int   main( int argc, char *argv[])
    UIApplication   *app;
    UIWindow        *window[ 8];
    NSUInteger      i;
-   MulleUIPerf     *perf;
    NSUInteger      styleMask;
 
    app = [UIApplication sharedInstance];

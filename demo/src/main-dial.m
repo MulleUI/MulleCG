@@ -17,7 +17,6 @@ static inline void mvgRoundedSector(CGContext *context, // Changed parameter typ
    CGPoint    compensatedInnerStart;
    CGPoint    compensatedInnerEnd;
    CGPoint    compensatedOuterStart;
-   CGPoint    compensatedOuterEnd;
    CGPoint    innerStart;
    CGPoint    innerEnd;
    CGPoint    outerStart;
@@ -26,12 +25,8 @@ static inline void mvgRoundedSector(CGContext *context, // Changed parameter typ
    CGPoint    middleEnd;
    CACircle   midCircle;
    CAAngle    increasedOuterStartAngle;
-   CAAngle    reducedOuterStartAngle;
    CAAngle    increasedInnerStartAngle;
-   CAAngle    reducedInnerStartAngle;
-   CAAngle    increasedOuterEndAngle;
    CAAngle    reducedOuterEndAngle;
-   CAAngle    increasedInnerEndAngle;
    CAAngle    reducedInnerEndAngle;
    CGFloat    outerCornerRadius;
    CGFloat    innerCornerRadius;
@@ -125,7 +120,6 @@ static inline void mvgRoundedSector(CGContext *context, // Changed parameter typ
    outerEnd            = CACirclePointAtAngle( outerCircle, endAngle);
    middleEnd           = CACirclePointAtAngle( midCircle, endAngle);
    compensatedInnerEnd = CACirclePointAtAngle( innerCircle, reducedInnerEndAngle);
-   compensatedOuterEnd = CACirclePointAtAngle( outerCircle, reducedOuterEndAngle);
 
 #if 0
    CGContextFillCircleWithColor( context, CACircleMakeWithCenterAndRadius( innerEnd, 3.0), CGColorMakeMagenta()); // Converted from mvgFillCircleWithColor

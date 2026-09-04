@@ -23,7 +23,6 @@ static void   drawRectBehindText( CGContext *context, CGRect canvas)
 {
    CGRect                    rect;
    CGRect                    nopadRect;
-   CGFloat                   fontSize;
    CGRect                    textRect;
    CGRect                    backgroundRect;
    CGFloat                   pad;

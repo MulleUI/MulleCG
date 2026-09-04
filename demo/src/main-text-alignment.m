@@ -26,7 +26,7 @@ NSUInteger   alignments[] =
 };
 
 #define N_ALIGNMENTS  (sizeof( alignments) / sizeof( alignments[ 0]))
-static char  *cgHAlignmentUTF8String( int alignment)
+static char __attribute__((unused))  *cgHAlignmentUTF8String( int alignment)
 {
    switch( alignment & (CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight)) // Converted from CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight
    {
@@ -36,7 +36,7 @@ static char  *cgHAlignmentUTF8String( int alignment)
    default                : return( "*invalid*");
    }
 }
-static char  *cgVAlignmentUTF8String( int alignment)
+static char __attribute__((unused))  *cgVAlignmentUTF8String( int alignment)
 {
    switch( alignment & (CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline)) // Converted from CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline
    {
@@ -48,7 +48,7 @@ static char  *cgVAlignmentUTF8String( int alignment)
    }
 }
 
-static void   cgStrokeGlyphPosition( CGContext *context, struct UIGlyphPosition *position, CGColor color) // Converted from CGContext *context
+static void __attribute__((unused))   cgStrokeGlyphPosition( CGContext *context, struct UIGlyphPosition *position, CGColor color) // Converted from CGContext *context
 {
    CGContextBeginPath( context);
    CGContextRect( context, CGRectMake( position->minx,
@@ -59,7 +59,7 @@ static void   cgStrokeGlyphPosition( CGContext *context, struct UIGlyphPosition 
    CGContextStrokeWidth( context, 1.0);
    CGContextStroke( context);
 }
-static void   strokeBounds( CGContext *context, float bounds[ 4], CGColor color) // Converted from CGContext *context
+static void __attribute__((unused))   strokeBounds( CGContext *context, float bounds[ 4], CGColor color) // Converted from CGContext *context
 {
    CGContextBeginPath( context);
    CGContextRect( context, CGRectMake( bounds[0], bounds[1], bounds[2] - bounds[0], bounds[3] - bounds[1]));
@@ -67,7 +67,7 @@ static void   strokeBounds( CGContext *context, float bounds[ 4], CGColor color)
    CGContextStrokeWidth( context, 1.0);
    CGContextStroke( context);
 }
-static void  strokeBoundsInRect( CGContext *context, float bounds[ 4], CGRect rect, CGColor color) // Converted from CGContext *context
+static void __attribute__((unused))  strokeBoundsInRect( CGContext *context, float bounds[ 4], CGRect rect, CGColor color) // Converted from CGContext *context
 {
    CGPoint   point;
    CGFloat   halfRectHeight = CGRectGetHeight( rect) / 2.0;
@@ -83,7 +83,7 @@ static void  strokeBoundsInRect( CGContext *context, float bounds[ 4], CGRect re
    CGContextStrokeLineHWithColor( context, CGPointMake( CGRectGetMinX( rect), bounds[ 3]), midRectX - CGRectGetMinX(rect), 1.0, color);
 }
 
-static void  strokeBoundsInRect2( CGContext *context, float bounds[ 4], CGRect rect, CGColor color) // Converted from CGContext *context
+static void __attribute__((unused))  strokeBoundsInRect2( CGContext *context, float bounds[ 4], CGRect rect, CGColor color) // Converted from CGContext *context
 {
    CGPoint   point;
    CGFloat   halfRectHeight = CGRectGetHeight( rect) / 2.0;
@@ -97,7 +97,7 @@ static void  strokeBoundsInRect2( CGContext *context, float bounds[ 4], CGRect r
    CGContextStrokeLineHWithColor( context, CGPointMake( CGRectGetMinX( rect), bounds[ 1]), midRectX - CGRectGetMinX(rect), 1.0, color);
    CGContextStrokeLineHWithColor( context, CGPointMake( CGRectGetMinX( rect), bounds[ 3]), midRectX - CGRectGetMinX(rect), 1.0, color);
 }
-static CGPoint   textOriginForAlignment( CGRect  rect, int alignment)
+static CGPoint __attribute__((unused))   textOriginForAlignment( CGRect  rect, int alignment)
 {
    CGPoint  origin;
 
@@ -122,7 +122,6 @@ static CGPoint   textOriginForAlignment( CGRect  rect, int alignment)
 #define USE_OLD_CODE
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CGFont               *font;
    CGRect               canvas;
    CGRect               rects[ 9][ N_ALIGNMENTS]; // Corrected array size based on usage
    NSUInteger           x, y;
@@ -144,14 +143,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 //    CGPoint              offset; // Unused
 // #endif
    // CGPoint              adjust; // Unused
-   int                  currentAlignment; // Renamed from alignment to avoid confusion
-   NSUInteger           frameNr;
    char                 *text; // Added declaration for text
-
-   frameNr   = [context numberOfFrames];
-   currentAlignment = alignments[ frameNr % N_ALIGNMENTS]; // Uses local currentAlignment
-
-   font   = [context fontWithNameUTF8String:"sans"]; // Sets font in context
 
    CGContextFontSize( context, 32.0);
 

@@ -38,14 +38,13 @@ static unsigned char    bitmap[4 * IH * IW] =
 #define COLUMNS  10
 #define SPACING  4
 
-static void  drawRotated( CGContext *context, CGImage *image, CGRect rect, NSInteger y, NSInteger x)
+static void __attribute__((unused))  drawRotated( CGContext *context, CGImage *image, CGRect rect, NSInteger y, NSInteger x)
 {
    // Delete: Remove CGImagePaint variable
    // CGImagePaint   *imgPaint = [[[CGImagePaint alloc] initWithImage:image] autorelease];
 
    CAPolarPoint      centerPolarPoint;
    CAPolarPoint      rotatedPolarPoint;
-   CGPoint           relativePoint;
    CGPoint           rotatedPoint;
    // texture is at 0.0, we calc the "scaled" texture point
    CAAngle           angle;
@@ -102,14 +101,12 @@ static void  drawUnscaled( CGContext *context, CGImage *image, CGRect rect, NSIn
    // Delete: Remove CGImagePaint variable
    // CGImagePaint   *imgPaint = [[[CGImagePaint alloc] initWithImage:image] autorelease];
    CGPoint             centerPoint;
-   CGPoint             diffPoint;
    CGSize              size;
    CGSize              step;
    CGDrawableOptions   options; // Add: Declare CGDrawableOptions
    CGRect              imageRect;
 
 
-   diffPoint = CGPointMake( x, y);
    size      = [image size];
 
    // center texture
@@ -139,7 +136,7 @@ static void  drawUnscaled( CGContext *context, CGImage *image, CGRect rect, NSIn
 }
 
 
-static void  drawShifted( CGContext *context, CGImage *image, CGRect rect, NSInteger y, NSInteger x)
+static void __attribute__((unused))  drawShifted( CGContext *context, CGImage *image, CGRect rect, NSInteger y, NSInteger x)
 {
    // Delete: Remove CGImagePaint variable
    // CGImagePaint   *imgPaint = [[[CGImagePaint alloc] initWithImage:image] autorelease];
@@ -186,7 +183,6 @@ static void  drawShifted( CGContext *context, CGImage *image, CGRect rect, NSInt
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CGDrawableOptions   options;
    CGRect              canvas;
    CGRect              rects[ ROWS][ COLUMNS];
    CGImage             *image;

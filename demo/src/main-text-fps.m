@@ -70,11 +70,9 @@ static void   usage( void)
 - (mulle_relativetime_t) frameRate
 {
    id <UIOSWindow>         window;
-   id <UIWindow>           parent;
    mulle_relativetime_t    frameRate;
 
    window    = [self screenOSWindow];
-   parent    = [window parentWindow];
    frameRate = [window frameRate];
 
    if( frameRate == UIWindowFrameRateUnsynced)
@@ -97,7 +95,6 @@ static void   usage( void)
 - (mulle_relativetime_t) refreshRate
 {
    id <UIOSWindow>         window;
-   id <UIWindow>           parent;
    id <UIScreen>           screen;
    mulle_relativetime_t    refreshRate;
 
@@ -136,31 +133,17 @@ static void  didSwapBuffersCallback( UIWindow *window, BOOL immediately)
 //
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CGFont               *font;
    CGRect               canvas;
    CGRect               rects[ 3][ 3];
    NSUInteger           x, y;
    CGRect               rect;
    char                 *s;
-   //float                ascender, descender, lineh;
-   char                 buf[ 256];
-   float                textBounds[ 4];
-   float                visualBounds[ 4];
-   float                glyphBounds[ 4];
-   float                bounds[ 4];
-   CGPoint              origin;
-   struct UIGlyphPosition     positions[ 32];
-   int                  i;
-   int                  nGlyphs;
-   CGPoint              adjust;
    int                  alignment;
-   NSUInteger           frameNr;
    CGContentMode        contentMode;
 
-   frameNr   = [context numberOfFrames];
    alignment = CGTextAlignCenter | CGTextAlignMiddle; // Converted from CGTextAlignCenter | CGTextAlignMiddle
 
-   font   = [context fontWithNameUTF8String:"sans"];
+   [context useFontWithNameUTF8String:"sans"];
 
    CGContextFontSize( context, 32.0);
 
@@ -237,7 +220,6 @@ int   main( int argc, char *argv[])
    mulle_relativetime_t   frameRate;
    NSUInteger             swapInterval;
    NSUInteger             styleMask;
-   MulleUIPerf            *perf;
    BOOL                   isRetained;
    BOOL                   isMainThread;
 
@@ -363,7 +345,7 @@ int   main( int argc, char *argv[])
 //                     ╙▀W╥,╓╣   ╙█║        ╫M  █    ,╓▄╝╙`
 //                          ╙╙▀%▄▄▄▌,≤▄_▄≡,▐▓▓▄▄#ª▀"`
 
-static char  *cgHAlignmentUTF8String( int alignment)
+static char __attribute__((unused))  *cgHAlignmentUTF8String( int alignment)
 {
    switch( alignment & (CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight)) // Converted from CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight
    {
@@ -373,7 +355,7 @@ static char  *cgHAlignmentUTF8String( int alignment)
    default               : return( "*invalid*");
    }
 }
-static char  *cgVAlignmentUTF8String( int alignment)
+static char __attribute__((unused))  *cgVAlignmentUTF8String( int alignment)
 {
    switch( alignment & (CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline)) // Converted from CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline
    {

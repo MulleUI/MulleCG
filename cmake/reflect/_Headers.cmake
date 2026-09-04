@@ -86,11 +86,13 @@ src/CGFontFunctionTable.h
 src/CGFont.h
 src/CGFramebuffer.h
 src/CGFunctionTable.h
+src/CGFunctionTable+null.h
 src/CGGradient.h
 src/CGImagePaint.h
 src/CGImage.h
 src/CGLayoutContext+CGFont.h
 src/CGLayoutContext.h
+src/CGNullContext.h
 src/CGPaint+DrawingConveniences.h
 src/CGPaint+Drawing.h
 src/CGPaint+UIGraphicsDrawing.h
@@ -101,5 +103,6 @@ src/MulleCG.h
 src/MulleObjCDeps+MulleCG.h
 src/UIColor.h
 src/reflect/_MulleCG-import-public.h
+src/reflect/_MulleCG-versioncheck.h
 )
 

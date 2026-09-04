@@ -65,7 +65,7 @@ static void  strokeBoundsInRect( CGContext *context, float bounds[ 4], CGRect re
 //   CGContextStrokeLineHWithColor( context, CGRectGetMinX( rect), CGRectGetMidX( rect), bounds[ 3], 1.0, color); // Converted from mvgStrokeLineHWithColor
 }
 
-static void  strokeBoundsInRect2( CGContext *context, float bounds[ 4], CGRect rect, CGColor color) // Converted from CGContext *context
+static void __attribute__((unused))  strokeBoundsInRect2( CGContext *context, float bounds[ 4], CGRect rect, CGColor color) // Converted from CGContext *context
 {
    CGPoint   point;
 
@@ -125,27 +125,19 @@ static CGPoint   textOriginForAlignment( CGRect  rect, int alignment)
 #define USE_OLD_CODE
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CGFont               *font;
    CGRect               canvas;
    CGRect               rects[ 4];
-   NSUInteger           x, y;
+   NSUInteger           y;
    CGRect               rect;
-   CGRect               centeredRect;
-   CGPoint              point;
    char                 *s;
    //float                ascender, descender, lineh;
    char                 buf[ 256];
    float                textBounds[ 4];
    float                visualBounds[ 4];
-   float                glyphBounds[ 4];
-   float                bounds[ 4];
    CGPoint              origin;
    struct UIGlyphPosition     positions[ 32];
    int                  i;
    int                  nGlyphs;
-#ifdef USE_OLD_CODE
-   CGPoint              offset;
-#endif
    CGPoint              adjust;
    int                  alignment;
    NSUInteger           frameNr;
@@ -153,7 +145,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    frameNr   = [context numberOfFrames];
    alignment = alignments[ frameNr % N_ALIGNMENTS];
 
-   font   = [context fontWithNameUTF8String:"sans"];
+   [context useFontWithNameUTF8String:"sans"];
 
    CGContextFontSize( context, 80.0);
 

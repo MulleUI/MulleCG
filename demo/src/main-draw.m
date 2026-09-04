@@ -12,7 +12,7 @@
 
 #define LAG_FRAMES    2
 
-static void   lag( long refreshRate)
+static void __attribute__((unused))   lag( long refreshRate)
 {
    mulle_relativetime_sleep( 1.0 / refreshRate * LAG_FRAMES);
 }

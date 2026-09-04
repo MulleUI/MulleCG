@@ -78,7 +78,7 @@ static void   _CGContextBezierTo_cb( void *ctx, CGPoint c1, CGPoint c2, CGPoint 
 static void   _CGContextClosePath_cb( void *ctx)                                  { CGContextClosePath( ctx); }
 static void   _CGContextPathWinding_cb( void *ctx, CGPathFillStyle s)             { CGContextPathWinding( ctx, s); }
 
-static inline void   MulleGlyphPathCallbacksInitCG( struct MulleGlyphPathCallbacks *callbacks)
+static inline void __attribute__((unused))   MulleGlyphPathCallbacksInitCG( struct MulleGlyphPathCallbacks *callbacks)
 {
    if( ! callbacks)
       return;
@@ -124,7 +124,6 @@ static void   mulleFreetypeOutlineGlyphPath( FT_Outline *outline,
    FT_Vector   *limit;
    unsigned char  *tags;
 
-   FT_Error    error;
 
    FT_Int      n;         /* index of contour in outline     */
    FT_Int      first;     /* index of first point in contour */
@@ -433,7 +432,7 @@ static void   _mvgPathAddGlyph( CGPath *path,
    _CGPathSetBounds( path, rect);
 }
 
-static CGPath  *mvgCreateGlyphPath( CGContext *context, // Converted from CGContext *context
+static CGPath __attribute__((unused))  *mvgCreateGlyphPath( CGContext *context, // Converted from CGContext *context
                                     int codepoint,
                                     CGFloat size,
                                     int options,

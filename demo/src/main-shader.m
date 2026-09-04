@@ -73,10 +73,7 @@ static struct CGShaderUTF8Sources   monochromeShaderSources =
 static MulleUIResourceStorageKeyDefine( test_image);
 - (void) drawOpenGLInContext:(CGContext *) context
 {
-   float     timeValue;
-   float     greenValue;
    GLint     texLoc;
-   GLfloat   rgba[ 4];
    CGImage   *image;
 
    if( ! _VAO)

@@ -20,7 +20,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect               rects[ COLS * ROWS];
    CGFloat              cornerRadius;
    CGFloat              feather;
-   CGFloat              offset;
    NSUInteger           frameNr;
    CGPaint             *paint;
    CGColor              color;

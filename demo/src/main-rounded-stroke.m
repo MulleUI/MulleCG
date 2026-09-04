@@ -80,8 +80,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGContext                  *context = _context;
    CGRect                     canvas;
    CGRect                     rect;
-   struct MulleCornerInsets   insets;
-   CGFloat                    value;
    int                        i, j;
    CGFloat                    factor;
    CGFloat                    h;

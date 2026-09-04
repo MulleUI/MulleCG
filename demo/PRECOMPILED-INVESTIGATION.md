@@ -8,7 +8,7 @@ shows on the first frame then disappears.
 
 ## What was fixed
 
-- `createPathContext` now returns a proper `CGContext *` wrapping a
+- `pathContext` now returns a proper `CGContext *` wrapping a
   `NVG_PATH_ONLY` NVG context, instead of crashing with a raw `NVGcontext *`
   cast to `CGContext *`.
 - Added `CGContextCopyPath(dst, src)` to `CGContext+Drawing.h` and wired it

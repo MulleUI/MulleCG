@@ -42,7 +42,7 @@ static void   drawRedWhiteBlueFlag( CGContext *context, CGRect canvas)
 }
 
 
-static void   drawRedWhiteGreenFlag( CGContext *context, CGRect canvas)
+static void __attribute__((unused))   drawRedWhiteGreenFlag( CGContext *context, CGRect canvas)
 {
    CGColor   colors[ 3];
 

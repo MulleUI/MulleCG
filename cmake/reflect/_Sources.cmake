@@ -26,6 +26,7 @@ src/CGContext.m
 src/CGDrawable.m
 src/CGFont.m
 src/CGFramebuffer.m
+src/CGFunctionTable+null.m
 src/CGGradient+CGPaintable.m
 src/CGGradient.m
 src/CGImage+CGPaintable.m
@@ -35,6 +36,7 @@ src/CGImagePaint.m
 src/CGImage.m
 src/CGLayoutContext+CGFont.m
 src/CGLayoutContext.m
+src/CGNullContext.m
 src/CGPaint+DrawingConveniences.m
 src/CGPaint+UIGraphicsDrawing.m
 src/CGPaintable.m

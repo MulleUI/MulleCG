@@ -4,8 +4,6 @@
 
 #include <string.h>
 #include <time.h>
-static CABasicAnimation   *animation;
-
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CAAngle             angle;
@@ -15,6 +13,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    CGRect              rect;
    CGRect              rects[ 3][ 3];
    char                buf[ 128];
+   (void) buf;
    unsigned int        i, j;
    NSUInteger          frameNr;
 

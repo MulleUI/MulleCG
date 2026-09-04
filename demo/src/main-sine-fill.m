@@ -48,21 +48,11 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
   CGRect              canvas;
   CGRect              rect;
-  CGRect              imageRect;
   CGRect              rotatedBbox;
-  CGRect              targetRect;
-  CGAffineTransform   xform;
   CGPath              *path;
   CGPath              *rotatedPath;
-  CGFloat             length;
-  CGFloat             rotatedLength;
-  CGFloat             fraction;
-  CGPoint             center;
-  CGPoint             strokePoint;
   CGColor             strokeColor;
   CGColor             fillColor;
-  CGPoint             mouseLocation;
-  NSUInteger          index;
   CGRect              rects[ 2][ 2];
   NSUInteger          i;
   NSUInteger          j;
@@ -123,7 +113,6 @@ int   main( int argc, char *argv[])
 {
      UIApplication   *app;
      UIWindow        *window;
-     CGSize          imageSize;
      NSUInteger      styleMask;
 
      app       = [UIApplication sharedInstance];

@@ -1,0 +1,56 @@
+## Usage
+
+Here is a complete draw callback. A window ([MulleUIWindow](//github.com/MulleUI/MulleUIWindow))
+creates the layer and the `CGContext` for you and calls your callback once per
+frame. You just draw:
+
+``` objc
+#import <MulleCG/MulleCG.h>
+#import <MulleGraphics/MulleGraphics.h>   // CGGraphicsLayer
+#import <mulle-color/mulle-color.h>       // CGColorMake*
+
+static BOOL   draw( CGGraphicsLayer *layer, CGContext *context)
+{
+   CGPaint   *paint;
+   CGRect    rect;
+
+   rect = CGRectMake( 20.0, 20.0, 160.0, 60.0);
+
+   // fill a rounded rectangle with a solid color paint
+   paint = [CGPaint paintWithColor:CGColorMakeSkyBlue()];
+   CGContextFillRoundedRectWithPaintable( context, rect, 8.0, paint);
+
+   // stroke the same rectangle from the inside
+   CGContextStrokeRoundedRectWithPaintable( context, rect, 8.0, 2.0, paint);
+
+   // fill a rectangle with a linear gradient paint
+   paint = [CGPaint paintWithStartColor:CGColorMakeLightSkyBlue()
+                               endColor:CGColorMakeTransparent()];
+   CGContextFillRectWithPaintable( context, CGRectMake( 20.0, 100.0, 160.0, 40.0), paint);
+
+   // draw some text; a length of 0 means "use strlen"
+   CGContextFontSize( context, 14.0);
+   CGContextTextColor( context, CGColorMakeWhite());
+   CGContextText( context, CGPointMake( 30.0, 40.0), "Hello MulleCG", 0);
+
+   return( NO);
+}
+```
+
+The color constructors come from [mulle-color](//github.com/mulle-gfx/mulle-color),
+rectangles and points from [mulle-geometry](//github.com/MulleUI/mulle-geometry);
+both are pulled in by MulleCG. See the
+[MulleUIWindow demos](//github.com/MulleUI/MulleUIWindow) for the window setup
+that feeds `draw:` its `CGContext`.
+
+`demo/main-cglayer-paint.m` is a larger example that renders into offscreen
+`CGFramebuffer`s, composites them and swaps layers.
+
+## Build the demo
+
+The `demo/` folder is a [mulle-sde](//github.com/mulle-sde) project:
+
+``` sh
+cd demo
+mulle-sde craft
+```

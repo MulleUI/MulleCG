@@ -5,14 +5,8 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
 {
    CGRect               canvas;
    CGRect               fillRect;
-   CGRect               strokeRect;
-   char                 buf[ 64];
-   CGFloat              strokeWidth;
-   CGRect               rows[ 3];
    CGRect               columns[ 3];
-   NSUInteger           i, j;
-   char                 *strokeMode;
-   char                 *fillMode;
+   NSUInteger           j;
 
    canvas = CGRectInset( [layer canvas], 10.0, 10.0);
 

@@ -7,7 +7,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGFloat             factor;
    NSUInteger          frameNr;
    CGFloat             r;
-   CGPoint             center;
 
    frameNr = [context numberOfFrames] % 240;
    if( frameNr >= 120)
@@ -15,11 +14,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    else
       factor = frameNr / 119.0;
    factor = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
-
-   CGPoint    p01;
-   CGPoint    p12;
-   CGFloat    m01;
-   CGFloat    m12;
 
    CGPoint   p0 = { 200, 20  };
    CGPoint   p1 = { 200, 130 };
