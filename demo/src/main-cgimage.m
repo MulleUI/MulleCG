@@ -9,7 +9,6 @@
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CGDrawableOptions   options;
    CGRect              rect;
    CGImage             *image;
 
@@ -23,8 +22,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       CGContextStrokeColor( context, CGColorMakeWithHexColor( 0x8020A0FF));
    }
    CGContextStroke( context);
-
-   options = CGDrawableOptionsMakeScaleToFit();
 
    // if we immediately reclaim the image (via release) after drawing it
    // is too early, and the texture is gone too soon

@@ -44,7 +44,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    NSUInteger          i;
    NSUInteger          j;
    CGColor             colors[ 2];
-   CGImage             *image;
    canvas = [layer canvas];
 
    drawGridInRect( context, canvas);

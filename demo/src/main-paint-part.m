@@ -15,7 +15,6 @@ static UIImage  *AppTigerImage;
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect   canvas;
-   CGRect   rect;
    CGRect   imageRect;
 
    canvas    = [layer canvas];
@@ -27,7 +26,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
       CGContextBeginPath( context);
       CGContextRect( context, canvas);
       CGContextGlobalAlpha( context, 0.1);
-      CGContextFillPaintableOptions( context, AppTigerImage, imageRect, NULL);
+      CGContextFillPaintableOptions( context, (id <CGPaintable>) AppTigerImage, imageRect, NULL);
       CGContextFill( context);   
    }
    CGContextRestore( context);
@@ -35,17 +34,17 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    // draw various parts of the tiger image with full alpha
    CGContextBeginPath( context);
    CGContextRect( context, CGRectMake( 200, 100, 100, 100));
-   CGContextFillPaintableOptions( context, AppTigerImage, imageRect, NULL);
+   CGContextFillPaintableOptions( context, (id <CGPaintable>) AppTigerImage, imageRect, NULL);
    CGContextFill( context);   
 
    CGContextBeginPath( context);
    CGContextRect( context, CGRectMake( 450, 300, 400, 100));
-   CGContextFillPaintableOptions( context, AppTigerImage, imageRect, NULL);
+   CGContextFillPaintableOptions( context, (id <CGPaintable>) AppTigerImage, imageRect, NULL);
    CGContextFill( context);   
 
    CGContextBeginPath( context);
    CGContextCircle( context, CACircleMake( 325, 350, 75));
-   CGContextFillPaintableOptions( context, AppTigerImage, imageRect, NULL);
+   CGContextFillPaintableOptions( context, (id <CGPaintable>) AppTigerImage, imageRect, NULL);
    CGContextFill( context);   
 
    return( YES);

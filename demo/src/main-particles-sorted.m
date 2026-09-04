@@ -101,8 +101,6 @@ static CGColor    colors[ 32] =
 };
 static inline void   ParticleInit( struct Particle *p, CGSize canvasSize)
 {
-   CGFloat    r, g, b;
-
    p->location.x  = (rand() % (int) floor( canvasSize.width / 8)) - (canvasSize.width / 16) + canvasSize.width / 2;
    p->location.y  = 0;
    p->velocity.dx = 4 * (rand() / (double) RAND_MAX) - 2;

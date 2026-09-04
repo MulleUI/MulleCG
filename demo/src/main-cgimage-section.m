@@ -16,7 +16,6 @@ static void   drawBitmap2( CALayer *layer, CGContext *context)
    CGRect              rects[ ROWS][ COLUMNS];
    CGRect              sections[ 3][ 3];
    CGImage             *image;
-   CGRect              area;
    NSUInteger          x, y;
 
    canvas = [layer canvas];

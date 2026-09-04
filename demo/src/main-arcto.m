@@ -103,7 +103,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGContext           *context = _context;
    CGRect              canvas;
    CGRect              rect;
-   CGFloat             factor;
 
    rect   = CGRectIntegral( [layer canvas]);
    CGContextFillRectWithColor( context, rect, CGColorMake( 1.0, 1.0, 1.0, 1.0));

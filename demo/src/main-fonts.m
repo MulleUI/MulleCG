@@ -10,11 +10,9 @@
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect               rect;
-   CGFont               *font;
-
-   font = [context fontWithNameUTF8String:"sans"];
-   font = [context fontWithNameUTF8String:"sans-bold"];
-   font = [context fontWithNameUTF8String:"icons"];
+   [context useFontWithNameUTF8String:"sans"];
+   [context useFontWithNameUTF8String:"sans-bold"];
+   [context useFontWithNameUTF8String:"icons"];
    rect = [layer canvas];
    CGContextFontFace( context, "sans");
    CGContextCombinedTextAlignment( context, CGTextAlignLeft | CGTextAlignBaseline); // Converted from CGTextAlignLeft | CGTextAlignBaseline

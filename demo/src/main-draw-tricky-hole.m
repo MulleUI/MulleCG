@@ -46,7 +46,7 @@ static CGRect   drawRect( CGContext *context, CGRect rect) // Converted from str
 
    return( drawRect);
 }
-static void   drawArcHole( CGContext *context, CGRect rect) // Converted from struct CGContext *context
+static void __attribute__((unused))   drawArcHole( CGContext *context, CGRect rect) // Converted from struct CGContext *context
 {
    CGPoint          center;
    CGFloat          radius;
@@ -55,7 +55,6 @@ static void   drawArcHole( CGContext *context, CGRect rect) // Converted from st
    CGFloat          h_2;
    CGFloat          y;
    CGFloat          x;
-   CGPaint          *paint;
 
    center = CGRectGetCenter( rect);
    radius = 20.0;

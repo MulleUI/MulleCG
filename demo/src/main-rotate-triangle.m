@@ -26,12 +26,10 @@ static void   draw_triangle_with_centroid( CGContext *context,
    };
    CGAffineTransform   xform;
    CGRect              rect;
-   CGFloat             scale;
    CGPoint             massCenter;
    CGPoint             translated;
    CACircle            circle;
 
-   scale = CGSizeGetMaximum( size);
    CGContextSave( context);
    {
       massCenter = CGPointTriangleGetCentroid( points[ 0], points[ 1], points[ 2]);

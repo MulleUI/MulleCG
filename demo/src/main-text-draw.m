@@ -6,7 +6,7 @@
 #import "import-private.h"
 
 #include <string.h>
-static char  *cgHAlignmentUTF8String( int alignment)
+static char __attribute__((unused))  *cgHAlignmentUTF8String( int alignment)
 {
    switch( alignment & (CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight)) // Converted from CGTextAlignLeft | CGTextAlignCenter | CGTextAlignRight
    {
@@ -16,7 +16,7 @@ static char  *cgHAlignmentUTF8String( int alignment)
    default               : return( "*invalid*");
    }
 }
-static char  *cgVAlignmentUTF8String( int alignment)
+static char __attribute__((unused))  *cgVAlignmentUTF8String( int alignment)
 {
    switch( alignment & (CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline)) // Converted from CGTextAlignTop | CGTextAlignMiddle | CGTextAlignBottom | CGTextAlignBaseline
    {
@@ -29,28 +29,14 @@ static char  *cgVAlignmentUTF8String( int alignment)
 }
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CGFont               *font;
    CGRect               canvas;
    CGRect               rects[ 3][ 3];
    NSUInteger           x, y;
    CGRect               rect;
    char                 *s;
-   //float                ascender, descender, lineh;
-   char                 buf[ 256];
-   float                textBounds[ 4];
-   float                visualBounds[ 4];
-   float                glyphBounds[ 4];
-   float                bounds[ 4];
-   CGPoint              origin;
-   struct UIGlyphPosition     positions[ 32];
-   int                  i;
-   int                  nGlyphs;
-   CGPoint              adjust;
    int                  alignment;
-   NSUInteger           frameNr;
    CGContentMode        contentMode;
 
-   frameNr   = [context numberOfFrames];
    alignment = CGTextAlignCenter | CGTextAlignMiddle; // Converted from CGTextAlignCenter | CGTextAlignMiddle
 
    CGContextFontFace( context, "sans");

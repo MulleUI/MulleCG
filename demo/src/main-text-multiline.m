@@ -44,8 +44,6 @@ static char  *CG_ALIGN_UTF8String( NSUInteger valign)
 static void   drawDebugInfo( struct Info *info, CGRect canvas, CGContext *context)
 {
    CGTextMetrics   metrics;
-   CGRect          adjustedBounds;
-   CGPaint         *paint;
 
    CGContextSave( context);
    {
@@ -190,7 +188,6 @@ static void   dump_row_glyphs_to_file( FILE *fp,
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect                 canvas;
-   float                  factor;
    struct UITextRow       rows[ 64];
    NSUInteger             i, n;
    CGFloat                x, y;
@@ -198,7 +195,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    struct Info            space = { 0 };
    struct Info            *info = &space;
    NSUInteger             bits;
-   CGFloat                lineHeight;
 
    canvas = [layer canvas];
    paint  = [CGGradient gradientWithStartColor:CGColorMakeYellow()

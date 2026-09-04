@@ -15,7 +15,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGRect                        canvas;
    CGRect                        originalCanvas;
    CGRect                        rect;
-   struct CGBitmapInfo           bitmapInfo;
    struct CGContextFramebuffer   previous;
    struct CGFrameInfo            frameInfo;
    struct CGFrameInfo            oldFrameInfo;
@@ -94,15 +93,14 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 }
 int   main( int argc, char *argv[])
 {
-   NSUInteger      styleMask;
    UIApplication   *app;
+   NSUInteger      styleMask;
    UIWindow        *window;
 
    fprintf( stderr, "%s\n", [CGContext backendUTF8String]);
 
-   app = [UIApplication sharedInstance];
-
-   styleMask  = UIWindowStyleMaskDefault;
+   app         = [UIApplication sharedInstance];
+   styleMask   = UIWindowStyleMaskDefault;
    styleMask &= ~UIWindowStyleRetained;
 
    window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 200, 200)
@@ -111,7 +109,7 @@ int   main( int argc, char *argv[])
    // [window setFrameRateHz:100.0];  // run with high frequency to detect leaks
    [window setDrawCallback:drawStuff];
 
-   return( UIApplicationRunWindow( window));
+   return( [app runWindow:window]);
 }
 //
 //                           ,╓≤æKª╨╙╙▓█D"╙╙╙*╨¥W▄╓,

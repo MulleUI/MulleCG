@@ -11,10 +11,6 @@ static void   drawRect( CALayer *layer, CGContext *context, NSUInteger antiAlias
    CGRect       fillRect;
    CGRect       rect;
    CGRect       rows[ 3];
-   CGRect       strokeRect;
-   char         *fillMode;
-   char         *strokeMode;
-   char         buf[ 1024];
    NSUInteger   i, j;
 
    canvas      = CGRectInset( [layer canvas], 10.0, 10.0);

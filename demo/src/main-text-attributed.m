@@ -7,12 +7,9 @@
 
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
-   CGRect            canvas;
    CGTextAttribute   attrs[3];
    char              *text;
    CGFontID          italicFont;
-
-   canvas = [layer canvas];
 
    [context useFontWithNameUTF8String:"sans"];
    italicFont = CGContextFindFont( context, "sans-italic");

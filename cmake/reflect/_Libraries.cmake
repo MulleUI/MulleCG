@@ -21,20 +21,27 @@ if( COLLECT_OS_SPECIFIC_LIBRARIES_AS_NAMES)
    list( APPEND OS_SPECIFIC_LIBRARIES "m")
 else()
    if( NOT M_LIBRARY)
-      find_library( M_LIBRARY NAMES
-         m
-      )
+      foreach( _TMP_M_LIBRARY_TARGET m)
+         if( TARGET ${_TMP_M_LIBRARY_TARGET})
+            set( M_LIBRARY ${_TMP_M_LIBRARY_TARGET})
+            break()
+         endif()
+      endforeach()
+      if( NOT M_LIBRARY)
+         find_library( M_LIBRARY NAMES
+            m
+         )
+      endif()
       message( STATUS "M_LIBRARY is ${M_LIBRARY}")
-      #
-      # The order looks ascending, but due to the way this file is read
-      # it ends up being descending, which is what we need.
-      #
-      if( M_LIBRARY)
+   endif()
+   if( M_LIBRARY)
          #
          # Add M_LIBRARY to OS_SPECIFIC_LIBRARIES list.
          # Disable with: `mulle-sourcetree mark m no-cmake-add`
          #
-         list( APPEND OS_SPECIFIC_LIBRARIES ${M_LIBRARY})
+         if( NOT ${M_LIBRARY} IN_LIST OS_SPECIFIC_LIBRARIES)
+            list( APPEND OS_SPECIFIC_LIBRARIES ${M_LIBRARY})
+         endif()
          #
          # Inherit information from dependency.
          # Encompasses: no-cmake-searchpath,no-cmake-dependency,no-cmake-loader
@@ -77,9 +84,8 @@ else()
                message( STATUS "${_TMP_M_DIR} not found")
             endif()
          endforeach()
-      else()
-         # Disable with: `mulle-sourcetree mark m no-require-link`
-         message( SEND_ERROR "M_LIBRARY was not found in m")
-      endif()
+   else()
+      # Disable with: `mulle-sourcetree mark m no-require-link`
+      message( SEND_ERROR "M_LIBRARY was not found in m")
    endif()
 endif()

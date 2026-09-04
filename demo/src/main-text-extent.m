@@ -6,7 +6,6 @@
 static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
 {
    CGContext           *context = _context;
-   CGRect              canvas;
    CGTextBoundsInfo    info;
    CGFont              *font;
    font = [context fontWithNameUTF8String:"sans"];
@@ -31,15 +30,15 @@ int   main( int argc, char *argv[])
 {
    UIWindow        *window;
    UIApplication   *app;
-   
-   app    = [UIApplication sharedInstance];
+
+   app = [UIApplication sharedInstance];
    window = [UIWindow windowWithFrame:CGRectMake( 0.0, 0.0, 200, 200)
                       titleUTF8String:"Demo"
                             styleMask:UIWindowStyleMaskDefault];
    assert( window);
 
    [window setDrawCallback:drawStuff];
-   return( UIApplicationRunWindow( window));
+   return( [app runWindow:window]);
 }
 
 //

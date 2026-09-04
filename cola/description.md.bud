@@ -1,37 +1,18 @@
+MulleCG is the abstract drawing API of MulleUI. It provides `CGContext`,
+`CGPaint`, `CGGradient`, `CGImage`, `CGFont`, `CGFramebuffer` and
+`CGLayoutContext` — the classes you draw with. Drawing is delegated to a
+pluggable `CGBackend`, so the actual rendering
+happens with a concrete backend library.
 
-# 💫 MulleCG
-
-💫 MulleCG Coregraphics for MulleUI
-
-MulleCG adds `nanovg` to MulleUI. It provides CGContext which uses a nanovg
-context to do drawing. The CGContext manages textures, fonts and shaders.
-Does not do any animation or layouting. Does not do windowing. Does not
-handle events.
-
+MulleCG does no animation or layouting, no windowing and does not handle
+events. It is the drawing layer only: the window that provides the frame loop
+and the concrete backend selection come from
+[MulleUIOS](//github.com/MulleUI/MulleUIOS).
 
 > #### Note
 >
-> Typedefs CGColor! For that reason, if you
-> have MulleCA and MulleCG in your project, ensure that MulleCG is before
+> Both MulleCA and MulleCG pull in the CGColor typedef. For that reason, if
+> you have MulleCA and MulleCG in your project, ensure that MulleCG is before
 > MulleCA in your dependency list. MulleGraphics will have the proper order
 > but MulleUICore will include MulleCA, so also have MulleGraphics before
 > MulleUICore.
-
-
-
-```
-TODO: dFdx not supported by OpenGLES2 (steal from shader compiler or
-wherever)
-```
-
-> #### Memo
->
-> It's still too big. Need to split this into:
->
->  * MulleCG (abstract)  or live somewhere else
->  * MulleCG+nanovg
->  * MulleCG+OpenGL
->
-
-
-

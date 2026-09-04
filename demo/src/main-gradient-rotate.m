@@ -13,6 +13,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
    unsigned int   i, j;
    CAAngle        angle;
    char           buf[ 128];
+   (void) buf;
 
    // directions as we want the texture rotated in each rectangle
    static CAAngle   directions[ 9] =

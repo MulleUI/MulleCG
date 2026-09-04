@@ -31,6 +31,7 @@
       { @selector( CGLayoutContext), MULLE_OBJC_NO_CATEGORYID },      // ca9fd8c1;CGLayoutContext;;
       { @selector( CGLinearGradient), @selector( CGPaintable) },      // a1f73d66;CGLinearGradient;faf2d5d6;CGPaintable
       { @selector( CGLinearGradient), MULLE_OBJC_NO_CATEGORYID },      // a1f73d66;CGLinearGradient;;
+      { @selector( CGNullContext), MULLE_OBJC_NO_CATEGORYID },      // dd25c0db;CGNullContext;;
       { @selector( CGPaint), @selector( CGBlendedPaint) },      // df22fbd2;CGPaint;f164885b;CGBlendedPaint
       { @selector( CGPaint), @selector( CGImagePaint) },      // df22fbd2;CGPaint;3e23b783;CGImagePaint
       { @selector( CGPaint), @selector( CGPaintable) },      // df22fbd2;CGPaint;faf2d5d6;CGPaintable

@@ -97,8 +97,6 @@ static void   drawCirclesInRect( CGContext *context,
    CGFloat             factor;
    CGFloat             deg;
    CGFloat             alpha;
-   CGRect              rects[ 2][ 2];
-
    drawGridInRect( context, rect);
 
 //   CGRectPartition2x2( rect, CGSizeZero, rects);

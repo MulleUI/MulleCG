@@ -163,14 +163,12 @@ static void   fillRectWithLinearGradientBorder( CGContext *context, // Converted
    CGContextStroke( context);
 }
 
-static void   strokeRectWithHairline( CGContext *context, // Converted from struct CGContext *context
+static void __attribute__((unused))   strokeRectWithHairline( CGContext *context, // Converted from struct CGContext *context
                                       CGRect rect,
                                       CGFloat strokeWidth,
                                       CGColor color,
                                       struct CornerAndLinearGradientInfo *info)
 {
-   CGFloat    corner;
-
    CGContextBeginPath( context);
 
    CGContextRoundedRect( context, rect, info->cornerInfo.corner);
@@ -181,9 +179,8 @@ static void   strokeRectWithHairline( CGContext *context, // Converted from stru
    CGContextStroke( context);
 }
 
-static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, BOOL highlight)
+static void __attribute__((unused))   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, BOOL highlight)
 {
-   CGFont     *font;
    char       icon[ 8];
    char       *iconText;
    CGFloat    radius;
@@ -194,7 +191,7 @@ static void   drawEmote( CGContext *context, CGRect iconRect, int unicodeIcon, B
    if( radius < 5.0 / 2.0)
       return;
 
-   font = [context fontWithNameUTF8String:"icons"];
+   [context useFontWithNameUTF8String:"icons"];
 
    if( highlight)
    {

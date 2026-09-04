@@ -44,6 +44,7 @@ int   main( int argc, char *argv[])
 {
    CGGraphicsLayer    *layer;
    UIWindow           *window;
+   UIApplication      *app;
    NSUInteger         styleMask;
    int                i;
 
@@ -79,12 +80,12 @@ int   main( int argc, char *argv[])
    [layer setDrawCallback:drawStuff];
 
    // need this for UIWindow to work, since it initializes glwf/SDL
-   [UIApplication sharedInstance];
+   app = [UIApplication sharedInstance];
 
    window = [UIWindow windowWithLayer:layer
                       titleUTF8String:"Demo"
                             styleMask:styleMask & ~UIWindowStylePlanes];
    //[window setFrameRate:60.0];
 
-   return( UIApplicationRunWindow( window));
+   return( [app runWindow:window]);
 }

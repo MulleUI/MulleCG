@@ -63,12 +63,9 @@
 {
    CGFloat    r, g, b;
    CGFloat    w;
-   CGFloat    h;
-
    [super initWithFrame:frame];
 
    w = frame.size.width;
-   h = frame.size.height;
 
    self->location.x  = (rand() % (int) floor( w / 8)) - (w / 16) + w / 2;
    self->location.y  = 0;
@@ -123,7 +120,6 @@ static inline void   ParticleUpdate( ParticleLayer *p, CGSize canvasSize)
 - (BOOL) drawInContext:(CGContext *) context
 {
    CGRect       canvas;
-   NSUInteger   i;
 
    if( ! [super drawInContext:context])
       return( NO);

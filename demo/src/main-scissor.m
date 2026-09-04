@@ -9,7 +9,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGRect              canvas;
    CGRect              rect;
    CGRect              scissor;
-   int                 i, j;
    CGFloat             factor;
    CGFloat             rawFactor;
    BOOL                isScissoring;

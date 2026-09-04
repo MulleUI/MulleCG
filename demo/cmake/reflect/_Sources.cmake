@@ -69,6 +69,7 @@ src/main-html5-arc.m
 src/main-html5-arcto.m
 src/main-huge-font.m
 src/main-line-context.m
+src/main-msaa-test.m
 src/main-outline-glyph.m
 src/main-paint-image.m
 src/main-paint.m

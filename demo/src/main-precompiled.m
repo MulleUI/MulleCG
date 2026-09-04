@@ -31,7 +31,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    CGRect                     contentRect;
    CGRect                     rect;
    CGFloat                    hue;
-   NSUInteger                 frameNr;
    static CGContext   *pathContext;
    NSUInteger                 i;
    CGFloat                    steps;
@@ -43,7 +42,7 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
    {
       MulleUICLog( "Cache path");
 
-      pathContext = [[CGContext createPathContext] retain];
+      pathContext = [[CGContext pathContext] retain];
       assert( pathContext);
       fprintf( stderr, "pathContext NVG ptr: %p\n", CGContextVG( pathContext));
       [pathContext setTraceFile:stderr];

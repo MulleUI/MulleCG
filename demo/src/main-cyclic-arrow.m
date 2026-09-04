@@ -126,7 +126,6 @@ int   main( int argc, char *argv[])
 {
      UIApplication   *app;
      UIWindow        *window;
-     CGSize          imageSize;
      NSUInteger      styleMask;
 
      app       = [UIApplication sharedInstance];

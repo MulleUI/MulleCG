@@ -4,15 +4,6 @@
 
 #include <string.h>
 #include <time.h>
-static void   drawFilledRect( CGContext *context, CGRect rect, CGColor color)
-{
-   CGContextBeginPath( context);
-   {
-      CGContextRect( context, CGRectMake( rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
-      CGContextFillColor( context, color);
-   }
-   CGContextFill( context);
-}
 static void   drawStrokedRect( CGContext *context, CGRect rect, CGColor color)
 {
    CGContextBeginPath( context);
@@ -43,10 +34,6 @@ static char* cpToUTF8(int cp, char* str)
    case 1: str[0] = cp;
    }
    return str;
-}
-static inline CGFloat   CGSizeGetMax( CGSize size)
-{
-   return( size.width > size.height ? size.width : size.height);
 }
 static inline CGFloat   CGSizeGetMin( CGSize size)
 {
@@ -125,7 +112,6 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
    CGRect     innerRect;
    CGRect     lineRect;
    CGRect     outerRect;
-   CGRect     middleRect;
    CGFont     *font;
    CGContextSave( context);
    {
@@ -158,10 +144,7 @@ static void   drawFancyButton( CGContext *context, CGRect rect, CGColor colors[ 
       // CGTextAlignCenter and CGTextAlignRight
       //
       char     icon[8];
-      float    iw = 0;
-      float    ih = 0;
       int      preicon = 0xE740;
-      float    x, y, w, h;
       char     *text = "Start";
       char     *iconText;
       CGRect   iconRect;

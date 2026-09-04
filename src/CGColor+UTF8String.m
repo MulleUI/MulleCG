@@ -1,8 +1,8 @@
 //
 //  CGColor+UTF8String.m
-//  MulleUIBase
+//  MulleCG
 //
-//  Copyright (c) 2022 Nat! - Mulle kybernetiK.
+//  Copyright (c) 2025 Nat! - Mulle kybernetiK.
 //  Copyright (c) 2022 Codeon GmbH.
 //  All rights reserved.
 //

@@ -24,12 +24,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *_context)
       factor = frameNr / 119.0;
    factor = _CACubicGetValue( ((struct CACubic) { 0.0f, 0.010f, 0.990f, 1.0f }), factor);
 
-   CGPoint    p01;
-   CGPoint    p12;
-   CGPoint    center;
-   CGFloat    m01;
-   CGFloat    m12;
-
    CGPoint   p0 = { 200, 20  };
    CGPoint   p1 = { 200, 130 };
    CGPoint   p2 = { 50, 0    };

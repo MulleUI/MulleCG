@@ -19,7 +19,7 @@
 #define drawRectColorOrderedFill     1  // 171-174 fps
 
 // ca. 48-50fps
-static void   strokeRect1( CGContext *context,
+static void __attribute__((unused))   strokeRect1( CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
@@ -52,7 +52,7 @@ static void   strokeRect2( CGContext *context,
    CGContextFill( context);
 }
 // ca. 39-40 fps
-static void   strokeRect3( CGContext *context,
+static void __attribute__((unused))   strokeRect3( CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
@@ -67,7 +67,7 @@ static void   strokeRect3( CGContext *context,
    CGContextFill( context);
 }
 // ca. 47-49 fps
-static void   strokeRect4( CGContext *context,
+static void __attribute__((unused))   strokeRect4( CGContext *context,
                            CGRect rect,
                            CGColor color,
                            CGColor backgroundColor,
@@ -87,7 +87,7 @@ static void   strokeRect4( CGContext *context,
 }
 // here we just fill a rect for reference
 // ca. 125-127 fps
-static void   fillRect( CGContext *context,
+static void __attribute__((unused))   fillRect( CGContext *context,
                         CGRect rect,
                         CGColor color,
                         CGColor backgroundColor,
@@ -186,15 +186,14 @@ static CGRect   munch( CGRect rect, NSUInteger i, NSUInteger j)
    return( CGRectInset( rect, -4, -4));
 }
 
-static void   drawRectColor( CALayer *layer, CGContext *context, NSUInteger mode)
+static void __attribute__((unused))   drawRectColor( CALayer *layer, CGContext *context, NSUInteger mode)
 {
    CGRect              canvas;
    CGRect              rect;
    CGFloat             strokeWidth;
    CGSize              wh;
-   unsigned int        i, j, k;
+   unsigned int        i, j;
    CGColor             color;
-   NSUInteger          colorIndex;
 
    canvas = [layer canvas];
 
@@ -226,7 +225,6 @@ static void   drawRectColorOrdered( CALayer *layer, CGContext *context, NSUInteg
    CGFloat              strokeWidth;
    CGSize               wh;
    unsigned int         i, j, k;
-   CGColor              color;
    CGColor              colors[ 4];
 
    canvas = [layer canvas];
@@ -270,14 +268,13 @@ static void   drawRectColorOrdered( CALayer *layer, CGContext *context, NSUInteg
    }
 }
 // 90 fps
-static void   drawRectColorOrderedWithFill( CALayer *layer, CGContext *context, NSUInteger mode)
+static void __attribute__((unused))   drawRectColorOrderedWithFill( CALayer *layer, CGContext *context, NSUInteger mode)
 {
    CGRect               canvas;
    CGRect               rect;
    CGFloat              strokeWidth;
    CGSize               wh;
    unsigned int         i, j, k;
-   CGColor              color;
    CGColor              colors[ 4];
 
    canvas = [layer canvas];

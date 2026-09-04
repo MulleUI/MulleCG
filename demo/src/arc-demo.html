@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head><title>Arc Demo</title></head>
+<body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#333">
+<canvas id="c" width="600" height="400"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let frameNr = 0;
+
+function cubicEase(t) {
+  // matches CACubic {0, 0.01, 0.99, 1}
+  const p0=0, p1=0.01, p2=0.99, p3=1;
+  const u = 1-t;
+  return u*u*u*p0 + 3*u*u*t*p1 + 3*u*t*t*p2 + t*t*t*p3;
+}
+
+function draw() {
+  ctx.clearRect(0,0,600,400);
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0,0,600,400);
+
+  // rect centered in canvas, 200x100
+  const rx = 200, ry = 150, rw = 200, rh = 100;
+
+  // gray rect outline
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(rx, ry, rw, rh);
+
+  // animation factor
+  const f = frameNr % 240;
+  let factor = f >= 120 ? 1.0 - (f-120)/119.0 : f/119.0;
+  factor = cubicEase(factor);
+
+  const r = rh; // 100
+  // p0 = top center of rect (RED)
+  const p0 = { x: rx + rw/2, y: ry };
+
+  // Angles: using "clock" system where 0°=north, CW positive
+  // Convert to standard math radians: mathAngle = -(deg * PI/180) + PI/2... 
+  // Actually matching the MulleCG system: CADegreesToAngle(deg) = deg/360 * 2PI - PI/2
+  function degToRad(deg) { return (deg/360) * 2*Math.PI - Math.PI/2; }
+
+  const a1 = degToRad(0 + 90*factor);
+  const a2 = degToRad(180 - 90*factor);
+
+  const p1 = { x: p0.x + Math.cos(a1)*r, y: p0.y + Math.sin(a1)*r }; // BLUE
+  const p2 = { x: p0.x + Math.cos(a2)*r, y: p0.y + Math.sin(a2)*r }; // LIME
+
+  // 1. Black arc (width 3): MoveTo(p1), ArcTo(p0, p2, r)
+  ctx.beginPath();
+  ctx.moveTo(p1.x, p1.y);
+  ctx.arcTo(p0.x, p0.y, p2.x, p2.y, r);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = 'black';
+  ctx.stroke();
+
+  // 2. Indigo arc (width 1): MoveTo(p1), ArcTo(p2, p0, r)
+  ctx.beginPath();
+  ctx.moveTo(p1.x, p1.y);
+  ctx.arcTo(p2.x, p2.y, p0.x, p0.y, r);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'indigo';
+  ctx.stroke();
+
+  // 3. Olive arc (width 1): MoveTo(p0), ArcTo(p1, p2, r)
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+  ctx.arcTo(p1.x, p1.y, p2.x, p2.y, r);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'olive';
+  ctx.stroke();
+
+  // 4. Salmon arc (width 1): MoveTo(p0), ArcTo(p2, p1, r)
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+  ctx.arcTo(p2.x, p2.y, p1.x, p1.y, r);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'salmon';
+  ctx.stroke();
+
+  // 5. Orange arc (width 2): MoveTo(p2), ArcTo(p0, p1, r)
+  ctx.beginPath();
+  ctx.moveTo(p2.x, p2.y);
+  ctx.arcTo(p0.x, p0.y, p1.x, p1.y, r);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'orange';
+  ctx.stroke();
+
+  // 6. DodgerBlue arc (width 2): MoveTo(p2), ArcTo(p1, p0, r)
+  ctx.beginPath();
+  ctx.moveTo(p2.x, p2.y);
+  ctx.arcTo(p1.x, p1.y, p0.x, p0.y, r);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'dodgerblue';
+  ctx.stroke();
+
+  // Helper lines
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y);
+  ctx.moveTo(p0.x, p0.y); ctx.lineTo(p2.x, p2.y);
+  ctx.lineWidth = 0.5;
+  ctx.strokeStyle = 'black';
+  ctx.stroke();
+
+  // Dots
+  function dot(p, color) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 5, 0, 2*Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+  dot(p0, 'red');
+  dot(p1, 'blue');
+  dot(p2, 'lime');
+
+  frameNr++;
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

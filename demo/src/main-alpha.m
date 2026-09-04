@@ -15,11 +15,10 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 {
    CGRect              canvas;
    CGRect              rects[ ROWS][ COLUMNS];
-   NSUInteger          i, j, k;
+   NSUInteger          i, j;
    CGRect              cellRect;
    CGFloat             alpha;
    CGColor             color;
-   CGRect              drawRect;
 
    canvas = [layer canvas];
 

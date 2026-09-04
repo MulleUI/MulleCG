@@ -21,7 +21,6 @@ static BOOL   drawStuff( CGGraphicsLayer *layer, CGContext *context)
 
    CGColor      fillColor   = CGColorMake( 0.8, 0.4, 0.4, 1.0); // Light red fill
    CGColor      strokeColor = CGColorMake( 0.2, 0.6, 0.8, 0.5); // Blue stroke with 0.5 alpha
-   CGRect       space;
    BOOL         relativeToFill;
 
    canvas = [layer canvas];
