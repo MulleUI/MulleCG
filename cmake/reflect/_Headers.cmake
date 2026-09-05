@@ -103,6 +103,5 @@ src/MulleCG.h
 src/MulleObjCDeps+MulleCG.h
 src/UIColor.h
 src/reflect/_MulleCG-import-public.h
-src/reflect/_MulleCG-versioncheck.h
 )
 
