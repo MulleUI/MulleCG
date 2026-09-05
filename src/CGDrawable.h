@@ -150,8 +150,10 @@ typedef struct CGDrawableOptions
 } CGDrawableOptions;
 
 
-extern CGDrawableOptions   CGDrawableOptionsDefault;
-extern CGDrawableOptions   CGDrawableOptionsScaleToFit;
+MULLE_CG_GLOBAL
+CGDrawableOptions   CGDrawableOptionsDefault;
+MULLE_CG_GLOBAL
+CGDrawableOptions   CGDrawableOptionsScaleToFit;
 
 
 static inline CGDrawableOptions   CGDrawableOptionsMakeWithCornerRadius( CGFloat cornerRadius,

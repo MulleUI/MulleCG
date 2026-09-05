@@ -88,6 +88,7 @@
 @end
 
 
+MULLE_CG_GLOBAL
 CGFont  *CGLayoutContextUseFontWithNameUTF8String( CGLayoutContext *context,
                                                    char *name);
 

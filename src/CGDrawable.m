@@ -42,6 +42,7 @@
 // #define DRAWABLE_DEBUG
 
 
+MULLE_CG_GLOBAL_VAR
 CGDrawableOptions   CGDrawableOptionsDefault =
 {
    .alpha             = 1.0f,
@@ -54,6 +55,7 @@ CGDrawableOptions   CGDrawableOptionsDefault =
 };
 
 
+MULLE_CG_GLOBAL_VAR
 CGDrawableOptions   CGDrawableOptionsScaleToFit =
 {
    .alpha             = 1.0f,

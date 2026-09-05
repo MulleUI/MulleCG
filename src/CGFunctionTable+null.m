@@ -203,6 +203,7 @@ void   CGNullContextPatchFontFunctionTable( CGFontFunctionTable *table)
 }
 
 
+MULLE_CG_GLOBAL_VAR
 CGFunctionTable   CGNullContextFunctionTable =
 {
    .beginFrame                    = _beginFrame,
