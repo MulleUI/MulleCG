@@ -100,6 +100,7 @@ void   CGContextStrokeRadialGradient( CGContext *context,
                                       CGFloat strokeWidth);
 
 
+MULLE_CG_GLOBAL
 void   CGContextFillGradientColors( CGContext *context,
                                     CGRect rect,
                                     CGColor startColor,

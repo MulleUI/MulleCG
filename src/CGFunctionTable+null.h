@@ -23,16 +23,20 @@
 // When YES, each no-op drawing call is logged (as a CGContext-level call, not
 // an nvg call). Off by default. Toggle via CGNullContextFunctionTableSetTrace().
 //
+MULLE_CG_GLOBAL
 void   CGNullContextFunctionTableSetTrace( BOOL flag);
+MULLE_CG_GLOBAL
 BOOL   CGNullContextFunctionTableGetTrace( void);
 
 //
 // Sets the trace destination and enables/disables tracing (NULL disables).
 // Returns the previous trace file. Used to implement -[CGNullContext setTraceFile:].
 //
+MULLE_CG_GLOBAL
 FILE   *CGNullContextFunctionTableSetTraceFile( FILE *file);
 
-extern CGFunctionTable   CGNullContextFunctionTable;
+MULLE_CG_GLOBAL
+CGFunctionTable   CGNullContextFunctionTable;
 
 
 //
@@ -41,6 +45,7 @@ extern CGFunctionTable   CGNullContextFunctionTable;
 // leaving the measurement slots intact. Used by CGNullContext so text drawing
 // through a font-only context does not assert.
 //
+MULLE_CG_GLOBAL
 void   CGNullContextPatchFontFunctionTable( CGFontFunctionTable *table);
 
 #endif

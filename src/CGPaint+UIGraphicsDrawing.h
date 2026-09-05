@@ -69,12 +69,14 @@
 // will use linear gradients, these functions may be somewhat
 // cheaper than using a CGGradient
 //
+MULLE_CG_GLOBAL
 void   CGContextFillGradientColors( CGContext *context,
                                     CGRect rect,
                                     CGColor startColor,
                                     CGColor endColor,
                                     CGFloat colorRotation);
 
+MULLE_CG_GLOBAL
 void   CGContextStrokeGradientColors( CGContext *context,
                                       CGRect rect,
                                       CGColor startColor,
@@ -82,6 +84,7 @@ void   CGContextStrokeGradientColors( CGContext *context,
                                       CGFloat colorRotation,
                                       CGFloat strokeWidth);
 
+MULLE_CG_GLOBAL
 void   CGContextFillRoundedRectWithGradientColors( CGContext *context,
                                                    CGRect rect,
                                                    CGFloat cornerRadius,
@@ -89,6 +92,7 @@ void   CGContextFillRoundedRectWithGradientColors( CGContext *context,
                                                    CGColor endColor,
                                                    CARotation colorRotation);
 
+MULLE_CG_GLOBAL
 void   CGContextStrokeRoundedRectWithGradientColors( CGContext *context,
                                                      CGRect rect,
                                                      CGFloat cornerRadius,
