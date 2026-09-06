@@ -46,6 +46,7 @@
 #import "CGPaint+UIGraphicsDrawing.h"
 #import "CGPaintable.h"
 #import "CGPaint.h"
+#import "CGSystemFont.h"
 #import "CGTypes.h"
 #import "MulleObjCDeps+MulleCG.h"
 #import "UIColor.h"

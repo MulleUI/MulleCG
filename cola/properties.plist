@@ -1,7 +1,7 @@
 {
    project =
    {
-      description="💫 MulleCG Coregraphics for MulleUI";
+      description="Part of [MulleUI](https://github.com/MulleUI) — UIKit-shaped modular GUI libraries for mulle-objc.";
       domain="github";
       language="c";
       dialect="objc";
@@ -14,7 +14,7 @@
    dependencies =
    (
       {
-         description="💺 MulleUIBase adds Objective-C to mulle-geometry and friends";
+         description="Part of [MulleUI](https://github.com/MulleUI) — UIKit-shaped modular GUI libraries for mulle-objc.";
          domain="github";
          name="MulleUIBase";
          repo="MulleUIBase";

@@ -2,7 +2,7 @@
 
 Part of [MulleUI](https://github.com/MulleUI) — UIKit-shaped modular GUI libraries for mulle-objc.
 
-#### 💫 MulleCG Coregraphics for MulleUI
+#### Part of [MulleUI](https://github.com/MulleUI) — UIKit-shaped modular GUI libraries for mulle-objc.
 
 MulleCG is the abstract drawing API of MulleUI. It provides `CGContext`,
 `CGPaint`, `CGGradient`, `CGImage`, `CGFont`, `CGFramebuffer` and
@@ -300,7 +300,7 @@ Install the requirements:
 
 | Requirements                                 | Description
 |----------------------------------------------|-----------------------
-| [MulleUIBase](https://github.com/MulleUI/MulleUIBase)             | 💺 MulleUIBase adds Objective-C to mulle-geometry and friends
+| [MulleUIBase](https://github.com/MulleUI/MulleUIBase)             | Part of [MulleUI](https://github.com/MulleUI) — UIKit-shaped modular GUI libraries for mulle-objc.
 | [mulle-objc-list](https://github.com/mulle-objc/mulle-objc-list)             | 📒 Lists mulle-objc runtime information contained in executables.
 
 Download the latest [tar](https://github.com/MulleUI/MulleCG/archive/refs/tags/latest.tar.gz) or [zip](https://github.com/MulleUI/MulleCG/archive/refs/tags/latest.zip) archive and unpack it.

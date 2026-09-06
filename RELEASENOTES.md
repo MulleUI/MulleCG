@@ -1,9 +1,12 @@
-### 0.1.0
+## 0.1.0
 
-Added CGNullContext, a headless drawing context that keeps the full
-text/layout machinery while no-opping drawing, for UIWindowStyleNoDrawing
-and headless setups. Also added a trace function table and tests.
 
-### 0.0.1
 
-Various small improvements
+
+feature: add CGNullContext headless drawing context
+
+* new CGNullContext class draws nothing yet keeps full text/layout machinery, so views lay out and hit-test even without a GPU backend
+* new no-op/trace drawing function table (CGNullContextFunctionTable) so drawing accessors no longer hit NULL function pointers on the headless context
+* new CGNullContextFunctionTableSetTrace/SetTraceFile and -setTraceFile: to log CGContext-level drawing calls as no-ops
+* CGNullContextPatchFontFunctionTable keeps real text measurement while no-opping text drawing in font-only contexts
+* CGContext now captures an optional Metal surface via -backendMetalLayer and tracks framebuffer textureFlags changes when reusing framebuffers

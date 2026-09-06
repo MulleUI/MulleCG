@@ -41,6 +41,7 @@ src/CGContext+DebugPrivate.h
 src/CGGradient+Private.h
 src/CGImage+DebugPrivate.h
 src/CGPaint+Private.h
+src/CGSystemFont+Private.h
 )
 
 #
@@ -98,6 +99,7 @@ src/CGPaint+Drawing.h
 src/CGPaint+UIGraphicsDrawing.h
 src/CGPaintable.h
 src/CGPaint.h
+src/CGSystemFont.h
 src/CGTypes.h
 src/MulleCG.h
 src/MulleObjCDeps+MulleCG.h

@@ -5,6 +5,8 @@
 
 MulleCG provides CoreGraphics-like 2D rendering functionality for MulleUI, wrapping the nanovg vector graphics library. It offers path drawing, shape filling/stroking, text rendering, gradients, images, textures, framebuffers, shaders, font management, and shader-based image effects. The library uses a vtable-based backend dispatch architecture (`CGFunctionTable`, `CGFontFunctionTable`, `CGBackendFunctionTable`) decoupling drawing operations from any specific backend implementation (nanovg + OpenGL provided by MulleCGNanovgGL). MulleCG does not handle animation, layouting, windowing, or events — it focuses purely on drawing. It is a foundational graphics layer within the MulleUI ecosystem.
 
+Coupled to the vtable dispatch are two headless-friendly mechanisms: `CGNullContext` (a `CGContext`-shaped sibling that draws nothing but keeps all text/layout machinery, for `UIWindowStyleNoDrawing` and headless setups) and `CGSystemFont` (a pure discovery layer that enumerates/resolves installed OS fonts to absolute file paths, fed to the existing font loaders).
+
 ## 2. Key Concepts & Design Philosophy
 
 ### Vtable Backend Dispatch (New Architecture)
@@ -987,6 +989,191 @@ char *CGRelationUTF8String(NSUInteger)
 
 Color conveniences and debug helpers (see headers for details).
 
+### 3.29. `CGNullContext.h` — Headless No-Backend Context
+
+#### `@interface CGNullContext : CGLayoutContext < UIGraphicsDrawing>`
+
+The no-backend sibling of `CGContext`. Every GPU/drawing/render operation is a
+deliberate no-op and touches no OpenGL/Metal/Vulkan backend, making it safe
+when there is no current GPU context at all (headless, or a window created
+with `UIWindowStyleNoDrawing`). It still inherits the full text/layout
+machinery of `CGLayoutContext`, so view layout and hit-testing keep working; a
+backend that augments `CGLayoutContext` with a font context (e.g. nanovg's
+font-only FreeType context) provides real text measurement for free. If no
+backend is present, "no backend, no backend": layout degrades gracefully.
+
+**Key Fields:**
+- `_cgBackend` — MUST be the first ivar, at the same offset `CGContext` uses.
+  The C accessors `CGContextFN()`/`CGContextVG()` reach it purely by offset, so
+  it must be a real `struct CGBackend` whose `.functions` vtable is the no-op
+  `CGNullContextFunctionTable` instead of GPU calls (`.context` stays NULL).
+- `_inputState`, `_framebufferBits`, `_numberOfFrames`, `_backend`,
+  `_rendersOffScreen`, `_initializedFramebuffer` — state mirrors of `CGContext`.
+
+**Lifecycle Functions (designated, mirror `CGContext`):**
+```objc
+- (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) os_context
+                            nameUTF8String:(char *) nameUTF8String
+                                   shareID:(NSUInteger) shareID
+                                   options:(UIGraphicsOptions) options;
+- (instancetype) initWithOSGraphicsContext:(id <UIOSGraphicsContext>) os_context
+                                   shareID:(NSUInteger) shareID
+                                   options:(UIGraphicsOptions) options;
+```
+`shareID`/`options` are meaningless without a GPU backend and are ignored; the
+backend is forced to `UIGraphicsBackendNone`.
+
+**Behavior (implementations):**
+- `- (UIGraphicsBackend) backend` returns `UIGraphicsBackendNone`;
+  `- (char *) backendUTF8String` returns `"none"`.
+- `+ (BOOL) supportsAntiAliasing` returns `NO`.
+- `- (FILE *) setTraceFile:(FILE *) file` routes to
+  `CGNullContextFunctionTableSetTraceFile()` to log CGContext-level drawing
+  calls as no-ops.
+- Render lifecycle `beginRender:`, `resumeRender`, `suspendRender`,
+  `endRender`, `_endRender`, `reset`, `barrier` balance bookkeeping only
+  (`endRender` advances the frame counter `_numberOfFrames`).
+- `- (void) renderObjects:(struct mulle_pointerarray *) array` still traverses
+  every `CGRenderObject` and calls `-renderInContext:` (duck-typed through
+  `id`), so layers run their full layout/geometry/draw logic down to the
+  no-op leaf primitives.
+- Framebuffer: `needsFramebufferClear` returns `NO`;
+  `acquireRenderedFramebuffer` returns `nil`; `recycleAcquiredRenderedFramebuffer:`
+  returns `NO`; bitmap reads (`readFramebufferBitmap:...`, `framebufferBitmap`)
+  return an empty `struct CGBitmap`.
+- Input state: `inputState`, `mouseLocation`, `keyModifiers`, `buttonStates`,
+  `keyStates` accessors back the `_inputState` ivar.
+- `framebufferBits`, `rendersOffScreen`, `isInitializedFramebuffer`,
+  `numberOfFrames` getters/setters mirror `CGContext` state.
+- All `<UIGraphicsDrawing>` methods
+  (`fillRect:hexColor:`, `blitRect:image:scale:`, `fillRect:bitmap:scale:`,
+  `strokeRect:strokeWidth:hexColor:`, `fillCircle:hexColor:`,
+  `strokeCircle:strokeWidth:hexColor:`, `fillPoint:pointSize:hexColor:`,
+  `strokeLineFromPoint:toPoint:strokeWidth:hexColor:`,
+  `fillPath:hexColor:`, `strokePath:strokeWidth:hexColor:`,
+  `drawAtPoint:textUTF8String:fontNameUTF8String:fontSize:hexColor:`,
+  `drawIcon:atPoint:`) are no-ops.
+
+### 3.30. `CGFunctionTable+null.h` — No-op/Trace Drawing Vtable
+
+The drawing vtable installed by `CGNullContext`, whose entries do nothing
+(optionally tracing the call as a CGContext-level operation). It lets the C
+drawing accessors (`CGContextFN(ctx)->...`) resolve to safe no-ops instead of
+NULL function pointers when there is no GPU backend.
+
+```c
+MULLE_CG_GLOBAL
+CGFunctionTable   CGNullContextFunctionTable;
+
+MULLE_CG_GLOBAL
+void   CGNullContextFunctionTableSetTrace( BOOL flag);
+MULLE_CG_GLOBAL
+BOOL   CGNullContextFunctionTableGetTrace( void);
+MULLE_CG_GLOBAL
+FILE   *CGNullContextFunctionTableSetTraceFile( FILE *file);
+
+MULLE_CG_GLOBAL
+void   CGNullContextPatchFontFunctionTable( CGFontFunctionTable *table);
+```
+
+- `CGNullContextFunctionTable` — the shared no-op/trace `CGFunctionTable`
+  global (this is the `.functions` value stored in `CGNullContext._cgBackend`).
+- `CGNullContextFunctionTableSetTrace`/`CGNullContextFunctionTableGetTrace` —
+  enable/disable logging of each no-op drawing call (as a CGContext-level
+  call, not an nvg call). Off by default.
+- `CGNullContextFunctionTableSetTraceFile` — sets the trace destination and
+  enables/disables tracing (NULL disables); returns the previous trace file.
+  Implements `-[CGNullContext setTraceFile:]`.
+- `CGNullContextPatchFontFunctionTable` — overwrites only the text *drawing*
+  slots of a font vtable (`textColor`/`textBackgroundColor`/`clearType`/`text`/
+  `textBox`/`attributedText`) with no-ops, leaving the measurement slots
+  intact. Used by `CGNullContext` so text drawing through a font-only context
+  does not assert.
+
+### 3.31. `CGSystemFont.h` — System Font Discovery
+
+A pure, cross-platform discovery layer for installed OS fonts. It does NOT
+render and does NOT load a font into a `CGContext`; it answers "which fonts
+are installed?" via `CGSystemFontEnumerate` and "where is family X on disk?"
+via `CGSystemFontResolve`. Both hand back `CGSystemFontDescriptor`s whose
+`pathUTF8String` you feed to the existing loaders, e.g.
+`-[CGLayoutContext fontWithContentsOfFileWithFileRepresentationString:fontNameUTF8String:]`.
+
+A concrete OS backend (fontconfig on Linux/FreeBSD, Core Text, DirectWrite,
+Android NDK) fills in the results. When no backend is compiled in, the
+functions behave as if no system fonts exist (`enumerate` returns 0,
+`resolve` returns NO); shipping your own fonts remains the fallback.
+
+**Normalized Weight Enum (OpenType usWeightClass 100..900, 0 = unknown):**
+```c
+enum
+{
+   CGSystemFontWeightUnknown    = 0,
+   CGSystemFontWeightThin       = 100,
+   CGSystemFontWeightExtraLight = 200,
+   CGSystemFontWeightLight      = 300,
+   CGSystemFontWeightRegular    = 400,
+   CGSystemFontWeightMedium     = 500,
+   CGSystemFontWeightSemiBold   = 600,
+   CGSystemFontWeightBold       = 700,
+   CGSystemFontWeightExtraBold  = 800,
+   CGSystemFontWeightBlack      = 900
+};
+```
+
+**Structures:**
+```c
+struct CGSystemFontDescriptor
+{
+   char         *familyUTF8String;   // e.g. "DejaVu Sans"   (never NULL)
+   char         *styleUTF8String;    // e.g. "Bold Italic"   (may be NULL)
+   char         *pathUTF8String;     // absolute file path   (never NULL)
+   NSUInteger   faceIndex;           // face in a .ttc/.otc, else 0
+   NSInteger    weight;              // CGSystemFontWeight..., 0 if unknown
+   BOOL         italic;
+};
+
+struct CGSystemFontQuery
+{
+   char         *familyUTF8String;   // required
+   NSInteger    weight;              // 0 == any
+   BOOL         italic;
+};
+```
+
+**Functions (all `MULLE_CG_GLOBAL`):**
+```c
+BOOL   CGSystemFontIsAvailable( void);                                              // YES if a real OS backend is compiled in
+char   *CGSystemFontBackendUTF8String( void);                                       // "fontconfig", "coretext", "directwrite", "android" or "none"
+NSUInteger   CGSystemFontEnumerate( struct CGSystemFontDescriptor **descriptors,    // allocates *descriptors (mulle_malloc)
+                                    NSUInteger *count);                             // returns count; free with CGSystemFontDescriptorsFree
+BOOL   CGSystemFontResolve( struct CGSystemFontQuery *query,                        // best match for family/weight/italic
+                            struct CGSystemFontDescriptor *descriptor);             // YES on success; free with CGSystemFontDescriptorDone
+void   CGSystemFontDescriptorDone( struct CGSystemFontDescriptor *descriptor);      // frees strings owned by one descriptor
+void   CGSystemFontDescriptorsFree( struct CGSystemFontDescriptor *descriptors,     // frees array + owned strings; safe with NULL
+                                    NSUInteger count);
+```
+
+**Backend Registration (`CGSystemFont+Private.h`, for backend implementors):**
+```c
+struct CGSystemFontBackend
+{
+   char         *nameUTF8String;
+   NSUInteger   (*enumerate)( struct CGSystemFontDescriptor **descriptors,
+                              NSUInteger *count);
+   BOOL         (*resolve)( struct CGSystemFontQuery *query,
+                            struct CGSystemFontDescriptor *descriptor);
+};
+
+void   CGSystemFontRegisterBackend( struct CGSystemFontBackend *backend);  // last registration wins; NULL ignored
+```
+Backends register themselves from `MULLE_C_CONSTRUCTOR` at load time (before
+any drawing, so no locking is needed). Backends must allocate all descriptor
+strings and the array with `mulle_malloc`/`mulle_strdup` so the dispatcher
+frees them uniformly. The public API is a quiet no-op ("none" backend) until a
+backend registers. `CGSystemFontIsAvailable()` is the way to decide whether to
+fall back to shipped fonts.
+
 ## 4. Performance Characteristics
 
 ### Rendering
@@ -998,6 +1185,12 @@ Color conveniences and debug helpers (see headers for details).
 ### Vtable Dispatch
 - **Zero indirection**: Function tables are embedded in structs, not pointed-to. Inline accessors use `@defs(CGContext)` for direct struct offset access
 - **Split backend**: Font operations dispatch through `CGFontFunctionTable` independently from draw operations through `CGFunctionTable`, enabling font-only contexts without drawing overhead
+- **Headless mode**: `CGNullContext` installs the no-op/trace `CGNullContextFunctionTable`; drawing calls resolve to no-ops at the same inline-dispatch cost as a real backend, but with zero GPU work or context switching
+
+### System Font Discovery
+- **`CGSystemFontEnumerate()`**: Does file I/O (fontconfig `FcFontList`, etc.) and can be slow-ish; call it off the render path (startup or a worker thread)
+- **`CGSystemFontResolve()`**: Backend applies fallback substitution, so it tends to always succeed if any font exists
+- **No caching**: Descriptors are freshly allocated per call; ownership is always handed to the caller
 
 ### Resource Management
 - **Texture Caching**: CGContext caches textures by handle. O(1) lookup via hash map
@@ -1006,6 +1199,8 @@ Color conveniences and debug helpers (see headers for details).
 
 ### Thread Safety
 - **CGContext/CGContextBase/CGLayoutContext**: Not thread-safe. Each context is tied to a single thread
+- **CGNullContext**: Not thread-safe; same single-thread constraint as CGContext
+- **CGSystemFont**: Backend registers at load time (before drawing), so the active-backend pointer needs no locking. `CGSystemFontEnumerate`/`CGSystemFontResolve` are safe to call off the render thread but are not documented as re-entrant across backends
 - **CGImage/CGFramebuffer**: Not thread-safe. Bound to the owning context's thread
 - **CGPaint/CGGradient/CGImagePaint/CGBlendedPaint**: Immutable and thread-safe
 - **CGSharedGPUTexture**: Thread-safe (atomic reference counting)
@@ -1014,6 +1209,7 @@ Color conveniences and debug helpers (see headers for details).
 - **Memory vs. Speed**: Offscreen framebuffers (CGFramebuffer) cache complex drawings, trading GPU memory for rendering speed
 - **Antialiasing**: MSAA trades memory and resolve cost for quality
 - **Texture Flags**: RepeatX/Y affects fill behavior. Nearest vs. linear filtering trades quality for speed
+- **Headless vs. shipped fonts**: On platforms/builds without a `CGSystemFont` backend, `CGSystemFontIsAvailable()` returns NO and you must ship fonts as files — a portability trade-off in exchange for zero load-time cost
 
 ## 5. AI Usage Recommendations & Patterns
 
@@ -1039,6 +1235,12 @@ Color conveniences and debug helpers (see headers for details).
 
 10. **Backend Agnostic** — Use the public inline functions in `CGContext+Drawing.h` rather than accessing the vtable or `_vg` directly. This ensures compatibility with future backends
 
+11. **Check `CGSystemFontIsAvailable()` First** — When it returns NO (no OS backend compiled in, e.g. a non-Linux/FreeBSD build), fall back to shipped fonts. `CGSystemFontEnumerate`/`CGSystemFontResolve` are quiet no-ops in that case
+
+12. **Run System Font Discovery Off the Render Path** — `CGSystemFontEnumerate()` does file I/O; cache its results once instead of calling per frame
+
+13. **Use `CGNullContext` for Headless Layout** — For windows with `UIWindowStyleNoDrawing` or headless runs, `CGNullContext` keeps layout, geometry and hit-testing working while drawing nothing. Render-object traversal still runs every layer's `-drawInContext:` logic
+
 ### Common Pitfalls
 
 1. **Do Not Access `_` Prefixed Fields** — Use accessors; direct access breaks encapsulation and vtable dispatch
@@ -1056,6 +1258,14 @@ Color conveniences and debug helpers (see headers for details).
 7. **No Dot-Syntax in Obj-C** — Use `[object property]`, not `object.property`
 
 8. **Font vs. Draw Save/Restore** — `CGLayoutContextSave` only saves font state. Use `CGContextSave` for full save
+
+9. **Free CGSystemFont Results** — An enumerated array must be freed with `CGSystemFontDescriptorsFree(descriptors, count)`; a resolved descriptor with `CGSystemFontDescriptorDone(&descriptor)`. Descriptors own their UTF8 strings; do not free `pathUTF8String`/`familyUTF8String` individually. Do not free the descriptor struct itself after `CGSystemFontDescriptorDone` — only its strings are released
+
+10. **Backends Must Use `mulle_malloc`/`mulle_strdup`** — All descriptor strings and the array must be allocated with `mulle_malloc`/`mulle_strdup` so the dispatcher's uniform `mulle_free` works
+
+11. **No Framebuffer on CGNullContext** — `acquireRenderedFramebuffer` returns nil, `needsFramebufferClear` returns NO, and bitmap reads return empty `struct CGBitmap`s. Do not expect offscreen rendering from a headless context
+
+12. **Do Not Call `CGNullContextPatchFontFunctionTable` on a Full Context** — It is meant for a font-only/headless context; it no-ops text *drawing* slots and must not be applied to a context that should actually draw text
 
 ### Idiomatic Usage
 
@@ -1224,6 +1434,77 @@ static void   applyEffect( CGContext *context, CGImage *image, CGShaderID shader
 }
 ```
 
+### Example 9: Enumerating Installed System Fonts
+```c
+static void   printSystemFonts( void)
+{
+   struct CGSystemFontDescriptor   *descriptors;
+   NSUInteger                      count;
+   NSUInteger                      i;
+
+   // NO on platforms without an OS backend: fall back to shipped fonts
+   if( ! CGSystemFontIsAvailable())
+      return;
+
+   descriptors = NULL;
+   count       = 0;
+   CGSystemFontEnumerate( &descriptors, &count);
+   for( i = 0; i < count; i++)
+      printf( "%s [%s] -> %s (face %tu, weight %td, italic %d)\n",
+              descriptors[ i].familyUTF8String,
+              descriptors[ i].styleUTF8String,
+              descriptors[ i].pathUTF8String,
+              descriptors[ i].faceIndex,
+              descriptors[ i].weight,
+              descriptors[ i].italic);
+
+   // frees the array AND every descriptor's owned UTF8 strings
+   CGSystemFontDescriptorsFree( descriptors, count);
+}
+```
+
+### Example 10: Resolving a Font Family and Loading It
+```c
+static CGFont   *loadBoldSansFont( CGLayoutContext *context)
+{
+   struct CGSystemFontQuery        query;
+   struct CGSystemFontDescriptor   descriptor;
+   CGFont                          *font;
+   BOOL                            matched;
+
+   memset( &query, 0, sizeof( query));
+   query.familyUTF8String = "sans-serif";     // required
+   query.weight           = CGSystemFontWeightBold;
+   query.italic           = NO;
+
+   matched = CGSystemFontResolve( &query, &descriptor);
+   if( ! matched)
+      return( NULL);                          // no backend / no match
+
+   // feed the absolute path to the existing CGLayoutContext loader
+   font = [context fontWithContentsOfFileWithFileRepresentationString:descriptor.pathUTF8String
+                                                  fontNameUTF8String:descriptor.familyUTF8String];
+   CGSystemFontDescriptorDone( &descriptor);  // release the resolved strings
+   return( font);
+}
+```
+
+### Example 11: Headless Layout with CGNullContext
+```objc
+//
+// Drawing through a CGNullContext: every leaf drawing primitive is a safe
+// no-op, but the full layout / hit-test machinery still runs. Typically the
+// window layer (MulleUIOS) creates the CGNullContext for windows built with
+// UIWindowStyleNoDrawing or in headless runs.
+//
+static void   renderIntoHeadlessContext( CGNullContext *context,
+                                         struct mulle_pointerarray *layers)
+{
+   [context setTraceFile:stderr];   // optional: log no-op drawing calls
+   [context renderObjects:layers];  // layers lay out + draw (no-op leaves)
+}
+```
+
 ## 7. Dependencies
 
 Direct mulle-sde library dependencies (from `.mulle/etc/sourcetree/config`):
@@ -1232,6 +1513,11 @@ Direct mulle-sde library dependencies (from `.mulle/etc/sourcetree/config`):
 
 Build-time tool dependencies:
 - **mulle-objc-list** — Runtime information listing tool (no-header, no-link)
+
+Platform library dependency:
+- **fontconfig** — System library (Linux/FreeBSD only), links only when the
+  `CGSystemFont` fontconfig backend is compiled in. The `CGSystemFont`
+  no-backend path requires no extra libraries.
 
 Additionally, MulleCG incorporates:
 - **mulle-nanovg** — Embedded nanovg vector graphics library (git submodule, not a standard dependency)
