@@ -89,3 +89,44 @@ else()
       message( SEND_ERROR "M_LIBRARY was not found in m")
    endif()
 endif()
+
+
+#
+# Generated from sourcetree: 745BE585-349C-46CA-8A7C-8DDECF3BC8CF;fontconfig;no-build,no-cmake-inherit,no-delete,no-dependency,no-fs,no-header,no-import,no-require,no-share,no-update,only-platform-freebsd,only-platform-linux;
+# Disable with : `mulle-sourcetree mark fontconfig `
+# Disable for this platform: `mulle-sourcetree mark fontconfig no-cmake-platform-${MULLE_UNAME}`
+# Disable for a sdk: `mulle-sourcetree mark fontconfig no-cmake-sdk-<name>`
+#
+if( ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD" OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+   if( COLLECT_ALL_LOAD_OS_SPECIFIC_LIBRARIES_AS_NAMES)
+      list( APPEND ALL_LOAD_OS_SPECIFIC_LIBRARIES "fontconfig")
+   else()
+      if( NOT FONTCONFIG_LIBRARY)
+         foreach( _TMP_FONTCONFIG_LIBRARY_TARGET fontconfig)
+            if( TARGET ${_TMP_FONTCONFIG_LIBRARY_TARGET})
+               set( FONTCONFIG_LIBRARY ${_TMP_FONTCONFIG_LIBRARY_TARGET})
+               break()
+            endif()
+         endforeach()
+         if( NOT FONTCONFIG_LIBRARY)
+            find_library( FONTCONFIG_LIBRARY NAMES
+               fontconfig
+            )
+         endif()
+         message( STATUS "FONTCONFIG_LIBRARY is ${FONTCONFIG_LIBRARY}")
+      endif()
+      if( FONTCONFIG_LIBRARY)
+            #
+            # Add FONTCONFIG_LIBRARY to ALL_LOAD_OS_SPECIFIC_LIBRARIES list.
+            # Disable with: `mulle-sourcetree mark fontconfig no-cmake-add`
+            #
+            if( NOT ${FONTCONFIG_LIBRARY} IN_LIST ALL_LOAD_OS_SPECIFIC_LIBRARIES)
+               list( APPEND ALL_LOAD_OS_SPECIFIC_LIBRARIES ${FONTCONFIG_LIBRARY})
+            endif()
+            # intentionally left blank
+      else()
+         # Enable with: `mulle-sourcetree mark fontconfig require`
+         message( STATUS "FONTCONFIG_LIBRARY is missing but it is marked as \"no-require\"")
+      endif()
+   endif()
+endif()

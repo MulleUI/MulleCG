@@ -1,3 +1,4 @@
 MulleUIBase;${MULLE_UI_BASE_NODETYPE:-tar};no-singlephase;7C2E96F2-78B7-47A6-82D6-463D97BB521B;${MULLE_UI_BASE_URL:-https://github.com/MulleUI/MulleUIBase/archive/${MULLE_TAG}.tar.gz};${MULLE_UI_BASE_BRANCH};${MULLE_UI_BASE_TAG:-latest};;
 mulle-objc-list;${MULLE__OBJC__LIST_NODETYPE:-tar};no-all-load,no-bequeath,no-cmake-inherit,no-header,no-link,no-singlephase;6B654994-617F-4AB4-9BEA-6793BE1F4C9F;${MULLE__OBJC__LIST_URL:-https://github.com/mulle-objc/mulle-objc-list/archive/${MULLE_TAG}.tar.gz};${MULLE__OBJC__LIST_BRANCH};${MULLE__OBJC__LIST_TAG:-latest};;
 m;none;no-all-load,no-build,no-delete,no-dependency,no-fs,no-header,no-import,no-update;A6069A59-7634-4A6F-B5A9-CEB38DFE6F6C;m;${M_BRANCH};;;
+fontconfig;none;no-build,no-cmake-inherit,no-delete,no-dependency,no-fs,no-header,no-import,no-require,no-share,no-update,only-os-freebsd,only-platform-linux;745BE585-349C-46CA-8A7C-8DDECF3BC8CF;;;;;
