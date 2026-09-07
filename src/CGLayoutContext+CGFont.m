@@ -37,8 +37,10 @@
 #import "import-private.h"
 
 #import "CGFont.h"
+#import "CGSystemFont.h"
 
 #include <assert.h>
+#include <stdio.h>
 
 
 @implementation CGLayoutContext ( CGFont)
@@ -128,6 +130,127 @@ static struct mulle_container_keyvaluecallback   c_string_to_object_callback;
 - (void *) internalFontHandle
 {
    return( NULL);  // overridden by nanovg backend
+}
+
+
+//
+// Dispatch font creation through the backend font function table. Prefers the
+// face-index entry (for .ttc/.otc collections); backends without it fall
+// back to the plain entry, which loads the first face only.
+//
+static CGFontID   _fontFunctionsCreateFontMem( CGLayoutContext *self,
+                                               char *name,
+                                               void *data,
+                                               size_t length,
+                                               BOOL freeData,
+                                               NSUInteger faceIndex)
+{
+   struct CGFontFunctionTable   *functions;
+
+   functions = &self->_fontFunctions;
+   if( functions->createFontMemAtIndex)
+      return( (*functions->createFontMemAtIndex)( self->_fontContext, name, data, length, freeData, faceIndex));
+   if( functions->createFontMem)
+      return( (*functions->createFontMem)( self->_fontContext, name, data, length, freeData));
+   return( -1);
+}
+
+
+- (CGFont *) fontWithCData:(struct mulle_data) data
+        fontNameUTF8String:(char *) name
+                 faceIndex:(NSUInteger) faceIndex
+{
+   CGFont    *font;
+   CGFontID  fontID;
+
+   assert( name);
+
+   font = mulle_map_get( &_fontMap, name);
+   if( font)
+      return( font);
+
+   fontID = _fontFunctionsCreateFontMem( self, name, data.bytes, data.length, NO, faceIndex);
+   if( fontID == -1)
+      return( nil);
+
+   font = [CGFont fontWithNameUTF8String:name
+                                  fontID:fontID];
+   mulle_map_insert( &_fontMap, name, font);
+   return( font);
+}
+
+
+- (CGFont *) fontWithContentsOfFileWithFileRepresentationString:(char *) filename
+                                             fontNameUTF8String:(char *) name
+                                                      faceIndex:(NSUInteger) faceIndex
+{
+   CGFont    *font;
+   CGFontID  fontID;
+   void      *data;
+   size_t    length;
+   FILE      *fp;
+   long      size;
+
+   assert( filename);
+   assert( name);
+
+   font = mulle_map_get( &_fontMap, name);
+   if( font)
+      return( font);
+
+   fp = fopen( filename, "rb");
+   if( ! fp)
+      return( nil);
+   if( fseek( fp, 0, SEEK_END) != 0)
+   {
+      fclose( fp);
+      return( nil);
+   }
+   size = ftell( fp);
+   if( size <= 0)
+   {
+      fclose( fp);
+      return( nil);
+   }
+   if( fseek( fp, 0, SEEK_SET) != 0)
+   {
+      fclose( fp);
+      return( nil);
+   }
+
+   length = (size_t) size;
+   data   = mulle_malloc( length);
+   if( fread( data, 1, length, fp) != length)
+   {
+      mulle_free( data);
+      fclose( fp);
+      return( nil);
+   }
+   fclose( fp);
+
+   //
+   // Ownership of `data` transfers to the backend (freeData == YES); on
+   // failure the backend releases it itself, matching fontstash semantics.
+   //
+   fontID = _fontFunctionsCreateFontMem( self, name, data, length, YES, faceIndex);
+   if( fontID == -1)
+      return( nil);
+
+   font = [CGFont fontWithNameUTF8String:name
+                                  fontID:fontID];
+   mulle_map_insert( &_fontMap, name, font);
+   return( font);
+}
+
+
+- (CGFont *) fontWithSystemFontDescriptor:(struct CGSystemFontDescriptor *) descriptor
+{
+   if( ! descriptor || ! descriptor->pathUTF8String)
+      return( nil);
+
+   return( [self fontWithContentsOfFileWithFileRepresentationString:descriptor->pathUTF8String
+                                                fontNameUTF8String:descriptor->familyUTF8String
+                                                         faceIndex:descriptor->faceIndex]);
 }
 
 @end

@@ -33,19 +33,32 @@
 //  POSSIBILITY OF SUCH DAMAGE.
 //
 //
-// fontconfig backend for CGSystemFont. Active on Linux and FreeBSD. The
-// build restricts linking of libfontconfig to those platforms (see the
-// `fontconfig` library entry, marked only-platform-linux/freebsd), so we
-// gate the source on the same platforms here.
+// fontconfig backend for CGSystemFont. Active on Linux and FreeBSD.
 //
-// Define MULLE_CG_NO_FONTCONFIG to force this backend off (e.g. a Linux
-// build without fontconfig installed); the "none" backend then stays in
-// effect and shipped fonts remain the fallback.
+// fontconfig is deliberately NOT linked. The backend dlopens
+// "libfontconfig.so.1" (fallback "libfontconfig.so") at load time and binds
+// the functions it uses into a static vtable. Only if the library is present
+// AND every symbol resolves is the backend registered; otherwise the "none"
+// backend stays in effect and shipped fonts remain the fallback. This keeps
+// a MulleCG app loadable on a host that has no fontconfig installed.
+//
+// Prototypes and constants still come from <fontconfig/fontconfig.h>, which
+// is a compile-time-only dependency (no -lfontconfig). If the dev headers are
+// missing the gate below compiles this file to nothing.
+//
+// Define MULLE_CG_NO_FONTCONFIG to force this backend off (e.g. a Linux build
+// without fontconfig installed); the "none" backend then stays in effect.
 //
 #import "import-private.h"
 
 #if ! defined( MULLE_CG_NO_FONTCONFIG) && (defined( __linux__) || defined( __FreeBSD__))
-# define MULLE_CG_HAVE_FONTCONFIG
+# if defined( __has_include)
+#  if __has_include( <fontconfig/fontconfig.h>)
+#   define MULLE_CG_HAVE_FONTCONFIG
+#  endif
+# else
+#  define MULLE_CG_HAVE_FONTCONFIG
+# endif
 #endif
 
 #if defined( MULLE_CG_HAVE_FONTCONFIG)
@@ -53,6 +66,117 @@
 #import "CGSystemFont+Private.h"
 
 #include <fontconfig/fontconfig.h>
+
+#include <mulle-dlfcn/mulle-dlfcn.h>   // dlopen/dlsym/dlclose, portable
+
+
+//
+// Bindings: one function pointer per fontconfig function used below, filled
+// in by CGSystemFontFontconfigLoad(). Signatures match fontconfig.h exactly.
+// The call sites go through these pointers instead of calling fontconfig
+// directly, so nothing needs to be linked against libfontconfig.
+//
+struct CGSystemFontFontconfigBindings
+{
+   FcBool      (*FcConfigSubstitute)( FcConfig *config,
+                                      FcPattern *pattern,
+                                      FcMatchKind kind);
+   void        (*FcDefaultSubstitute)( FcPattern *pattern);
+   FcFontSet   *(*FcFontList)( FcConfig *config,
+                               FcPattern *pattern,
+                               FcObjectSet *objectSet);
+   FcPattern   *(*FcFontMatch)( FcConfig *config,
+                                FcPattern *pattern,
+                                FcResult *result);
+   void        (*FcFontSetDestroy)( FcFontSet *fontSet);
+   FcBool      (*FcInit)( void);
+   FcObjectSet *(*FcObjectSetBuild)( const char *first, ...);
+   void        (*FcObjectSetDestroy)( FcObjectSet *objectSet);
+   FcBool      (*FcPatternAddInteger)( FcPattern *pattern,
+                                       const char *object,
+                                       int value);
+   FcBool      (*FcPatternAddString)( FcPattern *pattern,
+                                      const char *object,
+                                      const FcChar8 *value);
+   FcPattern   *(*FcPatternCreate)( void);
+   void        (*FcPatternDestroy)( FcPattern *pattern);
+   FcResult    (*FcPatternGetInteger)( const FcPattern *pattern,
+                                       const char *object,
+                                       int id,
+                                       int *value);
+   FcResult    (*FcPatternGetString)( const FcPattern *pattern,
+                                      const char *object,
+                                      int id,
+                                      FcChar8 **value);
+   int         (*FcWeightFromOpenType)( int openTypeWeight);
+   int         (*FcWeightToOpenType)( int fcWeight);
+};
+
+
+static struct CGSystemFontFontconfigBindings   CGSystemFontFontconfigBindings;
+
+static void                                    *CGSystemFontFontconfigLibrary;
+
+static BOOL                                    CGSystemFontFontconfigLoadAttempted;
+
+
+// return TRUE if the fontconfig backend is ready to use
+static BOOL   CGSystemFontFontconfigLoad( void)
+{
+   void   *library;
+   void   *symbol;
+
+   if( CGSystemFontFontconfigLibrary)
+      return( YES);
+   if( CGSystemFontFontconfigLoadAttempted)
+      return( NO);
+   CGSystemFontFontconfigLoadAttempted = YES;
+
+   library = dlopen( "libfontconfig.so.1", RTLD_NOW);
+   if( ! library)
+      library = dlopen( "libfontconfig.so", RTLD_NOW);
+   if( ! library)
+      return( NO);
+
+   //
+   // Bind every function we call. On any miss close the library again and
+   // stay "none"; partial bindings would crash later.
+   //
+#define CG_SYSTEM_FONT_FONTCONFIG_BIND( _name)                \
+   do                                                         \
+   {                                                          \
+      symbol = dlsym( library, #_name);                       \
+      if( ! symbol)                                           \
+      {                                                       \
+         dlclose( library);                                   \
+         return( NO);                                         \
+      }                                                       \
+      *(void **) &CGSystemFontFontconfigBindings._name = symbol;  \
+   }                                                          \
+   while( 0)
+
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcConfigSubstitute);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcDefaultSubstitute);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcFontList);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcFontMatch);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcFontSetDestroy);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcInit);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcObjectSetBuild);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcObjectSetDestroy);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcPatternAddInteger);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcPatternAddString);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcPatternCreate);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcPatternDestroy);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcPatternGetInteger);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcPatternGetString);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcWeightFromOpenType);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcWeightToOpenType);
+
+#undef CG_SYSTEM_FONT_FONTCONFIG_BIND
+
+   CGSystemFontFontconfigLibrary = library;   // never dlclose'ed (process lifetime)
+   return( YES);
+}
 
 
 //
@@ -65,7 +189,7 @@ static NSInteger   CGSystemFontWeightFromFcWeight( int fcWeight)
 #ifdef FC_WEIGHT_REGULAR
    int   ot;
 
-   ot = FcWeightToOpenType( fcWeight);
+   ot = CGSystemFontFontconfigBindings.FcWeightToOpenType( fcWeight);
    if( ot > 0)
       return( (NSInteger) ot);
 #endif
@@ -92,7 +216,7 @@ static char   *CGSystemFontCopyPatternString( FcPattern *pattern, const char *ob
 {
    FcChar8   *value;
 
-   if( FcPatternGetString( pattern, object, 0, &value) != FcResultMatch)
+   if( CGSystemFontFontconfigBindings.FcPatternGetString( pattern, object, 0, &value) != FcResultMatch)
       return( NULL);
    if( ! value)
       return( NULL);
@@ -106,7 +230,7 @@ static NSUInteger   CGSystemFontCopyPatternInteger( FcPattern *pattern,
 {
    int   value;
 
-   if( FcPatternGetInteger( pattern, object, 0, &value) != FcResultMatch)
+   if( CGSystemFontFontconfigBindings.FcPatternGetInteger( pattern, object, 0, &value) != FcResultMatch)
       return( defaultValue);
    return( (NSUInteger) value);
 }
@@ -138,7 +262,7 @@ static BOOL   CGSystemFontDescriptorFromPattern( FcPattern *pattern,
    style = CGSystemFontCopyPatternString( pattern, FC_STYLE);
 
    slant = FC_SLANT_ROMAN;
-   FcPatternGetInteger( pattern, FC_SLANT, 0, &slant);
+   CGSystemFontFontconfigBindings.FcPatternGetInteger( pattern, FC_SLANT, 0, &slant);
 
    descriptor->familyUTF8String = family;
    descriptor->styleUTF8String  = style;
@@ -164,24 +288,24 @@ static NSUInteger   CGSystemFontFontconfigEnumerate( struct CGSystemFontDescript
    *descriptorsp = NULL;
    *countp       = 0;
 
-   if( ! FcInit())
+   if( ! CGSystemFontFontconfigBindings.FcInit())
       return( 0);
 
-   pattern   = FcPatternCreate();
-   objectSet = FcObjectSetBuild( FC_FAMILY, FC_STYLE, FC_FILE,
-                                 FC_INDEX, FC_WEIGHT, FC_SLANT,
-                                 (char *) NULL);
-   fontSet   = FcFontList( NULL, pattern, objectSet);
+   pattern   = CGSystemFontFontconfigBindings.FcPatternCreate();
+   objectSet = CGSystemFontFontconfigBindings.FcObjectSetBuild( FC_FAMILY, FC_STYLE, FC_FILE,
+                                                                FC_INDEX, FC_WEIGHT, FC_SLANT,
+                                                                (char *) NULL);
+   fontSet   = CGSystemFontFontconfigBindings.FcFontList( NULL, pattern, objectSet);
 
-   FcObjectSetDestroy( objectSet);
-   FcPatternDestroy( pattern);
+   CGSystemFontFontconfigBindings.FcObjectSetDestroy( objectSet);
+   CGSystemFontFontconfigBindings.FcPatternDestroy( pattern);
 
    if( ! fontSet)
       return( 0);
 
    if( fontSet->nfont <= 0)
    {
-      FcFontSetDestroy( fontSet);
+      CGSystemFontFontconfigBindings.FcFontSetDestroy( fontSet);
       return( 0);
    }
 
@@ -193,7 +317,7 @@ static NSUInteger   CGSystemFontFontconfigEnumerate( struct CGSystemFontDescript
          n++;
    }
 
-   FcFontSetDestroy( fontSet);
+   CGSystemFontFontconfigBindings.FcFontSetDestroy( fontSet);
 
    if( n == 0)
    {
@@ -218,27 +342,27 @@ static BOOL   CGSystemFontFontconfigResolve( struct CGSystemFontQuery *query,
    if( ! query->familyUTF8String)
       return( NO);
 
-   if( ! FcInit())
+   if( ! CGSystemFontFontconfigBindings.FcInit())
       return( NO);
 
-   pattern = FcPatternCreate();
-   FcPatternAddString( pattern, FC_FAMILY, (const FcChar8 *) query->familyUTF8String);
+   pattern = CGSystemFontFontconfigBindings.FcPatternCreate();
+   CGSystemFontFontconfigBindings.FcPatternAddString( pattern, FC_FAMILY, (const FcChar8 *) query->familyUTF8String);
    if( query->weight)
-      FcPatternAddInteger( pattern, FC_WEIGHT, FcWeightFromOpenType( (int) query->weight));
+      CGSystemFontFontconfigBindings.FcPatternAddInteger( pattern, FC_WEIGHT, CGSystemFontFontconfigBindings.FcWeightFromOpenType( (int) query->weight));
    if( query->italic)
-      FcPatternAddInteger( pattern, FC_SLANT, FC_SLANT_ITALIC);
+      CGSystemFontFontconfigBindings.FcPatternAddInteger( pattern, FC_SLANT, FC_SLANT_ITALIC);
 
-   FcConfigSubstitute( NULL, pattern, FcMatchPattern);
-   FcDefaultSubstitute( pattern);
+   CGSystemFontFontconfigBindings.FcConfigSubstitute( NULL, pattern, FcMatchPattern);
+   CGSystemFontFontconfigBindings.FcDefaultSubstitute( pattern);
 
-   match = FcFontMatch( NULL, pattern, &result);
-   FcPatternDestroy( pattern);
+   match = CGSystemFontFontconfigBindings.FcFontMatch( NULL, pattern, &result);
+   CGSystemFontFontconfigBindings.FcPatternDestroy( pattern);
 
    if( ! match)
       return( NO);
 
    ok = CGSystemFontDescriptorFromPattern( match, descriptor);
-   FcPatternDestroy( match);
+   CGSystemFontFontconfigBindings.FcPatternDestroy( match);
    return( ok);
 }
 
@@ -254,7 +378,8 @@ static struct CGSystemFontBackend   CGSystemFontFontconfigBackend =
 MULLE_C_CONSTRUCTOR( CGSystemFontFontconfigRegister)
 static void   CGSystemFontFontconfigRegister( void)
 {
-   CGSystemFontRegisterBackend( &CGSystemFontFontconfigBackend);
+   if( CGSystemFontFontconfigLoad())
+      CGSystemFontRegisterBackend( &CGSystemFontFontconfigBackend);
 }
 
 #endif // MULLE_CG_HAVE_FONTCONFIG
