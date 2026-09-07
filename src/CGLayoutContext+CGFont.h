@@ -67,6 +67,9 @@
 @end
 
 
+struct CGSystemFontDescriptor;
+
+
 //
 // implemented by nanovg-specifics
 //
@@ -82,6 +85,29 @@
 
 - (CGFont *) fontWithContentsOfFileWithFileRepresentationString:(char *) filename
                                              fontNameUTF8String:(char *) name;
+
+//
+// face-index variants for .ttc/.otc collections. Implemented in MulleCG by
+// dispatching through the CGFontFunctionTable (createFontAtIndex /
+// createFontMemAtIndex); backends without the index entries fall back to
+// the plain ones (first face only). Use distinct fontNameUTF8String values
+// for distinct faces of the same collection, as the font cache is keyed by
+// name.
+//
+- (CGFont *) fontWithCData:(struct mulle_data) data
+        fontNameUTF8String:(char *) name
+                 faceIndex:(NSUInteger) faceIndex;
+
+- (CGFont *) fontWithContentsOfFileWithFileRepresentationString:(char *) filename
+                                             fontNameUTF8String:(char *) name
+                                                      faceIndex:(NSUInteger) faceIndex;
+
+//
+// Load a CGSystemFont descriptor (path + face index + family) into the font
+// cache, so CGSystemFontResolve results can be used directly.
+//
+- (CGFont *) fontWithSystemFontDescriptor:(struct CGSystemFontDescriptor *) descriptor;
+
 // useFont: is obsolete
 - (void) useFont:(CGFont *) font;
 

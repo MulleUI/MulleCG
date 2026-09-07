@@ -41,6 +41,9 @@ src/CGPaint+DrawingConveniences.m
 src/CGPaint+UIGraphicsDrawing.m
 src/CGPaintable.m
 src/CGPaint.m
+src/CGSystemFont+Android.m
+src/CGSystemFont+CoreText.m
+src/CGSystemFont+DirectWrite.m
 src/CGSystemFont+fontconfig.m
 src/CGSystemFont.m
 src/UIColor.m

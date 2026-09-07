@@ -60,6 +60,14 @@ typedef struct CGFontFunctionTable
    // Font management
    CGFontID    (*createFont)( void *vg, char *name, char *filename);
    CGFontID    (*createFontMem)( void *vg, char *name, void *data, size_t length, BOOL freeData);
+   //
+   // face-index variants for .ttc/.otc collections. A backend that does not
+   // set these (NULL) is served by the plain entries above, which load the
+   // first face of a collection only. The MulleCG fontstash backend already
+   // supports face indices (nvgCreateFontAtIndex / nvgCreateFontMemAtIndex).
+   //
+   CGFontID    (*createFontAtIndex)( void *vg, char *name, char *filename, NSUInteger faceIndex);
+   CGFontID    (*createFontMemAtIndex)( void *vg, char *name, void *data, size_t length, BOOL freeData, NSUInteger faceIndex);
    CGFontID    (*findFont)( void *vg, char *name);
    CGFontID    (*addFallbackFontId)( void *vg, CGFontID baseFont, CGFontID fallbackFont);
    CGFontID    (*addFallbackFont)( void *vg, char *baseFont, char *fallbackFont);
