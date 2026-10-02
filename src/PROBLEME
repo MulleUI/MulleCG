@@ -1,9 +1,0 @@
-PROBLEME
-========
-
-
-Manuell super aufrufen wenn man in MulleObject ist, kriegt man die falsche
-inheritance. Was tun ?
-
-CGLayer deletestuff irgendwie testen. Was macht man wenn der andere Context
-vorzeitig stirbt ?
