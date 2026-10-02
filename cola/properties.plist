@@ -6,6 +6,7 @@
       language="c";
       dialect="objc";
       name="MulleCG";
+      version="0.2.0";
       user="MulleUI";
       repo="MulleCG";
       homepage="https://github.com/MulleUI/MulleCG";

@@ -3,49 +3,49 @@
  *   `mulle-sde reflect` and any edits will be lost.
  *   Suppress generation of this file with:
  *
- *      mulle-sde environment set MULLE_MATCH_TO_C_OBJC_HEADERS_FILE DISABLE
+ *      mulle-sde environment --global set MULLE_MATCH_TO_C_OBJC_HEADERS_FILE DISABLE
  *
  *   To not let mulle-match-to-c generate any header files:
  *
- *      mulle-sde environment set MULLE_MATCH_TO_C_RUN DISABLE
+ *      mulle-sde environment --global set MULLE_MATCH_TO_C_RUN DISABLE
  */
 #ifndef _mulle_c_g__export_h__
 #define _mulle_c_g__export_h__
 
 
-#import "CGBackendFunctionTable.h"
 #import "CGBackend.h"
+#import "CGBackendFunctionTable.h"
 #import "CGBlendedPaint.h"
 #import "CGColor+MulleObjC.h"
 #import "CGColor+UTF8String.h"
-#import "CGContextBase.h"
+#import "CGContext.h"
 #import "CGContext+CGFramebuffer.h"
 #import "CGContext+CGImage.h"
-#import "CGContext+DrawingConveniences.h"
 #import "CGContext+Drawing.h"
+#import "CGContext+DrawingConveniences.h"
 #import "CGContext+ImageEffect.h"
 #import "CGContext+Render.h"
 #import "CGContext+Shader.h"
 #import "CGContext+Texture.h"
 #import "CGContext+UIGraphicsDrawing.h"
-#import "CGContext.h"
+#import "CGContextBase.h"
 #import "CGDrawable.h"
-#import "CGFontFunctionTable.h"
 #import "CGFont.h"
+#import "CGFontFunctionTable.h"
 #import "CGFramebuffer.h"
 #import "CGFunctionTable.h"
 #import "CGFunctionTable+null.h"
 #import "CGGradient.h"
-#import "CGImagePaint.h"
 #import "CGImage.h"
-#import "CGLayoutContext+CGFont.h"
+#import "CGImagePaint.h"
 #import "CGLayoutContext.h"
+#import "CGLayoutContext+CGFont.h"
 #import "CGNullContext.h"
-#import "CGPaint+DrawingConveniences.h"
+#import "CGPaint.h"
 #import "CGPaint+Drawing.h"
+#import "CGPaint+DrawingConveniences.h"
 #import "CGPaint+UIGraphicsDrawing.h"
 #import "CGPaintable.h"
-#import "CGPaint.h"
 #import "CGSystemFont.h"
 #import "CGTypes.h"
 #import "MulleObjCDeps+MulleCG.h"
