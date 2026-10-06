@@ -1,3 +1,19 @@
+## 0.2.0
+
+
+* fontconfig is now initialized at most once and finalized via FcFini, eliminating process-lifetime "definitely lost" allocations reported by valgrind when querying or resolving system fonts
+* the fontconfig backend no longer leaks its parsed configuration (loaded through libexpat) after system font enumeration or resolution
+
+
+
+feature: add native system font backends for Apple, Windows and Android
+
+* Core Text backend resolves and enumerates installed fonts on macOS and iOS
+* DirectWrite backend for Windows, bound at runtime so cross-build toolchains need no import library
+* Android NDK backend using ASystemFontIterator/AFontMatcher on Android 10 (API 29) and later
+* system font descriptors now uniformly report family, style, weight, italic and .ttc/.otc face index across backends
+
+
 ## 0.1.0
 
 

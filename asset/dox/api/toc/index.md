@@ -73,7 +73,9 @@ CGContext manages **GPU resources** (textures, fonts, shaders, framebuffers) wit
 
 **State:** `save(vg)`, `restore(vg)`, `reset(vg)`
 
-**Font management:** `createFont(vg, name, filename)`, `createFontMem(vg, name, data, length, freeData)`, `findFont(vg, name)`, `addFallbackFontId(vg, baseFont, fallbackFont)`, `addFallbackFont(vg, baseFont, fallbackFont)`, `resetFallbackFontsId(vg, baseFont)`, `resetFallbackFonts(vg, baseFont)`
+**Font management:** `createFont(vg, name, filename)`, `createFontMem(vg, name, data, length, freeData)`, `createFontAtIndex(vg, name, filename, faceIndex)`, `createFontMemAtIndex(vg, name, data, length, freeData, faceIndex)`, `findFont(vg, name)`, `addFallbackFontId(vg, baseFont, fallbackFont)`, `addFallbackFont(vg, baseFont, fallbackFont)`, `resetFallbackFontsId(vg, baseFont)`, `resetFallbackFonts(vg, baseFont)`
+
+The `createFontAtIndex`/`createFontMemAtIndex` entries select a face within a `.ttc`/`.otc` collection. A backend that leaves them NULL is served by the plain `createFont`/`createFontMem` entries, which load the first face only.
 
 **Text style:** `fontSize(vg, size)`, `fontBlur(vg, blur)`, `textLetterSpacing(vg, spacing)`, `textLineHeight(vg, lineHeight)`, `textAlign(vg, align)`, `fontFaceId(vg, fontID)`, `fontFace(vg, fontname)`, `textColor(vg, color)`, `textBackgroundColor(vg, color)`, `clearType(vg, enable)`
 
@@ -316,6 +318,16 @@ Ivars: `_fontContext` (void *), `_fontFunctions` (struct CGFontFunctionTable), `
 - (CGFloat) fontSizeThatFitsIntoSize:(CGSize) size
 - (struct CGTextMetrics) visualTextMetrics
 ```
+
+#### `CGLayoutContext+CGFont.h` — Face-Indexed & Descriptor Font Loading
+
+```objc
+- (CGFont *) fontWithCData:(struct mulle_data) data fontNameUTF8String:(char *) name faceIndex:(NSUInteger) faceIndex
+- (CGFont *) fontWithContentsOfFileWithFileRepresentationString:(char *) filename fontNameUTF8String:(char *) name faceIndex:(NSUInteger) faceIndex
+- (CGFont *) fontWithSystemFontDescriptor:(struct CGSystemFontDescriptor *) descriptor
+```
+
+The `faceIndex` variants select a face within a `.ttc`/`.otc` collection, dispatching through `createFontAtIndex`/`createFontMemAtIndex` (falling back to the plain entries, first face only). `fontWithSystemFontDescriptor:` loads a `CGSystemFontDescriptor` (path + face index + family) directly, so `CGSystemFontResolve` results can be used without manual unpacking.
 
 ### 3.8. `CGContext.h` — Main Rendering Context
 

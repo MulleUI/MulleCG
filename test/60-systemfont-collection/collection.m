@@ -78,13 +78,16 @@ static void   fake_reset( void)
 static CGFontID   fake_createFontMem( void *vg, char *name, void *data, size_t length, BOOL freeData)
 {
    (void) vg;
-   (void) data;
 
    g_fake_call.kind     = 1;
    g_fake_call.name     = strdup( name);
    g_fake_call.length   = length;
    g_fake_call.freeData = freeData;
    g_fake_call.calls++;
+
+   // a real backend takes ownership of `data` when freeData is YES
+   if( freeData)
+      free( data);
    return( 42);
 }
 
@@ -92,7 +95,6 @@ static CGFontID   fake_createFontMem( void *vg, char *name, void *data, size_t l
 static CGFontID   fake_createFontMemAtIndex( void *vg, char *name, void *data, size_t length, BOOL freeData, NSUInteger faceIndex)
 {
    (void) vg;
-   (void) data;
 
    g_fake_call.kind      = 2;
    g_fake_call.name      = strdup( name);
@@ -100,6 +102,10 @@ static CGFontID   fake_createFontMemAtIndex( void *vg, char *name, void *data, s
    g_fake_call.freeData  = freeData;
    g_fake_call.faceIndex = faceIndex;
    g_fake_call.calls++;
+
+   // a real backend takes ownership of `data` when freeData is YES
+   if( freeData)
+      free( data);
    return( 42);
 }
 
@@ -449,6 +455,9 @@ static void   test_loading_dispatch( char *ttcPath)
    CHECK( font != nil, "descriptor glue");
    CHECK( g_fake_call.faceIndex == 1, "glue faceIndex");
    CHECK( strcmp( g_fake_call.name, "glue-face") == 0, "glue name");
+
+   fake_reset();
+   [context release];
 }
 
 
@@ -522,6 +531,10 @@ int   main( int argc, char *argv[])
    }
 
    rm_rf( tmpdir);
+
+   free( ttcPath);
+   while( g_nSources > 0)
+      free( g_sources[ --g_nSources]);
 
    if( g_failures == 0)
       printf( "collection: PASS\n");

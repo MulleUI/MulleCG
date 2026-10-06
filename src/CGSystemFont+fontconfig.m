@@ -90,6 +90,7 @@ struct CGSystemFontFontconfigBindings
                                 FcResult *result);
    void        (*FcFontSetDestroy)( FcFontSet *fontSet);
    FcBool      (*FcInit)( void);
+   void        (*FcFini)( void);
    FcObjectSet *(*FcObjectSetBuild)( const char *first, ...);
    void        (*FcObjectSetDestroy)( FcObjectSet *objectSet);
    FcBool      (*FcPatternAddInteger)( FcPattern *pattern,
@@ -118,6 +119,8 @@ static struct CGSystemFontFontconfigBindings   CGSystemFontFontconfigBindings;
 static void                                    *CGSystemFontFontconfigLibrary;
 
 static BOOL                                    CGSystemFontFontconfigLoadAttempted;
+
+static BOOL                                    CGSystemFontFontconfigInitialized;
 
 
 // return TRUE if the fontconfig backend is ready to use
@@ -161,6 +164,7 @@ static BOOL   CGSystemFontFontconfigLoad( void)
    CG_SYSTEM_FONT_FONTCONFIG_BIND( FcFontMatch);
    CG_SYSTEM_FONT_FONTCONFIG_BIND( FcFontSetDestroy);
    CG_SYSTEM_FONT_FONTCONFIG_BIND( FcInit);
+   CG_SYSTEM_FONT_FONTCONFIG_BIND( FcFini);
    CG_SYSTEM_FONT_FONTCONFIG_BIND( FcObjectSetBuild);
    CG_SYSTEM_FONT_FONTCONFIG_BIND( FcObjectSetDestroy);
    CG_SYSTEM_FONT_FONTCONFIG_BIND( FcPatternAddInteger);
@@ -176,6 +180,37 @@ static BOOL   CGSystemFontFontconfigLoad( void)
 
    CGSystemFontFontconfigLibrary = library;   // never dlclose'ed (process lifetime)
    return( YES);
+}
+
+
+//
+// fontconfig keeps a process-global configuration that is only released by
+// FcFini(). Call FcInit() at most once and remember it, so the destructor
+// below knows whether there is anything to clean up. This keeps valgrind
+// happy: without FcFini the parsed config (via libexpat) stays "definitely
+// lost" for the lifetime of the process.
+//
+static BOOL   CGSystemFontFontconfigInit( void)
+{
+   if( CGSystemFontFontconfigInitialized)
+      return( YES);
+
+   if( ! CGSystemFontFontconfigBindings.FcInit())
+      return( NO);
+
+   CGSystemFontFontconfigInitialized = YES;
+   return( YES);
+}
+
+
+MULLE_C_DESTRUCTOR( CGSystemFontFontconfigUnload)
+static void   CGSystemFontFontconfigUnload( void)
+{
+   if( ! CGSystemFontFontconfigInitialized)
+      return;
+
+   CGSystemFontFontconfigInitialized = NO;
+   CGSystemFontFontconfigBindings.FcFini();
 }
 
 
@@ -288,7 +323,7 @@ static NSUInteger   CGSystemFontFontconfigEnumerate( struct CGSystemFontDescript
    *descriptorsp = NULL;
    *countp       = 0;
 
-   if( ! CGSystemFontFontconfigBindings.FcInit())
+   if( ! CGSystemFontFontconfigInit())
       return( 0);
 
    pattern   = CGSystemFontFontconfigBindings.FcPatternCreate();
@@ -342,7 +377,7 @@ static BOOL   CGSystemFontFontconfigResolve( struct CGSystemFontQuery *query,
    if( ! query->familyUTF8String)
       return( NO);
 
-   if( ! CGSystemFontFontconfigBindings.FcInit())
+   if( ! CGSystemFontFontconfigInit())
       return( NO);
 
    pattern = CGSystemFontFontconfigBindings.FcPatternCreate();
