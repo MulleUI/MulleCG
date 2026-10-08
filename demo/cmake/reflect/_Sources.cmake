@@ -110,5 +110,4 @@ src/main-text-origin.m
 src/main-text-simple.m
 src/main-texture.m
 src/main-window-config.m
-src/parse_uniform.c
 )

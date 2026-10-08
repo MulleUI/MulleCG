@@ -1,6 +1,11 @@
 ## 0.2.0
 
 
+* README now shows how to add MulleCG and its full dependency graph as git submodules, `add_subdirectory()` each, and link them with `target_link_libraries()`
+* API documentation notes the CMake subproject alternative to adding MulleCG via mulle-sde
+
+
+
 * fontconfig is now initialized at most once and finalized via FcFini, eliminating process-lifetime "definitely lost" allocations reported by valgrind when querying or resolving system fonts
 * the fontconfig backend no longer leaks its parsed configuration (loaded through libexpat) after system font enumeration or resolution
 

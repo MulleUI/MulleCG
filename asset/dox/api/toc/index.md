@@ -1519,6 +1519,8 @@ static void   renderIntoHeadlessContext( CGNullContext *context,
 
 ## 7. Dependencies
 
+MulleCG is normally added with `mulle-sde add github:MulleUI/MulleCG`, which resolves the full dependency graph below. It can equally be consumed as a CMake subproject: add MulleCG and its dependencies as git submodules, `add_subdirectory()` each, and `target_link_libraries()` against them (the README documents the complete recipe).
+
 Direct mulle-sde library dependencies (from `.mulle/etc/sourcetree/config`):
 
 - **MulleUIBase** — Objective-C wrappers for mulle-geometry and graphics primitives (CGColor, CGRect, CGPoint, etc.)
